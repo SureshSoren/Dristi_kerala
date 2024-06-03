@@ -32,8 +32,11 @@ public class Configuration {
     @Value("${summons.pdf.template.key}")
     private String summonsPdfTemplateKey;
 
-    @Value("${warrant.pdf.template.key}")
-    private String warrantPdfTemplateKey;
+    @Value("${non.bailable.warrant.pdf.template.key}")
+    private String nonBailableWarrantPdfTemplateKey;
+
+    @Value("${bailable.warrant.pdf.template.key}")
+    private String bailableWarrantPdfTemplateKey;
 
     @Value("${bail.pdf.template.key}")
     private String bailPdfTemplateKey;
