@@ -27,6 +27,7 @@ public class OrderConsumer {
     private final ObjectMapper objectMapper;
     private final OrderService orderService;
      private  final TaskService taskService;
+     
     @Autowired
     public OrderConsumer(ObjectMapper objectMapper, OrderService orderService, TaskService taskService) {
         this.objectMapper = objectMapper;

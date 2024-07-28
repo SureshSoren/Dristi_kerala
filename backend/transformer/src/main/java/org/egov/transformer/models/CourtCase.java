@@ -149,7 +149,6 @@ public class CourtCase {
 	private Object additionalDetails = null;
 
 	@JsonProperty("bailOrderDetails")
-
 	private Order bailOrderDetails = null;
 
 	@JsonProperty("judgementOrderDetails")
