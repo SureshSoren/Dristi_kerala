@@ -101,6 +101,11 @@ module.exports = function (app) {
     "/order",
     "/inbox",
     "/application",
+    "/e-sign-svc",
+    "/payment",
+    "/etreasury",
+    "/payment-calculator",
+
     "/task/v1/search",
     "/analytics",
   ].forEach((location) => app.use(location, createProxy));

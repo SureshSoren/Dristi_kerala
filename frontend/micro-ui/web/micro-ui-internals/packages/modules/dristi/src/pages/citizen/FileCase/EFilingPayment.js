@@ -6,6 +6,7 @@ import { Link, useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import CustomCaseInfoDiv from "../../../components/CustomCaseInfoDiv";
 import useSearchCaseService from "../../../hooks/dristi/useSearchCaseService";
 import { useToast } from "../../../components/Toast/useToast";
+import { DRISTIService } from "../../../services";
 
 const mockSubmitModalInfo = {
   header: "CS_HEADER_FOR_E_FILING_PAYMENT",
@@ -19,13 +20,6 @@ const mockSubmitModalInfo = {
   isArrow: false,
   showTable: true,
 };
-
-const paymentCalculation = [
-  { key: "Amount Due", value: 600, currency: "Rs" },
-  { key: "Court Fees", value: 400, currency: "Rs" },
-  { key: "Advocate Fees", value: 1000, currency: "Rs" },
-  { key: "Total Fees", value: 2000, currency: "Rs", isTotalFee: true },
-];
 
 const CloseBtn = (props) => {
   return (
@@ -48,6 +42,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const { caseId } = window?.Digit.Hooks.useQueryParams();
   const toast = useToast();
+  const [paymentLoader, setPaymentLoader] = useState(false);
 
   const { data: caseData, isLoading } = useSearchCaseService(
     {
@@ -374,7 +369,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
             <div className="payment-due-wrapper" style={{ display: "flex", flexDirection: "column" }}>
               <div className="payment-due-text" style={{ fontSize: "18px" }}>
                 {`${t("CS_DUE_PAYMENT")} `}
-                <span style={{ fontWeight: 700 }}>Rs {amount}/-.</span>
+                <span style={{ fontWeight: 700 }}>Rs {totalAmount}/-.</span>
                 {` ${t("CS_MANDATORY_STEP_TO_FILE_CASE")}`}
               </div>
               <div className="payment-calculator-wrapper" style={{ display: "flex", flexDirection: "column" }}>
