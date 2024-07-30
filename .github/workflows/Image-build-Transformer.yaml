@@ -1,5 +1,8 @@
 name: Transformer Image Build workflow
 on:
+  push:
+    branches:
+      - transformer
   pull_request:
     types:
       - closed
@@ -29,22 +32,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B -f backend/payment-calculator-svc/pom.xml package org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=solutions_transformer -Dsonar.organization=solutions -Dsonar.host.url=https://sonarcloud.io/
+        run: mvn -B -f backend/transformer/pom.xml package org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=solutions_transformer -Dsonar.organization=solutions -Dsonar.host.url=https://sonarcloud.io/
 
       # Login to Azure Container Registry
       - name: Login to Azure Container Registry
         run: docker login -u pucarsolutionsdev -p ${{ secrets.ACR_PASSWORD }} pucarsolutionsdev.azurecr.io
 
-      - name: Get Merge commit of PR
-        run: |
-          PR_NUMBER=$(curl -s "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" | jq -r '.[0].number')
-          Merge_Commit=$(curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" | jq -r '.merge_commit_sha')
-          echo "Merge_Commit=$Merge_Commit" >> $GITHUB_ENV
-
       - name: Build and Push Docker image for transformer
         run: |
-          docker build --build-arg WORK_DIR="backend/transformer" -t pucarsolutionsdev.azurecr.io/pucar_transformer:v1.0.0-${{ env.Merge_Commit }} -f build/maven/Dockerfile .
-          docker push pucarsolutionsdev.azurecr.io/pucar_transformer:v1.0.0-${{ env.Merge_Commit }}
+          docker build --build-arg WORK_DIR="backend/transformer" -t pucarsolutionsdev.azurecr.io/pucar_transformer:v1.0.0-${{ github.sha }} -f build/maven/Dockerfile .
+          docker push pucarsolutionsdev.azurecr.io/pucar_transformer:v1.0.0-${{ github.sha }}
 
 
   Workflow_Trigger:
