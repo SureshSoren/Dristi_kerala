@@ -38,9 +38,12 @@ public class OrderConsumer {
     public void orderConsumerCreate(ConsumerRecord<String, Object> payload,
                                     @Header(KafkaHeaders.RECEIVED_TOPIC) String topic){
     try {
-        Order order = (objectMapper.readValue((String) payload.value(), new TypeReference<OrderRequest>() {})).getOrder();
-        logger.info(objectMapper.writeValueAsString(order));
-        orderService.addOrderDetails (order);
+
+            Order order = (objectMapper.readValue((String) payload.value(), new TypeReference<OrderRequest>() {})).getOrder();
+            logger.info(objectMapper.writeValueAsString(order));
+
+            orderService.addOrderDetails(order);
+
         } catch (Exception exception) {
             log.error("error in saving order", exception);
         }

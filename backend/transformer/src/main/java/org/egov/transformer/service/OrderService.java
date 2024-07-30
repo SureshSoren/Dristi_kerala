@@ -27,16 +27,21 @@ public class OrderService {
     private final CaseService caseService;
     private  final TransformerProperties properties;
     private  final OrderProducer producer;
+    private final ApplicationService applicationService;
+
+
 
 
  @Autowired
-    public OrderService(ElasticSearchService elasticSearchService, ObjectMapper objectMapper, CaseService caseService, TransformerProperties properties, OrderProducer producer) {
+    public OrderService(ElasticSearchService elasticSearchService, ObjectMapper objectMapper, CaseService caseService, TransformerProperties properties, OrderProducer producer,ApplicationService applicationService) {
         this.elasticSearchService = elasticSearchService;
         this.objectMapper = objectMapper;
         this.caseService = caseService;
         this.properties = properties;
         this.producer = producer;
+        this.applicationService = applicationService;
     }
+   
 
     public Order fetchOrder(UUID orderId) throws IOException {
         LinkedHashMap<String, Object> sourceMap = elasticSearchService.getDocumentByField(ServiceConstants.ORDER_INDEX,ServiceConstants.ORDER_ID, String.valueOf(orderId));
@@ -63,12 +68,27 @@ public class OrderService {
             throw new CustomException("ERROR_ORDER_SEARCH", ServiceConstants.ERROR_ORDER_SEARCH);
         }
     }
-    public void addOrderDetails(Order order){
+    
+    
+    
+    private void addOrderDetailsToCase(Order order){
         if (order.getFilingNumber() != null
                 && (order.getOrderType().equalsIgnoreCase(ServiceConstants.BAIL_ORDER_TYPE)
                     || order.getOrderType().equalsIgnoreCase(ServiceConstants.JUDGEMENT_ORDER_TYPE))) {
                 caseService.updateCase(order);
-            }
+        }
+    }
+
+    private void addOrderDetailsToApplication(Order order){
+       for(String applicationNumber : order.getApplicationNumber()){
+           applicationService.updateApplication(order,applicationNumber);
+        }
+
+   }
+
+    public void addOrderDetails(Order order){
+        addOrderDetailsToCase(order);
+        addOrderDetailsToApplication(order);
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.setOrder(order);
         producer.push(properties.getOrderCreateTopic(), orderRequest);
