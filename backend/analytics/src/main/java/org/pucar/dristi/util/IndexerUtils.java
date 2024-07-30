@@ -8,7 +8,6 @@ import org.egov.tracer.model.CustomException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pucar.dristi.config.Configuration;
-import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.kafka.consumer.EventConsumerConfig;
 import org.pucar.dristi.config.PendingTaskMapConfig;
 import org.pucar.dristi.web.models.CaseOverallStatus;
@@ -43,19 +42,17 @@ public class IndexerUtils {
 
 	private final CaseUtil caseUtil;
 
-	private final HearingUtil hearingUtil;
-
-	private final EvidenceUtil evidenceUtil;
+    private final EvidenceUtil evidenceUtil;
 
 	private final TaskUtil taskUtil;
 
 	private final ApplicationUtil applicationUtil;
 
-	private final OrderUtil orderUtil;
+    private final ObjectMapper mapper;
 
-	private final Producer producer;
+	private final PendingTaskMapConfig pendingTaskMapConfig;
 
-	private final ObjectMapper mapper;
+	private final CaseOverallStatusUtil caseOverallStatusUtil;
 
 	private final PendingTaskMapConfig pendingTaskMapConfig;
 
@@ -66,12 +63,9 @@ public class IndexerUtils {
         this.restTemplate = restTemplate;
         this.config = config;
         this.caseUtil = caseUtil;
-        this.hearingUtil = hearingUtil;
         this.evidenceUtil = evidenceUtil;
         this.taskUtil = taskUtil;
         this.applicationUtil = applicationUtil;
-        this.orderUtil = orderUtil;
-        this.producer = producer;
         this.mapper = mapper;
         this.pendingTaskMapConfig = pendingTaskMapConfig;
         this.caseOverallStatusUtil = caseOverallStatusUtil;
@@ -155,7 +149,7 @@ public class IndexerUtils {
 		try {
 			additionalDetails = mapper.writeValueAsString(pendingTask.getAdditionalDetails());
 		}catch (Exception e){
-			log.error("Error while building API payload");
+			log.error("Error while building API payload",e);
 			throw new CustomException(Pending_Task_Exception, "Error occurred while preparing pending task: " + e);
 		}
 
@@ -351,8 +345,6 @@ public class IndexerUtils {
 
 	private Map<String, String> processOrderEntity(JSONObject request, String referenceId) throws InterruptedException {
 		Map<String, String> caseDetails = new HashMap<>();
-		Thread.sleep(config.getApiCallDelayInSeconds()*1000);
-		Object orderObject = orderUtil.getOrder(request, referenceId, config.getStateLevelTenantId());
 		String cnrNumber = JsonPath.read(orderObject.toString(), CNR_NUMBER_PATH);
 		String filingNumber = JsonPath.read(orderObject.toString(), FILING_NUMBER_PATH);
 
