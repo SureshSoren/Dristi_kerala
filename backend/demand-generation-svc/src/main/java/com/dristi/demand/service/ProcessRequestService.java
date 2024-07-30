@@ -122,6 +122,13 @@ public class ProcessRequestService {
         for (String element : pathElements) {
             if (currentObject instanceof JSONObject) {
                 currentObject = ((JSONObject) currentObject).opt(element);
+            } else if (currentObject instanceof JSONArray) {
+                try {
+                    int index = Integer.parseInt(element);
+                    currentObject = ((JSONArray) currentObject).opt(index);
+                } catch (NumberFormatException e) {
+                    return null; // Path element is not a valid array index
+                }
             } else {
                 return null;
             }
