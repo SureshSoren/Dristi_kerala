@@ -6,6 +6,7 @@ import org.egov.transformer.config.ServiceConstants;
 import org.egov.transformer.config.TransformerProperties;
 import org.egov.transformer.models.Order;
 import org.egov.transformer.models.Task;
+import org.egov.transformer.models.TaskRequest;
 import org.egov.transformer.producer.OrderProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,8 @@ public class TaskService {
     public void addTaskDetails(Task task){
 
             orderService.updateOrder(task);
-
-        producer.push(properties.getOrderCreateTopic(), task);
+        TaskRequest taskRequest = new TaskRequest();
+        taskRequest.setTask(task);
+        producer.push(properties.getOrderCreateTopic(), taskRequest);
     }
 }
