@@ -78,7 +78,7 @@ const useESign = () => {
     const parsedESignObj = JSON.parse(storedESignObj);
 
     if (isSignSuccess) {
-      const matchedSignStatus = parsedESignObj.find((obj) => obj.name === name && obj.isSigned === true);
+      const matchedSignStatus = parsedESignObj?.find((obj) => obj.name === name && obj.isSigned === true);
       if (isSignSuccess === "success" && matchedSignStatus) {
         setValue({ aadharsignature: name }, ["aadharsignature"]);
         setIsSigned(true);
