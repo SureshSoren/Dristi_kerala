@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class DefaultMasterDataHelper {
     @Autowired
     private Configuration config;
 
-
+    @Cacheable(value = "mdms-cache", key = "#masterName")
     public <T> List<T> getDataFromMDMS(Class<T> clazz, String masterName) {
         log.info("operation = getDataFromMDMS, result = IN_PROGRESS");
         RequestInfo requestInfo = new RequestInfo();
