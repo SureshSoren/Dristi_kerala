@@ -1,11 +1,12 @@
 import { useMemo, useCallback } from "react";
 
 const useESign = () => {
+  const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const storedObj = useMemo(() => localStorage.getItem("signStatus"), []);
   const parsedObj = JSON.parse(storedObj) || [];
 
   const handleEsign = useCallback(
-    async (name) => {
+    async (name, eSignFIleId, pageModule) => {
       try {
         const newSignStatuses = [...parsedObj, { name: name, isSigned: true }];
         localStorage.setItem("signStatus", JSON.stringify(newSignStatuses));
@@ -15,9 +16,9 @@ const useESign = () => {
             uidToken: "3456565",
             consent: "6564",
             authType: "6546",
-            fileStoreId: "2aefb901-edc6-4a45-95f8-3ea383a513f5",
-            tenantId: "kl",
-            pageModule: "ci",
+            fileStoreId: eSignFIleId,
+            tenantId: tenantId,
+            pageModule: pageModule,
           },
         });
         if (eSignResponse) {
