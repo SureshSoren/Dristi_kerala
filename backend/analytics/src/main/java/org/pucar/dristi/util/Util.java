@@ -11,14 +11,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class Util {
 
-
-	private final ObjectMapper mapper;
 	@Autowired
-    public Util(ObjectMapper mapper) {
-        this.mapper = mapper;
-    }
+	private ObjectMapper mapper;
 
-    public JSONArray constructArray(String kafkaJson, String jsonPath) throws Exception {
+	public JSONArray constructArray(String kafkaJson, String jsonPath) throws Exception {
 		JSONArray kafkaJsonArray = null;
 		try {
 			// Validating if the request is a valid json array.

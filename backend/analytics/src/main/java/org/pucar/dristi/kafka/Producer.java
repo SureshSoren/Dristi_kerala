@@ -18,10 +18,6 @@ public class Producer {
     }
 
     public void push(String topic, Object value) {
-        try {
-            kafkaTemplate.send(topic, value);
-        } catch (Exception e) {
-            log.error("Failed to send message to topic {}: {}", topic, e.getMessage());
-        }
+        kafkaTemplate.send(topic, value);
     }
 }

@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.util.IndexerUtils;
 import org.pucar.dristi.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.LinkedHashMap;
 
@@ -24,7 +24,9 @@ public class IndexerService {
 
 	private final Configuration config;
 
-    private final Util util;
+	private final RestTemplate restTemplate;
+
+	private final Util util;
 
 	private final ObjectMapper mapper;
 
@@ -32,6 +34,7 @@ public class IndexerService {
     public IndexerService(IndexerUtils indexerUtils, Configuration config, RestTemplate restTemplate, Util util, ObjectMapper mapper) {
         this.indexerUtils = indexerUtils;
         this.config = config;
+        this.restTemplate = restTemplate;
         this.util = util;
         this.mapper = mapper;
     }
@@ -67,10 +70,7 @@ public class IndexerService {
 			if (jsonObject != null) {
 				processJsonObject(jsonObject, bulkRequest,requestInfo);
 			}
-		} catch (JSONException e){
-			log.error("Error processing JSON array", e);
 		}
-
 		return bulkRequest;
 	}
 
