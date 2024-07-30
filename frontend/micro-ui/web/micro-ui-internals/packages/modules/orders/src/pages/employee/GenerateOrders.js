@@ -234,6 +234,11 @@ const GenerateOrders = () => {
     if (defaultIndex && defaultIndex !== -1 && defaultIndex !== selectedOrder) {
       setSelectedOrder(defaultIndex);
     }
+    const isSignSuccess = localStorage.getItem("esignProcess");
+    if (isSignSuccess) {
+      setShowsignatureModal(true);
+      localStorage.removeItem("esignProcess");
+    }
   }, [defaultIndex, selectedOrder]);
 
   const currentOrder = useMemo(() => formList?.[selectedOrder], [formList, selectedOrder]);
@@ -732,7 +737,13 @@ const GenerateOrders = () => {
         />
       )}
       {showsignatureModal && (
-        <OrderSignatureModal t={t} order={currentOrder} handleIssueOrder={handleIssueOrder} handleGoBackSignatureModal={handleGoBackSignatureModal} />
+        <OrderSignatureModal
+          t={t}
+          order={currentOrder}
+          handleIssueOrder={handleIssueOrder}
+          handleGoBackSignatureModal={handleGoBackSignatureModal}
+          saveOnsubmitLabel={"ISSUE_ORDER"}
+        />
       )}
       {showSuccessModal && <OrderSucessModal t={t} order={prevOrder} handleDownloadOrders={handleDownloadOrders} handleClose={handleClose} />}
       {showErrorToast && (

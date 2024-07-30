@@ -48,6 +48,7 @@ import CustomErrorTooltip from "./components/CustomErrorTooltip";
 import Button from "./components/Button";
 import MultiUploadWrapper from "./components/MultiUploadWrapper";
 import CustomCopyTextDiv from "./components/CustomCopyTextDiv";
+import UploadSignatureModal from "./components/UploadSignatureModal";
 
 export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   const { path } = useRouteMatch();
@@ -123,6 +124,7 @@ const componentsToRegister = {
   Button,
   CustomCopyTextDiv,
   SelectCustomNote,
+  UploadSignatureModal,
 };
 
 const overrideHooks = () => {
