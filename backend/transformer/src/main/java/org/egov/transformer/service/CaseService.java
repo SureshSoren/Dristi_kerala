@@ -6,14 +6,18 @@ import org.egov.tracer.model.CustomException;
 import org.egov.transformer.config.ServiceConstants;
 import org.egov.transformer.config.TransformerProperties;
 
-import org.egov.common.contract.models.AuditDetails;
-import org.egov.transformer.models.*;
+import org.egov.transformer.models.CaseData;
+import org.egov.transformer.models.CaseRequest;
+import org.egov.transformer.models.CourtCase;
+import org.egov.transformer.models.Order;
+
 import org.egov.transformer.producer.OrderProducer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
@@ -58,7 +62,9 @@ public class CaseService {
             if (order.getOrderType().equalsIgnoreCase(ServiceConstants.JUDGEMENT_ORDER_TYPE)){
                 courtCase.setJudgementOrderDetails(order);
             }
+
             courtCase.setAuditDetails();
+
             CaseRequest caseRequest = new CaseRequest();
             caseRequest.setCases(courtCase);
             producer.push(properties.getCaseUpdateTopic(), caseRequest);

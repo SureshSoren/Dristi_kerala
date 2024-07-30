@@ -18,13 +18,15 @@ public class TransformerProperties {
     private String orderCreateTopic;
 
     @Value("${egov.case.host}")
-    private String CaseSearchUrlHost;
+    private String caseSearchUrlHost;
 
     @Value("${egov.case.path}")
-    private String CaseSearchUrlEndPoint;
+    private String caseSearchUrlEndPoint;
 
     @Value("${transformer.producer.update.order.case.topic}")
-    private String CaseUpdateTopic;
+    private String caseUpdateTopic;
 
+    @Value("${transformer.producer.update.order.application.topic}")
+    private String applicationUpdateTopic;
 
 }

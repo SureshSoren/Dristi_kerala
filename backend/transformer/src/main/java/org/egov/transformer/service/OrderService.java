@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.egov.transformer.config.ServiceConstants;
 import org.egov.transformer.config.TransformerProperties;
 import org.egov.transformer.models.Order;
+
 import org.egov.transformer.models.OrderRequest;
+
 import org.egov.transformer.producer.OrderProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,23 +22,41 @@ public class OrderService {
     private final CaseService caseService;
     private  final TransformerProperties properties;
     private  final OrderProducer producer;
+    private final ApplicationService applicationService;
+
+
 
     @Autowired
-    public OrderService(CaseService caseService, TransformerProperties properties, OrderProducer producer) {
+    public OrderService(CaseService caseService, TransformerProperties properties, OrderProducer producer, ApplicationService applicationService) {
         this.caseService = caseService;
         this.properties = properties;
         this.producer = producer;
+        this.applicationService = applicationService;
     }
+   private void addOrderDetailsToApplication(Order order)
 
-    public void addOrderDetails(Order order){
+   {int index;
+       for(String applicationNumber : order.getApplicationNumber())
+        {
+           applicationService.updateApplication(order,applicationNumber);
+        }
+
+   }
+    private void addOrderDetailsToCase(Order order){
+
+
         if (order.getFilingNumber() != null
                 && (order.getOrderType().equalsIgnoreCase(ServiceConstants.BAIL_ORDER_TYPE)
                     || order.getOrderType().equalsIgnoreCase(ServiceConstants.JUDGEMENT_ORDER_TYPE))) {
                 caseService.updateCase(order);
             }
+    }
+
+    public void addOrderDetails(Order order){
+        addOrderDetailsToCase(order);
+        addOrderDetailsToApplication(order);
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.setOrder(order);
         producer.push(properties.getOrderCreateTopic(), orderRequest);
-        }
-
+    }
 }

@@ -111,6 +111,7 @@ public class Order {
     @JsonProperty("orderDetails")
     private Order orderDetails;
 
+
     public Order addApplicationIdsItem(String applicationNumbersItem) {
         this.applicationNumber.add(applicationNumbersItem);
         return this;
