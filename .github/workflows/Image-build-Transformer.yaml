@@ -4,7 +4,7 @@ on:
     types:
       - closed
     branches:
-      - develop
+      - transformer
     paths:
       - 'backend/transformer/**'
   workflow_dispatch:
