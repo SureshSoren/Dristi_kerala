@@ -149,14 +149,24 @@ public class CourtCase {
 	private Object additionalDetails = null;
 
 	@JsonProperty("bailOrderDetails")
-	private Order bailOrderDetails;
+
+	private Order bailOrderDetails = null;
 
 	@JsonProperty("judgementOrderDetails")
-	private Order judgementOrderDetails;
+	private Order judgementOrderDetails = null;
 
 	@JsonProperty("auditDetails")
 	@Valid
 	private AuditDetails auditdetails = null;
+
+	@JsonProperty("createdBy")
+	private String createdBy = null;
+	@JsonProperty("lastModifiedBy")
+	private String lastModifiedBy = null;
+	@JsonProperty("createdTime")
+	private Long createdTime = null;
+	@JsonProperty("lastModifiedTime")
+	private Long lastModifiedTime = null;
 
 	public CourtCase addLinkedCasesItem(LinkedCase linkedCasesItem) {
 		this.linkedCases.add(linkedCasesItem);
@@ -181,6 +191,15 @@ public class CourtCase {
 	public CourtCase addDocumentsItem(Document documentsItem) {
 		this.documents.add(documentsItem);
 		return this;
+	}
+
+	public void setAuditDetails(){
+		AuditDetails auditDetails = new AuditDetails();
+		auditDetails.setCreatedBy(this.createdBy);
+		auditDetails.setCreatedTime(this.createdTime);
+		auditDetails.setLastModifiedBy(this.lastModifiedBy);
+		auditDetails.setLastModifiedTime(this.lastModifiedTime);
+		this.setAuditdetails(auditDetails);
 	}
 
 }

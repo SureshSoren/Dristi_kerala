@@ -67,6 +67,7 @@ public class EpostUtil {
         ePostTracker.setDeliveryStatus(ePostRequest.getEPostTracker().getDeliveryStatus());
         ePostTracker.setRemarks(ePostRequest.getEPostTracker().getRemarks());
         ePostTracker.setTaskNumber(ePostRequest.getEPostTracker().getTaskNumber());
+        ePostTracker.setReceivedDate(ePostRequest.getEPostTracker().getReceivedDate());
 
         return ePostTracker;
 

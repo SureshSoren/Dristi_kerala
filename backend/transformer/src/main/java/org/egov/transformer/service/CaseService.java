@@ -10,6 +10,7 @@ import org.egov.transformer.models.CaseData;
 import org.egov.transformer.models.CaseRequest;
 import org.egov.transformer.models.CourtCase;
 import org.egov.transformer.models.Order;
+
 import org.egov.transformer.producer.OrderProducer;
 
 import org.slf4j.Logger;
@@ -61,6 +62,9 @@ public class CaseService {
             if (order.getOrderType().equalsIgnoreCase(ServiceConstants.JUDGEMENT_ORDER_TYPE)){
                 courtCase.setJudgementOrderDetails(order);
             }
+
+            courtCase.setAuditDetails();
+
             CaseRequest caseRequest = new CaseRequest();
             caseRequest.setCases(courtCase);
             producer.push(properties.getCaseUpdateTopic(), caseRequest);
