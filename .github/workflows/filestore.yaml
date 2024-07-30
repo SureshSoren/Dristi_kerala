@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - filestore
-    paths:
-      - 'backend/egov-filestore/**'
   workflow_dispatch:
 
 jobs:
