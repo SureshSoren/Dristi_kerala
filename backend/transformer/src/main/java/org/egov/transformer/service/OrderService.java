@@ -33,25 +33,28 @@ public class OrderService {
         this.producer = producer;
         this.applicationService = applicationService;
     }
-   public void addOrderDetailsToApplication(Order order)
+   private void addOrderDetailsToApplication(Order order)
+
    {int index;
-       for(index=0;index<order.getApplicationNumber().size();index++)
+       for(String applicationNumber : order.getApplicationNumber())
         {
-
-           applicationService.updateApplication(order,index);
-
+           applicationService.updateApplication(order,applicationNumber);
         }
 
    }
-    public void addOrderDetails(Order order){
+    private void addOrderDetailsToCase(Order order){
 
 
         if (order.getFilingNumber() != null
                 && (order.getOrderType().equalsIgnoreCase(ServiceConstants.BAIL_ORDER_TYPE)
                     || order.getOrderType().equalsIgnoreCase(ServiceConstants.JUDGEMENT_ORDER_TYPE))) {
                 caseService.updateCase(order);
-
             }
+    }
+
+    public void addOrderDetails(Order order){
+        addOrderDetailsToCase(order);
+        addOrderDetailsToApplication(order);
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.setOrder(order);
         producer.push(properties.getOrderCreateTopic(), orderRequest);

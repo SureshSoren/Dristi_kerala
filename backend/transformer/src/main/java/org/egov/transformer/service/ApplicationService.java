@@ -49,15 +49,15 @@ public class ApplicationService {
         return data.getApplicationDetails();
     }
 
-    public void updateApplication(Order order,int index){
+    public void updateApplication(Order order,String applicationNumber){
 
         try{
 
-           Application application = fetchApplication(order.getApplicationNumber().get(index));
+            Application application = fetchApplication(applicationNumber);
 
-          application.setOrder(order);
-          ApplicationRequest applicationRequest = new ApplicationRequest();
-          applicationRequest.setApplication(application);
+            application.setOrder(order);
+            ApplicationRequest applicationRequest = new ApplicationRequest();
+            applicationRequest.setApplication(application);
             producer.push(properties.getApplicationUpdateTopic(), applicationRequest);
         } catch (Exception e) {
             log.error("error executing application search query", e);
