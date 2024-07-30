@@ -69,10 +69,8 @@ public class OrderService {
                     || order.getOrderType().equalsIgnoreCase(ServiceConstants.JUDGEMENT_ORDER_TYPE))) {
                 caseService.updateCase(order);
             }
-
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.setOrder(order);
         producer.push(properties.getOrderCreateTopic(), orderRequest);
-        }
-
+    }
 }
