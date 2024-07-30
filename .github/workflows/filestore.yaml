@@ -24,13 +24,13 @@ jobs:
 
       - name: Build and Push Docker image for filestore
         run: |
-          docker build --build-arg WORK_DIR="backend/filestore" -t pucarsolutionsdev.azurecr.io/pucar_filestore:latest -f build/maven/Dockerfile .
+          docker build --build-arg WORK_DIR="backend/egov-filestore" -t pucarsolutionsdev.azurecr.io/pucar_filestore:latest -f build/maven/Dockerfile .
           docker push pucarsolutionsdev.azurecr.io/pucar_filestore:latest
 
       - name: Build and Push Docker image for filestore_DB
         run: |
           docker build  -t pucarsolutionsdev.azurecr.io/pucar_filestore_db:latest -f  Dockerfile .
           docker push pucarsolutionsdev.azurecr.io/pucar_filestore_db:latest
-        working-directory: backend/filestore/src/main/resources/db
+        working-directory: backend/egov-filestore/src/main/resources/db
 
 
