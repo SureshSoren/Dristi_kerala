@@ -14,7 +14,7 @@ import CaseFileAdmission from "./admission/CaseFileAdmission";
 import Home from "./home";
 import ViewCaseFile from "./scrutiny/ViewCaseFile";
 
-const EmployeeApp = ({ path, url, userType, tenants, parentRoute }) => {
+const EmployeeApp = ({ path, url, userType, tenants, parentRoute, result }) => {
   const { t } = useTranslation();
   const location = useLocation();
   const { toastMessage, toastType, closeToast } = useToast();
