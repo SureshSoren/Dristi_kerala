@@ -1,0 +1,36 @@
+name: filestore Image Build workflow
+on:
+  push:
+    branches:
+      - filestore
+    paths:
+      - 'backend/egov-filestore/**'
+  workflow_dispatch:
+
+jobs:
+  docker_image-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v1
+
+      # Login to Azure Container Registry
+      - name: Login to Azure Container Registry
+        run: docker login -u pucarsolutionsdev -p ${{ secrets.ACR_PASSWORD }} pucarsolutionsdev.azurecr.io
+
+
+      - name: Build and Push Docker image for filestore
+        run: |
+          docker build --build-arg WORK_DIR="backend/filestore" -t pucarsolutionsdev.azurecr.io/pucar_filestore:latest -f build/maven/Dockerfile .
+          docker push pucarsolutionsdev.azurecr.io/pucar_filestore:latest
+
+      - name: Build and Push Docker image for filestore_DB
+        run: |
+          docker build  -t pucarsolutionsdev.azurecr.io/pucar_filestore_db:latest -f  Dockerfile .
+          docker push pucarsolutionsdev.azurecr.io/pucar_filestore_db:latest
+        working-directory: backend/filestore/src/main/resources/db
+
+
