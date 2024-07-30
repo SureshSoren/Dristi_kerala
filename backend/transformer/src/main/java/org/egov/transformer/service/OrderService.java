@@ -35,7 +35,7 @@ public class OrderService {
     }
    private void addOrderDetailsToApplication(Order order)
 
-   {int index;
+   {
        for(String applicationNumber : order.getApplicationNumber())
         {
            applicationService.updateApplication(order,applicationNumber);
