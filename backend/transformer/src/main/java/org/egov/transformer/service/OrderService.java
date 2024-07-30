@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.egov.transformer.config.ServiceConstants;
 import org.egov.transformer.config.TransformerProperties;
 import org.egov.transformer.models.Order;
+import org.egov.transformer.models.OrderRequest;
 import org.egov.transformer.producer.OrderProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,9 @@ public class OrderService {
                     || order.getOrderType().equalsIgnoreCase(ServiceConstants.JUDGEMENT_ORDER_TYPE))) {
                 caseService.updateCase(order);
             }
-        producer.push(properties.getOrderCreateTopic(), order);
+        OrderRequest orderRequest = new OrderRequest();
+        orderRequest.setOrder(order);
+        producer.push(properties.getOrderCreateTopic(), orderRequest);
         }
 
 }
