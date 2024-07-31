@@ -4,6 +4,7 @@ package drishti.payment.calculator.service;
 import drishti.payment.calculator.config.Configuration;
 import drishti.payment.calculator.util.EFillingUtil;
 import drishti.payment.calculator.web.models.*;
+import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Service
+@Slf4j
 public class CaseFeesCalculationService {
 
     private final EFillingUtil eFillingUtil;
@@ -26,8 +28,7 @@ public class CaseFeesCalculationService {
 
 
     public List<Calculation> calculateCaseFees(EFillingCalculationReq request) {
-
-
+        log.info("operation=calculateCaseFees, result=IN_PROGRESS");
         RequestInfo requestInfo = request.getRequestInfo();
 
         List<EFillingCalculationCriteria> calculationCriteria = request.getCalculationCriteria();
@@ -62,6 +63,7 @@ public class CaseFeesCalculationService {
 
             result.add(calculation);
         }
+        log.info("operation=calculateCaseFees, result=SUCCESS");
 
         return result;
 

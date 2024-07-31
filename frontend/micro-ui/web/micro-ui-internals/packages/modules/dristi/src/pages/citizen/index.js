@@ -11,7 +11,7 @@ import LandingPage from "./Home/LandingPage";
 import { userTypeOptions } from "./registration/config";
 import Breadcrumb from "../../components/BreadCrumb";
 
-const App = ({ stateCode, tenantId }) => {
+const App = ({ stateCode, tenantId, result }) => {
   const [hideBack, setHideBack] = useState(false);
   const { toastMessage, toastType, closeToast } = useToast();
   const Digit = window?.Digit || {};
@@ -81,6 +81,7 @@ const App = ({ stateCode, tenantId }) => {
       searchResult?.[0]?.status === "INACTIVE"
     );
   }, [searchResult, userType]);
+
   const hideHomeCrumb = [`${path}/home`];
 
   const citizenCrumb = [
@@ -117,7 +118,8 @@ const App = ({ stateCode, tenantId }) => {
     `${path}/home/application-details`,
   ];
   const registerScreenRoute = [`${path}/home/login`, `${path}/home/registration/mobile-number`, `${path}/home/registration/otp`];
-
+  const eSignWindowObject = localStorage.getItem("eSignWindowObject");
+  const retrievedObject = JSON.parse(eSignWindowObject);
   if (!isUserLoggedIn && !whiteListedRoutes.includes(location.pathname)) {
     history.push(`${path}/home/login`);
   }
@@ -130,6 +132,13 @@ const App = ({ stateCode, tenantId }) => {
   }
   if (isUserLoggedIn && registerScreenRoute.includes(location.pathname)) {
     history.push(`${path}/home/registration/user-name`);
+  }
+  if (result) {
+    localStorage.setItem("isSignSuccess", result);
+  }
+  if (isUserLoggedIn && retrievedObject) {
+    history.push(`${retrievedObject?.path}${retrievedObject?.param}`);
+    localStorage.removeItem("eSignWindowObject");
   }
   if (isLoading) {
     return <Loader />;

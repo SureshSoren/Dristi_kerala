@@ -1,10 +1,14 @@
 package org.pucar.dristi.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.*;
 import org.egov.tracer.config.TracerConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @Data
@@ -27,6 +31,9 @@ public class Configuration {
 
 	@Value("${egov.case.overall.status.topic}")
 	private String caseOverallStatusTopic;
+
+	@Value("${egov.case.outcome.topic}")
+	private String caseOutcomeTopic;
 
 	@Value("${egov.bulk.index.path}")
 	private String bulkPath;
@@ -87,4 +94,53 @@ public class Configuration {
 
 	@Value("${api.call.delay.in.seconds}")
 	private Integer apiCallDelayInSeconds;
+
+	// MDMS Config
+	@Value("${egov.mdms.host}")
+	private String mdmsHost;
+
+	@Value("${egov.mdms.search.endpoint}")
+	private String mdmsEndPoint;
+
+	// MDMS Hearing module name
+	@Value("${egov.mdms.module.name}")
+	private String mdmsModuleName;
+
+	// MDMS Hearing Type Master List name
+	@Value("${egov.mdms.master.name}")
+	private String mdmsMasterName;
+
+	@Value("${egov.hearing.business.services}")
+	private String hearingBusinessServices;
+	private List<String> hearingBusinessServiceList;
+
+	@Value("${egov.case.business.services}")
+	private String caseBusinessServices;
+	private List<String> caseBusinessServiceList;
+
+	@Value("${egov.evidence.business.services}")
+	private String evidenceBusinessServices;
+	private List<String> evidenceBusinessServiceList;
+
+	@Value("${egov.task.business.services}")
+	private String taskBusinessServices;
+	private List<String> taskBusinessServiceList;
+
+	@Value("${egov.application.business.services}")
+	private String applicationBusinessServices;
+	private List<String> applicationBusinessServiceList;
+
+	@Value("${egov.order.business.services}")
+	private String orderBusinessServices;
+	private List<String> orderBusinessServiceList;
+
+	@PostConstruct
+	public void init() {
+		hearingBusinessServiceList = Arrays.asList(hearingBusinessServices.split(","));
+		caseBusinessServiceList = Arrays.asList(caseBusinessServices.split(","));
+		evidenceBusinessServiceList = Arrays.asList(evidenceBusinessServices.split(","));
+		taskBusinessServiceList = Arrays.asList(taskBusinessServices.split(","));
+		applicationBusinessServiceList = Arrays.asList(applicationBusinessServices.split(","));
+		orderBusinessServiceList = Arrays.asList(orderBusinessServices.split(","));
+	}
 }

@@ -33,13 +33,14 @@ public class PostalPinService {
     }
 
     public List<PostalService> create(PostalServiceRequest request) {
-
+        log.info("operation=create, postal={}", request.getPostalServices());
         validator.validatePostalServiceRequest(request);
 
         enrichment.enrichPostalServiceRequest(request);
 
         producer.push(config.getPostalServiceCreateTopic(), request.getPostalServices());
 
+        log.info("operation=create, postal={}", request.getPostalServices());
         return request.getPostalServices();
     }
 
@@ -48,13 +49,13 @@ public class PostalPinService {
     }
 
     public List<PostalService> update(PostalServiceRequest request) {
-
+        log.info("operation=update, postal={}", request.getPostalServices());
         validator.validateExistingPostalServiceRequest(request);
 
         enrichment.enrichExistingPostalServiceRequest(request);
 
         producer.push(config.getPostalServiceUpdateTopic(), request.getPostalServices());
-
+        log.info("operation=update, postal={}", request.getPostalServices());
         return request.getPostalServices();
     }
 }

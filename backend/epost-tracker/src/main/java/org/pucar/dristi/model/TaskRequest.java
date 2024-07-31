@@ -12,7 +12,7 @@ import org.springframework.validation.annotation.Validated;
 @Builder
 public class TaskRequest {
 
-    @JsonProperty("requestInfo")
+    @JsonProperty("RequestInfo")
     @Valid
     private RequestInfo requestInfo = null;
 

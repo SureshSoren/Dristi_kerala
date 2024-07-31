@@ -14,8 +14,8 @@ function OrderSucessModal({ order, t, handleDownloadOrders, handleClose }) {
     return `${month}/${day}/${year}`;
   };
   const orderModalInfo = {
-    header: "CS_ORDER_SUCCESSFULLY_ISSUED",
-    subHeader: "CS_ORDER_CREATED_SUBTEXT",
+    header: order?.orderModelInfo?.header ? order.orderModelInfo.header : "CS_ORDER_SUCCESSFULLY_ISSUED",
+    subHeader: order?.orderModelInfo?.subHeader ? order.orderModelInfo.subHeader : "CS_ORDER_CREATED_SUBTEXT",
     caseInfo: [
       {
         key: "ORDER_ISSUE_DATE",

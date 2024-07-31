@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import SignatureCard from "./SignatureCard";
 import { DRISTIService } from "../services";
-import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import isEqual from "lodash/isEqual";
 
 function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
@@ -62,7 +61,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
           uidToken: "3456565",
           consent: "6564",
           authType: "6546",
-          fileStoreId: "0cdd01bf-5c6c-43de-86df-48406ce4f5a8",
+          fileStoreId: "2aefb901-edc6-4a45-95f8-3ea383a513f5",
           tenantId: "kl",
           pageModule: "ci",
         },
@@ -120,6 +119,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
                 formData={formData}
                 onSelect={onSelect}
                 configKey={config.key}
+                handleAadharClick={handleAadharClick}
               />
             ))}
           </div>

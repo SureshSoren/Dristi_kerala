@@ -3,10 +3,12 @@ import utils from "../utils";
 
 import { ordersService } from "./services";
 import useSearchOrdersService from "./orders/useSearchOrdersService";
+import useESign from "./orders/useESign";
 
 const orders = {
   useIndividualView,
   useSearchOrdersService,
+  useESign,
 };
 
 const Hooks = {
