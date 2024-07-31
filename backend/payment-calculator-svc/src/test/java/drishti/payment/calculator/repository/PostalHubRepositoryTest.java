@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,10 +44,10 @@ public class PostalHubRepositoryTest {
     public void getPostalHubReturnsExpectedResult() {
         HubSearchCriteria criteria = new HubSearchCriteria();
         PostalHub postalHub = new PostalHub();
-        when(queryBuilder.getPostalHubQuery(criteria, Collections.emptyList(), 1, 0)).thenReturn("query");
-        when(jdbcTemplate.query(anyString(), any(Object[].class), any(PostalHubRowMapper.class))).thenReturn(Collections.singletonList(postalHub));
+        when(queryBuilder.getPostalHubQuery(criteria, Collections.emptyList(), new ArrayList<>())).thenReturn("query");
+        when(jdbcTemplate.query(anyString(), any(Object[].class), any(), any(PostalHubRowMapper.class))).thenReturn(Collections.singletonList(postalHub));
 
-        List<PostalHub> result = postalHubRepository.getPostalHub(criteria, 1, 0);
+        List<PostalHub> result = postalHubRepository.getPostalHub(criteria);
 
         assertEquals(Collections.singletonList(postalHub), result);
     }

@@ -27,6 +27,7 @@ public class MdmsUtil {
 
     private final Configuration configs;
 
+    @Autowired
     public MdmsUtil(RestTemplate restTemplate, ObjectMapper mapper, Configuration configs) {
         this.restTemplate = restTemplate;
         this.mapper = mapper;

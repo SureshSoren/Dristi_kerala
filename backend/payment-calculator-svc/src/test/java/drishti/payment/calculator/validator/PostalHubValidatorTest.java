@@ -83,4 +83,26 @@ public class PostalHubValidatorTest {
         assertEquals("DK_PC_PINCODE_ERR", exception.getCode());
         assertEquals("pincode is mandatory for creating postal hub", exception.getMessage());
     }
+
+    @Test
+    public void testValidateExistingPostalHubRequest_Success() {
+        PostalHub postalHub = new PostalHub();
+        postalHub.setHubId("hubId");
+
+        PostalHubRequest request = new PostalHubRequest();
+        request.setPostalHubs(Collections.singletonList(postalHub));
+
+        assertDoesNotThrow(() -> postalHubValidator.validateExistingPostalHubRequest(request));
+    }
+
+    @Test
+    public void testValidateExistingPostalHubRequest_MissingHubId() {
+        PostalHub postalHub = new PostalHub();
+
+        PostalHubRequest request = new PostalHubRequest();
+        request.setPostalHubs(Collections.singletonList(postalHub));
+
+        CustomException exception = assertThrows(CustomException.class, () -> postalHubValidator.validateExistingPostalHubRequest(request));
+        assertEquals("DK_PC_ID_ERR", exception.getCode());
+    }
 }

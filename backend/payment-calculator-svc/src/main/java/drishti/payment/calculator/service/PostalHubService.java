@@ -9,6 +9,7 @@ import drishti.payment.calculator.web.models.HubSearchRequest;
 import drishti.payment.calculator.web.models.PostalHub;
 import drishti.payment.calculator.web.models.PostalHubRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class PostalHubService {
     private final Producer producer;
     private final Configuration config;
 
+    @Autowired
     public PostalHubService(PostalHubRepository repository, PostalHubValidator validator, PostalHubEnrichment enrichment, Producer producer, Configuration config) {
         this.repository = repository;
         this.validator = validator;

@@ -10,6 +10,7 @@ import drishti.payment.calculator.web.models.PostalService;
 import drishti.payment.calculator.web.models.PostalServiceRequest;
 import drishti.payment.calculator.web.models.PostalServiceSearchRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class PostalPinService {
     private final Producer producer;
     private final Configuration config;
 
+    @Autowired
     public PostalPinService(PostalServiceRepository repository, PostalServiceValidator validator, PostalServiceEnrichment enrichment, Producer producer, Configuration config) {
         this.repository = repository;
         this.validator = validator;

@@ -43,10 +43,10 @@ public class PostalServiceRepositoryTest {
 
         PostalService postalService = new PostalService();
 
-        when(queryBuilder.getPostalServiceQuery(criteria, new ArrayList<>(), limit, offset)).thenReturn("query");
-        when(jdbcTemplate.query(anyString(), any(Object[].class), any(PostalServiceRowMapper.class))).thenReturn(Collections.singletonList(postalService));
+        when(queryBuilder.getPostalServiceQuery(criteria, new ArrayList<>(), new ArrayList<>())).thenReturn("query");
+        when(jdbcTemplate.query(anyString(), any(Object[].class), any(), any(PostalServiceRowMapper.class))).thenReturn(Collections.singletonList(postalService));
 
-        List<PostalService> postalServices = postalServiceRepository.getPostalService(criteria, limit, offset);
+        List<PostalService> postalServices = postalServiceRepository.getPostalService(criteria);
 
         assertEquals(Collections.singletonList(postalService), postalServices);
     }

@@ -33,7 +33,7 @@ public class PostalHubQueryBuilderTest {
         Integer offset = 0;
         List<Object> preparedStmtList = new ArrayList<>();
 
-        String query = postalHubQueryBuilder.getPostalHubQuery(criteria, preparedStmtList, limit, offset);
+        String query = postalHubQueryBuilder.getPostalHubQuery(criteria, preparedStmtList, new ArrayList<>());
 
         assertNotNull(query);
         assertTrue(query.contains("SELECT *  FROM postal_hub ph"));
@@ -43,7 +43,7 @@ public class PostalHubQueryBuilderTest {
     void testGetPostalHubQuery_NoCriteria() {
         HubSearchCriteria criteria = new HubSearchCriteria();
 
-        String query = postalHubQueryBuilder.getPostalHubQuery(criteria, preparedStmtList, 10, 0);
+        String query = postalHubQueryBuilder.getPostalHubQuery(criteria, preparedStmtList, new ArrayList<>());
 
         assertNotNull(query);
         assertEquals(0, preparedStmtList.size());

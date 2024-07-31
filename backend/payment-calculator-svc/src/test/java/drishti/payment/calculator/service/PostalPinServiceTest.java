@@ -62,7 +62,7 @@ public class PostalPinServiceTest {
         PostalServiceSearchRequest searchRequest = new PostalServiceSearchRequest();
         List<PostalService> postalServices = Collections.singletonList(new PostalService());
 
-        when(repository.getPostalService(searchRequest.getCriteria(), null, null)).thenReturn(postalServices);
+        when(repository.getPostalService(searchRequest.getCriteria())).thenReturn(postalServices);
 
         List<PostalService> result = postalPinService.search(searchRequest);
 

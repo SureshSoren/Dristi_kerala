@@ -27,8 +27,8 @@ public class PostalServiceValidator {
 
     public void validateExistingPostalServiceRequest(PostalServiceRequest request) {
         request.getPostalServices().forEach(postalService -> {
-          if(!ObjectUtils.isEmpty(postalService.getPostalHubId())) {
-              throw new CustomException("DK_PC_HUB_ERR", "hub id is mandatory for updating postal.");
+          if(ObjectUtils.isEmpty(postalService.getPostalHubId())) {
+              throw new CustomException("DK_PC_HUB_ERR", "hub id is mandatory for updating postal service.");
           }
         });
     }
