@@ -14,6 +14,7 @@ public class PostalHubValidator {
 
     private final PostalHubRepository repository;
 
+    @Autowired
     public PostalHubValidator(PostalHubRepository repository) {
         this.repository = repository;
     }

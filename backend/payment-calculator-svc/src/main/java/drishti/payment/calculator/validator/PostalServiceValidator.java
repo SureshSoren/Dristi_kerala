@@ -1,12 +1,24 @@
 package drishti.payment.calculator.validator;
 
+import drishti.payment.calculator.repository.PostalServiceRepository;
+import drishti.payment.calculator.web.models.PostalService;
 import drishti.payment.calculator.web.models.PostalServiceRequest;
+import drishti.payment.calculator.web.models.PostalServiceSearchCriteria;
 import org.apache.commons.lang3.ObjectUtils;
 import org.egov.tracer.model.CustomException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PostalServiceValidator {
+
+    private final PostalServiceRepository repository;
+
+    @Autowired
+    public PostalServiceValidator(PostalServiceRepository repository) {
+        this.repository = repository;
+    }
+
     public void validatePostalServiceRequest(PostalServiceRequest request) {
         request.getPostalServices().forEach(hub -> {
             if (ObjectUtils.isEmpty(hub.getTenantId()))
@@ -27,9 +39,7 @@ public class PostalServiceValidator {
 
     public void validateExistingPostalServiceRequest(PostalServiceRequest request) {
         request.getPostalServices().forEach(postalService -> {
-          if(!ObjectUtils.isEmpty(postalService.getPostalHubId())) {
-              throw new CustomException("DK_PC_HUB_ERR", "hub id is mandatory for updating postal.");
-          }
+            PostalService postalService1 = repository.getPostalService(PostalServiceSearchCriteria.builder().id(postalService.getPostalServiceId()).build()).get(0);
         });
     }
 }
