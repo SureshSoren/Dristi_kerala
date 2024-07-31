@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,8 +38,10 @@ public class PaymentCalculatorService {
 
         StringBuilder url = new StringBuilder().append(config.getPaymentCalculatorHost())
                 .append(endpoint);
-
-        Object response = repository.fetchResult(url, paymentCalculatorPayload);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(paymentCalculatorPayload.toString(), httpHeaders);
+        Object response = repository.fetchResult(url, entity);
 
         CalculationRes calculationRes = mapper.convertValue(response, CalculationRes.class);
 
