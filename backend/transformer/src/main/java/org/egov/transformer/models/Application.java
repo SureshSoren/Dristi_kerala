@@ -1,6 +1,5 @@
 package org.egov.transformer.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -14,23 +13,21 @@ import org.egov.common.contract.models.Document;
 import org.egov.common.contract.models.Workflow;
 import org.springframework.validation.annotation.Validated;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
- * An order is created as an outcome of an hearing or based on an application. Order will contain a set of tasks
+ * Application
  */
-//@Schema(description = "An order is created as an outcome of an hearing or based on an application. Order will contain a set of tasks")
 @Validated
-@jakarta.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2024-04-18T11:13:43.389623100+05:30[Asia/Calcutta]")
+@jakarta.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2024-04-18T11:12:15.132164900+05:30[Asia/Calcutta]")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Order {
-
+public class Application {
     @JsonProperty("id")
     @Valid
     private UUID id = null;
@@ -39,50 +36,50 @@ public class Order {
     @NotNull
     private String tenantId = null;
 
+    @JsonProperty("caseId")
+    @NotNull
+    private String caseId = null;
+
     @JsonProperty("filingNumber")
     private String filingNumber = null;
 
     @JsonProperty("cnrNumber")
     private String cnrNumber = null;
 
-    @JsonProperty("applicationNumber")
-    private List<String> applicationNumber = new ArrayList<>();
-
-    @JsonProperty("hearingNumber")
+    @JsonProperty("referenceId")
     @Valid
-    private String hearingNumber = null;
-
-    @JsonProperty("orderNumber")
-    @Size(min = 24, max = 256)
-    private String orderNumber = null;
-
-    @JsonProperty("linkedOrderNumber")
-    @Size(min = 24, max = 256)
-    private String linkedOrderNumber = null;
+    private UUID referenceId = null;
 
     @JsonProperty("createdDate")
     @NotNull
+    private String createdDate = null;
+
+    @JsonProperty("createdBy")
     @Valid
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDate createdDate = null;
+    private UUID createdBy = null;
+
+    @JsonProperty("onBehalfOf")
+    @Valid
+    private List<UUID> onBehalfOf = null;
+
+    @JsonProperty("applicationType")
+    @NotNull
+    @Valid
+    private String applicationType = null;
+
+    @JsonProperty("applicationNumber")
+    @Size(min = 24, max = 48)
+    private String applicationNumber = null;
 
     @JsonProperty("issuedBy")
     private IssuedBy issuedBy = null;
-
-    @JsonProperty("orderType")
-    @NotNull
-    @Valid
-    private String orderType = null;
-
-    @JsonProperty("orderCategory")
-    private String orderCategory = null;
 
     @JsonProperty("status")
     @NotNull
     private String status = null;
 
-    @JsonProperty("comments")
-    private String comments = null;
+    @JsonProperty("comment")
+    private String comment = null;
 
     @JsonProperty("isActive")
     @NotNull
@@ -107,24 +104,37 @@ public class Order {
     @Valid
     private Workflow workflow = null;
 
-    @JsonProperty("orderDetails")
+    @JsonProperty("order")
     private Order orderDetails;
 
-    @JsonProperty("task")
-    private Task taskDetails;
 
-
-    public Order addApplicationIdsItem(String applicationNumbersItem) {
-        this.applicationNumber.add(applicationNumbersItem);
+    public Application addOnBehalfOfItem(UUID onBehalfOfItem) {
+        if (this.onBehalfOf == null) {
+            this.onBehalfOf = new ArrayList<>();
+        }
+        this.onBehalfOf.add(onBehalfOfItem);
         return this;
     }
 
-    public Order addDocumentsItem(Document documentsItem) {
+    public Application addDocumentsItem(Document documentsItem) {
         if (this.documents == null) {
             this.documents = new ArrayList<>();
         }
         this.documents.add(documentsItem);
         return this;
     }
+
+    public boolean isResponseRequired() {
+
+        if (additionalDetails instanceof Map) {
+            Map<String, Object> detailsMap = (Map<String, Object>) additionalDetails;
+            if (detailsMap.containsKey("isResponseRequired")) {
+                return (boolean) detailsMap.get("isResponseRequired");
+            }
+        }
+
+        return false;
+    }
+
 
 }
