@@ -17,6 +17,12 @@ public class EPostQueryBuilder {
 
     private static final String FROM_TABLES = " FROM dristi_epost_tracker ";
 
+    private static final String ORDER_BY_CLAUSE = " ORDER BY {sortBy} ";
+
+    private static final String DEFAULT_ORDER_BY_CLAUSE = " ORDER BY createdtime ";
+
+    private static final String DEFAULT_SORTING_ORDER = "DESC";
+
     private final String LIMIT_OFFSET = " LIMIT ? OFFSET ?";
 
     private  static  final String TOTAL_COUNT_QUERY = "SELECT COUNT(*) FROM ({baseQuery}) total_result";
@@ -62,6 +68,18 @@ public class EPostQueryBuilder {
     }
 
     public String addPaginationQuery(String query, List<Object> preparedStmtList, Pagination pagination) {
+        if (pagination != null && !ObjectUtils.isEmpty(pagination.getSortBy())) {
+            query += ORDER_BY_CLAUSE.replace("{sortBy}", pagination.getSortBy().name());
+        } else {
+            query += DEFAULT_ORDER_BY_CLAUSE;
+        }
+
+        if (pagination != null && !ObjectUtils.isEmpty(pagination.getOrderBy())) {
+            query += pagination.getOrderBy().name();
+        } else {
+            query += DEFAULT_SORTING_ORDER;
+        }
+
         preparedStmtList.add(pagination.getLimit());
         preparedStmtList.add(pagination.getOffSet());
         return query + LIMIT_OFFSET;

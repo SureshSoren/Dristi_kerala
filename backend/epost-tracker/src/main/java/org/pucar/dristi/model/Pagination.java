@@ -30,5 +30,8 @@ public class Pagination {
 	private Integer totalCount = null;
 
 	@JsonProperty("sortBy")
-	private String sortBy = null;
+	private Sort sortBy = null;
+
+	@JsonProperty("orderBy")
+	private Order orderBy = null;
 }
