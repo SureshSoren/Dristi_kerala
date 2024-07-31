@@ -8,11 +8,8 @@ import org.egov.tracer.model.CustomException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pucar.dristi.config.Configuration;
-import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.kafka.consumer.EventConsumerConfig;
 import org.pucar.dristi.config.PendingTaskMapConfig;
-import org.pucar.dristi.web.models.CaseOverallStatus;
-import org.pucar.dristi.web.models.CaseStageSubStage;
 import org.pucar.dristi.web.models.PendingTask;
 import org.pucar.dristi.web.models.PendingTaskType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,35 +40,26 @@ public class IndexerUtils {
 
 	private final CaseUtil caseUtil;
 
-	private final HearingUtil hearingUtil;
-
-	private final EvidenceUtil evidenceUtil;
+    private final EvidenceUtil evidenceUtil;
 
 	private final TaskUtil taskUtil;
 
 	private final ApplicationUtil applicationUtil;
 
-	private final OrderUtil orderUtil;
-
-	private final Producer producer;
-
-	private final ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
 	private final PendingTaskMapConfig pendingTaskMapConfig;
 
 	private final CaseOverallStatusUtil caseOverallStatusUtil;
 
 	@Autowired
-    public IndexerUtils(RestTemplate restTemplate, Configuration config, CaseUtil caseUtil, HearingUtil hearingUtil, EvidenceUtil evidenceUtil, TaskUtil taskUtil, ApplicationUtil applicationUtil, OrderUtil orderUtil, Producer producer, ObjectMapper mapper, PendingTaskMapConfig pendingTaskMapConfig, CaseOverallStatusUtil caseOverallStatusUtil) {
+    public IndexerUtils(RestTemplate restTemplate, Configuration config, CaseUtil caseUtil, EvidenceUtil evidenceUtil, TaskUtil taskUtil, ApplicationUtil applicationUtil, ObjectMapper mapper, PendingTaskMapConfig pendingTaskMapConfig, CaseOverallStatusUtil caseOverallStatusUtil) {
         this.restTemplate = restTemplate;
         this.config = config;
         this.caseUtil = caseUtil;
-        this.hearingUtil = hearingUtil;
         this.evidenceUtil = evidenceUtil;
         this.taskUtil = taskUtil;
         this.applicationUtil = applicationUtil;
-        this.orderUtil = orderUtil;
-        this.producer = producer;
         this.mapper = mapper;
         this.pendingTaskMapConfig = pendingTaskMapConfig;
         this.caseOverallStatusUtil = caseOverallStatusUtil;
@@ -155,7 +143,7 @@ public class IndexerUtils {
 		try {
 			additionalDetails = mapper.writeValueAsString(pendingTask.getAdditionalDetails());
 		}catch (Exception e){
-			log.error("Error while building API payload");
+			log.error("Error while building API payload",e);
 			throw new CustomException(Pending_Task_Exception, "Error occurred while preparing pending task: " + e);
 		}
 
@@ -221,16 +209,17 @@ public class IndexerUtils {
 
 		// Determine name and isCompleted based on status and action
 		for (PendingTaskType pendingTaskType : pendingTaskTypeList) {
-			if (pendingTaskType.getState().equals(status)) {
-				if (pendingTaskType.getTriggerAction().contains(action)) {
-					name = pendingTaskType.getPendingTask();
-					isCompleted = false;
-					break;
-				}
-			}
+			if (pendingTaskType.getState().equals(status) && pendingTaskType.getTriggerAction().contains(action)) {
+                name = pendingTaskType.getPendingTask();
+                isCompleted = false;
+                break;
+            }
 		}
 
-		if (isCompleted) return caseDetails;
+		if (isCompleted){
+			log.info("No pending task with this config");
+			return caseDetails;
+		}
 
 		// Create request and process entity based on type
 		JSONObject request = new JSONObject();
@@ -247,17 +236,17 @@ public class IndexerUtils {
 
 	private Map<String, String> processEntityByType(String entityType, JSONObject request, String referenceId, Object object) {
 		try {
-			if(config.getHearingBussinessServiceList().contains(entityType))
+			if(config.getHearingBusinessServiceList().contains(entityType))
 				return processHearingEntity(request, object);
-			else if (config.getCaseBussinessServiceList().contains(entityType))
+			else if (config.getCaseBusinessServiceList().contains(entityType))
 				return processCaseEntity(request, referenceId);
-			else if (config.getEvidenceBussinessServiceList().contains(entityType))
+			else if (config.getEvidenceBusinessServiceList().contains(entityType))
 				return processEvidenceEntity(request, referenceId);
-			else if (config.getApplicationBussinessServiceList().contains(entityType))
+			else if (config.getApplicationBusinessServiceList().contains(entityType))
 				return processApplicationEntity(request, referenceId);
-			else if (config.getOrderBussinessServiceList().contains(entityType))
-				return processOrderEntity(request, referenceId);
-			else if (config.getTaskBussinessServiceList().contains(entityType))
+			else if (config.getOrderBusinessServiceList().contains(entityType))
+				return processOrderEntity(object);
+			else if (config.getTaskBusinessServiceList().contains(entityType))
 				return processTaskEntity(request, referenceId);
 			else {
 						log.error("Unexpected entityType: {}", entityType);
@@ -349,13 +338,10 @@ public class IndexerUtils {
 		return caseDetails;
 	}
 
-	private Map<String, String> processOrderEntity(JSONObject request, String referenceId) throws InterruptedException {
+	private Map<String, String> processOrderEntity(Object orderObject) throws InterruptedException {
 		Map<String, String> caseDetails = new HashMap<>();
-		Thread.sleep(config.getApiCallDelayInSeconds()*1000);
-		Object orderObject = orderUtil.getOrder(request, referenceId, config.getStateLevelTenantId());
 		String cnrNumber = JsonPath.read(orderObject.toString(), CNR_NUMBER_PATH);
 		String filingNumber = JsonPath.read(orderObject.toString(), FILING_NUMBER_PATH);
-
 		caseDetails.put("cnrNumber", cnrNumber);
 		caseDetails.put("filingNumber", filingNumber);
 		return caseDetails;

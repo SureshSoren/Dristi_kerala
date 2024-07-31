@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class ServiceConstants {
 
 	public static final String EXTERNAL_SERVICE_EXCEPTION = "External Service threw an Exception: ";
-	public static final String SEARCHER_SERVICE_EXCEPTION = "Exception while fetching from searcher: ";
+	public static final String SEARCHER_SERVICE_EXCEPTION = "Error while fetching result from URL: {} with request: {}";
 	public static final String ERROR_WHILE_FETCHING_FROM_MDMS = "Exception occurred while fetching category lists from mdms: ";
 
 
@@ -57,6 +57,8 @@ public class ServiceConstants {
 	public static final String FILING_NUMBER_PATH = "$.filingNumber";
 	public static final String ERRORS_PATH = "$.errors";
 	public static final String ORDER_TYPE_PATH = "$.orderType";
+	public static final String ORDER_FINDINGS_PATH = "$.additionalDetails.formdata.findings.code";
+
 
 
 	public static final String RES_MSG_ID = "uief87324";
