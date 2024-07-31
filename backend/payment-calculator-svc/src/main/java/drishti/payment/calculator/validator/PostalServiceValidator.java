@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PostalServiceValidator {
     public void validatePostalServiceRequest(PostalServiceRequest request) {
-        request.getPostalServices().forEach(hub -> {
+        request.getPostalServices().forEach((hub) -> {
             if (ObjectUtils.isEmpty(hub.getTenantId()))
                 throw new CustomException("DK_PC_TENANT_ERR", "tenantId is mandatory for creating postal.");
 
@@ -26,10 +26,6 @@ public class PostalServiceValidator {
     }
 
     public void validateExistingPostalServiceRequest(PostalServiceRequest request) {
-        request.getPostalServices().forEach(postalService -> {
-          if(!ObjectUtils.isEmpty(postalService.getPostalHubId())) {
-              throw new CustomException("DK_PC_HUB_ERR", "hub id is mandatory for updating postal.");
-          }
-        });
+
     }
 }
