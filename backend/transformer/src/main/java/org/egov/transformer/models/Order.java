@@ -110,7 +110,7 @@ public class Order {
     @JsonProperty("orderDetails")
     private Order orderDetails;
 
-    @JsonProperty("task")
+    @JsonProperty("taskDetails")
     private Task taskDetails;
 
 
