@@ -42,7 +42,7 @@ public class PostalHubService {
     }
 
     public List<PostalHub> search(HubSearchRequest searchRequest) {
-       return repository.getPostalHub(searchRequest.getCriteria(), null, null);
+       return repository.getPostalHub(searchRequest.getCriteria());
     }
 
     public List<PostalHub> update(PostalHubRequest request) {

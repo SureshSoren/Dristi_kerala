@@ -16,13 +16,11 @@ import java.util.List;
 public class CaseFeesCalculationService {
 
     private final EFillingUtil eFillingUtil;
-//    private final DemandService demandService;
     private final Configuration config;
 
     @Autowired
     public CaseFeesCalculationService(EFillingUtil eFillingUtil, Configuration config) {
         this.eFillingUtil = eFillingUtil;
-//        this.demandService = demandService;
         this.config = config;
     }
 
@@ -65,7 +63,6 @@ public class CaseFeesCalculationService {
             result.add(calculation);
         }
 
-//        demandService.generateDemands(requestInfo, result,config.getCaseModuleCode(),config.getCaseTaxHeadMasterCode());
         return result;
 
     }

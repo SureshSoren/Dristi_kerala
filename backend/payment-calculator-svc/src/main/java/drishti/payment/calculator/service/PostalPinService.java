@@ -44,7 +44,7 @@ public class PostalPinService {
     }
 
     public List<PostalService> search(PostalServiceSearchRequest searchRequest) {
-        return repository.getPostalService(searchRequest.getCriteria(), null, null);
+        return repository.getPostalService(searchRequest.getCriteria());
     }
 
     public List<PostalService> update(PostalServiceRequest request) {
