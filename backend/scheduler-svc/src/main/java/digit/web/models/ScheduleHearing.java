@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 import org.egov.tracer.model.Error;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -23,27 +22,27 @@ import java.time.LocalDateTime;
 public class ScheduleHearing {
 
     @JsonProperty("hearingBookingId")
-    private String hearingBookingId;
+    private String hearingBookingId;      // hearing id
 
     @JsonProperty("tenantId")
-    private String tenantId;
+    private String tenantId;                // tenant id
 
     @JsonProperty("courtId")
-    private String courtId;
+    private String courtId;                 //prescribed by then court id
 
     @JsonProperty("judgeId")
-    private String judgeId;
+    private String judgeId;                 // judge id
 
     @JsonProperty("caseId")
-    private String caseId;
+    private String caseId;                  // cnr number
 
     @JsonProperty("date")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")   ///start time to epoch
     private LocalDate date;
 
     //TODO: this should be enum
     @JsonProperty("eventType")
-    private EventType eventType;
+    private EventType eventType;    // hearing type
 
     @JsonProperty("title")
     private String title;
@@ -56,12 +55,10 @@ public class ScheduleHearing {
     private Status status;
 
     @JsonProperty("startTime")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime startTime;
+    private long startTime;
 
     @JsonProperty("endTime")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime endTime;
+    private long endTime;
 
     @JsonProperty("auditDetails")
     private AuditDetails auditDetails;
@@ -101,6 +98,7 @@ public class ScheduleHearing {
     }
 
     public boolean overlapsWith(ScheduleHearing other) {
-        return !((!startTime.isBefore(other.endTime)) || (!endTime.isAfter(other.startTime)));
+        return !(startTime >= other.endTime || endTime <= other.startTime);
+
     }
 }
