@@ -7,7 +7,7 @@ import org.egov.transformer.config.ServiceConstants;
 import org.egov.transformer.config.TransformerProperties;
 import org.egov.transformer.models.*;
 
-import org.egov.transformer.producer.OrderProducer;
+import org.egov.transformer.producer.TransformerProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +24,12 @@ public class ApplicationService {
 
     private final ElasticSearchService elasticSearchService;
     private final TransformerProperties properties;
-    private final OrderProducer producer;
+    private final TransformerProducer producer;
     private final ObjectMapper objectMapper;
 
 
   @Autowired
-    public ApplicationService(ElasticSearchService elasticSearchService, TransformerProperties properties, OrderProducer producer, ObjectMapper objectMapper) {
+    public ApplicationService(ElasticSearchService elasticSearchService, TransformerProperties properties, TransformerProducer producer, ObjectMapper objectMapper) {
         this.elasticSearchService = elasticSearchService;
         this.properties = properties;
         this.producer = producer;

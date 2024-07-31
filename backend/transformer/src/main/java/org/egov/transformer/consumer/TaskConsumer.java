@@ -20,31 +20,32 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class OrderConsumer {
+public class TaskConsumer {
 
-    private static final Logger logger = LoggerFactory.getLogger(OrderConsumer.class);
+    private static final Logger logger = LoggerFactory.getLogger(TaskConsumer.class);
 
     private final ObjectMapper objectMapper;
-    private final OrderService orderService;
-     
+    private final TaskService taskService;
+
     @Autowired
-    public OrderConsumer(ObjectMapper objectMapper, OrderService orderService, TaskService taskService) {
+    public TaskConsumer(ObjectMapper objectMapper, OrderService orderService, TaskService taskService) {
         this.objectMapper = objectMapper;
-        this.orderService = orderService;
+        this.taskService = taskService;
     }
 
-    @KafkaListener(topics = { "${transformer.consumer.create.order.topic}","${transformer.consumer.update.order.topic}"})
-    public void orderConsumerCreate(ConsumerRecord<String, Object> payload,
-                                    @Header(KafkaHeaders.RECEIVED_TOPIC) String topic){
-    try {
-
-            Order order = (objectMapper.readValue((String) payload.value(), new TypeReference<OrderRequest>() {})).getOrder();
-            logger.info(objectMapper.writeValueAsString(order));
-
-            orderService.addOrderDetails(order);
-
+    @KafkaListener(topics = { "${transformer.consumer.create.task.topic}","${transformer.consumer.update.task.topic}"})
+    public void taskConsumerCreate(ConsumerRecord<String, Object> payload,
+                                   @Header(KafkaHeaders.RECEIVED_TOPIC) String topic){
+        try {
+            Task task = (objectMapper.readValue((String) payload.value(), new TypeReference<TaskRequest>() {})).getTask();
+            logger.info(objectMapper.writeValueAsString(task));
+            taskService.addTaskDetails(task);
         } catch (Exception exception) {
-            log.error("error in saving order", exception);
+            log.error("error in saving task", exception);
         }
     }
+
+
+
+
 }

@@ -6,11 +6,8 @@ import org.egov.tracer.model.CustomException;
 import org.egov.transformer.config.ServiceConstants;
 import org.egov.transformer.config.TransformerProperties;
 import org.egov.transformer.models.*;
-import lombok.extern.slf4j.Slf4j;
-import org.egov.transformer.config.ServiceConstants;
-import org.egov.transformer.config.TransformerProperties;
 import org.egov.transformer.models.Order;
-import org.egov.transformer.producer.OrderProducer;
+import org.egov.transformer.producer.TransformerProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +26,13 @@ public class OrderService {
     private final ElasticSearchService elasticSearchService;
     private final ObjectMapper objectMapper;
     private final CaseService caseService;
-    private  final TransformerProperties properties;
-    private  final OrderProducer producer;
+    private final TransformerProperties properties;
+    private final TransformerProducer producer;
     private final ApplicationService applicationService;
 
 
     @Autowired
-    public OrderService(ElasticSearchService elasticSearchService, ObjectMapper objectMapper, CaseService caseService, TransformerProperties properties, OrderProducer producer, ApplicationService applicationService) {
+    public OrderService(ElasticSearchService elasticSearchService, ObjectMapper objectMapper, CaseService caseService, TransformerProperties properties, TransformerProducer producer, ApplicationService applicationService) {
         this.elasticSearchService = elasticSearchService;
         this.objectMapper = objectMapper;
         this.caseService = caseService;
@@ -62,8 +59,8 @@ public class OrderService {
 
             Order order = fetchOrder(task.getOrderId());
 
-          OrderRequest orderRequest= new OrderRequest();
-          orderRequest.setOrder(order);
+            OrderRequest orderRequest= new OrderRequest();
+            orderRequest.setOrder(order);
             producer.push(properties.getOrderUpdateTopic(), orderRequest);
         } catch (Exception e) {
             logger.error("error executing order search query", e);

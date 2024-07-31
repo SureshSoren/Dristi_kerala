@@ -10,7 +10,7 @@ import org.egov.transformer.models.CaseData;
 import org.egov.transformer.models.CaseRequest;
 import org.egov.transformer.models.CourtCase;
 import org.egov.transformer.models.Order;
-import org.egov.transformer.producer.OrderProducer;
+import org.egov.transformer.producer.TransformerProducer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +29,11 @@ public class CaseService {
 
     private final ElasticSearchService elasticSearchService;
     private final TransformerProperties properties;
-    private final OrderProducer producer;
+    private final TransformerProducer producer;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public CaseService(ElasticSearchService elasticSearchService, TransformerProperties properties, OrderProducer producer, ObjectMapper objectMapper) {
+    public CaseService(ElasticSearchService elasticSearchService, TransformerProperties properties, TransformerProducer producer, ObjectMapper objectMapper) {
         this.elasticSearchService = elasticSearchService;
         this.properties = properties;
         this.producer = producer;
