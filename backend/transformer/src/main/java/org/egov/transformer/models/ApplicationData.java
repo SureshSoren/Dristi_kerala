@@ -1,5 +1,7 @@
 package org.egov.transformer.models;
 
+import org.egov.common.contract.models.AuditDetails;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -19,4 +21,9 @@ public class ApplicationData {
 
     @JsonProperty("history")
     private Object history = null;
+
+    @JsonProperty("auditDetails")
+    private AuditDetails auditDetails = null;
+
+
 }

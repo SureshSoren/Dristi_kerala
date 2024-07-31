@@ -1,9 +1,7 @@
 package org.egov.transformer.service;
 
 import lombok.extern.slf4j.Slf4j;
-
 import org.egov.transformer.config.TransformerProperties;
-
 import org.egov.transformer.models.Task;
 import org.egov.transformer.models.TaskRequest;
 import org.egov.transformer.producer.TransformerProducer;
@@ -18,8 +16,8 @@ public class TaskService {
     private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
     private final OrderService orderService;
-    private  final TransformerProperties properties;
-    private  final TransformerProducer producer;
+    private final TransformerProperties properties;
+    private final TransformerProducer producer;
 
     @Autowired
     public TaskService(OrderService orderService, TransformerProperties properties, TransformerProducer producer) {
@@ -29,11 +27,11 @@ public class TaskService {
     }
 
 
-    public void addTaskDetails(Task task){
+    public void addTaskDetails(Task task, String topic) {
 
         orderService.updateOrder(task);
         TaskRequest taskRequest = new TaskRequest();
         taskRequest.setTask(task);
-        producer.push(properties.getOrderCreateTopic(), taskRequest);
+        producer.push(topic, taskRequest);
     }
 }

@@ -28,124 +28,113 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class Application {
-        @JsonProperty("id")
+    @JsonProperty("id")
+    @Valid
+    private UUID id = null;
 
-          @Valid
-                private UUID id = null;
+    @JsonProperty("tenantId")
+    @NotNull
+    private String tenantId = null;
 
-        @JsonProperty("tenantId")
-          @NotNull
+    @JsonProperty("caseId")
+    @NotNull
+    private String caseId = null;
 
-                private String tenantId = null;
+    @JsonProperty("filingNumber")
+    private String filingNumber = null;
 
-        @JsonProperty("caseId")
-        @NotNull
-        private String caseId = null;
+    @JsonProperty("cnrNumber")
+    private String cnrNumber = null;
 
-        @JsonProperty("filingNumber")
+    @JsonProperty("referenceId")
+    @Valid
+    private UUID referenceId = null;
 
-                private String filingNumber = null;
+    @JsonProperty("createdDate")
+    @NotNull
+    private String createdDate = null;
 
-        @JsonProperty("cnrNumber")
+    @JsonProperty("createdBy")
+    @Valid
+    private UUID createdBy = null;
 
-                private String cnrNumber = null;
+    @JsonProperty("onBehalfOf")
+    @Valid
+    private List<UUID> onBehalfOf = null;
 
-        @JsonProperty("referenceId")
+    @JsonProperty("applicationType")
+    @NotNull
+    @Valid
+    private String applicationType = null;
 
-          @Valid
-                private UUID referenceId = null;
+    @JsonProperty("applicationNumber")
+    @Size(min = 24, max = 48)
+    private String applicationNumber = null;
 
-        @JsonProperty("createdDate")
-          @NotNull
+    @JsonProperty("issuedBy")
+    private IssuedBy issuedBy = null;
 
-                private String createdDate = null;
+    @JsonProperty("status")
+    @NotNull
+    private String status = null;
 
-        @JsonProperty("createdBy")
+    @JsonProperty("comment")
+    private String comment = null;
 
-          @Valid
-                private UUID createdBy = null;
+    @JsonProperty("isActive")
+    @NotNull
+    private Boolean isActive = null;
 
-        @JsonProperty("onBehalfOf")
-          @Valid
-                private List<UUID> onBehalfOf = null;
+    @JsonProperty("statuteSection")
+    @Valid
+    private StatuteSection statuteSection = null;
 
-        @JsonProperty("applicationType")
-          @NotNull
-          @Valid
-                private String applicationType = null;
+    @JsonProperty("documents")
+    @Valid
+    private List<Document> documents = null;
 
-        @JsonProperty("applicationNumber")
+    @JsonProperty("additionalDetails")
+    private Object additionalDetails = null;
 
-        @Size(min=24,max=48)         private String applicationNumber = null;
+    @JsonProperty("auditDetails")
+    @Valid
+    private AuditDetails auditDetails = null;
 
-        @JsonProperty("issuedBy")
-
-                private IssuedBy issuedBy = null;
-
-        @JsonProperty("status")
-          @NotNull
-
-                private String status = null;
-
-        @JsonProperty("comment")
-
-                private String comment = null;
-
-        @JsonProperty("isActive")
-          @NotNull
-
-                private Boolean isActive = null;
-
-        @JsonProperty("statuteSection")
-
-          @Valid
-                private StatuteSection statuteSection = null;
-
-        @JsonProperty("documents")
-          @Valid
-                private List<Document> documents = null;
-
-        @JsonProperty("additionalDetails")
-
-                private Object additionalDetails = null;
-
-        @JsonProperty("auditDetails")
-
-          @Valid
-                private AuditDetails auditDetails = null;
-
-        @JsonProperty("workflow")
-
-          @Valid
-                private Workflow workflow = null;
+    @JsonProperty("workflow")
+    @Valid
+    private Workflow workflow = null;
 
     @JsonProperty("order")
-    private Order order;
+    private Order orderDetails;
 
 
-
-        public Application addOnBehalfOfItem(UUID onBehalfOfItem) {
-            if (this.onBehalfOf == null) {
+    public Application addOnBehalfOfItem(UUID onBehalfOfItem) {
+        if (this.onBehalfOf == null) {
             this.onBehalfOf = new ArrayList<>();
-            }
+        }
         this.onBehalfOf.add(onBehalfOfItem);
         return this;
-        }
+    }
 
-        public Application addDocumentsItem(Document documentsItem) {
-            if (this.documents == null) {
+    public Application addDocumentsItem(Document documentsItem) {
+        if (this.documents == null) {
             this.documents = new ArrayList<>();
-            }
+        }
         this.documents.add(documentsItem);
         return this;
-        }
+    }
+
     public boolean isResponseRequired() {
+
         if (additionalDetails instanceof Map) {
             Map<String, Object> detailsMap = (Map<String, Object>) additionalDetails;
             if (detailsMap.containsKey("isResponseRequired")) {
                 return (boolean) detailsMap.get("isResponseRequired");
             }
         }
+
         return false;
     }
+
+
 }

@@ -2,7 +2,6 @@ package org.egov.transformer.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -112,7 +111,7 @@ public class Order {
     private Order orderDetails;
 
     @JsonProperty("task")
-    private  Task task;
+    private Task taskDetails;
 
 
     public Order addApplicationIdsItem(String applicationNumbersItem) {
