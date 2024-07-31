@@ -31,8 +31,10 @@ public class OrderService {
     private final ApplicationService applicationService;
 
 
-    @Autowired
-    public OrderService(ElasticSearchService elasticSearchService, ObjectMapper objectMapper, CaseService caseService, TransformerProperties properties, TransformerProducer producer, ApplicationService applicationService) {
+
+
+ @Autowired
+    public OrderService(ElasticSearchService elasticSearchService, ObjectMapper objectMapper, CaseService caseService, TransformerProperties properties, TransformerProducer producer,ApplicationService applicationService) {
         this.elasticSearchService = elasticSearchService;
         this.objectMapper = objectMapper;
         this.caseService = caseService;
@@ -59,31 +61,31 @@ public class OrderService {
 
             Order order = fetchOrder(task.getOrderId());
 
-            OrderRequest orderRequest= new OrderRequest();
-            orderRequest.setOrder(order);
+          OrderRequest orderRequest= new OrderRequest();
+          orderRequest.setOrder(order);
             producer.push(properties.getOrderUpdateTopic(), orderRequest);
         } catch (Exception e) {
-            logger.error("error executing order search query", e);
+            log.error("error executing order search query", e);
             throw new CustomException("ERROR_ORDER_SEARCH", ServiceConstants.ERROR_ORDER_SEARCH);
         }
     }
     
+    
+    
     private void addOrderDetailsToCase(Order order){
-        
         if (order.getFilingNumber() != null
                 && (order.getOrderType().equalsIgnoreCase(ServiceConstants.BAIL_ORDER_TYPE)
                     || order.getOrderType().equalsIgnoreCase(ServiceConstants.JUDGEMENT_ORDER_TYPE))) {
                 caseService.updateCase(order);
-            }
+        }
     }
 
     private void addOrderDetailsToApplication(Order order){
-       
-        for(String applicationNumber : order.getApplicationNumber()){
+       for(String applicationNumber : order.getApplicationNumber()){
            applicationService.updateApplication(order,applicationNumber);
         }
 
-    }
+   }
 
     public void addOrderDetails(Order order){
         addOrderDetailsToCase(order);
