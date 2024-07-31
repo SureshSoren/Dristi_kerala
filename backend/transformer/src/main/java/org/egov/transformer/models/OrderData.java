@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CaseData {
+public class OrderData {
     @JsonProperty("caseDetails")
     @Valid
-    private CourtCase caseDetails = null;
+    private Order orderDetails = null;
 
     @JsonProperty("history")
     private Object history = null;

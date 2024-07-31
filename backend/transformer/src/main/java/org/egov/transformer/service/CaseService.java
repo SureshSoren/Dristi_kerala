@@ -6,14 +6,17 @@ import org.egov.tracer.model.CustomException;
 import org.egov.transformer.config.ServiceConstants;
 import org.egov.transformer.config.TransformerProperties;
 
-import org.egov.common.contract.models.AuditDetails;
-import org.egov.transformer.models.*;
-import org.egov.transformer.producer.OrderProducer;
+import org.egov.transformer.models.CaseData;
+import org.egov.transformer.models.CaseRequest;
+import org.egov.transformer.models.CourtCase;
+import org.egov.transformer.models.Order;
+import org.egov.transformer.producer.TransformerProducer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
@@ -26,11 +29,11 @@ public class CaseService {
 
     private final ElasticSearchService elasticSearchService;
     private final TransformerProperties properties;
-    private final OrderProducer producer;
+    private final TransformerProducer producer;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public CaseService(ElasticSearchService elasticSearchService, TransformerProperties properties, OrderProducer producer, ObjectMapper objectMapper) {
+    public CaseService(ElasticSearchService elasticSearchService, TransformerProperties properties, TransformerProducer producer, ObjectMapper objectMapper) {
         this.elasticSearchService = elasticSearchService;
         this.properties = properties;
         this.producer = producer;
@@ -58,7 +61,9 @@ public class CaseService {
             if (order.getOrderType().equalsIgnoreCase(ServiceConstants.JUDGEMENT_ORDER_TYPE)){
                 courtCase.setJudgementOrderDetails(order);
             }
+
             courtCase.setAuditDetails();
+
             CaseRequest caseRequest = new CaseRequest();
             caseRequest.setCases(courtCase);
             producer.push(properties.getCaseUpdateTopic(), caseRequest);
