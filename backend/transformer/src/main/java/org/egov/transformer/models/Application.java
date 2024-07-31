@@ -104,7 +104,7 @@ public class Application {
     @Valid
     private Workflow workflow = null;
 
-    @JsonProperty("order")
+    @JsonProperty("orderDetails")
     private Order orderDetails;
 
 
