@@ -29,7 +29,6 @@ public class TaskService {
     private final WorkflowUtil workflowUtil;
     private final Configuration config;
     private final Producer producer;
-    private final EmailNotificationService emailNotificationService;
 
     @Autowired
     public TaskService(TaskRegistrationValidator validator,
@@ -37,14 +36,13 @@ public class TaskService {
                        TaskRepository taskRepository,
                        WorkflowUtil workflowUtil,
                        Configuration config,
-                       Producer producer, EmailNotificationService emailNotificationService) {
+                       Producer producer) {
         this.validator = validator;
         this.enrichmentUtil = enrichmentUtil;
         this.taskRepository = taskRepository;
         this.workflowUtil = workflowUtil;
         this.config = config;
         this.producer = producer;
-        this.emailNotificationService = emailNotificationService;
     }
 
     @Autowired
@@ -60,13 +58,6 @@ public class TaskService {
             enrichmentUtil.enrichTaskRegistration(body);
 
             workflowUpdate(body);
-
-            IndividualSearchRequest individualSearchRequest =new IndividualSearchRequest();
-            individualSearchRequest.setRequestInfo(body.getRequestInfo());
-            IndividualSearch individualSearch = IndividualSearch.builder()
-                            .individualId(String.valueOf(body.getTask().getAssignedTo().getIndividualId())).build();
-            individualSearchRequest.setIndividual(individualSearch);
-            emailNotificationService.sendEmailNotification(individualSearchRequest);
 
             producer.push(config.getTaskCreateTopic(), body);
 
@@ -110,13 +101,6 @@ public class TaskService {
             String status = body.getTask().getStatus();
             if (ISSUESUMMON.equalsIgnoreCase(status))
                 producer.push(config.getTaskIssueSummonTopic(), body);
-
-            IndividualSearchRequest individualSearchRequest =new IndividualSearchRequest();
-            individualSearchRequest.setRequestInfo(body.getRequestInfo());
-            IndividualSearch individualSearch = IndividualSearch.builder()
-                    .individualId(String.valueOf(body.getTask().getAssignedTo().getIndividualId())).build();
-            individualSearchRequest.setIndividual(individualSearch);
-            emailNotificationService.sendEmailNotification(individualSearchRequest);
 
             producer.push(config.getTaskUpdateTopic(), body);
 
