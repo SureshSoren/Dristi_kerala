@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class OrderData {
-    @JsonProperty("caseDetails")
+    @JsonProperty("orderDetails")
     @Valid
     private Order orderDetails = null;
 
