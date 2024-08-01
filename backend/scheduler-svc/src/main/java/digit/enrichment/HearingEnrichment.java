@@ -130,12 +130,12 @@ public class HearingEnrichment {
             boolean flag = true;
             while (!currentStartTime.isAfter(getLocalTime(slot.getSlotEndTime()))) {
                 LocalTime currentEndTime = currentStartTime.plusMinutes(hearingDuration);
-                hearing.setStartTime(LocalDateTime.of(hearing.getDate(), currentStartTime));
-                hearing.setEndTime(LocalDateTime.of(hearing.getDate(), currentEndTime));
+//                hearing.setStartTime(LocalDateTime.of(hearing.getDate(), currentStartTime));
+//                hearing.setEndTime(LocalDateTime.of(hearing.getDate(), currentEndTime));
 
                 if (canScheduleHearings(hearing, scheduledHearings, slots)) {
-                    hearing.setStartTime(LocalDateTime.of(hearing.getDate(), currentStartTime));
-                    hearing.setEndTime(LocalDateTime.of(hearing.getDate(), currentEndTime));
+//                    hearing.setStartTime(LocalDateTime.of(hearing.getDate(), currentStartTime));
+//                    hearing.setEndTime(LocalDateTime.of(hearing.getDate(), currentEndTime));
                     // Hearing scheduled successfully
                     flag = false;
                     break;
@@ -156,6 +156,7 @@ public class HearingEnrichment {
 
         }
         for (MdmsSlot slot : slots) {
+
 
             if (!newHearing.getStartTime().isBefore(getLocalDateTime(newHearing.getStartTime(), slot.getSlotStartTime())) && !newHearing.getEndTime().isAfter(getLocalDateTime(newHearing.getEndTime(), slot.getSlotEndTime()))) {
                 return true;

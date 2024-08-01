@@ -28,7 +28,6 @@ public class HearingConsumer {
     @KafkaListener(topics = {"create-hearing-application"})
     public void listenScheduleHearing(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
-
         HearingRequest hearingRequest = mapper.convertValue(record, HearingRequest.class);
 
         processor.processCreateHearingRequest(hearingRequest);
