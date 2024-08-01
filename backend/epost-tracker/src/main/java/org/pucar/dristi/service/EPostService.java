@@ -33,8 +33,8 @@ public class EPostService {
         return ChannelMessage.builder().processNumber(ePostTracker.getProcessNumber()).build();
     }
 
-    public EPostResponse getEPost(EPostTrackerSearchRequest searchRequest) {
-        return ePostRepository.getEPostTrackerResponse(searchRequest.getEPostTrackerSearchCriteria());
+    public EPostResponse getEPost(EPostTrackerSearchRequest searchRequest, int limit, int offset) {
+        return ePostRepository.getEPostTrackerResponse(searchRequest.getEPostTrackerSearchCriteria(),limit,offset);
     }
 
     public EPostTracker updateEPost(EPostRequest ePostRequest) {

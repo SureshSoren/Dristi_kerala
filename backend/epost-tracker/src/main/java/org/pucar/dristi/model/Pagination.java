@@ -19,13 +19,6 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 @Builder
 public class Pagination {
-	@JsonProperty("limit")
-	@DecimalMax("100")
-	private Integer limit = 10;
-
-	@JsonProperty("offSet")
-	private Integer offSet = 0;
-
 	@JsonProperty("totalCount")
 	private Integer totalCount = null;
 

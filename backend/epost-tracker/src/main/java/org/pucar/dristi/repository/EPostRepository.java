@@ -29,18 +29,18 @@ public class EPostRepository {
         this.rowMapper = rowMapper;
     }
 
-    public EPostResponse getEPostTrackerResponse(EPostTrackerSearchCriteria searchCriteria){
-        List<EPostTracker> ePostTrackerList = getEPostTrackerList(searchCriteria);
+    public EPostResponse getEPostTrackerResponse(EPostTrackerSearchCriteria searchCriteria,int limit, int offset){
+        List<EPostTracker> ePostTrackerList = getEPostTrackerList(searchCriteria,limit,offset);
         Integer totalRecords = getTotalCountQuery(searchCriteria);
         Pagination pagination = searchCriteria.getPagination();
         pagination.setTotalCount(totalRecords);
         return EPostResponse.builder().ePostTrackers(ePostTrackerList).pagination(pagination).build();
     }
 
-    public List<EPostTracker> getEPostTrackerList(EPostTrackerSearchCriteria searchCriteria){
+    public List<EPostTracker> getEPostTrackerList(EPostTrackerSearchCriteria searchCriteria,int limit, int offset){
         List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getEPostTrackerSearchQuery(searchCriteria, preparedStmtList);
-        query = queryBuilder.addPaginationQuery(query, preparedStmtList, searchCriteria.getPagination());
+        query = queryBuilder.addPaginationQuery(query, preparedStmtList, searchCriteria.getPagination(),limit,offset);
         log.debug("Final query: " + query);
         return jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
     }

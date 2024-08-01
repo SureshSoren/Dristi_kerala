@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Collections;
 
@@ -41,8 +42,10 @@ public class EPostController {
         return new ResponseEntity<>(channelResponse, HttpStatus.OK);
     }
     @RequestMapping(value = "epost/v1/_getEPost", method = RequestMethod.POST)
-    public ResponseEntity<EPostResponse> getEPost(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody EPostTrackerSearchRequest request) {
-        EPostResponse ePostResponse = ePostService.getEPost(request);
+    public ResponseEntity<EPostResponse> getEPost(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody EPostTrackerSearchRequest request,
+                                                  @RequestParam(value = "limit", defaultValue = "10") int limit,
+                                                  @RequestParam(value = "offset", defaultValue = "0") int offset) {
+        EPostResponse ePostResponse = ePostService.getEPost(request,limit,offset);
         ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(request.getRequestInfo(), true);
         ePostResponse.setResponseInfo(responseInfo);
         return new ResponseEntity<>(ePostResponse, HttpStatus.OK);
