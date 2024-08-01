@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const caseRoutes = require('./routes/caseRoutes');
+const errorHandler = require('./middlewares/errorHandler');
 
 app.use(bodyParser.json());
 app.use('/cases', caseRoutes);

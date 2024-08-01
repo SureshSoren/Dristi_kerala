@@ -1,7 +1,7 @@
-const caseService = require('../services/caseService');
-const pdfService = require('../services/pdfService');
-const fileService = require('../services/fileService');
-const formatUtil = require('../utils/formatUtil');
+const caseService = require('../service/caseService');
+const pdfService = require('../service/pdfService');
+const fileService = require('../service/fileService');
+const formatUtil = require('../util/formatUtil');
 
 exports.generateCase = async (req, res, next) => {
     try {
