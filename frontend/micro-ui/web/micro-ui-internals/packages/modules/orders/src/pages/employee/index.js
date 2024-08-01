@@ -7,6 +7,8 @@ import OrdersCreate from "./OrdersCreate";
 import OrdersHome from "./OrdersHome";
 import GenerateOrders from "./GenerateOrders";
 import PaymentStatus from "../../components/PaymentStatus";
+import EpostTrackingPage from "./E-PostTracking"
+// import Transcription from "../../../../../../../../../pucar-ui/web/micro-ui-internals/packages/modules/orders/src/pages/employee/transcription";
 // import MakeSubmission from "./MakeSubmission";
 import ReviewSummonsNoticeAndWarrant from "./ReviewSummonsNoticeAndWarrant";
 const bredCrumbStyle = { maxWidth: "min-content" };
@@ -47,6 +49,8 @@ const App = ({ path, stateCode, userType, tenants }) => {
         <PrivateRoute path={`${path}/Summons&Notice`} component={() => <ReviewSummonsNoticeAndWarrant />} />
         <PrivateRoute path={`${path}/payment-screen`} component={() => <PaymentStatus />} />
         {/* <PrivateRoute path={`${path}/make-submission`} component={() => <MakeSubmission />} /> */}
+        <PrivateRoute path={`${path}/tracking`} component= {()=> <EpostTrackingPage />} />
+        {/* <PrivateRoute path={`${path}/transcription`} component= {()=> <Transcription />} /> */}
       </AppContainer>
     </Switch>
   );

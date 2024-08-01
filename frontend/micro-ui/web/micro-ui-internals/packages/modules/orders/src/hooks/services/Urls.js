@@ -7,4 +7,7 @@ export const Urls = {
     pendingTask: "/analytics/pending_task/v1/create",
   },
   FileFetchById: "/filestore/v1/files/id",
+  Epost: {
+    EpostUpdate: "/epost-tracker/epost/v1/_updateEPost"
+  }
 };
