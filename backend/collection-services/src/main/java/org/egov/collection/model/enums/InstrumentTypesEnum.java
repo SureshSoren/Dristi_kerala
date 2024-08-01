@@ -6,7 +6,9 @@ public enum InstrumentTypesEnum {
     OFFLINE_RTGS,
     ONLINE_NEFT,
     ONLINE_RTGS,
-    POSTAL_ORDER;
+    POSTAL_ORDER,
+    STAMP;
+
 
     public static boolean contains(String test) {
         for (InstrumentTypesEnum val : InstrumentTypesEnum.values()) {

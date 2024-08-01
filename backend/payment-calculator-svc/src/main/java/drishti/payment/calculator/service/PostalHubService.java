@@ -8,11 +8,13 @@ import drishti.payment.calculator.validator.PostalHubValidator;
 import drishti.payment.calculator.web.models.HubSearchRequest;
 import drishti.payment.calculator.web.models.PostalHub;
 import drishti.payment.calculator.web.models.PostalHubRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class PostalHubService {
 
     private final PostalHubRepository repository;
@@ -31,21 +33,23 @@ public class PostalHubService {
 
 
     public List<PostalHub> create(PostalHubRequest request) {
-
+        log.info("operation = create, result= IN_PROGRESS, hubs={}", request.getPostalHubs());
         validator.validatePostalHubRequest(request);
 
         enrichment.enrichPostalHubRequest(request);
 
         producer.push(config.getPostalHubCreateTopic(), request.getPostalHubs());
 
+        log.info("operation = create, result= SUCCESS, hubs={}", request.getPostalHubs());
         return request.getPostalHubs();
     }
 
     public List<PostalHub> search(HubSearchRequest searchRequest) {
-       return repository.getPostalHub(searchRequest.getCriteria(), null, null);
+       return repository.getPostalHub(searchRequest.getCriteria());
     }
 
     public List<PostalHub> update(PostalHubRequest request) {
+        log.info("operation = update, result= IN_PROGRESS, hubs={}", request.getPostalHubs());
 
         validator.validateExistingPostalHubRequest(request);
 
@@ -53,6 +57,7 @@ public class PostalHubService {
 
         producer.push(config.getPostalHubUpdateTopic(), request.getPostalHubs());
 
+        log.info("operation = update, result= SUCCESS, hubs={}", request.getPostalHubs());
         return request.getPostalHubs();
     }
 

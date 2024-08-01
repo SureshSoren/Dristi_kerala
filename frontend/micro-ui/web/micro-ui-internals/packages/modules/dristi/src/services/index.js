@@ -109,6 +109,33 @@ export const DRISTIService = {
       params,
     });
   },
+  startHearing: ({ hearing }, params) => {
+    return Request({
+      url: Urls.dristi.updateHearings,
+      useCache: false,
+      userService: false,
+      data: { hearing: { ...hearing, workflow: { action: "START" } } },
+      params,
+    });
+  },
+  startHearing: ({ hearing }, params) => {
+    return Request({
+      url: Urls.dristi.updateHearings,
+      useCache: false,
+      userService: false,
+      data: { hearing: { ...hearing, workflow: { action: "START" } } },
+      params,
+    });
+  },
+  createHearings: (data, params) => {
+    return Request({
+      url: Urls.dristi.createHearings,
+      useCache: false,
+      userService: false,
+      data,
+      params,
+    });
+  },
   searchOrders: (data, params) => {
     return Request({
       url: Urls.dristi.ordersSearch,
@@ -136,14 +163,16 @@ export const DRISTIService = {
       params,
     });
   },
-  createDemand: (data, params) =>
+
+  customApiService: (url, data, params, useCache = false, userService = true) =>
     Request({
-      url: Urls.dristi.demandCreate,
-      useCache: false,
-      userService: false,
+      url: url,
+      useCache: useCache,
+      userService: true,
       data,
       params,
     }),
+  //Solutions
   eSignService: (data, params) => {
     return Request({
       url: Urls.dristi.eSign,
@@ -157,7 +186,7 @@ export const DRISTIService = {
     Request({
       url: Urls.dristi.demandCreate,
       useCache: false,
-      userService: true,
+      userService: false,
       data,
       params,
     }),
@@ -190,6 +219,14 @@ export const DRISTIService = {
       url: Urls.dristi.searchBill,
       useCache: false,
       userService: true,
+      data,
+      params,
+    }),
+  fetchBillFileStoreId: (data, params) =>
+    Request({
+      url: Urls.dristi.billFileStoreId,
+      useCache: false,
+      userService: false,
       data,
       params,
     }),

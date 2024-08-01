@@ -50,7 +50,11 @@ function AdmissionActionModal({
   tenantId,
   // hearingDetails,
   handleScheduleNextHearing,
+  disabled,
   filingNumber,
+  isCaseAdmitted = false,
+  caseAdmittedSubmit = () => {},
+  caseAdmitLoader,
 }) {
   const history = useHistory();
   const [showErrorToast, setShowErrorToast] = useState(false);
@@ -112,7 +116,7 @@ function AdmissionActionModal({
   const [selectedChip, setSelectedChip] = React.useState(null);
 
   const setPurposeValue = (value, input) => {
-    setScheduleHearingParam({ ...scheduleHearingParams, purpose: value });
+    setScheduleHearingParam({ ...scheduleHearingParams, purpose: isCaseAdmitted ? value : value.code });
   };
 
   const showCustomDateModal = () => {
@@ -168,6 +172,7 @@ function AdmissionActionModal({
           headerBarMain={<Heading label={t(stepItems[1].headModal)} />}
           actionSaveLabel={t(stepItems[1]?.submitText)}
           headerBarEnd={<CloseBtn onClick={() => setShowModal(false)} />}
+          isDisabled={caseAdmitLoader}
           actionSaveOnSubmit={(props) => handleAdmitCase(props)}
         >
           <CardText>{t(stepItems[1]?.text)}</CardText>
@@ -195,6 +200,9 @@ function AdmissionActionModal({
             setScheduleHearingParam={setScheduleHearingParam}
             submitModalInfo={submitModalInfo}
             handleClickDate={handleClickDate}
+            disabled={disabled}
+            isCaseAdmitted={isCaseAdmitted}
+            caseAdmittedSubmit={caseAdmittedSubmit}
           />
         </Modal>
       )}

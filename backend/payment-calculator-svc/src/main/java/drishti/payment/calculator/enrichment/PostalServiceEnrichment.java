@@ -14,7 +14,7 @@ public class PostalServiceEnrichment {
 
         RequestInfo requestInfo = request.getRequestInfo();
         AuditDetails auditData = getAuditDetailsFromRqstInfo(requestInfo);
-        request.getPostalServices().forEach((postal) -> {
+        request.getPostalServices().forEach(postal -> {
             postal.setPostalServiceId(UUID.randomUUID().toString());
             postal.setRowVersion(1);
 
@@ -27,7 +27,7 @@ public class PostalServiceEnrichment {
 
         RequestInfo requestInfo = request.getRequestInfo();
 
-        request.getPostalServices().forEach((application) -> {
+        request.getPostalServices().forEach(application -> {
             Long currentTime = System.currentTimeMillis();
             application.getAuditDetails().setLastModifiedTime(currentTime);
             application.getAuditDetails().setLastModifiedBy(requestInfo.getUserInfo().getUuid());

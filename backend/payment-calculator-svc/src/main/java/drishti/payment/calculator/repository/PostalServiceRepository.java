@@ -29,11 +29,12 @@ public class PostalServiceRepository {
     }
 
 
-    public List<PostalService> getPostalService(PostalServiceSearchCriteria criteria, Integer limit, Integer offset) {
+    public List<PostalService> getPostalService(PostalServiceSearchCriteria criteria) {
         List<Object> preparedStmtList = new ArrayList<>();
-        String query = queryBuilder.getPostalServiceQuery(criteria, preparedStmtList, limit, offset);
+        List<Integer> preparedStmtArgsList = new ArrayList<>();
+        String query = queryBuilder.getPostalServiceQuery(criteria, preparedStmtList, preparedStmtArgsList);
         log.debug("Final query: " + query);
-        return jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
+        return jdbcTemplate.query(query, preparedStmtList.toArray(), preparedStmtArgsList.stream().mapToInt(Integer::intValue).toArray() ,  rowMapper);
     }
 
 

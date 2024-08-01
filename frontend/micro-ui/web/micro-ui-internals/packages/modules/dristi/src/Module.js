@@ -45,12 +45,15 @@ import CustomCaseInfoDiv from "./components/CustomCaseInfoDiv";
 import DocViewerWrapper from "./pages/employee/docViewerWrapper";
 import CustomSortComponent from "./components/CustomSortComponent";
 import CustomErrorTooltip from "./components/CustomErrorTooltip";
+import Button from "./components/Button";
 import MultiUploadWrapper from "./components/MultiUploadWrapper";
+import CustomCopyTextDiv from "./components/CustomCopyTextDiv";
+import UploadSignatureModal from "./components/UploadSignatureModal";
 
 export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   const { path } = useRouteMatch();
   const history = useHistory();
-  const moduleCode = ["DRISTI", "CASE"];
+  const moduleCode = ["DRISTI", "CASE", "ORDERS"];
   const tenantID = tenants?.[0]?.code?.split(".")?.[0];
   const language = Digit.StoreData.getCurrentLanguage();
   const { isLoading } = Digit.Services.useStore({ stateCode, moduleCode, language });
@@ -74,7 +77,7 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   }
   return (
     <ToastProvider>
-      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants}></EmployeeApp>
+      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} result={result}></EmployeeApp>
     </ToastProvider>
   );
 };
@@ -111,13 +114,17 @@ const componentsToRegister = {
   ScrutinyInfo,
   AdvocateNameDetails,
   CustomRadioInfoComponent,
-  MODAL: Modal,
-  CUSTOMCASEINFODIV: CustomCaseInfoDiv,
-  DOCVIEWERWRAPPER: DocViewerWrapper,
-  CUSTOMERRORTOOLTIP: CustomErrorTooltip,
+  Modal,
+  CustomCaseInfoDiv,
+  CustomErrorTooltip,
   CustomSortComponent,
+  CustomButton: Button,
   DocViewerWrapper,
   MultiUploadWrapper,
+  Button,
+  CustomCopyTextDiv,
+  SelectCustomNote,
+  UploadSignatureModal,
 };
 
 const overrideHooks = () => {

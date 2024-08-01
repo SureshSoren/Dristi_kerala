@@ -32,7 +32,7 @@ public class IPostFeesCalculation implements SummonPayment {
         IPostConfigParams iPostFeesDefaultData = iPostUtil.getIPostFeesDefaultData(requestInfo, criteria.getTenantId());
 
         PostalServiceSearchCriteria searchCriteria = PostalServiceSearchCriteria.builder().pincode(criteria.getReceiverPincode()).build();
-        List<PostalService> postalServices = repository.getPostalService(searchCriteria, null, null);
+        List<PostalService> postalServices = repository.getPostalService(searchCriteria);
         if(postalServices.isEmpty()){
             throw new CustomException("POSTAL_SERVICE_NOT_FOUND", "Pincode not found for speed post fee calculation");
         }
@@ -63,15 +63,12 @@ public class IPostFeesCalculation implements SummonPayment {
         breakDowns.add(ipost);
 
         double totalAmount = iPostFeeWithoutGST + gstPercentage * iPostFeeWithoutGST + courtFees + envelopeFee;
-        Calculation result = Calculation.builder()
+        return Calculation.builder()
                 .applicationId(criteria.getSummonId())
                 .totalAmount(Math.round(totalAmount * 100.0) / 100.0)
                 .tenantId(criteria.getTenantId())
                 .breakDown(breakDowns)
                 .build();
-
-
-        return result;
     }
 
     private Double calculateCourtFees(IPostConfigParams iPostFeesDefaultData) {
@@ -96,10 +93,7 @@ public class IPostFeesCalculation implements SummonPayment {
         Double speedPostFee = getSpeedPostFee(totalWeight, distance, speedPost);
 
         // Total Fee before GST
-        Double totalFeeBeforeGST = totalWeight + totalPrintingFee + speedPostFee + businessFee;
-
-        // Total Fee without GST
-        return totalFeeBeforeGST;
+        return totalWeight + totalPrintingFee + speedPostFee + businessFee;
     }
 
 

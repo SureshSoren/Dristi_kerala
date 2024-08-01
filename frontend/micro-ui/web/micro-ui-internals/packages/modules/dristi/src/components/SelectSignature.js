@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import SignatureCard from "./SignatureCard";
 import { DRISTIService } from "../services";
-import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
+import isEqual from "lodash/isEqual";
 
 function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
   const inputs = useMemo(
@@ -18,14 +18,44 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
     [config?.populators?.inputs]
   );
 
-  const storedObj = useMemo(() => localStorage.getItem("signStatus"), []);
-  const parsedObj = JSON.parse(storedObj) || [];
+  const isSignSuccess = useMemo(() => localStorage.getItem("isSignSuccess"), []);
+  const storedESignObj = useMemo(() => localStorage.getItem("signStatus"), []);
+  const parsedESignObj = JSON.parse(storedESignObj || "{}");
+  const storedData = localStorage.getItem("formData");
+  const parsedObj = JSON.parse(storedData);
+  let allKeys = Object.keys(parsedESignObj);
+
+  function setValue(configkey, value, input) {
+    if (Array.isArray(input)) {
+      onSelect(configkey, {
+        ...formData[configkey],
+        ...input.reduce((res, curr) => {
+          res[curr] = value[curr];
+          return res;
+        }, {}),
+      });
+    } else onSelect(configkey, { ...formData[configkey], [input]: value });
+  }
+
+  useEffect(() => {
+    if (isSignSuccess === "success") {
+      let newobj = structuredClone(parsedObj);
+      allKeys.forEach((key) => {
+        newobj[key] = { ...parsedObj[key], ...parsedESignObj[key] };
+      });
+
+      Object.keys(newobj).forEach((key) => {
+        newobj[key] && !isEqual(formData[key], newobj[key]) && setValue(key, newobj[key], Object.keys(newobj[key]));
+      });
+      localStorage.removeItem("signStatus");
+      localStorage.removeItem("isSignSuccess");
+      localStorage.removeItem("formdata");
+    }
+  }, [isSignSuccess, formData]);
   const handleAadharClick = async (data, name) => {
     try {
-      const newSignStatuses = [...parsedObj, { name: name, isSigned: true }];
-      localStorage.setItem("signStatus", JSON.stringify(newSignStatuses));
-      localStorage.setItem("isSignSuccess", "success");
-
+      localStorage.setItem("signStatus", JSON.stringify({ [config.key]: { [name]: [true] } }));
+      localStorage.setItem("formData", JSON.stringify(formData));
       const eSignResponse = await DRISTIService.eSignService({
         ESignParameter: {
           uidToken: "3456565",
