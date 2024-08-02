@@ -8,9 +8,14 @@ on:
   workflow_dispatch:
 
 jobs:
+  Intro:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Introduction
+        run: echo "Image build for Solutions Started"
+
   Workflow_Trigger:
     runs-on: ubuntu-latest
-    needs: image-build
     steps:
       - name: Trigger Deployment Pipeline for Solutions Dev
         run: |

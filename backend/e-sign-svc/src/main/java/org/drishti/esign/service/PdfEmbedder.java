@@ -101,7 +101,7 @@ public class PdfEmbedder {
                 // handle error case
             }
 
-//            stamper.close();
+
             bos.close();
 
             return new ByteArrayMultipartFile("signedDoc.pdf", bos.toByteArray());

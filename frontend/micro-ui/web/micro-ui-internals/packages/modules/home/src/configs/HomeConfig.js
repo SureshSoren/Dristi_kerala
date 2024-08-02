@@ -122,7 +122,7 @@ export const TabLitigantSearchConfig = {
       label: "All",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {},
         requestBody: {
           tenantId: "pg",
@@ -131,7 +131,7 @@ export const TabLitigantSearchConfig = {
         masterName: "commonUiConfig",
         moduleName: "homeLitigantUiConfig",
         minParametersForSearchForm: 0,
-        tableFormJsonPath: "requestParam",
+        tableFormJsonPath: "requestBody",
         filterFormJsonPath: "requestBody",
         searchFormJsonPath: "requestBody",
       },
@@ -224,6 +224,7 @@ export const TabLitigantSearchConfig = {
               {
                 label: "Filing Date",
                 jsonPath: "filingDate",
+                additionalCustomization: true,
               },
             ],
 
@@ -238,7 +239,7 @@ export const TabLitigantSearchConfig = {
       label: "Drafts",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {},
         requestBody: {
           tenantId: "pg",
@@ -251,7 +252,7 @@ export const TabLitigantSearchConfig = {
         masterName: "commonUiConfig",
         moduleName: "homeLitigantUiConfig",
         minParametersForSearchForm: 0,
-        tableFormJsonPath: "requestParam",
+        tableFormJsonPath: "requestBody",
         filterFormJsonPath: "requestBody",
         searchFormJsonPath: "requestBody",
       },
@@ -275,6 +276,24 @@ export const TabLitigantSearchConfig = {
                 showIcon: true,
                 icon: "UpDownArrowIcon",
                 populators: {},
+              },
+              {
+                label: "Case Type",
+                isMandatory: false,
+                key: "caseType",
+                type: "dropdown",
+                disable: false,
+                populators: {
+                  name: "caseType",
+                  options: ["NIA S138"],
+                  styles: {
+                    maxWidth: "200px",
+                    minWidth: "150px",
+                  },
+                  optionsCustomStyle: {
+                    overflowX: "hidden",
+                  },
+                },
               },
               {
                 label: "Case ID",
@@ -333,7 +352,7 @@ export const TabLitigantSearchConfig = {
       label: "Closed",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {},
         requestBody: {
           tenantId: "pg",
@@ -342,7 +361,7 @@ export const TabLitigantSearchConfig = {
         masterName: "commonUiConfig",
         moduleName: "homeLitigantUiConfig",
         minParametersForSearchForm: 0,
-        tableFormJsonPath: "requestParam",
+        tableFormJsonPath: "requestBody",
         filterFormJsonPath: "requestBody",
         searchFormJsonPath: "requestBody",
       },
@@ -355,6 +374,24 @@ export const TabLitigantSearchConfig = {
             minReqFields: 0,
             defaultValues: defaultSearchValues,
             fields: [
+              {
+                label: "Case Type",
+                isMandatory: false,
+                key: "caseType",
+                type: "dropdown",
+                disable: false,
+                populators: {
+                  name: "caseType",
+                  options: ["NIA S138"],
+                  styles: {
+                    maxWidth: "200px",
+                    minWidth: "150px",
+                  },
+                  optionsCustomStyle: {
+                    overflowX: "hidden",
+                  },
+                },
+              },
               {
                 label: "Case ID",
                 type: "text",
@@ -416,6 +453,7 @@ export const TabLitigantSearchConfig = {
               {
                 label: "Filing Date",
                 jsonPath: "filingDate",
+                additionalCustomization: true,
               },
             ],
 
@@ -438,20 +476,20 @@ export const TabJudgeSearchConfig = {
       label: "All",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {},
         requestBody: {
           tenantId: "pg",
           criteria: [
             {
-              stage: "Pre-Trial",
+              stage: "",
             },
           ],
         },
         masterName: "commonUiConfig",
         moduleName: "homeJudgeUIConfig",
         minParametersForSearchForm: 0,
-        tableFormJsonPath: "requestParam",
+        tableFormJsonPath: "requestBody",
         filterFormJsonPath: "requestBody",
         searchFormJsonPath: "requestBody",
       },
@@ -543,6 +581,7 @@ export const TabJudgeSearchConfig = {
               {
                 label: "Filing Date",
                 jsonPath: "filingDate",
+                additionalCustomization: true,
               },
             ],
 
@@ -557,7 +596,7 @@ export const TabJudgeSearchConfig = {
       label: "Ongoing",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {},
         requestBody: {
           tenantId: "pg",
@@ -570,7 +609,7 @@ export const TabJudgeSearchConfig = {
         masterName: "commonUiConfig",
         moduleName: "homeJudgeUIConfig",
         minParametersForSearchForm: 0,
-        tableFormJsonPath: "requestParam",
+        tableFormJsonPath: "requestBody",
         filterFormJsonPath: "requestBody",
         searchFormJsonPath: "requestBody",
       },
@@ -662,6 +701,7 @@ export const TabJudgeSearchConfig = {
               {
                 label: "Filing Date",
                 jsonPath: "filingDate",
+                additionalCustomization: true,
               },
             ],
 
@@ -676,7 +716,7 @@ export const TabJudgeSearchConfig = {
       label: "Registered",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {},
         requestBody: {
           tenantId: "pg",
@@ -689,7 +729,7 @@ export const TabJudgeSearchConfig = {
         masterName: "commonUiConfig",
         moduleName: "homeJudgeUIConfig",
         minParametersForSearchForm: 0,
-        tableFormJsonPath: "requestParam",
+        tableFormJsonPath: "requestBody",
         filterFormJsonPath: "requestBody",
         searchFormJsonPath: "requestBody",
       },
@@ -797,6 +837,7 @@ export const TabJudgeSearchConfig = {
               {
                 label: "Filing Date",
                 jsonPath: "filingDate",
+                additionalCustomization: true,
               },
             ],
 
@@ -814,7 +855,7 @@ export const TabJudgeSearchConfig = {
       label: "Closed",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {},
         requestBody: {
           tenantId: "pg",
@@ -827,7 +868,7 @@ export const TabJudgeSearchConfig = {
         masterName: "commonUiConfig",
         moduleName: "homeJudgeUIConfig",
         minParametersForSearchForm: 0,
-        tableFormJsonPath: "requestParam",
+        tableFormJsonPath: "requestBody",
         filterFormJsonPath: "requestBody",
         searchFormJsonPath: "requestBody",
       },
@@ -934,6 +975,7 @@ export const TabJudgeSearchConfig = {
               {
                 label: "Filing Date",
                 jsonPath: "filingDate",
+                additionalCustomization: true,
               },
             ],
 
@@ -959,7 +1001,7 @@ export const TabFSOSearchConfig = {
       label: "All",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {},
         requestBody: {
           tenantId: "pg",
@@ -972,7 +1014,7 @@ export const TabFSOSearchConfig = {
         masterName: "commonUiConfig",
         moduleName: "homeFSOUiConfig",
         minParametersForSearchForm: 0,
-        tableFormJsonPath: "requestParam",
+        tableFormJsonPath: "requestBody",
         filterFormJsonPath: "requestBody",
         searchFormJsonPath: "requestBody",
       },
@@ -1097,7 +1139,7 @@ export const TabFSOSearchConfig = {
       label: "Scrutiny Due",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {},
         requestBody: {
           tenantId: "pg",
@@ -1110,7 +1152,7 @@ export const TabFSOSearchConfig = {
         masterName: "commonUiConfig",
         moduleName: "homeFSOUiConfig",
         minParametersForSearchForm: 0,
-        tableFormJsonPath: "requestParam",
+        tableFormJsonPath: "requestBody",
         filterFormJsonPath: "requestBody",
         searchFormJsonPath: "requestBody",
       },
@@ -1283,6 +1325,15 @@ export const rolesToConfigMapping = [
   },
 ];
 
+export const taskTypes = [
+  { code: "case", name: "Case" },
+  { code: "hearing", name: "Hearing" },
+  { code: "order", name: "Order" },
+  { code: "order-judgement", name: "Order of Judgement" },
+  { code: "async-voluntary-submission-services", name: "Voluntary Submission" },
+  { code: "asynsubmissionwithresponse", name: "Submission With Response" },
+  { code: "asyncsubmissionwithoutresponse", name: "Submission Without Response" },
+];
 export const pendingTaskCaseActions = {
   PAYMENT_PENDING: {
     actorName: ["LITIGANT/ADVOCATE"],
@@ -1318,30 +1369,109 @@ export const pendingTaskCaseActions = {
       ],
     },
   },
-  SCHEDULE_ADMISSION_HEARING: {
-    actorName: ["JUDGE"],
-    actionName: "Schedule admission hearing",
-    redirectDetails: {
-      url: "/orders/generate-orders",
-      params: [{ key: "filingNumber", value: "filingNumber" }],
-    },
-  },
   ADMISSION_HEARING_SCHEDULED: {
     actorName: ["JUDGE"],
     actionName: "Admission hearing scheduled - Admit Case",
     redirectDetails: {
-      url: "/orders/generate-orders",
-      params: [{ key: "filingNumber", value: "filingNumber" }],
+      url: "/dristi/admission",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "caseId", value: "id" },
+      ],
     },
   },
   CASE_ADMITTED: {
     actorName: ["JUDGE"],
     actionName: "Schedule admission hearing",
     redirectDetails: {
-      url: "/orders/generate-orders",
-      params: [{ key: "filingNumber", value: "filingNumber" }],
+      url: "/dristi/admission",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "caseId", value: "id" },
+      ],
     },
   },
 };
 
-export const pendingTaskSubmissionActions = {};
+export const pendingTaskHearingActions = {};
+
+export const pendingTaskOrderActions = {
+  SAVE_DRAFT: {
+    actorName: ["JUDGE"],
+    actionName: "Schedule admission hearing",
+    customFunction: "handleCreateOrder",
+    redirectDetails: {
+      url: "/orders/generate-orders",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "applicationNumber", value: "referenceId" },
+      ],
+    },
+  },
+};
+
+export const pendingTaskOrderOfJudgementActions = {};
+
+export const pendingTaskVoluntarySubmissionActions = {
+  MAKE_PAYMENT_SUBMISSION: {
+    actorName: ["LITIGANT/ADVOCATE"],
+    actionName: "Payment for Submission",
+    redirectDetails: {
+      url: "/submissions/submissions-create",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "applicationNumber", value: "referenceId" },
+      ],
+    },
+  },
+};
+
+export const pendingTaskSubmissionWithResponseActions = {
+  CREATE_SUBMISSION: {
+    actorName: ["LITIGANT/ADVOCATE"],
+    actionName: "Mandatory Submission of Documents",
+    customFunction: "handleCreateOrder",
+    redirectDetails: {
+      url: "/submissions/submissions-create",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "orderNumber", value: "referenceId" },
+      ],
+    },
+  },
+  MAKE_PAYMENT_SUBMISSION: {
+    actorName: ["LITIGANT/ADVOCATE"],
+    actionName: "Payment for Submission",
+    redirectDetails: {
+      url: "/submissions/submissions-create",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "applicationNumber", value: "referenceId" },
+      ],
+    },
+  },
+};
+
+export const pendingTaskSubmissionWithoutResponseActions = {
+  MAKE_PAYMENT_SUBMISSION: {
+    actorName: ["LITIGANT/ADVOCATE"],
+    actionName: "Payment for Submission",
+    redirectDetails: {
+      url: "/submissions/submissions-create",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "applicationNumber", value: "referenceId" },
+      ],
+    },
+  },
+};
+
+export const selectTaskType = {
+  case: pendingTaskCaseActions,
+  hearing: pendingTaskHearingActions,
+  order: pendingTaskOrderActions,
+  "order-judgement": pendingTaskOrderOfJudgementActions,
+  "async-voluntary-submission-services": pendingTaskVoluntarySubmissionActions,
+  asynsubmissionwithresponse: pendingTaskSubmissionWithResponseActions,
+  asyncsubmissionwithoutresponse: pendingTaskSubmissionWithoutResponseActions,
+};

@@ -4,11 +4,13 @@ import { useTranslation } from "react-i18next";
 import OrderReviewModal from "../../../../../orders/src/pageComponents/OrderReviewModal";
 import useGetOrders from "../../../hooks/dristi/useGetOrders";
 import { CustomArrowOut } from "../../../icons/svgIndex";
+import { useHistory } from "react-router-dom";
 
-const OrderDrafts = ({ caseData }) => {
+const OrderDrafts = ({ caseData, setOrderModal }) => {
   const { t } = useTranslation();
+  const history = useHistory();
   const filingNumber = caseData.filingNumber;
-  const cnr = caseData.cnrNumber;
+  const caseId = caseData.id;
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentOrder, setCurrentOrder] = useState({});
@@ -21,8 +23,8 @@ const OrderDrafts = ({ caseData }) => {
       },
     },
     {},
-    cnr + filingNumber,
-    true
+    filingNumber,
+    filingNumber
   );
 
   return ordersRes?.list?.filter((order) => order.status === "DRAFT_IN_PROGRESS").length ? (
@@ -33,32 +35,46 @@ const OrderDrafts = ({ caseData }) => {
           marginTop: "10px",
         }}
       >
-        <div
-          style={{
-            fontWeight: 700,
-            fontSize: "24px",
-            lineHeight: "28.8px",
-            color: "#231F20",
-          }}
-        >
-          Drafts ({ordersRes?.list?.filter((order) => order.status === "DRAFT_IN_PROGRESS").length})
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: "24px",
+              lineHeight: "28.8px",
+              color: "#231F20",
+            }}
+          >
+            Drafts ({ordersRes?.list?.filter((order) => order.status === "DRAFT_IN_PROGRESS").length})
+          </div>
+          <div
+            onClick={() => setOrderModal(ordersRes?.list?.filter((order) => order.status === "DRAFT_IN_PROGRESS"))}
+            style={{ cursor: "pointer", fontWeight: 500, fontSize: "16px", lineHeight: "20px", color: "#0A5757" }}
+          >
+            {t("VIEW_ALL_LINK")}
+          </div>
         </div>
         <div style={{ display: "flex", gap: "16px", marginTop: "10px" }}>
           {ordersRes?.list
             ?.filter((order) => order.status === "DRAFT_IN_PROGRESS")
-            .slice(0, 5)
+            .slice(0, 3)
             .map((order) => (
               <div
                 style={{
                   padding: "12px 16px",
                   borderRadius: "4px",
-                  width: "300px",
+                  width: "33%",
                   cursor: "pointer",
                   background: "#ECF3FD66",
                 }}
                 onClick={() => {
-                  setShowReviewModal(true);
                   setCurrentOrder(order);
+                  history.push(
+                    `/${window.contextPath}/employee/orders/generate-orders?filingNumber=${filingNumber}&orderNumber=${order.orderNumber}`,
+                    {
+                      caseId: caseId,
+                      tab: "Orders",
+                    }
+                  );
                 }}
               >
                 <div style={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
@@ -70,8 +86,7 @@ const OrderDrafts = ({ caseData }) => {
                       color: "#101828",
                     }}
                   >
-                    Order for {order?.orderType.charAt(0).toUpperCase()}
-                    {order?.orderType.slice(1).toLowerCase()}
+                    {t(`ORDER_TYPE_${order?.orderType?.toUpperCase()}`)}
                   </div>
                   <CustomArrowOut />
                 </div>

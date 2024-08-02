@@ -39,6 +39,8 @@ public class ServiceConstants {
 	public static final String CITIZEN_UPPER = "CITIZEN";
 	public static final String CITIZEN_LOWER = "Citizen";
 	public static final String USER = "user";
+	public static final String RESPONDENT_PRIMARY = "respondent.primary";
+	public static final String COMPLAINANT_PRIMARY = "complainant.primary";
 
     public static final String CASE_CREATE_EXCEPTION = "CASE_CREATE_EXCEPTION";
 
@@ -55,6 +57,7 @@ public class ServiceConstants {
 	public static final String CREATE_CASE_ERR = "CREATE_CASE_ERR";
 	public static final String SEARCH_CASE_ERR = "CASE_NOT_FOUND";
 	public static final String UPDATE_CASE_ERR = "UPDATE_CASE_ERR";
+	public static final String ADD_WITNESS_TO_CASE_ERR = "ADD_WITNESS_TO_CASE_ERR";
 
 	public static final String CREATE_WITNESS_ERR = "CREATE_WITNESS_ERR";
 	public static final String SEARCH_WITNESS_ERR = "WITNESS_NOT_FOUND";
@@ -78,19 +81,11 @@ public class ServiceConstants {
 	public static final String MDMS_DATA_NOT_FOUND = "MDMS_DATA_NOT_FOUND";
 	public static final String INVALID_ADVOCATE_ID = "INVALID_ADVOCATE_ID";
 	public static final String INVALID_CASE_ID = "INVALID_CASE_ID";
+	public static final String INVALID_CASE = "INVALID_CASE";
 	public static final String INVALID_FILESTORE_ID = "INVALID_FILESTORE_ID";
 	public static final String REGISTERED_STATUS ="REGISTERED";
 	public static final String INWORKFLOW_STATUS ="INWORKFLOW";
     public static final String INVALID_LINKEDCASE_ID = "INVALID_LINKEDCASE_ID";
-
-	public static final String CASE_SUBMISSION = "CASE_SUBMISSION";
-	public static final String CASE_FILED = "CASE_FILED";
-	public static final String SCRUTINY_COMPLETE_CASE_REGISTERED = "SCRUTINY_COMPLETE_CASE_REGISTERED";
-	public static final String EFILING_ERRORS = "EFILING_ERRORS";
-	public static final String ERRORS_IDENTIFIED_CASE_FILE = "ERRORS_IDENTIFIED_CASE_FILE";
-	public static final String ADMISSION_HEARING_SCHEDULED = "ADMISSION_HEARING_SCHEDULED";
-	public static final String CASE_ADMITTED = "CASE_ADMITTED";
-	public static final String HEARING_REJECTED = "HEARING_REJECTED";
 
 	public static final String INDIVIDUAL_UTILITY_EXCEPTION = "INDIVIDUAL_UTILITY_EXCEPTION";
 
@@ -99,7 +94,7 @@ public class ServiceConstants {
 	public static final String DELETE_DRAFT_WORKFLOW_ACTION = "DELETE_DRAFT";
 	public static final Long TAX_PERIOD_FROM = 1680287400000l;
 	public static final Long TAX_PERIOD_TO = 1711909799000l;
-	public static final BigDecimal TAX_AMOUNT = BigDecimal.valueOf(4.00);
+	public static final BigDecimal TAX_AMOUNT = BigDecimal.valueOf(2000.00);
 	public static final String TAX_HEADMASTER_CODE = "CASE_ADVANCE_CARRYFORWARD";
 	public static final String CREATE_DEMAND_STATUS = "PAYMENT_PENDING";
 	public static final String CASE_ADMIT_STATUS = "CASE_ADMITTED";
@@ -114,10 +109,6 @@ public class ServiceConstants {
 	public static final String INVALID_DOCUMENT_DETAILS = "Invalid document details";
 	public static final String INVALID_ADVOCATE_DETAILS = "Invalid advocate details";
 
-	public static final String HIGH_COURT_LOCALIZATION_CODE = "HIGH_COURT_KERALA";
-	public static final String NOTIFICATION_ENG_LOCALE_CODE = "en_IN";
-	public static final String NOTIFICATION_MODULE_CODE = "notification";
-	public static final String NOTIFICATION_LOCALIZATION_CODES_JSONPATH = "$.messages.*.code";
+	public static final String EMPLOYEE = "EMPLOYEE";
 
-	public static final String NOTIFICATION_LOCALIZATION_MSGS_JSONPATH = "$.messages.*.message";
 }

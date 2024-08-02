@@ -1,6 +1,7 @@
 package org.drishti.esign.cipher;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -14,9 +15,10 @@ import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-//import com.itextpdf.text.Element;
+
 
 @Component
+@Slf4j
 public class Encryption {
 
     @Autowired
@@ -25,7 +27,7 @@ public class Encryption {
     private String getKey(String filename) throws IOException {
         // Read key from file
 
-        String strKeyPEM = "";
+        StringBuilder strKeyPEM = new StringBuilder();
         Resource resource = resourceLoader.getResource("classpath:"+filename);
         InputStream is = resource.getInputStream();
 
@@ -33,10 +35,10 @@ public class Encryption {
 
         String line;
         while ((line = br.readLine()) != null) {
-            strKeyPEM += line + "\n";
+            strKeyPEM.append(line).append("\n");
         }
         br.close();
-        return strKeyPEM;
+        return strKeyPEM.toString();
     }
 
     /**
@@ -47,7 +49,7 @@ public class Encryption {
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    //public  RSAPrivateKey getPrivateKey(String filename) throws IOException, GeneralSecurityException {
+
     public PrivateKey getPrivateKey(String filename) throws IOException, GeneralSecurityException {
         String privateKeyPEM = getKey(filename);
         return getPrivateKeyFromString(privateKeyPEM);
@@ -58,10 +60,9 @@ public class Encryption {
      *
      * @param key PEM Private Key
      * @return RSA Private Key
-     * @throws IOException
      * @throws GeneralSecurityException
      */
-    public PrivateKey getPrivateKeyFromString(String key) throws IOException, GeneralSecurityException {
+    public PrivateKey getPrivateKeyFromString(String key) throws GeneralSecurityException {
         String privateKeyPEM = key;
 
 
@@ -97,14 +98,13 @@ public class Encryption {
      *
      * @param key PEM Public Key
      * @return RSA Public Key
-     * @throws IOException
      * @throws GeneralSecurityException
      */
-    public PublicKey getPublicKeyFromString(String key) throws IOException, GeneralSecurityException {
+    public PublicKey getPublicKeyFromString(String key) throws GeneralSecurityException {
         String publicKeyPEM = key;
 
         publicKeyPEM = publicKeyPEM.substring(28, publicKeyPEM.indexOf("\n-----END CERTIFICATE-----"));
-        System.out.println(publicKeyPEM);
+        log.info(publicKeyPEM);
         // Base64 decode data
         publicKeyPEM = publicKeyPEM.trim();
         java.security.Security.addProvider(
@@ -117,7 +117,7 @@ public class Encryption {
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePublic(spec);
     }
-
+    String charSetName = "UTF-8";
     /**
      * @param privateKey
      * @param message
@@ -130,8 +130,8 @@ public class Encryption {
     public String sign(PrivateKey privateKey, String message) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, UnsupportedEncodingException {
         Signature sign = Signature.getInstance("SHA1withRSA");
         sign.initSign(privateKey);
-        sign.update(message.getBytes("UTF-8"));
-        return new String(Base64.encodeBase64(sign.sign()), "UTF-8");
+        sign.update(message.getBytes(charSetName));
+        return new String(Base64.encodeBase64(sign.sign()), charSetName);
     }
 
     /**
@@ -147,8 +147,8 @@ public class Encryption {
     public boolean verify(PublicKey publicKey, String message, String signature) throws SignatureException, NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException {
         Signature sign = Signature.getInstance("SHA1withRSA");
         sign.initVerify(publicKey);
-        sign.update(message.getBytes("UTF-8"));
-        return sign.verify(Base64.decodeBase64(signature.getBytes("UTF-8")));
+        sign.update(message.getBytes(charSetName));
+        return sign.verify(Base64.decodeBase64(signature.getBytes(charSetName)));
     }
 
     /**
@@ -163,13 +163,13 @@ public class Encryption {
     public String encrypt(String rawText, PrivateKey privateKey) throws IOException, GeneralSecurityException {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, privateKey);
-        return Base64.encodeBase64String(cipher.doFinal(rawText.getBytes("UTF-8")));
+        return Base64.encodeBase64String(cipher.doFinal(rawText.getBytes(charSetName)));
     }
 
     public String encrypt1(Document doc, PrivateKey privateKey) throws IOException, GeneralSecurityException {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, privateKey);
-        return Base64.encodeBase64String(cipher.doFinal(doc.toString().getBytes("UTF-8")));
+        return Base64.encodeBase64String(cipher.doFinal(doc.toString().getBytes(charSetName)));
     }
 
     /**
@@ -184,6 +184,6 @@ public class Encryption {
     public String decrypt(String cipherText, PublicKey publicKey) throws IOException, GeneralSecurityException {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, publicKey);
-        return new String(cipher.doFinal(Base64.decodeBase64(cipherText)), "UTF-8");
+        return new String(cipher.doFinal(Base64.decodeBase64(cipherText)), charSetName);
     }
 }

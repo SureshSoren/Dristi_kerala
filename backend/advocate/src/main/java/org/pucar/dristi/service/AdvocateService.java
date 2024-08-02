@@ -3,14 +3,15 @@ package org.pucar.dristi.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
-import org.egov.common.models.individual.Individual;
 import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.enrichment.AdvocateRegistrationEnrichment;
 import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.repository.AdvocateRepository;
 import org.pucar.dristi.validators.AdvocateRegistrationValidator;
-import org.pucar.dristi.web.models.*;
+import org.pucar.dristi.web.models.Advocate;
+import org.pucar.dristi.web.models.AdvocateRequest;
+import org.pucar.dristi.web.models.AdvocateSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -30,7 +31,6 @@ public class AdvocateService {
     private final AdvocateRepository advocateRepository;
     private final Producer producer;
     private final Configuration config;
-    private final EmailNotificationService emailNotificationService;
 
     @Autowired
     public AdvocateService(
@@ -39,14 +39,13 @@ public class AdvocateService {
             WorkflowService workflowService,
             AdvocateRepository advocateRepository,
             Producer producer,
-            Configuration config, EmailNotificationService emailNotificationService) {
+            Configuration config) {
         this.validator = validator;
         this.enrichmentUtil = enrichmentUtil;
         this.workflowService = workflowService;
         this.advocateRepository = advocateRepository;
         this.producer = producer;
         this.config = config;
-        this.emailNotificationService = emailNotificationService;
     }
 
     public Advocate createAdvocate(AdvocateRequest body) {
@@ -64,7 +63,6 @@ public class AdvocateService {
             // Push the application to the topic for persister to listen and persist
 
             producer.push(config.getAdvocateCreateTopic(), body);
-
 
             return body.getAdvocate();
         } catch (CustomException e) {
@@ -169,13 +167,6 @@ public class AdvocateService {
             if (APPLICATION_ACTIVE_STATUS.equalsIgnoreCase(advocateRequest.getAdvocate().getStatus())) {
                 //setting true once application approved
                 advocateRequest.getAdvocate().setIsActive(true);
-            }
-            if(advocateRequest.getAdvocate().getWorkflow().getAction().equalsIgnoreCase("APPROVE")){
-                IndividualSearchRequest individualSearchRequest = new IndividualSearchRequest();
-                individualSearchRequest.setRequestInfo(advocateRequest.getRequestInfo());
-                IndividualSearch individual = IndividualSearch.builder().individualId(advocateRequest.getAdvocate().getIndividualId()).build();
-                individualSearchRequest.setIndividual(individual);
-                emailNotificationService.sendEmailNotification(individualSearchRequest, false);
             }
 
             producer.push(config.getAdvocateUpdateTopic(), advocateRequest);

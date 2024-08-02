@@ -10,6 +10,7 @@ import drishti.payment.calculator.web.models.PostalService;
 import drishti.payment.calculator.web.models.PostalServiceRequest;
 import drishti.payment.calculator.web.models.PostalServiceSearchRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class PostalPinService {
     private final Producer producer;
     private final Configuration config;
 
+    @Autowired
     public PostalPinService(PostalServiceRepository repository, PostalServiceValidator validator, PostalServiceEnrichment enrichment, Producer producer, Configuration config) {
         this.repository = repository;
         this.validator = validator;
@@ -33,28 +35,29 @@ public class PostalPinService {
     }
 
     public List<PostalService> create(PostalServiceRequest request) {
-
+        log.info("operation=create, postal={}", request.getPostalServices());
         validator.validatePostalServiceRequest(request);
 
         enrichment.enrichPostalServiceRequest(request);
 
         producer.push(config.getPostalServiceCreateTopic(), request.getPostalServices());
 
+        log.info("operation=create, postal={}", request.getPostalServices());
         return request.getPostalServices();
     }
 
     public List<PostalService> search(PostalServiceSearchRequest searchRequest) {
-        return repository.getPostalService(searchRequest.getCriteria(), null, null);
+        return repository.getPostalService(searchRequest.getCriteria());
     }
 
     public List<PostalService> update(PostalServiceRequest request) {
-
+        log.info("operation=update, postal={}", request.getPostalServices());
         validator.validateExistingPostalServiceRequest(request);
 
         enrichment.enrichExistingPostalServiceRequest(request);
 
         producer.push(config.getPostalServiceUpdateTopic(), request.getPostalServices());
-
+        log.info("operation=update, postal={}", request.getPostalServices());
         return request.getPostalServices();
     }
 }

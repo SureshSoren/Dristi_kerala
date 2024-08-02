@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.net.URI;
@@ -33,8 +30,10 @@ public class InterceptorApiController {
         this.configs = configs;
     }
 
-    @RequestMapping(value = "/v1/redirect", method = RequestMethod.GET)
-    public ResponseEntity<?> redirectHandler(@RequestParam("result") String result, @RequestParam("filestoreId") String filestoreId, @RequestParam("userType") String userType) {
+
+    @GetMapping("/v1/redirect")
+    public ResponseEntity<HttpHeaders> redirectHandler(@RequestParam("result") String result, @RequestParam("filestoreId") String filestoreId, @RequestParam("userType") String userType) {
+        log.info("api=/v1/redirect, result = IN_PROGRESS result = {}, filestoreId = {}, userType = {}",result,filestoreId,userType);
         log.info("redirecting through get method");
 
         // Construct the final redirect URL
@@ -44,16 +43,14 @@ public class InterceptorApiController {
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(redirectUri));
         log.info("redirectUri {}", redirectUri);
+        log.info("api=/v1/redirect, result = SUCCESS result = {}, filestoreId = {}, userType = {}",result,filestoreId,userType);
         return new ResponseEntity<>(headers, HttpStatus.TEMPORARY_REDIRECT);
     }
 
 
-    @RequestMapping(value = "/v1/_intercept", method = RequestMethod.POST)
+    @PostMapping("/v1/_intercept")
     public ModelAndView eSignV1Interceptor(@RequestParam("eSignResponse") String response, @RequestParam("espTxnID") String espId) {
-
-        log.info(response);
-        log.info(espId);
-
+        log.info("api=/v1/_intercept, result = IN_PROGRESS eSignResponse = {}, espTxnID = {}",response,espId);
 
         String filestoreId = "";
         String result = "error";
@@ -91,7 +88,7 @@ public class InterceptorApiController {
         modelAndView.addObject("result", result);
         modelAndView.addObject("filestoreId", filestoreId);
         modelAndView.addObject("userType", userType);
-
+        log.info("api=/v1/_intercept, result = SUCCESS eSignResponse = {}, espTxnID = {}",response,espId);
         return modelAndView;
 
     }

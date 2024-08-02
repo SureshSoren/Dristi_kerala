@@ -132,12 +132,4 @@ public class Configuration {
 	// Advocate clerk application number Id name
 	@Value("${egov.idgen.advocate.clerk.application.number.id.name}")
 	private String advClerkApplicationNumberConfig;
-
-	// Email Notification topic
-	@Value("${egov.email.notification.topic}")
-	private String emailNotificationTopic;
-
-	// tenant
-	@Value("${egov.state.level.tenant.id}")
-	private String stateLevelTenantId;
 }

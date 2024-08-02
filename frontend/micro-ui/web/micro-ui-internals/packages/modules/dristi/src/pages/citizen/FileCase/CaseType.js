@@ -157,7 +157,6 @@ function CaseType({ t }) {
                 resolutionMechanism: "COURT",
                 caseDescription: "Case description",
                 linkedCases: [],
-                filingDate: formatDate(new Date()),
                 caseDetails: {},
                 caseCategory: "CRIMINAL",
                 statutesAndSections: [
@@ -261,8 +260,8 @@ function CaseType({ t }) {
                                       city: city,
                                       state: addressLine1,
                                       coordinates: {
-                                        longitude: latitude,
-                                        latitude: longitude,
+                                        longitude: longitude,
+                                        latitude: latitude,
                                       },
                                       locality: address,
                                     },

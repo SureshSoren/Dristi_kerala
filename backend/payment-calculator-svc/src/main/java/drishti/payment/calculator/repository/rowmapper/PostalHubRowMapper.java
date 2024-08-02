@@ -13,7 +13,7 @@ import java.sql.SQLException;
 public class PostalHubRowMapper implements RowMapper<PostalHub> {
     @Override
     public PostalHub mapRow(ResultSet rs, int rowNum) throws SQLException {
-        PostalHub postalHub = PostalHub.builder()
+        return PostalHub.builder()
                 .hubId(rs.getString("hub_id"))
                 .name(rs.getString("name"))
                 .pincode(rs.getString("pincode"))
@@ -42,6 +42,5 @@ public class PostalHubRowMapper implements RowMapper<PostalHub> {
                         .build())
                 .rowVersion(rs.getInt("row_version"))
                 .build();
-        return postalHub;
     }
 }

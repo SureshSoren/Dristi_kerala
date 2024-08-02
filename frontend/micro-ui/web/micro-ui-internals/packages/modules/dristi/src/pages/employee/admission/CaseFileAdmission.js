@@ -10,6 +10,10 @@ import { formatDate } from "../../citizen/FileCase/CaseType";
 import CustomCaseInfoDiv from "../../../components/CustomCaseInfoDiv";
 import { selectParticipantConfig } from "../../citizen/FileCase/Config/admissionActionConfig";
 import { admitCaseSubmitConfig, scheduleCaseSubmitConfig, sendBackCase } from "../../citizen/FileCase/Config/admissionActionConfig";
+import { OrderTypes, OrderWorkflowAction } from "../../../Utils/orderWorkflow";
+import { CaseWorkflowState } from "../../../Utils/caseWorkflow";
+import { getAllAssignees } from "../../citizen/FileCase/EfilingValidationUtils";
+import { Urls } from "../../../hooks";
 
 function CaseFileAdmission({ t, path }) {
   const [isDisabled, setIsDisabled] = useState(false);
@@ -23,6 +27,7 @@ function CaseFileAdmission({ t, path }) {
   const searchParams = new URLSearchParams(location.search);
   const caseId = searchParams.get("caseId");
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
+  const [caseAdmitLoader, setCaseADmitLoader] = useState(false);
   const { data: caseFetchResponse, isLoading } = useSearchCaseService(
     {
       criteria: [
@@ -42,10 +47,10 @@ function CaseFileAdmission({ t, path }) {
   const formConfig = useMemo(() => {
     if (!caseDetails) return null;
     return [
-      ...reviewCaseFileFormConfig.map((form) => {
+      ...reviewCaseFileFormConfig?.map((form) => {
         return {
           ...form,
-          body: form.body.map((section) => {
+          body: form.body?.map((section) => {
             return {
               ...section,
               populators: {
@@ -73,10 +78,10 @@ function CaseFileAdmission({ t, path }) {
         cases: {
           ...newcasedetails,
           linkedCases: caseDetails?.linkedCases ? caseDetails?.linkedCases : [],
-          filingDate: formatDate(new Date()),
           workflow: {
             ...caseDetails?.workflow,
             action,
+            ...(action === "SEND_BACK" && { assignes: getAllAssignees(caseDetails) || [] }),
           },
         },
         tenantId,
@@ -160,10 +165,82 @@ function CaseFileAdmission({ t, path }) {
       setModalInfo({ ...modalInfo, page: 1 });
     });
   };
-  const handleAdmitCase = () => {
+
+  const fetchBasicUserInfo = async () => {
+    const individualData = await window?.Digit.DRISTIService.searchIndividualUser(
+      {
+        Individual: {
+          userUuid: [caseDetails?.auditDetails?.createdBy],
+        },
+      },
+      { tenantId, limit: 1000, offset: 0 },
+      "",
+      caseDetails?.auditDetails?.createdBy
+    );
+
+    return individualData?.Individual?.[0]?.individualId;
+  };
+
+  const handleAdmitCase = async () => {
+    setCaseADmitLoader(true);
+    const individualId = await fetchBasicUserInfo();
+    let documentList = [];
+    documentList = [
+      ...documentList,
+      ...caseDetails?.caseDetails?.chequeDetails?.formdata?.map((form) => form?.data?.bouncedChequeFileUpload?.document),
+      ...caseDetails?.caseDetails?.chequeDetails?.formdata?.map((form) => form?.data?.depositChequeFileUpload?.document),
+      ...caseDetails?.caseDetails?.chequeDetails?.formdata?.map((form) => form?.data?.returnMemoFileUpload?.document),
+      ...caseDetails?.caseDetails?.debtLiabilityDetails?.formdata?.map((form) => form?.data?.debtLiabilityFileUpload?.document),
+      ...caseDetails?.caseDetails?.demandNoticeDetails?.formdata?.map((form) => form?.data?.legalDemandNoticeFileUpload?.document),
+      ...caseDetails?.caseDetails?.demandNoticeDetails?.formdata?.map((form) => form?.data?.proofOfAcknowledgmentFileUpload?.document),
+      ...caseDetails?.caseDetails?.demandNoticeDetails?.formdata?.map((form) => form?.data?.proofOfDispatchFileUpload?.document),
+      ...caseDetails?.caseDetails?.demandNoticeDetails?.formdata?.map((form) => form?.data?.proofOfReplyFileUpload?.document),
+      ...caseDetails?.additionalDetails?.prayerSwornStatement?.formdata?.map((form) => form?.data?.memorandumOfComplaint?.document),
+      ...caseDetails?.additionalDetails?.prayerSwornStatement?.formdata?.map((form) => form?.data?.prayerForRelief?.document),
+      ...caseDetails?.additionalDetails?.prayerSwornStatement?.formdata?.map((form) => form?.data?.swornStatement?.document),
+      ...caseDetails?.additionalDetails?.respondentDetails?.formdata?.map((form) => form?.data?.inquiryAffidavitFileUpload?.document),
+      ...caseDetails?.additionalDetails?.advocateDetails?.formdata?.map((form) => form?.data?.vakalatnamaFileUpload?.document),
+    ].flat();
+
+    await Promise.all(
+      documentList
+        ?.filter((data) => data)
+        ?.map(async (data) => {
+          await DRISTIService.createEvidence({
+            artifact: {
+              artifactType: "DOCUMENTARY",
+              sourceType: "COMPLAINANT",
+              sourceID: individualId,
+              caseId: caseDetails?.id,
+              filingNumber: caseDetails?.filingNumber,
+              tenantId,
+              comments: [],
+              file: {
+                documentType: data?.fileType || data?.documentType,
+                fileStore: data?.fileStore,
+                fileName: data?.fileName,
+                documentName: data?.documentName,
+              },
+              workflow: {
+                action: "TYPE DEPOSITION",
+                documents: [
+                  {
+                    documentType: data?.documentType,
+                    fileName: data?.fileName,
+                    documentName: data?.documentName,
+                    fileStoreId: data?.fileStore,
+                  },
+                ],
+              },
+            },
+          });
+        })
+    );
+
     updateCaseDetails("ADMIT", formdata).then((res) => {
       setModalInfo({ ...modalInfo, page: 1 });
     });
+    setCaseADmitLoader(false);
   };
   const handleScheduleCase = (props) => {
     setSubmitModalInfo({
@@ -182,11 +259,49 @@ function CaseFileAdmission({ t, path }) {
   };
 
   const handleScheduleNextHearing = () => {
-    history.push(`/digit-ui/employee/orders/generate-orders?filingNumber=${caseDetails?.filingNumber}`);
+    const reqBody = {
+      order: {
+        createdDate: formatDate(new Date()),
+        tenantId,
+        cnrNumber: caseDetails?.cnrNumber,
+        filingNumber: caseDetails?.filingNumber,
+        statuteSection: {
+          tenantId,
+        },
+        orderType: OrderTypes.SCHEDULE_OF_HEARING_DATE,
+        status: "",
+        isActive: true,
+        workflow: {
+          action: OrderWorkflowAction.SAVE_DRAFT,
+          comments: "Creating order",
+          assignes: null,
+          rating: null,
+          documents: [{}],
+        },
+        documents: [],
+        additionalDetails: {
+          formdata: {
+            orderType: {
+              code: OrderTypes.SCHEDULE_OF_HEARING_DATE,
+              type: OrderTypes.SCHEDULE_OF_HEARING_DATE,
+              name: `ORDER_TYPE_${OrderTypes.SCHEDULE_OF_HEARING_DATE}`,
+            },
+          },
+        },
+      },
+    };
+    DRISTIService.customApiService(Urls.dristi.ordersCreate, reqBody, { tenantId })
+      .then(() => {
+        history.push(`/digit-ui/employee/orders/generate-orders?filingNumber=${caseDetails?.filingNumber}`, {
+          caseId: caseId,
+          tab: "Orders",
+        });
+      })
+      .catch();
   };
 
   const updateConfigWithCaseDetails = (config, caseDetails) => {
-    const litigantsNames = caseDetails.litigants.map((litigant) => {
+    const litigantsNames = caseDetails.litigants?.map((litigant) => {
       return { name: litigant.additionalDetails.fullName, individualId: litigant.individualId };
     });
 
@@ -207,21 +322,20 @@ function CaseFileAdmission({ t, path }) {
     additionalDetails: "CS_ADDITIONAL_DETAILS",
   };
 
-  if (!caseId) {
-    return <Redirect to="admission" />;
+  if (!caseId || (caseDetails && caseDetails?.status === CaseWorkflowState.CASE_ADMITTED)) {
+    return <Redirect to="/" />;
   }
 
   if (isLoading) {
     return <Loader />;
   }
-
   return (
     <div className={"case-and-admission"}>
       <div className="view-case-file">
         <div className="file-case">
           <div className="file-case-side-stepper">
             <div className="file-case-select-form-section">
-              {sidebar.map((key, index) => (
+              {sidebar?.map((key, index) => (
                 <div className="accordion-wrapper">
                   <div key={index} className="accordion-title">
                     <div>{`${index + 1}. ${t(labels[key])}`}</div>
@@ -254,11 +368,11 @@ function CaseFileAdmission({ t, path }) {
                 isDisabled={isDisabled}
                 cardClassName={`e-filing-card-form-style review-case-file`}
                 secondaryLabel={t("CS_SCHEDULE_ADMISSION_HEARING")}
-                showSecondaryLabel={true}
-                // actionClassName="admission-action-buttons"
+                showSecondaryLabel={caseDetails?.status !== CaseWorkflowState.ADMISSION_HEARING_SCHEDULED}
                 actionClassName="case-file-admission-action-bar"
-                showSkip={true}
+                showSkip={caseDetails?.status !== CaseWorkflowState.ADMISSION_HEARING_SCHEDULED}
                 onSkip={onSendBack}
+                skiplabel={t("SEND_BACK_FOR_CORRECTION")}
                 noBreakLine
                 submitIcon={<RightArrow />}
                 skipStyle={{ position: "fixed", left: "20px", bottom: "18px", color: "#007E7E", fontWeight: "700" }}
@@ -281,6 +395,7 @@ function CaseFileAdmission({ t, path }) {
                   updatedConfig={updatedConfig}
                   tenantId={tenantId}
                   handleScheduleNextHearing={handleScheduleNextHearing}
+                  caseAdmitLoader={caseAdmitLoader}
                 ></AdmissionActionModal>
               )}
             </div>

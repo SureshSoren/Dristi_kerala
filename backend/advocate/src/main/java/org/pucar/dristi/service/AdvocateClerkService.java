@@ -8,7 +8,9 @@ import org.pucar.dristi.enrichment.AdvocateClerkRegistrationEnrichment;
 import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.repository.AdvocateClerkRepository;
 import org.pucar.dristi.validators.AdvocateClerkRegistrationValidator;
-import org.pucar.dristi.web.models.*;
+import org.pucar.dristi.web.models.AdvocateClerk;
+import org.pucar.dristi.web.models.AdvocateClerkRequest;
+import org.pucar.dristi.web.models.AdvocateClerkSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -28,18 +30,16 @@ public class AdvocateClerkService {
     private  WorkflowService workflowService;
     private  Producer producer;
     private  Configuration config;
-    private EmailNotificationService emailNotificationService;
 
     @Autowired
     public AdvocateClerkService(AdvocateClerkRepository advocateClerkRepository, AdvocateClerkRegistrationValidator validator, AdvocateClerkRegistrationEnrichment enrichmentUtil,
-                                WorkflowService workflowService, Producer producer, Configuration config, EmailNotificationService emailNotificationService) {
+                                WorkflowService workflowService, Producer producer, Configuration config) {
         this.advocateClerkRepository = advocateClerkRepository;
         this.validator = validator;
         this.enrichmentUtil = enrichmentUtil;
         this.workflowService = workflowService;
         this.producer = producer;
         this.config = config;
-        this.emailNotificationService = emailNotificationService;
     }
 
 
@@ -156,13 +156,7 @@ public class AdvocateClerkService {
                 // Setting true once application approved
                 advocateClerkRequest.getClerk().setIsActive(true);
             }
-            if(advocateClerkRequest.getClerk().getWorkflow().getAction().equalsIgnoreCase("APPROVE")){
-                IndividualSearchRequest individualSearchRequest = new IndividualSearchRequest();
-                individualSearchRequest.setRequestInfo(advocateClerkRequest.getRequestInfo());
-                IndividualSearch individual = IndividualSearch.builder().individualId(advocateClerkRequest.getClerk().getIndividualId()).build();
-                individualSearchRequest.setIndividual(individual);
-                emailNotificationService.sendEmailNotification(individualSearchRequest, true);
-            }
+
             producer.push(config.getAdvClerkUpdateTopic(), advocateClerkRequest);
 
             return advocateClerkRequest.getClerk();

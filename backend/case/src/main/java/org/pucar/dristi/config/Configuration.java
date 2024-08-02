@@ -124,12 +124,6 @@ public class Configuration {
 	@Value("${egov.sms.notification.topic}")
 	private String smsNotificationTopic;
 
-	@Value("${egov.sms.notification.template.id}")
-	private String smsNotificationTemplateId;
-
-	@Value("${notification.sms.enabled}")
-	private Boolean isSMSEnabled;
-
 	//Case
 	@Value("${case.kafka.update.topic}")
 	private String caseUpdateTopic;
@@ -166,19 +160,10 @@ public class Configuration {
 	@Value("${egov.representative.join.case.kafka.topic}")
 	private String representativeJoinCaseTopic;
 
+	@Value("${egov.update.representative.join.case.kafka.topic}")
+	private String updateRepresentativeJoinCaseTopic;
+
 	@Value("${egov.additional.join.case.kafka.topic}")
 	private String additionalJoinCaseTopic;
 
-	//Localization
-	@Value("${egov.localization.host}")
-	private String localizationHost;
-
-	@Value("${egov.localization.context.path}")
-	private String localizationContextPath;
-
-	@Value("${egov.localization.search.endpoint}")
-	private String localizationSearchEndpoint;
-
-	@Value("${egov.localization.statelevel}")
-	private Boolean isLocalizationStateLevel;
 }
