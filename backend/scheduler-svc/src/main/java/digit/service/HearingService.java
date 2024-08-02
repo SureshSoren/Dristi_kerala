@@ -63,7 +63,7 @@ public class HearingService {
         // master data for default slots of court
         List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);
 
-        double totalHrs = defaultSlots.stream().reduce(0.0, (total, slot) -> total + slot.getSlotDuration() / 60.0, Double::sum);
+//        double totalHrs = defaultSlots.stream().reduce(0.0, (total, slot) -> total + slot.getSlotDuration() / 60.0, Double::sum);
         // get hearings and default timing
         List<MdmsHearing> defaultHearings = helper.getDataFromMDMS(MdmsHearing.class, serviceConstants.DEFAULT_HEARING_MASTER_NAME);
         Map<String, MdmsHearing> hearingTypeMap = defaultHearings.stream().collect(Collectors.toMap(
@@ -71,7 +71,9 @@ public class HearingService {
                 obj -> obj
         ));
         //validate hearing request here
-        hearingValidator.validateHearing(schedulingRequests, totalHrs, hearingTypeMap);
+        //
+        // not required
+//        hearingValidator.validateHearing(schedulingRequests, totalHrs, hearingTypeMap);
 
         // enhance the hearing request here
         hearingEnrichment.enrichScheduleHearing(schedulingRequests, defaultSlots, hearingTypeMap);
@@ -117,13 +119,13 @@ public class HearingService {
 
     /**
      * This function provide the available date for judge and their occupied bandwidth after a start date ( fromDate )
-     * @param hearingSearchCriteria criteria and request info object
+     * @param scheduleHearingSearchCriteria criteria and request info object
      * @return list of availability dto
      */
 
-    public List<AvailabilityDTO> getAvailableDateForHearing(HearingSearchCriteria hearingSearchCriteria) {
+    public List<AvailabilityDTO> getAvailableDateForHearing(ScheduleHearingSearchCriteria scheduleHearingSearchCriteria) {
 
-        return hearingRepository.getAvailableDatesOfJudges(hearingSearchCriteria);
+        return hearingRepository.getAvailableDatesOfJudges(scheduleHearingSearchCriteria);
     }
 
     /**

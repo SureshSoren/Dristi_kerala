@@ -87,7 +87,7 @@ public class ScheduleHearingConsumerService {
 
                 List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder()
                         .requestInfo(requestInfo)
-                        .criteria(HearingSearchCriteria.builder()
+                        .criteria(ScheduleHearingSearchCriteria.builder()
                                 .hearingIds(Collections.singletonList(hearingDetail.getHearingBookingId()))
                                 .build()).build(), null, null);
                 ScheduleHearing hearing = hearings.get(0);

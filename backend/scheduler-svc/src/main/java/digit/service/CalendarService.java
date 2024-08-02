@@ -99,15 +99,15 @@ public class CalendarService {
         int calendarLength = judgeCalendarRule.size();
 
         // fetch available dates of  judge for next 6 month
-        HearingSearchCriteria hearingSearchCriteria = HearingSearchCriteria.builder().fromDate(criteria.getFromDate())
+        ScheduleHearingSearchCriteria scheduleHearingSearchCriteria = ScheduleHearingSearchCriteria.builder().fromDate(criteria.getFromDate())
                 .judgeId(criteria.getJudgeId()).toDate(criteria.getFromDate().plusDays(30 * 6)).build();
 
         List<AvailabilityDTO> availableDateForHearing;
 
         try {
-            availableDateForHearing = hearingService.getAvailableDateForHearing(hearingSearchCriteria);
+            availableDateForHearing = hearingService.getAvailableDateForHearing(scheduleHearingSearchCriteria);
         } catch (Exception e) {
-            log.error("error occurred while retrieving available date for judge from hearings, searchCriteria= {} ", hearingSearchCriteria);
+            log.error("error occurred while retrieving available date for judge from hearings, searchCriteria= {} ", scheduleHearingSearchCriteria);
             throw new CustomException("EXTERNAL_SERVICE_CALL_EXCEPTION", "Failed to fetch available dates");
         }
         int hearingLength = availableDateForHearing.size();
@@ -220,11 +220,11 @@ public class CalendarService {
 
         }
 
-        HearingSearchCriteria hearingSearchCriteria = getHearingSearchCriteriaFromJudgeSearch(criteria);
+        ScheduleHearingSearchCriteria scheduleHearingSearchCriteria = getHearingSearchCriteriaFromJudgeSearch(criteria);
         // sort on the basis of start time
         List<ScheduleHearing> hearings;
         try {
-            hearings = hearingService.search(HearingSearchRequest.builder().criteria(hearingSearchCriteria).build(), null, null);
+            hearings = hearingService.search(HearingSearchRequest.builder().criteria(scheduleHearingSearchCriteria).build(), null, null);
         } catch (Exception e) {
             log.error("");
             throw new CustomException("", "");
@@ -241,7 +241,7 @@ public class CalendarService {
         });
 
         //generating calendar response
-        for (LocalDate start = hearingSearchCriteria.getFromDate(); start.isBefore(hearingSearchCriteria.getToDate()) || start.isEqual(hearingSearchCriteria.getToDate()); start = start.plusDays(1)) {
+        for (LocalDate start = scheduleHearingSearchCriteria.getFromDate(); start.isBefore(scheduleHearingSearchCriteria.getToDate()) || start.isEqual(scheduleHearingSearchCriteria.getToDate()); start = start.plusDays(1)) {
             List<ScheduleHearing> hearingOfaDay = dayHearingMap.getOrDefault(start, new ArrayList<>());
 
             HearingCalendar calendarOfDay = HearingCalendar.builder()
@@ -287,7 +287,7 @@ public class CalendarService {
      * @return Hearing search criteria
      */
 
-    private HearingSearchCriteria getHearingSearchCriteriaFromJudgeSearch(CalendarSearchCriteria criteria) {
+    private ScheduleHearingSearchCriteria getHearingSearchCriteriaFromJudgeSearch(CalendarSearchCriteria criteria) {
         log.info("operation = getHearingSearchCriteriaFromJudgeSearch, result = IN_PROGRESS, CalendarSearchCriteria = {}", criteria);
 
         LocalDate fromDate = null, toDate = null;
@@ -297,9 +297,9 @@ public class CalendarService {
             toDate = criteria.getToDate();
         }
 
-        log.info("operation = getHearingSearchCriteriaFromJudgeSearch, result = SUCCESS, HearingSearchCriteria = {}", criteria);
+        log.info("operation = getHearingSearchCriteriaFromJudgeSearch, result = SUCCESS, ScheduleHearingSearchCriteria = {}", criteria);
 
-        return HearingSearchCriteria.builder()
+        return ScheduleHearingSearchCriteria.builder()
                 .judgeId(criteria.getJudgeId())
                 .tenantId(criteria.getTenantId())
                 .fromDate(fromDate)

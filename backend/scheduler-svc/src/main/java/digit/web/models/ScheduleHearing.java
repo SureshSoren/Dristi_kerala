@@ -17,27 +17,23 @@ import org.egov.tracer.model.Error;
 public class ScheduleHearing {
 
     @JsonProperty("hearingBookingId")
-    private String hearingBookingId;      // hearing id d
+    private String hearingBookingId;
 
     @JsonProperty("tenantId")
-    private String tenantId;                // tenant id d
+    private String tenantId;
 
     @JsonProperty("courtId")
-    private String courtId;                 //prescribed by then court id  d
+    private String courtId;
 
     @JsonProperty("judgeId")
-    private String judgeId;                 // judge id  a
+    private String judgeId;
 
     @JsonProperty("caseId")
-    private String caseId;                  // cnr number  a
+    private String caseId;
 
-//    @JsonProperty("date")
-//    @JsonFormat(pattern = "yyyy-MM-dd")   ///start time to epoch  d
-//    private LocalDate date;
 
-    //TODO: this should be enum
-    @JsonProperty("eventType")
-    private String eventType;    // hearing type     d
+    @JsonProperty("hearingType")
+    private String hearingType;
 
     @JsonProperty("title")
     private String title;
@@ -45,9 +41,9 @@ public class ScheduleHearing {
     @JsonProperty("description")
     private String description;
 
-    //TODO: this should be enum
+
     @JsonProperty("status")
-    private String status;       //  d
+    private String status;
 
     @JsonProperty("startTime")
     private long startTime;
@@ -78,7 +74,7 @@ public class ScheduleHearing {
         this.courtId = hearingObject.courtId;
         this.judgeId = hearingObject.judgeId;
         this.caseId = hearingObject.caseId;
-        this.eventType = hearingObject.eventType;
+        this.hearingType = hearingObject.hearingType;
         this.title = hearingObject.title;
         this.description = hearingObject.description;
         this.status = hearingObject.status;

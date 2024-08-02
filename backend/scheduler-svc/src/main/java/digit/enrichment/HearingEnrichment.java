@@ -37,47 +37,34 @@ public class HearingEnrichment {
     public void enrichScheduleHearing(ScheduleHearingRequest schedulingRequests, List<MdmsSlot> defaultSlots, Map<String, MdmsHearing> hearingTypeMap) {
 
         RequestInfo requestInfo = schedulingRequests.getRequestInfo();
-
-        HashMap<String, List<ScheduleHearing>> sameDayHearings = new HashMap<>();
-
         List<ScheduleHearing> hearingList = schedulingRequests.getHearing();
-        log.info("starting update method for schedule hearing enrichment");
-        log.info("generating IDs for schedule hearing enrichment using IdGenService");
-        List<String> idList = idgenUtil.getIdList(requestInfo, hearingList.get(0).getTenantId(), configuration.getHearingIdFormat(), null, hearingList.size());
+
         AuditDetails auditDetails = getAuditDetailsScheduleHearing(requestInfo);
-
-
-        int index = 0;
         for (ScheduleHearing hearing : hearingList) {
             hearing.setAuditDetails(auditDetails);
-            hearing.setHearingBookingId(idList.get(index++));
             hearing.setRowVersion(1);
-
         }
 
         updateTimingInHearings(hearingList, hearingTypeMap, defaultSlots);
 
-
     }
 
 
-    void updateTimingInHearings(List<ScheduleHearing> hearingList, Map<String, MdmsHearing> hearingTypeMap,List<MdmsSlot> defaultSlots) {
+    void updateTimingInHearings(List<ScheduleHearing> hearingList, Map<String, MdmsHearing> hearingTypeMap, List<MdmsSlot> defaultSlots) {
 
-        List<Status> statuses = new ArrayList<>();
-        statuses.add(Status.SCHEDULED);
-        statuses.add(Status.BLOCKED);
+        List<String> statuses = new ArrayList<>();
+        statuses.add("Status.SCHEDULED");
+        statuses.add("Status.BLOCKED");
         HashMap<String, List<ScheduleHearing>> sameDayHearings = new HashMap<>();
         for (ScheduleHearing hearing : hearingList) {
 
-
-            HearingSearchCriteria searchCriteria = HearingSearchCriteria.builder()
-                    .toDate(hearing.getDate())
-                    .fromDate(hearing.getDate())
+            // todo : fetch hearing for day
+            ScheduleHearingSearchCriteria searchCriteria = ScheduleHearingSearchCriteria.builder()
                     .judgeId(hearing.getJudgeId())
                     .status(statuses).build();
 
-
-            if (hearing.getStatus() == null) hearing.setStatus(Status.SCHEDULED);
+// redundant
+            if (hearing.getStatus() == null) hearing.setStatus("Status.SCHEDULED");
 
             StringBuilder key = new StringBuilder();
             key.append(hearing.getDate()).append("-").append(hearing.getJudgeId());
@@ -194,6 +181,6 @@ public class HearingEnrichment {
 
         });
 
-        updateTimingInHearings(hearing,hearingTypeMap,defaultHearings);
+        updateTimingInHearings(hearing, hearingTypeMap, defaultHearings);
     }
 }

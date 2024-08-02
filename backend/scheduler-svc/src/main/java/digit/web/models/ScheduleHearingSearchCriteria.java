@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class HearingSearchCriteria {
+public class ScheduleHearingSearchCriteria {
 
 
     @JsonProperty("hearingIds")
@@ -28,13 +28,6 @@ public class HearingSearchCriteria {
     @JsonProperty("courtId")
     private String courtId;
 
-    @JsonProperty("fromDate")
-    private LocalDate fromDate;
-
-    @JsonProperty("toDate")
-    private LocalDate toDate;
-
-    //TODO: this should be enum
     @JsonProperty("hearingType")
     private String hearingType;
 
@@ -45,13 +38,13 @@ public class HearingSearchCriteria {
     private String tenantId;
     // to search in a one date between hours (to make it more flexible search)
     @JsonProperty("startDateTime")
-    private LocalDateTime startDateTime;
+    private Long startDateTime;
 
     @JsonProperty("endDateTime")
-    private LocalDateTime endDateTime;
+    private Long endDateTime;
 
     @JsonProperty("status")
-    private List<Status> status;
+    private List<String> status;
 
     @JsonProperty("rescheduleId")
     private String rescheduleId;

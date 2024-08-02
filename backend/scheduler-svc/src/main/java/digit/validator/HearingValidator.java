@@ -1,8 +1,6 @@
 package digit.validator;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
 import digit.repository.HearingRepository;
@@ -72,7 +70,7 @@ public class HearingValidator {
 
             String eventType = hearing.getEventType().toString();
 
-            HearingSearchCriteria searchCriteria = HearingSearchCriteria.builder()
+            ScheduleHearingSearchCriteria searchCriteria = ScheduleHearingSearchCriteria.builder()
                     .toDate(hearing.getDate())
                     .fromDate(hearing.getDate())
                     .judgeId(hearing.getJudgeId()).build();

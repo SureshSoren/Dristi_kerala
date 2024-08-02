@@ -102,7 +102,7 @@ public class CauseListService {
 
     private void generateCauseListForJudge(String judgeId, List<CauseList> causeLists) {
         log.info("operation = generateCauseListForJudge, result = IN_PROGRESS, judgeId = {}", judgeId);
-        HearingSearchCriteria searchCriteria =  HearingSearchCriteria.builder()
+        ScheduleHearingSearchCriteria searchCriteria =  ScheduleHearingSearchCriteria.builder()
                 .judgeId(judgeId)
                 .fromDate(LocalDate.now().plusDays(1))
                 .toDate(LocalDate.now().plusDays(1))

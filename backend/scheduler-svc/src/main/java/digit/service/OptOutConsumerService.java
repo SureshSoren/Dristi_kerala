@@ -69,7 +69,7 @@ public class OptOutConsumerService {
                 // get the list and cancelled the hearings
                 List<ScheduleHearing> hearingList = hearingService.search(HearingSearchRequest
                         .builder().requestInfo(requestInfo)
-                        .criteria(HearingSearchCriteria.builder()
+                        .criteria(ScheduleHearingSearchCriteria.builder()
                                 .rescheduleId(optOut.getRescheduleRequestId())
                                 .status(Collections.singletonList(Status.BLOCKED))
                                 .fromDate(optoutDates.get(0))

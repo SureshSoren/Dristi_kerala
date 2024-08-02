@@ -81,7 +81,7 @@ public class ReScheduleRequestValidator {
         //VALIDATING HEARINGS FOR WHICH RESCHEDULE REQUEST IS RAISED
 
         List<String> ids = rescheduleRequests.stream().map(ReScheduleHearing::getHearingBookingId).toList();
-        List<ScheduleHearing> hearingsToReschedule = hearingService.search(HearingSearchRequest.builder().requestInfo(reScheduleHearingsRequest.getRequestInfo()).criteria(HearingSearchCriteria.builder().hearingIds(ids).build()).build(), null, null);
+        List<ScheduleHearing> hearingsToReschedule = hearingService.search(HearingSearchRequest.builder().requestInfo(reScheduleHearingsRequest.getRequestInfo()).criteria(ScheduleHearingSearchCriteria.builder().hearingIds(ids).build()).build(), null, null);
 
         if (hearingsToReschedule.size() != ids.size()) {
             throw new CustomException("DK_RR_INVALID_REQ_ERR", "Hearing does not exist in the database");

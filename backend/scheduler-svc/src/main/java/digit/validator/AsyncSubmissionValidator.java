@@ -3,7 +3,7 @@ package digit.validator;
 import digit.config.Configuration;
 import digit.repository.HearingRepository;
 import digit.web.models.AsyncSubmission;
-import digit.web.models.HearingSearchCriteria;
+import digit.web.models.ScheduleHearingSearchCriteria;
 import digit.web.models.ScheduleHearing;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.tracer.model.CustomException;
@@ -41,7 +41,7 @@ public class AsyncSubmissionValidator {
         validateSubmissionAndResponseDates(asyncSubmission);
 
         // Build search criteria using case id and retrieve list of scheduled hearings
-        HearingSearchCriteria searchCriteria = HearingSearchCriteria.builder()
+        ScheduleHearingSearchCriteria searchCriteria = ScheduleHearingSearchCriteria.builder()
                 .caseId(asyncSubmission.getCaseId()).build();
         List<ScheduleHearing> scheduleHearingList = repository.getHearings(searchCriteria,null,null);
 
@@ -82,7 +82,7 @@ public class AsyncSubmissionValidator {
 
     public void validateDates(AsyncSubmission asyncSubmission) {
         // Build search criteria using case Id and retrieve list of scheduled hearings
-        HearingSearchCriteria searchCriteria = HearingSearchCriteria.builder()
+        ScheduleHearingSearchCriteria searchCriteria = ScheduleHearingSearchCriteria.builder()
                 .caseId(asyncSubmission.getCaseId()).build();
         List<ScheduleHearing> scheduleHearingList = repository.getHearings(searchCriteria,null,null);
 

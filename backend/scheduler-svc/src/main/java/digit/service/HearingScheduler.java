@@ -7,18 +7,13 @@ import digit.config.ServiceConstants;
 import digit.helper.DefaultMasterDataHelper;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
-import digit.util.MdmsUtil;
 import digit.web.models.*;
 import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONArray;
-import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,7 +77,7 @@ public class HearingScheduler {
             if (!blockedHearings.isEmpty()) producer.push("schedule-hearing-to-block-calendar", request);
 
             if (!hearingsNeedToBeSchedule.isEmpty()) {
-                List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().criteria(HearingSearchCriteria.builder()
+                List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().criteria(ScheduleHearingSearchCriteria.builder()
                                 .hearingIds(ids).build())
                         .build(), null, null);
                 for (ScheduleHearing hearing : hearings) {
