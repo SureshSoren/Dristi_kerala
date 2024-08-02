@@ -30,7 +30,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
           uidToken: "3456565",
           consent: "6564",
           authType: "6546",
-          fileStoreId: "30bf596b-f4e4-461e-bc92-3ccd778b7ebc",
+          fileStoreId: process.env.REACT_APP_ESIGN_FILESTORE_ID,
           tenantId: "kl",
           pageModule: "ci",
         },
