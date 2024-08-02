@@ -50,7 +50,7 @@ public class ServiceRequestRepository {
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         Object response = null;
         try {
-            response = (new RestTemplate()).postForObject(uri.toString(), request, String.class);
+            response = restTemplate.postForObject(uri.toString(), request, String.class);
         } catch (HttpClientErrorException e) {
             log.error(EXTERNAL_SERVICE_EXCEPTION, e);
             throw new ServiceCallException(e.getResponseBodyAsString());
