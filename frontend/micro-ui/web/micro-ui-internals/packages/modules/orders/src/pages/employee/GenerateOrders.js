@@ -73,6 +73,7 @@ const GenerateOrders = () => {
   const [prevOrder, setPrevOrder] = useState();
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
+  const [signedDoucumentUploadedID, setSignedDocumentUploadID] = useState("");
   const userInfo = Digit.UserService.getUser()?.info || {};
   const history = useHistory();
   const setSelectedOrder = (orderIndex) => {
@@ -742,6 +743,7 @@ const GenerateOrders = () => {
           order={currentOrder}
           handleIssueOrder={handleIssueOrder}
           handleGoBackSignatureModal={handleGoBackSignatureModal}
+          setSignedDocumentUploadID={setSignedDocumentUploadID}
           saveOnsubmitLabel={"ISSUE_ORDER"}
         />
       )}

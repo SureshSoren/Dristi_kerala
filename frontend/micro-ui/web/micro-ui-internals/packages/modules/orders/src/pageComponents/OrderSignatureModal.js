@@ -5,6 +5,7 @@ import { Button } from "@egovernments/digit-ui-react-components";
 import { FileUploadIcon } from "../../../dristi/src/icons/svgIndex";
 import useESign from "../hooks/orders/useESign";
 import { Urls } from "../hooks/services/Urls";
+import useDocumentUpload from "../hooks/orders/useDocumentUpload";
 
 const Heading = (props) => {
   return <h1 className="heading-m">{props.label}</h1>;
@@ -18,7 +19,7 @@ const CloseBtn = (props) => {
   );
 };
 
-function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignatureModal, saveOnsubmitLabel }) {
+function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignatureModal, saveOnsubmitLabel, setSignedDocumentUploadID }) {
   const [isSigned, setIsSigned] = useState(false);
   const { handleEsign, checkSignStatus } = useESign();
   const [formData, setFormData] = useState({}); // storing the file upload data
@@ -29,7 +30,7 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
   const [pageModule, setPageModule] = useState("en");
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const uri = `${window.location.origin}${Urls.FileFetchById}?tenantId=${tenantId}&fileStoreId=${fileStoreId}`;
-
+  const { uploadDocuments } = useDocumentUpload();
   const name = "Signature";
   const uploadModalConfig = useMemo(() => {
     return {
@@ -65,9 +66,15 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
 
   // check the data from upload
   useEffect(() => {
-    if (formData?.uploadSignature?.Signature?.length > 0) {
-      setIsSigned(true);
-    }
+    const upload = async () => {
+      if (formData?.uploadSignature?.Signature?.length > 0) {
+        const uploadedFileId = await uploadDocuments(formData?.uploadSignature?.Signature, tenantId);
+        setSignedDocumentUploadID(uploadedFileId?.[0]?.fileStoreId);
+        setIsSigned(true);
+      }
+    };
+
+    upload();
   }, [formData]);
 
   useEffect(() => {
