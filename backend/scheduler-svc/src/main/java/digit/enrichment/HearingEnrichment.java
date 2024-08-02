@@ -53,8 +53,8 @@ public class HearingEnrichment {
     void updateTimingInHearings(List<ScheduleHearing> hearingList, Map<String, MdmsHearing> hearingTypeMap, List<MdmsSlot> defaultSlots) {
 
         List<String> statuses = new ArrayList<>();
-        statuses.add("Status.SCHEDULED");
-        statuses.add("Status.BLOCKED");
+        statuses.add("SCHEDULED");
+        statuses.add("BLOCKED");
         HashMap<String, List<ScheduleHearing>> sameDayHearings = new HashMap<>();
         for (ScheduleHearing hearing : hearingList) {
 

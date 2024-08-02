@@ -46,7 +46,7 @@ public class HearingProcessor {
                 .requestInfo(requestInfo)
                 .build();
 
-        List<ScheduleHearing> scheduledHearings = hearingService.schedule(request);
+        List<ScheduleHearing> scheduledHearings = hearingService.schedule(request);   // BLOCKED THE JUDGE CALENDAR
         ScheduleHearing scheduledHearing = scheduledHearings.get(0);
 
         hearing.setStartTime(scheduledHearing.getStartTime());
