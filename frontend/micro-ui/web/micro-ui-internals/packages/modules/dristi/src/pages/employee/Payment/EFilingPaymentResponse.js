@@ -7,24 +7,25 @@ import CustomCopyTextDiv from "../../../components/CustomCopyTextDiv";
 import SelectCustomNote from "../../../components/SelectCustomNote";
 import { Urls } from "../../../hooks";
 
-const customNoteConfig = {
-  populators: {
-    inputs: [
-      {
-        infoHeader: "CS_COMMON_NOTE",
-        infoText: "PAYMENT_FAILED_NOTE_MSG",
-        infoTooltipMessage: "CS_NOTE_TOOLTIP_CASE_TYPE",
-      },
-    ],
-  },
-};
-
 function EFilingPaymentResponse() {
   const history = useHistory();
   const { t } = useTranslation();
   const { state } = useLocation();
   const fileStoreId = state.state.fileStoreId;
+  const amountPayed = state.state.amount;
+
   const tenantId = Digit.ULBService.getCurrentTenantId();
+  const customNoteConfig = {
+    populators: {
+      inputs: [
+        {
+          infoHeader: "CS_COMMON_NOTE",
+          infoText: `CS_PAYMENT_DUE_NOTE ${amountPayed}.CS_MANDATORY_STEP_TEXT`,
+          infoTooltipMessage: "CS_NOTE_TOOLTIP_CASE_TYPE",
+        },
+      ],
+    },
+  };
 
   const uri = `${window.location.origin}${Urls.FileFetchById}?tenantId=${tenantId}&fileStoreId=${fileStoreId}`;
   return (
@@ -69,6 +70,7 @@ function EFilingPaymentResponse() {
               variation={"secondary"}
               className={"secondary-button-selector"}
               label={t("CS_PRINT_RECEIPT")}
+              isDisabled={!state?.state?.success}
               labelClassName={"secondary-label-selector"}
               onButtonClick={() => {}}
             />
