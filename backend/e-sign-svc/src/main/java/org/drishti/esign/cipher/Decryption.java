@@ -52,13 +52,15 @@ public class Decryption {
         // Read key from file
         StringBuilder strKeyPEM = new StringBuilder();
         Resource resource = resourceLoader.getResource("classpath:"+filename);
-        File file = resource.getFile();
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String line;
-        while ((line = br.readLine()) != null) {
-            strKeyPEM.append(line).append("\n");
+        try (InputStream inputStream = resource.getInputStream();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                strKeyPEM.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        br.close();
         return strKeyPEM.toString();
     }
 
