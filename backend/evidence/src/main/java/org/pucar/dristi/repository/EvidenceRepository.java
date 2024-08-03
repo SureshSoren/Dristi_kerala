@@ -8,6 +8,7 @@
     import org.pucar.dristi.web.models.Artifact;
     import org.pucar.dristi.web.models.Comment;
     import org.pucar.dristi.web.models.EvidenceSearchCriteria;
+    import org.pucar.dristi.web.models.Pagination;
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.jdbc.core.JdbcTemplate;
     import org.springframework.stereotype.Repository;
@@ -42,42 +43,72 @@
             this.commentRowMapper = commentRowMapper;
         }
 
-        public List<Artifact> getArtifacts(EvidenceSearchCriteria evidenceSearchCriteria) {
+        public List<Artifact> getArtifacts(EvidenceSearchCriteria evidenceSearchCriteria, Pagination pagination) {
             try {
-                List<Object> preparedStmtListDoc = new ArrayList<>();
+                List<Object> preparedStmtList = new ArrayList<>();
                 List<Object> preparedStmtListCom = new ArrayList<>();
-                List<Object> preparedStmtList=new ArrayList<>();
+                List<Object> preparedStmtListDoc = new ArrayList<>();
+
+                // Artifact query building
                 String artifactQuery = queryBuilder.getArtifactSearchQuery(
                         preparedStmtList,
+                        evidenceSearchCriteria.getOwner(),
+                        evidenceSearchCriteria.getArtifactType(),
+                        evidenceSearchCriteria.getEvidenceStatus(),
                         evidenceSearchCriteria.getId(),
                         evidenceSearchCriteria.getCaseId(),
                         evidenceSearchCriteria.getApplicationNumber(),
+                        evidenceSearchCriteria.getFilingNumber(),
                         evidenceSearchCriteria.getHearing(),
                         evidenceSearchCriteria.getOrder(),
                         evidenceSearchCriteria.getSourceId(),
                         evidenceSearchCriteria.getSourceName(),
                         evidenceSearchCriteria.getArtifactNumber()
                 );
+                artifactQuery = queryBuilder.addOrderByQuery(artifactQuery, pagination);
                 log.info("Final artifact query: {}", artifactQuery);
 
-                List<Artifact> artifactList = jdbcTemplate.query(artifactQuery,preparedStmtList.toArray(), evidenceRowMapper);
-                log.info("DB artifact list :: {}", artifactList);
-
-                List<String> artifactIds = new ArrayList<>();
-                for (Artifact artifact : artifactList) {
-                    artifactIds.add(String.valueOf(artifact.getId()));
+                if (pagination != null) {
+                    Integer totalRecords = getTotalCountArtifact(artifactQuery, preparedStmtList);
+                    log.info("Total count without pagination :: {}", totalRecords);
+                    pagination.setTotalCount(Double.valueOf(totalRecords));
+                    artifactQuery = queryBuilder.addPaginationQuery(artifactQuery, pagination, preparedStmtList);
                 }
 
-                if (!artifactIds.isEmpty()) {
-                    String documentQuery = queryBuilder.getDocumentSearchQuery(artifactIds, preparedStmtListDoc);
-                    log.info("Final document query: {}", documentQuery);
-                    Document documentMap = jdbcTemplate.query(documentQuery, preparedStmtListDoc.toArray(), documentRowMapper);
-                    log.info("DB document map :: {}", documentMap);
+                List<Artifact> artifactList = jdbcTemplate.query(artifactQuery, preparedStmtList.toArray(), evidenceRowMapper);
+                log.info("DB artifact list :: {}", artifactList);
 
-                    String commentQuery = queryBuilder.getCommentSearchQuery(artifactIds, preparedStmtListCom);
-                    log.info("Final comment query: {}", commentQuery);
-                    List<Comment> commentMap = jdbcTemplate.query(commentQuery, preparedStmtListCom.toArray(), commentRowMapper);
-                    log.info("DB comment map :: {}", commentMap);
+                // Fetch associated comments
+                List<String> artifactIds = new ArrayList<>();
+                for (Artifact artifact : artifactList) {
+                    artifactIds.add(artifact.getId().toString());
+                }
+                if (artifactIds.isEmpty()) {
+                    return artifactList;
+                }
+
+                // Fetch associated comments
+                String commentQuery = queryBuilder.getCommentSearchQuery(artifactIds, preparedStmtListCom);
+                log.info("Final comment query: {}", commentQuery);
+                Map<UUID, List<Comment>> commentMap = jdbcTemplate.query(commentQuery, preparedStmtListCom.toArray(), commentRowMapper);
+                log.info("DB comment map :: {}", commentMap);
+
+                if (commentMap != null) {
+                    artifactList.forEach(artifact ->
+                            artifact.setComments(commentMap.get(UUID.fromString(String.valueOf(artifact.getId()))))
+                    );
+                }
+
+                // Fetch associated documents
+                String documentQuery = queryBuilder.getDocumentSearchQuery(artifactIds, preparedStmtListDoc);
+                log.info("Final document query: {}", documentQuery);
+                Map<UUID, Document> documentMap = jdbcTemplate.query(documentQuery, preparedStmtListDoc.toArray(), documentRowMapper);
+                log.info("DB document map :: {}", documentMap);
+
+                if (documentMap != null) {
+                    artifactList.forEach(artifact ->
+                            artifact.setFile(documentMap.get(UUID.fromString(String.valueOf(artifact.getId()))))
+                    );
                 }
 
                 return artifactList;
@@ -90,5 +121,11 @@
             }
         }
 
+
+        public Integer getTotalCountArtifact(String baseQuery, List<Object> preparedStmtList) {
+            String countQuery = queryBuilder.getTotalCountQuery(baseQuery);
+            log.info("Final count query :: {}", countQuery);
+            return jdbcTemplate.queryForObject(countQuery, preparedStmtList.toArray(), Integer.class);
+        }
     }
 

@@ -46,6 +46,7 @@ import DocViewerWrapper from "./pages/employee/docViewerWrapper";
 import CustomSortComponent from "./components/CustomSortComponent";
 import CustomErrorTooltip from "./components/CustomErrorTooltip";
 import Button from "./components/Button";
+import Button from "./components/Button";
 import MultiUploadWrapper from "./components/MultiUploadWrapper";
 import CustomCopyTextDiv from "./components/CustomCopyTextDiv";
 import { DRISTIService } from "./services";
@@ -64,11 +65,13 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
     return <Loader />;
   }
   Digit.SessionStorage.set("DRISTI_TENANTS", tenants);
-
+  const urlParams = new URLSearchParams(window.location.search);
+  const result = urlParams.get("result");
+  console.log(result, "result");
   if (userType === "citizen" && userInfo?.type !== "EMPLOYEE") {
     return (
       <ToastProvider>
-        <CitizenApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} tenantId={tenantID} />
+        <CitizenApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} tenantId={tenantID} result={result} />
       </ToastProvider>
     );
   }
@@ -77,7 +80,7 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   }
   return (
     <ToastProvider>
-      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants}></EmployeeApp>
+      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} result={result}></EmployeeApp>
     </ToastProvider>
   );
 };
@@ -117,7 +120,11 @@ const componentsToRegister = {
   Modal,
   CustomCaseInfoDiv,
   CustomErrorTooltip,
+  Modal,
+  CustomCaseInfoDiv,
+  CustomErrorTooltip,
   CustomSortComponent,
+  CustomButton: Button,
   CustomButton: Button,
   DocViewerWrapper,
   MultiUploadWrapper,

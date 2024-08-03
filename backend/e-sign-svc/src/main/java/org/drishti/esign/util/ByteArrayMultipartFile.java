@@ -29,7 +29,7 @@ public class ByteArrayMultipartFile implements MultipartFile {
     @Override
     public String getContentType() {
         // You can return a default content type or determine it based on the file extension
-        return "application/octet-stream";
+        return "application/pdf";
     }
 
     @Override

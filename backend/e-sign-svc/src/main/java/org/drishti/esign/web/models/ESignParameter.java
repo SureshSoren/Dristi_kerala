@@ -28,4 +28,7 @@ public class ESignParameter {
     @JsonProperty("tenantId")
     private String tenantId;
 
+    @JsonProperty("pageModule")
+    private String pageModule;
+
 }

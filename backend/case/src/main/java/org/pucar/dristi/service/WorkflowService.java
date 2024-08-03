@@ -1,45 +1,55 @@
 package org.pucar.dristi.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.egov.common.contract.models.Workflow;
-import org.egov.common.contract.request.RequestInfo;
-import org.egov.common.contract.request.User;
-import org.egov.common.contract.workflow.*;
-import org.egov.tracer.model.CustomException;
-import org.pucar.dristi.config.Configuration;
-import org.pucar.dristi.repository.ServiceRequestRepository;
-import org.pucar.dristi.web.models.CaseRequest;
-import org.pucar.dristi.web.models.CourtCase;
-import org.pucar.dristi.web.models.RequestInfoWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+import static org.pucar.dristi.config.ServiceConstants.WORKFLOW_SERVICE_EXCEPTION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.pucar.dristi.config.ServiceConstants.WORKFLOW_SERVICE_EXCEPTION;
+import org.egov.common.contract.models.Workflow;
+import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.User;
+import org.egov.common.contract.workflow.ProcessInstance;
+import org.egov.common.contract.workflow.ProcessInstanceRequest;
+import org.egov.common.contract.workflow.ProcessInstanceResponse;
+import org.egov.common.contract.workflow.State;
+import org.egov.tracer.model.CustomException;
+import org.pucar.dristi.config.Configuration;
+import org.pucar.dristi.repository.ServiceRequestRepository;
+import org.pucar.dristi.web.models.CaseCriteria;
+import org.pucar.dristi.web.models.CaseRequest;
+import org.pucar.dristi.web.models.CaseSearchRequest;
+import org.pucar.dristi.web.models.CourtCase;
+import org.pucar.dristi.web.models.RequestInfoWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
 public class WorkflowService {
 
-    @Autowired
     private ObjectMapper mapper;
 
-    @Autowired
     private ServiceRequestRepository repository;
 
-    @Autowired
     private Configuration config;
 
+    @Autowired
+    public WorkflowService(ObjectMapper mapper, ServiceRequestRepository repository, Configuration config) {
+        this.mapper = mapper;
+        this.repository = repository;
+        this.config = config;
+    }
 
     public void updateWorkflowStatus(CaseRequest caseRequest) {
             try {
-                ProcessInstance processInstance = getProcessInstance(caseRequest.getCases(), caseRequest.getRequestInfo());
+                ProcessInstance processInstance = getProcessInstance(caseRequest.getCases());
                 ProcessInstanceRequest workflowRequest = new ProcessInstanceRequest(caseRequest.getRequestInfo(), Collections.singletonList(processInstance));
                 log.info("ProcessInstance Request :: {}", workflowRequest);
                 String state=callWorkFlow(workflowRequest).getState();
@@ -67,7 +77,7 @@ public class WorkflowService {
         }
     }
 
-    public ProcessInstance getProcessInstance(CourtCase courtCase, RequestInfo requestInfo) {
+    public ProcessInstance getProcessInstance(CourtCase courtCase) {
         try {
             Workflow workflow = courtCase.getWorkflow();
             ProcessInstance processInstance = new ProcessInstance();
@@ -136,6 +146,26 @@ public class WorkflowService {
             log.error("Error getting process instance for case registration payment :: {}", e.toString());
             throw new CustomException(WORKFLOW_SERVICE_EXCEPTION, e.getMessage());
         }
+    }
+
+    public ProcessInstanceRequest getProcessInstanceForCasePayment(CaseSearchRequest updateRequest, String tenantId) {
+
+        CaseCriteria caseCriteria = updateRequest.getCriteria().get(0);
+
+        ProcessInstance process = ProcessInstance.builder()
+                .businessService(config.getCaseBusinessServiceName())
+                .businessId(caseCriteria.getFilingNumber())
+                .comment("Payment for Case processed")
+                .moduleName(config.getCaseBusinessName())
+                .tenantId(tenantId)
+                .action("MAKE_PAYMENT")
+                .build();
+
+        return ProcessInstanceRequest.builder()
+                .requestInfo(updateRequest.getRequestInfo())
+                .processInstances(Arrays.asList(process))
+                .build();
+
     }
 
     public Workflow getWorkflowFromProcessInstance(ProcessInstance processInstance) {

@@ -29,9 +29,14 @@
 .header-wrapper {
   padding-top: 16px;
   /* Adjust the padding as needed */
+  padding-top: 16px;
+  /* Adjust the padding as needed */
 }
 
 .search-tabs-container .search-tab-head-selected {
+  color: theme(digitv2.lightTheme.primary) !important;
+  border: solid theme(digitv2.lightTheme.primary) !important;
+  border-width: 1px 1px 4px !important;
   color: theme(digitv2.lightTheme.primary) !important;
   border: solid theme(digitv2.lightTheme.primary) !important;
   border-width: 1px 1px 4px !important;

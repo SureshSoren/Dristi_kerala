@@ -14,8 +14,7 @@ function CommentComponent({ key, comment }) {
           {comment?.author}
           {comment?.additionalDetails?.author}
           <span className="times-stamp" style={{ color: "#77787B", marginLeft: "10px" }}>
-            {comment?.timestamp}{" "}
-            {comment?.additionalDetails?.timestamp}{" "}
+            {comment?.timestamp} {comment?.additionalDetails?.timestamp}{" "}
           </span>
         </h3>
         <p className="comment-text">{comment?.text}</p>

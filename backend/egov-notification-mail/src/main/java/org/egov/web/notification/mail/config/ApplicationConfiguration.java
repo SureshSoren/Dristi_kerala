@@ -111,4 +111,10 @@ public class ApplicationConfiguration {
     @Value("${egov.from.email}")
     private String senderEmail;
 
+    @Value("${egov.mdms.host}")
+    private String mdmsHost;
+
+    @Value("${egov.mdms.search.endpoint}")
+    private String mdmsEndPoint;
+
 }

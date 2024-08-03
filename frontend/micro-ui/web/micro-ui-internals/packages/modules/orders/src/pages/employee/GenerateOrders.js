@@ -132,6 +132,21 @@ const GenerateOrders = () => {
     filingNumber
   );
 
+  const { data: applicationData, isLoading: isApplicationDetailsLoading } = Digit.Hooks.submissions.useSearchSubmissionService(
+    {
+      criteria: {
+        filingNumber: filingNumber,
+        tenantId: tenantId,
+        applicationNumber: applicationNumber,
+      },
+      tenantId,
+    },
+    {},
+    applicationNumber,
+    applicationNumber
+  );
+  const applicationDetails = useMemo(() => applicationData?.applicationList?.[0], [applicationData]);
+
   const caseDetails = useMemo(
     () => ({
       ...caseData?.criteria?.[0]?.responseList?.[0],
@@ -823,7 +838,13 @@ const GenerateOrders = () => {
         />
       )}
       {showsignatureModal && (
-        <OrderSignatureModal t={t} order={currentOrder} handleIssueOrder={handleIssueOrder} handleGoBackSignatureModal={handleGoBackSignatureModal} />
+        <OrderSignatureModal
+          t={t}
+          order={currentOrder}
+          handleIssueOrder={handleIssueOrder}
+          handleGoBackSignatureModal={handleGoBackSignatureModal}
+          saveOnsubmitLabel={"ISSUE_ORDER"}
+        />
       )}
       {showSuccessModal && <OrderSucessModal t={t} order={prevOrder} handleDownloadOrders={handleDownloadOrders} handleClose={handleClose} />}
       {showErrorToast && (

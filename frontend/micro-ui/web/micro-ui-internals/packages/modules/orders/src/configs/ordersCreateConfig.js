@@ -200,7 +200,7 @@ export const configsOrderSection202CRPC = [
     body: [
       {
         label: "REF_APPLICATION_ID",
-        isMandatory: false,
+        isMandatory: true,
         key: "refApplicationId",
         disable: true,
         type: "text",

@@ -464,8 +464,6 @@ export const UICustomizations = {
           return <span>NIA S138</span>;
         case "Stage":
           return <span>E-filing</span>;
-        case "Amount Due":
-          return <span>Rs 2000</span>;
         case "Action":
           return (
             <span className="action-link">
@@ -584,7 +582,7 @@ export const UICustomizations = {
     },
   },
   SearchIndividualConfig: {
-    preProcess: (requestCriteria, additionalDetails) => {      
+    preProcess: (requestCriteria, additionalDetails) => {
       const filterList = Object.keys(requestCriteria.state.searchForm)
         .map((key) => {
           if (requestCriteria.state.searchForm[key]?.type) {
@@ -663,6 +661,7 @@ export const UICustomizations = {
           );
         case "Order Type":
           return <OrderName rowData={row} colData={column} value={value} />;
+        case "Submission Type":
         case "Submission Type":
           return <OwnerColumn rowData={row} colData={column} t={t} value={value} showAsHeading={true} />;
         case "Document Type":

@@ -29,10 +29,11 @@ public class PostalHubRepository {
     }
 
 
-    public List<PostalHub> getPostalHub(HubSearchCriteria criteria, Integer limit, Integer offset) {
+    public List<PostalHub> getPostalHub(HubSearchCriteria criteria) {
         List<Object> preparedStmtList = new ArrayList<>();
-        String query = queryBuilder.getPostalHubQuery(criteria, preparedStmtList, limit, offset);
+        List<Integer> preparedStmtArgsList = new ArrayList<>();
+        String query = queryBuilder.getPostalHubQuery(criteria, preparedStmtList, preparedStmtArgsList);
         log.debug("Final query: " + query);
-        return jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
+        return jdbcTemplate.query(query, preparedStmtList.toArray(), preparedStmtArgsList.stream().mapToInt(Integer::intValue).toArray(), rowMapper);
     }
 }

@@ -267,6 +267,7 @@ function CaseFileAdmission({ t, path }) {
         },
       });
     });
+    setCaseADmitLoader(false);
   };
   const scheduleHearing = async ({ purpose, participant, date }) => {
     return DRISTIService.createHearings(
@@ -401,6 +402,7 @@ function CaseFileAdmission({ t, path }) {
         <div className="file-case">
           <div className="file-case-side-stepper">
             <div className="file-case-select-form-section">
+              {sidebar?.map((key, index) => (
               {sidebar?.map((key, index) => (
                 <div className="accordion-wrapper">
                   <div key={index} className="accordion-title">

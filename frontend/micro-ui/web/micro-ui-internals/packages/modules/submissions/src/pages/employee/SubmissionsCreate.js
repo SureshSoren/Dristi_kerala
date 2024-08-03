@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FormComposerV2, Header, Loader } from "@egovernments/digit-ui-react-components";
 import {
@@ -41,8 +42,12 @@ const SubmissionsCreate = () => {
   const tenantId = Digit.ULBService.getCurrentTenantId();
   const { t } = useTranslation();
   const history = useHistory();
+  const history = useHistory();
   const urlParams = new URLSearchParams(window.location.search);
   const filingNumber = urlParams.get("filingNumber");
+  const orderNumber = urlParams.get("orderNumber");
+  const applicationNumber = urlParams.get("applicationNumber");
+  const isExtension = urlParams.get("isExtension");
   const orderNumber = urlParams.get("orderNumber");
   const applicationNumber = urlParams.get("applicationNumber");
   const isExtension = urlParams.get("isExtension");
@@ -454,6 +459,7 @@ const SubmissionsCreate = () => {
             status: "in_progress",
             comments: "Workflow comments",
             documents: [{}],
+            // assignes: getAllAssignees(caseDetails),
           },
         },
       };

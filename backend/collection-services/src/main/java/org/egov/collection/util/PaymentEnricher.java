@@ -6,9 +6,7 @@ import static org.egov.collection.config.CollectionServiceConstants.MASTER_COLLE
 import static org.egov.collection.config.CollectionServiceConstants.MASTER_ISADVANCEALLOWED_KEY;
 import static org.egov.collection.config.CollectionServiceConstants.MASTER_PARTPAYMENTALLOWED_KEY;
 import static org.egov.collection.config.CollectionServiceConstants.MDMS_BUSINESSSERVICE_PATH;
-import static org.egov.collection.model.enums.InstrumentTypesEnum.CARD;
-import static org.egov.collection.model.enums.InstrumentTypesEnum.CASH;
-import static org.egov.collection.model.enums.InstrumentTypesEnum.ONLINE;
+import static org.egov.collection.model.enums.InstrumentTypesEnum.*;
 import static org.egov.collection.model.enums.PaymentModeEnum.ONLINE_NEFT;
 import static org.egov.collection.model.enums.PaymentModeEnum.ONLINE_RTGS;
 
@@ -180,7 +178,8 @@ public class PaymentEnricher {
 		Payment payment = paymentRequest.getPayment();
 		String paymentMode = payment.getPaymentMode().toString();
 
-		if (paymentMode.equalsIgnoreCase(CASH.name())) {
+		if (paymentMode.equalsIgnoreCase(CASH.name()) || paymentMode.equalsIgnoreCase(DD.name()) ||
+				paymentMode.equalsIgnoreCase(CHEQUE.name()) || paymentMode.equalsIgnoreCase(STAMP.name())) {
 			String transactionId = idGenRepository.generateTransactionNumber(paymentRequest.getRequestInfo(),
 					payment.getTenantId());
 			payment.setTransactionNumber(transactionId);

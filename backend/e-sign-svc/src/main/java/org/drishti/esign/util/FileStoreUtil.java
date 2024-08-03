@@ -6,16 +6,18 @@ import org.drishti.esign.config.Configuration;
 import org.drishti.esign.repository.ServiceRequestRepository;
 import org.drishti.esign.web.models.StorageResponse;
 import org.egov.tracer.model.CustomException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class FileStoreUtil {
@@ -66,6 +68,10 @@ public class FileStoreUtil {
 
 
     public String storeFileInFileStore(MultipartFile file, String tenantId) {
+
+        if (!FileValidationUtil.isValidFile(file)) {
+            throw new IllegalArgumentException("Invalid file type");
+        }
         String module = "signed";  // fixme: take me from constant file
         StringBuilder uri = new StringBuilder();
         uri.append(configs.getFilestoreHost()).append(configs.getFilestoreCreateEndPoint());
@@ -73,16 +79,21 @@ public class FileStoreUtil {
         List<MultipartFile> files = new ArrayList<>();
         files.add(file);
 
-        Map<String, Object> request = new HashMap<>();
-        request.put("file", files);
-        request.put("tenantId", tenantId);
-        request.put("module", module);
+        MultiValueMap<String, Object> request = new LinkedMultiValueMap<>();
+        request.add("file", file.getResource());
+        request.add("tenantId", tenantId);
+        request.add("module", module);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        Object response = serviceRepository.fetchResult(uri, request);
-        StorageResponse storageResponse = mapper.convertValue(response, StorageResponse.class);
+        HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(request, headers);
 
 
-        return storageResponse.getFiles().get(0).getFileStoreId(); //fixme: handle null wala part
+        ResponseEntity<String> response = restTemplate.exchange(uri.toString(), HttpMethod.POST, entity, String.class);
+        String body = response.getBody();
+        JSONObject jsonObject = new JSONObject(body);
+        JSONObject fileObject = jsonObject.getJSONArray("files").getJSONObject(0);
+        return fileObject.getString("fileStoreId");
 
 
     }

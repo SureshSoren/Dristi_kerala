@@ -32,6 +32,7 @@ export const OwnerColumn = ({ rowData, colData, value = "", showAsHeading = fals
   const docObj = rowData?.documents?.map((doc) => {
     return {
       status: rowData?.status,
+      status: rowData?.status,
       details: {
         applicationType: rowData?.applicationType,
         applicationSentOn: formatDate(parseInt(rowData?.auditDetails.createdTime)),
@@ -42,6 +43,7 @@ export const OwnerColumn = ({ rowData, colData, value = "", showAsHeading = fals
         referenceId: rowData?.referenceId,
       },
       applicationContent: {
+        tenantId: rowData?.tenantId,
         tenantId: rowData?.tenantId,
         fileStoreId: doc.fileStore,
         id: doc.id,

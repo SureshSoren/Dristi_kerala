@@ -39,6 +39,7 @@ function CaseType({ t }) {
   const [isDisabled, setIsDisabled] = useState(false);
   const onCancel = () => {
     history.push("/digit-ui/citizen/home/home-pending-task");
+    history.push("/digit-ui/citizen/home/home-pending-task");
   };
   const onSelect = () => {
     setPage(1);
@@ -158,6 +159,7 @@ function CaseType({ t }) {
                 statutesAndSections: [
                   {
                     tenantId,
+                    statute: statuteData?.name,
                     statute: statuteData?.name,
                     sections: ["Negotiable Instrument Act", "02."],
                     subsections: ["138", "03."],
