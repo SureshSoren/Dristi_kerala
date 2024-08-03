@@ -59,17 +59,17 @@ public class HearingScheduler {
             List<String> ids = new ArrayList<>();
             HashMap<String, LocalDate> dateMap = new HashMap<>();
             List<ReScheduleHearing> blockedHearings = new ArrayList<>();
-            for (ReScheduleHearing element : reScheduleHearingsRequest.getReScheduleHearing()) {
-                if (Objects.equals(element.getWorkflow().getAction(), "SCHEDULE")) {
-                    hearingsNeedToBeSchedule.add(element);
-                    ids.add(element.getHearingBookingId());
-                    dateMap.put(element.getHearingBookingId(), element.getScheduleDate());
-                }
-                if (Objects.equals(element.getWorkflow().getAction(), "APPROVE")) {
-                    blockedHearings.add(element);
-
-                }
-            }
+//            for (ReScheduleHearing element : reScheduleHearingsRequest.getReScheduleHearing()) {
+//                if (Objects.equals(element.getWorkflow().getAction(), "SCHEDULE")) {
+//                    hearingsNeedToBeSchedule.add(element);
+//                    ids.add(element.getHearingBookingId());
+//                    dateMap.put(element.getHearingBookingId(), element.getScheduleDate());
+//                }
+//                if (Objects.equals(element.getWorkflow().getAction(), "APPROVE")) {
+//                    blockedHearings.add(element);
+//
+//                }
+//            }
 
             ReScheduleHearingRequest request = ReScheduleHearingRequest.builder().reScheduleHearing(blockedHearings)
                     .requestInfo(reScheduleHearingsRequest.getRequestInfo()).build();
@@ -81,8 +81,8 @@ public class HearingScheduler {
                                 .hearingIds(ids).build())
                         .build(), null, null);
                 for (ScheduleHearing hearing : hearings) {
-                    hearing.setStatus(Status.SCHEDULED);
-                    hearing.setDate(dateMap.get(hearing.getHearingBookingId()));
+                    hearing.setStatus(Status.SCHEDULED.toString());
+//                    hearing.setDate(dateMap.get(hearing.getHearingBookingId()));
                 }
 
                 List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);

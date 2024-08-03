@@ -78,8 +78,8 @@ public class ScheduleHearingConsumerService {
 
                 // update here all the suggestedDay in reschedule hearing day
 
-                List<LocalDate> suggestedDays = availability.stream().map(
-                                (suggestedDate) -> LocalDate.parse(suggestedDate.getDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                List<Long> suggestedDays = availability.stream().map(
+                                (suggestedDate) -> Long.valueOf(suggestedDate.getDate()))
                         .toList();
                 hearingDetail.setSuggestedDates(suggestedDays);
                 hearingDetail.setRowVersion(hearingDetail.getRowVersion() + 1);
@@ -91,7 +91,7 @@ public class ScheduleHearingConsumerService {
                                 .hearingIds(Collections.singletonList(hearingDetail.getHearingBookingId()))
                                 .build()).build(), null, null);
                 ScheduleHearing hearing = hearings.get(0);
-                hearings.get(0).setStatus(Status.RE_SCHEDULED);
+                hearings.get(0).setStatus(Status.RE_SCHEDULED.toString());
 
 
                 //reschedule hearing to unblock the calendar
@@ -106,10 +106,9 @@ public class ScheduleHearingConsumerService {
 
                     ScheduleHearing scheduleHearing = new ScheduleHearing(hearing);
 
-                    scheduleHearing.setDate(LocalDate.parse(availabilityDTO.getDate()));
-                    scheduleHearing.setStartTime(LocalDateTime.of(scheduleHearing.getDate(), hearing.getStartTime().toLocalTime()));
-                    scheduleHearing.setEndTime(LocalDateTime.of(scheduleHearing.getDate(), hearing.getEndTime().toLocalTime()));
-                    scheduleHearing.setStatus(Status.BLOCKED);
+                    scheduleHearing.setStartTime(hearing.getStartTime());
+                    scheduleHearing.setEndTime(hearing.getEndTime());
+                    scheduleHearing.setStatus(Status.BLOCKED.toString());
                     udpateHearingList.add(scheduleHearing);
                     scheduleHearing.setRescheduleRequestId(hearingDetail.getRescheduledRequestId());
 

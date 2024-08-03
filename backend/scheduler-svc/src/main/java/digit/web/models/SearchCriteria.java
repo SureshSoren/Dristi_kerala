@@ -10,7 +10,7 @@ public interface SearchCriteria {
 
     String getCourtId();
 
-    LocalDate getFromDate();
+    Long getFromDate();
 
-    LocalDate getToDate();
+    Long getToDate();
 }

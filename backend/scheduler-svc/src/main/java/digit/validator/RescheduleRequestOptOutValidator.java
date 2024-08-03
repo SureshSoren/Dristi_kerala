@@ -83,7 +83,7 @@ public class RescheduleRequestOptOutValidator {
         if (ids.size() != search.size()) {
             throw new CustomException("DK_OO_APP_ERR", "Reschedule request does not exist in database");
         }
-        Map<String, List<LocalDate>> resultMap = new HashMap<>();
+        Map<String, List<Long>> resultMap = new HashMap<>();
         //check weather request is approved or not
         search.forEach((element) -> {
             if (!element.getStatus().equals(Status.APPROVED)) {

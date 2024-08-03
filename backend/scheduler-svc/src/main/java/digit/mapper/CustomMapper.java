@@ -12,9 +12,8 @@ public interface CustomMapper {
     CustomMapper INSTANCE = Mappers.getMapper(CustomMapper.class);
 
     @Mapping(source = "hearingId", target = "hearingBookingId")
-    @Mapping(source = "hearingType", target = "eventType")
+    @Mapping(source = "hearingType", target = "hearingType")
     @Mapping(source = "presidedBy.courtID", target = "courtId")
     @Mapping(source = "status", target = "status")
-    @Mapping(source = "date", target = "startTime")
     ScheduleHearing hearingToScheduleHearingConversion(Hearing hearing);
 }

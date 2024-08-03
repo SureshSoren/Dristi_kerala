@@ -49,8 +49,6 @@ public class OptOutConsumerService {
 
 
     public void checkAndScheduleHearingForOptOut(HashMap<String, Object> record) {
-
-
         try {
             log.info("operation = checkAndScheduleHearingForOptOut, result = IN_PROGRESS, record = {}", record);
             OptOutRequest optOutRequest = mapper.convertValue(record, OptOutRequest.class);
@@ -71,10 +69,9 @@ public class OptOutConsumerService {
                         .builder().requestInfo(requestInfo)
                         .criteria(ScheduleHearingSearchCriteria.builder()
                                 .rescheduleId(optOut.getRescheduleRequestId())
-                                .status(Collections.singletonList(Status.BLOCKED))
-                                .fromDate(optoutDates.get(0))
-                                .toDate(optoutDates.get(optoutDates.size() - 1)).build()).build(), null, null);
-                hearingList.forEach(hearing -> hearing.setStatus(Status.CANCELLED));
+                                .status(Collections.singletonList(Status.BLOCKED.toString()))
+                                .build()).build(), null, null);
+                hearingList.forEach(hearing -> hearing.setStatus(Status.CANCELLED.toString()));
 
                 //release judge calendar for opt out dates
                 hearingService.update(ScheduleHearingRequest.builder()
@@ -101,9 +98,9 @@ public class OptOutConsumerService {
                         .rescheduledRequestId(Collections.singletonList(rescheduleRequestId)).build(), null, null);
 
 
-                List<LocalDate> suggestedDates = reScheduleRequest.get(0).getSuggestedDates();
-                List<LocalDate> availableDates = reScheduleRequest.get(0).getAvailableDates();
-                Set<LocalDate> suggestedDatesSet = existingOptOut.isEmpty() ? new HashSet<>(availableDates) : new HashSet<>(suggestedDates);
+                List<Long> suggestedDates = reScheduleRequest.get(0).getSuggestedDates();
+                List<Long> availableDates = reScheduleRequest.get(0).getAvailableDates();
+                Set<Long> suggestedDatesSet = existingOptOut.isEmpty() ? new HashSet<>(availableDates) : new HashSet<>(suggestedDates);
 
                 optoutDates.forEach(suggestedDatesSet::remove);
 

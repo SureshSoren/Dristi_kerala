@@ -51,8 +51,8 @@ public class RequestOptOutScheduleTask {
                 List<OptOut> optOuts = requestOptOutRepository.getOptOut(OptOutSearchCriteria.builder().judgeId(reScheduleHearing.getJudgeId()).caseId(reScheduleHearing.getCaseId()).rescheduleRequestId(reScheduleHearing.getRescheduledRequestId()).tenantId(reScheduleHearing.getTenantId()).build(), null, null);
 
 
-                List<LocalDate> suggestedDays = new ArrayList<>(reScheduleHearing.getSuggestedDates());
-                List<LocalDate> availableDates = new ArrayList<>(suggestedDays);
+                List<Long> suggestedDays = new ArrayList<>(reScheduleHearing.getSuggestedDates());
+                List<Long> availableDates = new ArrayList<>(suggestedDays);
 
                 for (OptOut optOut : optOuts) {
                     List<LocalDate> optOutDates = optOut.getOptoutDates();

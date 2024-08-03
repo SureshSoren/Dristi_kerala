@@ -36,29 +36,29 @@ public class HearingValidator {
 
     public void validateHearing(ScheduleHearingRequest schedulingRequests, double totalHrs, Map<String, MdmsHearing> hearingTypeMap) {
 
-        schedulingRequests.getHearing().forEach(application -> {
-            if (ObjectUtils.isEmpty(application.getTenantId()))
-                throw new CustomException("DK_SH_APP_ERR", "tenantId is mandatory for schedule a hearing");
+//        schedulingRequests.getHearing().forEach(application -> {
+//            if (ObjectUtils.isEmpty(application.getTenantId()))
+//                throw new CustomException("DK_SH_APP_ERR", "tenantId is mandatory for schedule a hearing");
 
-            if (ObjectUtils.isEmpty(application.getEventType()))
-                throw new CustomException("DK_SH_APP_ERR", "Event type is mandatory for schedule a hearing");
-
-            if (ObjectUtils.isEmpty(application.getDate())) {
-                throw new CustomException("DK_SH_APP_ERR", "date is mandatory for schedule a hearing");
-            } else {
-                LocalDate date = application.getDate();
-                if (date.isBefore(LocalDate.now())) {
-                    throw new CustomException("DK_SH_APP_ERR", "cannot schedule a hearing for past date: " + date);
-
-                }
-            }
-            StringBuilder url = new StringBuilder(config.getCaseUrl() + config.getCaseEndpoint());
-            SearchCaseRequest caseSearchCriteria = SearchCaseRequest.builder().RequestInfo(schedulingRequests.getRequestInfo()).tenantId(config.getEgovStateTenantId()).criteria(Collections.singletonList(CaseCriteria.builder().caseId(application.getCaseId()).build())).build();
-            Object response = requestRepository.postMethod(url, caseSearchCriteria);
-
-        });
-
-        verifyHearingDates(schedulingRequests.getHearing(), totalHrs, hearingTypeMap);
+//            if (ObjectUtils.isEmpty(application.getEventType()))
+//                throw new CustomException("DK_SH_APP_ERR", "Event type is mandatory for schedule a hearing");
+//
+//            if (ObjectUtils.isEmpty(application.getDate())) {
+//                throw new CustomException("DK_SH_APP_ERR", "date is mandatory for schedule a hearing");
+//            } else {
+//                LocalDate date = application.getDate();
+//                if (date.isBefore(LocalDate.now())) {
+//                    throw new CustomException("DK_SH_APP_ERR", "cannot schedule a hearing for past date: " + date);
+//
+//                }
+//            }
+//            StringBuilder url = new StringBuilder(config.getCaseUrl() + config.getCaseEndpoint());
+//            SearchCaseRequest caseSearchCriteria = SearchCaseRequest.builder().RequestInfo(schedulingRequests.getRequestInfo()).tenantId(config.getEgovStateTenantId()).criteria(Collections.singletonList(CaseCriteria.builder().caseId(application.getCaseId()).build())).build();
+//            Object response = requestRepository.postMethod(url, caseSearchCriteria);
+//
+//        });
+//
+//        verifyHearingDates(schedulingRequests.getHearing(), totalHrs, hearingTypeMap);
     }
 
     private void verifyHearingDates(List<ScheduleHearing> hearingRequest, Double judgeBandwidth, Map<String, MdmsHearing> hearingTypeMap) {
@@ -68,11 +68,9 @@ public class HearingValidator {
 
             Double requiredSlot = null;
 
-            String eventType = hearing.getEventType().toString();
+            String eventType = "Eventype";
 
             ScheduleHearingSearchCriteria searchCriteria = ScheduleHearingSearchCriteria.builder()
-                    .toDate(hearing.getDate())
-                    .fromDate(hearing.getDate())
                     .judgeId(hearing.getJudgeId()).build();
 
             if (hearingTypeMap.containsKey(eventType)) {
@@ -86,7 +84,7 @@ public class HearingValidator {
 
 
             StringBuilder key = new StringBuilder();
-            key.append(hearing.getJudgeId()).append("-").append(hearing.getDate());
+            key.append(hearing.getJudgeId()).append("-");
             Double occupiedBandwidthOfJudgeForDay;
 
             if (map.containsKey(key.toString())) {

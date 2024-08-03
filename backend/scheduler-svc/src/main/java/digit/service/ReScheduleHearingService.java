@@ -79,12 +79,14 @@ public class ReScheduleHearingService {
 
         List<ReScheduleHearing> reScheduleHearing = reScheduleHearingsRequest.getReScheduleHearing();
 
-        validator.validateRescheduleRequest(reScheduleHearingsRequest);
+//        validator.validateRescheduleRequest(reScheduleHearingsRequest);
 
         enrichment.enrichRescheduleRequest(reScheduleHearingsRequest);
 
-        workflowService.updateWorkflowStatus(reScheduleHearingsRequest);
+//        workflowService.updateWorkflowStatus(reScheduleHearingsRequest);
 
+        producer.push("schedule-hearing-to-block-calendar", reScheduleHearing);
+        producer.push("check-opt-out", reScheduleHearing);
         producer.push(config.getRescheduleRequestCreateTopic(), reScheduleHearing);
 
         log.info("operation = create, result=SUCCESS, ReScheduleHearing={}", reScheduleHearing);
@@ -148,12 +150,12 @@ public class ReScheduleHearingService {
 
         String tenantId = request.getRequestInfo().getUserInfo().getTenantId();
         String judgeId = bulkRescheduling.getJudgeId();
-        LocalDateTime endTime = bulkRescheduling.getEndTime();
-        LocalDateTime startTime = bulkRescheduling.getStartTime();
-        LocalDate fromDate = bulkRescheduling.getScheduleAfter();
+        Long endTime = bulkRescheduling.getEndTime();
+        Long startTime = bulkRescheduling.getStartTime();
+        Long fromDate = bulkRescheduling.getScheduleAfter();
 
         ScheduleHearingSearchCriteria criteria = ScheduleHearingSearchCriteria.builder().judgeId(judgeId).startDateTime(startTime).endDateTime(endTime).tenantId(tenantId)
-                .status(Arrays.asList(Status.SCHEDULED, Status.BLOCKED)).build();
+                .status(Arrays.asList(Status.SCHEDULED.toString(), Status.BLOCKED.toString())).build();
 
         List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().requestInfo(request.getRequestInfo()).criteria(criteria).build(), null, null);
 
@@ -180,21 +182,21 @@ public class ReScheduleHearingService {
         // assign slots and push for schedule hearing
         int index = 0;
         Double requiredSlot = null;
-        for (ScheduleHearing hearing : hearings) {
-            String eventType = hearing.getEventType().toString();
-
-            MdmsHearing hearingType = hearingTypeMap.get(eventType);
-            requiredSlot = hearingType.getHearingTime() / 60.00;
-
-            Double occupiedBandwidth = availability.get(index).getOccupiedBandwidth();
-            if (totalHrs - occupiedBandwidth > requiredSlot) {  // need to configure
-                hearing.setDate(LocalDate.parse(availability.get(index).getDate()));
-                availability.get(index).setOccupiedBandwidth(occupiedBandwidth + requiredSlot);  // need to configure
-            } else {
-                hearing.setDate(LocalDate.parse(availability.get(++index).getDate()));
-                availability.get(index).setOccupiedBandwidth(availability.get(index).getOccupiedBandwidth() + requiredSlot);  // need to configure
-            }
-        }
+//        for (ScheduleHearing hearing : hearings) {
+//            String eventType = hearing.getEventType().toString();
+//
+//            MdmsHearing hearingType = hearingTypeMap.get(eventType);
+//            requiredSlot = hearingType.getHearingTime() / 60.00;
+//
+//            Double occupiedBandwidth = availability.get(index).getOccupiedBandwidth();
+////            if (totalHrs - occupiedBandwidth > requiredSlot) {  // need to configure
+////                hearing.setDate(LocalDate.parse(availability.get(index).getDate()));
+////                availability.get(index).setOccupiedBandwidth(occupiedBandwidth + requiredSlot);  // need to configure
+////            } else {
+////                hearing.setDate(LocalDate.parse(availability.get(++index).getDate()));
+////                availability.get(index).setOccupiedBandwidth(availability.get(index).getOccupiedBandwidth() + requiredSlot);  // need to configure
+////            }
+//        }
         // try to make it async
         // updated hearing in hearing table
         hearingService.updateBulk(ScheduleHearingRequest.builder()
@@ -224,7 +226,6 @@ public class ReScheduleHearingService {
                     .caseId(hearing.getCaseId())
                     .tenantId(hearing.getTenantId())
                     .requesterId(requesterId)
-                    .workflow(workflow)
                     .actionComment("AUTO SCHEDULE BY JUDGE")
                     .reason("reschedule by judge")
                     .build();

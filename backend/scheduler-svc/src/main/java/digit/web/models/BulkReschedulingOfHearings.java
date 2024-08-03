@@ -20,11 +20,11 @@ public class BulkReschedulingOfHearings {
     private String judgeId;
 
     @JsonProperty("startTime")
-    private LocalDateTime startTime;
+    private Long startTime;
 
     @JsonProperty("endTime")
-    private LocalDateTime endTime;
+    private Long endTime;
 
     @JsonProperty("scheduleAfter")
-    private LocalDate scheduleAfter;
+    private Long scheduleAfter;
 }

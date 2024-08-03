@@ -65,7 +65,7 @@ public class WorkflowService {
     private ProcessInstance getProcessInstanceForHearingReScheduler(ReScheduleHearing application, RequestInfo requestInfo) {
 
         log.info("operation= getProcessInstanceForHearingReScheduler, result=IN_PROGRESS, tenantId={}", application.getTenantId());
-        Workflow workflow = application.getWorkflow();
+        Workflow workflow = new Workflow();
 
         ProcessInstance processInstance = new ProcessInstance();
         processInstance.setBusinessId(application.getRescheduledRequestId());

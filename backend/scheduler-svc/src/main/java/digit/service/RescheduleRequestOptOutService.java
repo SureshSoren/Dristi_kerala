@@ -45,7 +45,7 @@ public class RescheduleRequestOptOutService {
     public List<OptOut> create(OptOutRequest request) {
         log.info("operation = create, result = IN_PROGRESS, OptOut = {}", request.getOptOuts());
 
-        optOutValidator.validateRequest(request);
+//        optOutValidator.validateRequest(request);
 
         optOutEnrichment.enrichCreateRequest(request);
 

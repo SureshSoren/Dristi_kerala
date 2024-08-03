@@ -25,10 +25,10 @@ public class CalendarSearchCriteria implements SearchCriteria {
     private String courtId;             // required field
 
     @JsonProperty("fromDate")
-    private LocalDate fromDate;
+    private Long fromDate;
 
     @JsonProperty("toDate")
-    private LocalDate toDate;
+    private Long toDate;
 
     @JsonProperty("periodType")
     private PeriodType periodType;

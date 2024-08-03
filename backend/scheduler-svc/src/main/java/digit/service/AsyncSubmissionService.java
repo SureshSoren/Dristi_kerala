@@ -52,7 +52,7 @@ public class AsyncSubmissionService {
         AsyncSubmission asyncSubmission = submissionRequest.getAsyncSubmission();
         asyncSubmission.setSubmissionDate(LocalDate.now().plusDays(config.getMinAsyncSubmissionDays()).toString());
         asyncSubmission.setResponseDate(LocalDate.now().plusDays(config.getMinAsyncResponseDays()).toString());
-        validator.validateDates(asyncSubmission);
+//        validator.validateDates(asyncSubmission);
         log.info("operation = getDueDates, result = SUCCESS");
         return asyncSubmission;
     }

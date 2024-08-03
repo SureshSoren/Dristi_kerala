@@ -44,8 +44,7 @@ public class ReScheduleHearing {
     private String reason;
 
     @JsonProperty("availableAfter")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate availableAfter;
+    private Long availableAfter;
 
     @JsonProperty("status")
     private Status status;
@@ -53,8 +52,8 @@ public class ReScheduleHearing {
     @JsonProperty("actionComment")
     private String actionComment;
 
-    @JsonProperty("workflow")
-    private Workflow workflow;
+//    @JsonProperty("workflow")
+//    private Workflow workflow;
 
     @JsonProperty("auditDetails")
     private AuditDetails auditDetails;
@@ -62,20 +61,20 @@ public class ReScheduleHearing {
     @JsonProperty("rowVersion")
     private Integer rowVersion = null;
 
-    @JsonProperty("documents")
-    @Valid
-    private List<Document> documents = null;
+//    @JsonProperty("documents")
+//    @Valid
+//    private List<Document> documents = null;
 
     @JsonProperty("suggestedDates")             // additional details
-    private List<LocalDate> suggestedDates;
+    private List<Long> suggestedDates;
 
     @JsonProperty("availableDates")             // additional details
-    private List<LocalDate> availableDates;
+    private List<Long> availableDates;
 
 
     @JsonProperty("scheduleDate")
     @JsonFormat(pattern = "yyyy-MM-dd")// additional details
-    private LocalDate scheduleDate;
+    private Long scheduleDate;
 
 
 }
