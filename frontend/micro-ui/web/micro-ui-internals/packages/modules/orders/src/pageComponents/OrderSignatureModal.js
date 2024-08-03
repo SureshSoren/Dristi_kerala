@@ -1,5 +1,5 @@
 import { CloseSvg, InfoCard } from "@egovernments/digit-ui-components";
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Modal from "../../../dristi/src/components/Modal";
 import { Button } from "@egovernments/digit-ui-react-components";
 import { FileUploadIcon } from "../../../dristi/src/icons/svgIndex";
@@ -87,7 +87,7 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
       headerBarEnd={<CloseBtn onClick={handleGoBackSignatureModal} />}
       actionCancelLabel={t("CS_COMMON_BACK")}
       actionCancelOnSubmit={handleGoBackSignatureModal}
-      actionSaveLabel={t("ISSUE_ORDER")}
+      actionSaveLabel={t(saveOnsubmitLabel)}
       isDisabled={!isSigned}
       actionSaveOnSubmit={() => {
         handleIssueOrder();
@@ -116,7 +116,8 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
                 label={t("CS_ESIGN")}
                 onButtonClick={() => {
                   // setOpenAadharModal(true);
-                  setIsSigned(true);
+                  // setIsSigned(true);
+                  handleEsign(name, eSignFIleId, pageModule);
                 }}
                 className={"aadhar-sign-in"}
                 labelClassName={"aadhar-sign-in"}
@@ -126,7 +127,8 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
                 label={t("UPLOAD_DIGITAL_SIGN_CERTI")}
                 onButtonClick={() => {
                   // setOpenUploadSignatureModal(true);
-                  setIsSigned(true);
+                  // setIsSigned(true);
+                  setOpenUploadSignatureModal(true);
                 }}
                 className={"upload-signature"}
                 labelClassName={"upload-signature-label"}
@@ -134,9 +136,9 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
             </div>
             <div className="donwload-submission">
               <h2>{t("WANT_TO_DOWNLOAD")}</h2>
-              <span style={{ color: "#007E7E", cursor: "pointer", textDecoration: "underline" }}>
+              <a href={uri} target="_blank" rel="noreferrer" style={{ color: "#007E7E", cursor: "pointer", textDecoration: "underline" }}>
                 {t("CLICK_HERE")}
-              </span>
+              </a>
             </div>
           </div>
         ) : (
