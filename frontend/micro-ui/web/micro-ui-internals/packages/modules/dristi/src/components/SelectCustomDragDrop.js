@@ -24,7 +24,7 @@ const DragDropJSX = ({ t, currentValue, error }) => {
           <div>
             <FileUploadIcon />
           </div>
-          <h3>Upload</h3>
+          <h3>{t("CS_COMMON_CHOOSE_FILE")}</h3>
         </div>
       </div>
       {error && <span className="alert-error">{t(error.msg || "CORE_REQUIRED_FIELD_ERROR")}</span>}
@@ -80,7 +80,7 @@ function SelectCustomDragDrop({ t, config, formData = {}, onSelect, errors, setE
     // }
     if (file?.fileStore) return null;
     const maxFileSize = input?.maxFileSize * 1024 * 1024;
-    return file.size > maxFileSize ? t(input?.maxFileErrorMessage) : null;
+    return file.size > maxFileSize ? `${t("CS_YOUR_FILE_EXCEEDED_THE")} ${input?.maxFileSize}${t("CS_COMMON_LIMIT_MB")}` : null;
   };
 
   const handleChange = (file, input, index = Infinity) => {
@@ -88,7 +88,7 @@ function SelectCustomDragDrop({ t, config, formData = {}, onSelect, errors, setE
     currentValue.splice(index, 1, file);
     const maxFileSize = input?.maxFileSize * 1024 * 1024;
     if (file.size > maxFileSize) {
-      setError(config.key, { message: t(input?.maxFileErrorMessage) });
+      setError(config.key, { message: `${t("CS_YOUR_FILE_EXCEEDED_THE")} ${input?.maxFileSize}${t("CS_COMMON_LIMIT_MB")}` });
     }
     setValue(currentValue, input?.name, file.size > maxFileSize);
   };
@@ -120,7 +120,7 @@ function SelectCustomDragDrop({ t, config, formData = {}, onSelect, errors, setE
                     {t(input?.documentHeader)}
                   </h1>
                   {input?.isOptional && <span style={{ color: "#77787B" }}>&nbsp;{`${t(input?.isOptional)}`}</span>}
-                  <CustomErrorTooltip message={t("")} showTooltip={Boolean(input?.infoTooltipMessage)} />
+                  <CustomErrorTooltip message={t(input?.documentHeader)} showTooltip={Boolean(input?.infoTooltipMessage)} />
                 </div>
               )}
               {input.documentSubText && <p className="custom-document-sub-header">{t(input.documentSubText)}</p>}
@@ -154,7 +154,17 @@ function SelectCustomDragDrop({ t, config, formData = {}, onSelect, errors, setE
                   toast.error(t("CS_INVALID_FILE_TYPE"));
                 }}
               />
-              <div className="upload-guidelines-div">{input.uploadGuidelines && <p>{t(input.uploadGuidelines)}</p>}</div>
+              <div className="upload-guidelines-div">
+                {input.fileTypes && input.maxFileSize ? (
+                  <p>
+                    {`${t("CS_COMMON_CHOOSE_FILE")} ${input?.fileTypes.map((type) => `.${type.toLowerCase()}`).join(` ${t("CS_COMMON_OR")} `)}. ${t(
+                      "CS_MAX_UPLOAD"
+                    )} ${input.maxFileSize}MB`}
+                  </p>
+                ) : (
+                  <p>{input.uploadGuidelines}</p>
+                )}
+              </div>
             </div>
             {input.downloadTemplateText && input.downloadTemplateLink && (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "20px" }}>

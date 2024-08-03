@@ -45,12 +45,17 @@ import CustomCaseInfoDiv from "./components/CustomCaseInfoDiv";
 import DocViewerWrapper from "./pages/employee/docViewerWrapper";
 import CustomSortComponent from "./components/CustomSortComponent";
 import CustomErrorTooltip from "./components/CustomErrorTooltip";
+import Button from "./components/Button";
 import MultiUploadWrapper from "./components/MultiUploadWrapper";
+import CustomCopyTextDiv from "./components/CustomCopyTextDiv";
+import { DRISTIService } from "./services";
+import CustomChooseDate from "./components/CustomChooseDate";
+import CustomCalendar from "./components/CustomCalendar";
 
 export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   const { path } = useRouteMatch();
   const history = useHistory();
-  const moduleCode = ["DRISTI", "CASE"];
+  const moduleCode = ["DRISTI", "CASE", "ORDERS", "SUBMISSIONS"];
   const tenantID = tenants?.[0]?.code?.split(".")?.[0];
   const language = Digit.StoreData.getCurrentLanguage();
   const { isLoading } = Digit.Services.useStore({ stateCode, moduleCode, language });
@@ -109,13 +114,18 @@ const componentsToRegister = {
   ScrutinyInfo,
   AdvocateNameDetails,
   CustomRadioInfoComponent,
-  MODAL: Modal,
-  CUSTOMCASEINFODIV: CustomCaseInfoDiv,
-  DOCVIEWERWRAPPER: DocViewerWrapper,
-  CUSTOMERRORTOOLTIP: CustomErrorTooltip,
+  Modal,
+  CustomCaseInfoDiv,
+  CustomErrorTooltip,
   CustomSortComponent,
+  CustomButton: Button,
   DocViewerWrapper,
   MultiUploadWrapper,
+  Button,
+  CustomCopyTextDiv,
+  DRISTIService,
+  CustomChooseDate,
+  CustomCalendar,
 };
 
 const overrideHooks = () => {

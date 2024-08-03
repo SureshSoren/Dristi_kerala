@@ -37,7 +37,7 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
           label={t("PLEASE_NOTE")}
           additionalElements={[
             <p>
-              {t("YOU_ARE_ADDING_YOUR_SIGNATURE_TO_THE")} <span style={{ fontWeight: "bold" }}>{order?.orderType}</span>
+              {t("YOU_ARE_ADDING_YOUR_SIGNATURE_TO_THE")} <span style={{ fontWeight: "bold" }}>{t(order?.orderType)}</span>
             </p>,
           ]}
           inline
@@ -53,7 +53,6 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
                 label={t("CS_ESIGN")}
                 onButtonClick={() => {
                   // setOpenAadharModal(true);
-                  console.log("first");
                   setIsSigned(true);
                 }}
                 className={"aadhar-sign-in"}
@@ -72,8 +71,8 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
             </div>
             <div className="donwload-submission">
               <h2>{t("WANT_TO_DOWNLOAD")}</h2>
-              <span>
-                <a href="">{t("CLICK_HERE")}</a>
+              <span style={{ color: "#007E7E", cursor: "pointer", textDecoration: "underline" }}>
+                {t("CLICK_HERE")}
               </span>
             </div>
           </div>

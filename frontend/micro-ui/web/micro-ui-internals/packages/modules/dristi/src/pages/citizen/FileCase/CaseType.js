@@ -1,6 +1,6 @@
 import { Loader } from "@egovernments/digit-ui-components";
 import { CitizenInfoLabel, CloseSvg } from "@egovernments/digit-ui-react-components";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useHistory, useRouteMatch } from "react-router-dom/cjs/react-router-dom.min";
 import Button from "../../../components/Button";
 import CustomDetailsCard from "../../../components/CustomDetailsCard";
@@ -9,6 +9,8 @@ import { FileDownloadIcon } from "../../../icons/svgIndex";
 import { DRISTIService } from "../../../services";
 import { userTypeOptions } from "../registration/config";
 import SelectCustomNote from "../../../components/SelectCustomNote";
+import _ from "lodash";
+import useGetStatuteSection from "../../../hooks/dristi/useGetStatuteSection";
 
 const customNoteConfig = {
   populators: {
@@ -36,7 +38,7 @@ function CaseType({ t }) {
   const [page, setPage] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
   const onCancel = () => {
-    history.push("/digit-ui/citizen/dristi/home");
+    history.push("/digit-ui/citizen/home/home-pending-task");
   };
   const onSelect = () => {
     setPage(1);
@@ -92,7 +94,6 @@ function CaseType({ t }) {
     const userType = useMemo(() => individualData?.Individual?.[0]?.additionalFields?.fields?.find((obj) => obj.key === "userType")?.value, [
       individualData?.Individual,
     ]);
-
     const { data: searchData, isLoading: isSearchLoading } = window?.Digit.Hooks.dristi.useGetAdvocateClerk(
       {
         criteria: [{ individualId }],
@@ -125,7 +126,9 @@ function CaseType({ t }) {
       return searchResult?.[0]?.responseList?.[0]?.id;
     }, [searchResult]);
 
-    if (isLoading || isFetching || isSearchLoading) {
+    const { isLoading: mdmsLoading, data: statuteData } = useGetStatuteSection();
+
+    if (isLoading || isFetching || isSearchLoading || mdmsLoading) {
       return <Loader />;
     }
     return (
@@ -150,13 +153,12 @@ function CaseType({ t }) {
                 resolutionMechanism: "COURT",
                 caseDescription: "Case description",
                 linkedCases: [],
-                filingDate: formatDate(new Date()),
                 caseDetails: {},
                 caseCategory: "CRIMINAL",
                 statutesAndSections: [
                   {
                     tenantId,
-                    statute: "Statute",
+                    statute: statuteData?.name,
                     sections: ["Negotiable Instrument Act", "02."],
                     subsections: ["138", "03."],
                   },
@@ -254,8 +256,8 @@ function CaseType({ t }) {
                                       city: city,
                                       state: addressLine1,
                                       coordinates: {
-                                        longitude: latitude,
-                                        latitude: longitude,
+                                        longitude: longitude,
+                                        latitude: latitude,
                                       },
                                       locality: address,
                                     },

@@ -1,17 +1,23 @@
 // default values of search input component
 const defaultSearchValues = {
-  individualName: "",
-  mobileNumber: "",
-  IndividualID: "",
+  owner: {},
+  parties: {},
+  hearingType: {},
+  orderType: {},
+  status: {},
+  orderNumber: "",
+  applicationType: {},
+  applicationNumber: "",
+  artifactType: {},
+  artifactNumber: "",
 };
 
 //config for tab search sceeen
 export const TabSearchconfig = {
   tenantId: "mz",
   moduleName: "commonCampaignUiConfig",
-  showTab: true, // setting true will enable tab screen
+  showTab: true,
   TabSearchconfig: [
-    // all tab config should be added in json array
     {
       label: "Overview",
       type: "search",
@@ -19,12 +25,6 @@ export const TabSearchconfig = {
     {
       label: "Complaints",
       type: "search",
-      // sections: {
-      //   searchResult: {
-      //     uiConfig: {},
-      //   },
-      //   show: true,
-      // },
     },
     {
       label: "Hearings",
@@ -54,7 +54,7 @@ export const TabSearchconfig = {
             primaryLabel: "ES_COMMON_SEARCH",
             secondaryLabel: "ES_COMMON_CLEAR_SEARCH",
             minReqFields: 0,
-            defaultValues: defaultSearchValues, // Set default values for search fields
+            defaultValues: defaultSearchValues,
             fields: [
               {
                 label: "Type",
@@ -71,39 +71,39 @@ export const TabSearchconfig = {
                   },
                 },
               },
-              {
-                label: "Stage",
-                isMandatory: false,
-                key: "stage",
-                type: "dropdown",
-                populators: {
-                  name: "stage",
-                  optionsKey: "value",
-                  mdmsConfig: {
-                    masterName: "Stage",
-                    moduleName: "case",
-                    // localePrefix: "SUBMISSION_TYPE",
-                  },
-                },
-              },
-              {
-                label: "Parties",
-                isMandatory: false,
-                key: "parties",
-                type: "dropdown",
-                populators: {
-                  name: "parties",
-                },
-              },
-              {
-                label: "Order ID",
-                isMandatory: false,
-                key: "orderId",
-                type: "text",
-                populators: {
-                  name: "orderId",
-                },
-              },
+              // {
+              //   label: "Stage",
+              //   isMandatory: false,
+              //   key: "stage",
+              //   type: "dropdown",
+              //   populators: {
+              //     name: "stage",
+              //     optionsKey: "value",
+              //     mdmsConfig: {
+              //       masterName: "Stage",
+              //       moduleName: "case",
+              //       // localePrefix: "SUBMISSION_TYPE",
+              //     },
+              //   },
+              // },
+              // {
+              //   label: "Parties",
+              //   isMandatory: false,
+              //   key: "parties",
+              //   type: "dropdown",
+              //   populators: {
+              //     name: "parties",
+              //   },
+              // },
+              // {
+              //   label: "Order ID",
+              //   isMandatory: false,
+              //   key: "orderNumber",
+              //   type: "text",
+              //   populators: {
+              //     name: "orderNumber",
+              //   },
+              // },
             ],
           },
           show: true,
@@ -115,11 +115,12 @@ export const TabSearchconfig = {
               {
                 label: "Hearing Type",
                 jsonPath: "hearingType",
+                additionalCustomization: true,
               },
-              {
-                label: "Stage",
-                jsonPath: "",
-              },
+              // {
+              //   label: "Stage",
+              //   jsonPath: "",
+              // },
               {
                 label: "Parties",
                 jsonPath: "attendees",
@@ -128,10 +129,20 @@ export const TabSearchconfig = {
               {
                 label: "Status",
                 jsonPath: "status",
+                additionalCustomization: true,
               },
               {
-                label: "Date Added",
+                label: "Date",
                 jsonPath: "startTime",
+                additionalCustomization: true,
+              },
+              // {
+              //   label: "Date Added",
+              //   jsonPath: "auditDetails.createdTime",
+              //   additionalCustomization: true,
+              // },
+              {
+                label: "Actions",
                 additionalCustomization: true,
               },
             ],
@@ -146,7 +157,7 @@ export const TabSearchconfig = {
       label: "Orders",
       type: "search",
       apiDetails: {
-        serviceName: "/order/order/v1/search",
+        serviceName: "/order/v1/search",
         requestParam: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
         },
@@ -170,7 +181,7 @@ export const TabSearchconfig = {
             primaryLabel: "ES_COMMON_SEARCH",
             secondaryLabel: "ES_COMMON_CLEAR_SEARCH",
             minReqFields: 0,
-            defaultValues: defaultSearchValues, // Set default values for search fields
+            defaultValues: defaultSearchValues,
             fields: [
               {
                 label: "Type",
@@ -187,21 +198,21 @@ export const TabSearchconfig = {
                   },
                 },
               },
-              {
-                label: "Stage",
-                isMandatory: false,
-                key: "stage",
-                type: "dropdown",
-                populators: {
-                  name: "stage",
-                  optionsKey: "value",
-                  mdmsConfig: {
-                    masterName: "Stage",
-                    moduleName: "case",
-                    // localePrefix: "SUBMISSION_TYPE",
-                  },
-                },
-              },
+              // {
+              //   label: "Stage",
+              //   isMandatory: false,
+              //   key: "stage",
+              //   type: "dropdown",
+              //   populators: {
+              //     name: "stage",
+              //     optionsKey: "value",
+              //     mdmsConfig: {
+              //       masterName: "Stage",
+              //       moduleName: "case",
+              //       // localePrefix: "SUBMISSION_TYPE",
+              //     },
+              //   },
+              // },
               {
                 label: "Status",
                 isMandatory: false,
@@ -209,30 +220,21 @@ export const TabSearchconfig = {
                 type: "dropdown",
                 populators: {
                   name: "status",
-                  optionsKey: "value",
+                  optionsKey: "type",
                   mdmsConfig: {
-                    masterName: "Status",
-                    moduleName: "case",
+                    masterName: "OrderStatus",
+                    moduleName: "Order",
                     // localePrefix: "SUBMISSION_TYPE",
                   },
                 },
               },
               {
-                label: "Parties",
+                label: "Search Order Id",
                 isMandatory: false,
-                key: "parties",
-                type: "dropdown",
-                populators: {
-                  name: "parties",
-                },
-              },
-              {
-                label: "Order ID",
-                isMandatory: false,
-                key: "orderId",
+                key: "orderNumber",
                 type: "text",
                 populators: {
-                  name: "orderId",
+                  name: "orderNumber",
                 },
               },
             ],
@@ -251,19 +253,20 @@ export const TabSearchconfig = {
               },
               {
                 label: "Order Id",
-                jsonPath: "id",
+                jsonPath: "orderNumber",
               },
-              {
-                label: "Stage",
-                jsonPath: "",
-              },
+              // {
+              //   label: "Stage",
+              //   jsonPath: "",
+              // },
               {
                 label: "Parties",
-                jsonPath: "",
+                jsonPath: "workflow.assignees",
               },
               {
                 label: "Status",
                 jsonPath: "status",
+                additionalCustomization: true,
               },
               {
                 label: "Date Added",
@@ -282,8 +285,9 @@ export const TabSearchconfig = {
     {
       label: "Submissions",
       type: "search",
+      customHookName: "dristi.useApplicationDetails",
       apiDetails: {
-        serviceName: "/application/application/v1/search",
+        serviceName: "/application/v1/search",
         requestParam: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
         },
@@ -310,7 +314,7 @@ export const TabSearchconfig = {
             primaryLabel: "ES_COMMON_SEARCH",
             secondaryLabel: "ES_COMMON_CLEAR_SEARCH",
             minReqFields: 0,
-            defaultValues: defaultSearchValues, // Set default values for search fields
+            defaultValues: defaultSearchValues,
             fields: [
               {
                 label: "Type",
@@ -327,21 +331,21 @@ export const TabSearchconfig = {
                   },
                 },
               },
-              {
-                label: "Stage",
-                isMandatory: false,
-                key: "stage",
-                type: "dropdown",
-                populators: {
-                  name: "stage",
-                  optionsKey: "value",
-                  mdmsConfig: {
-                    masterName: "Stage",
-                    moduleName: "case",
-                    // localePrefix: "SUBMISSION_TYPE",
-                  },
-                },
-              },
+              // {
+              //   label: "Stage",
+              //   isMandatory: false,
+              //   key: "stage",
+              //   type: "dropdown",
+              //   populators: {
+              //     name: "stage",
+              //     optionsKey: "value",
+              //     mdmsConfig: {
+              //       masterName: "Stage",
+              //       moduleName: "case",
+              //       // localePrefix: "SUBMISSION_TYPE",
+              //     },
+              //   },
+              // },
               {
                 label: "Status",
                 isMandatory: false,
@@ -349,30 +353,21 @@ export const TabSearchconfig = {
                 type: "dropdown",
                 populators: {
                   name: "status",
-                  optionsKey: "value",
+                  optionsKey: "type",
                   mdmsConfig: {
-                    masterName: "Status",
-                    moduleName: "case",
+                    masterName: "ApplicationStatus",
+                    moduleName: "Application",
                     // localePrefix: "SUBMISSION_TYPE",
                   },
                 },
               },
               {
-                label: "Owner",
+                label: "Search Submission Id",
                 isMandatory: false,
-                key: "owner",
-                type: "dropdown",
-                populators: {
-                  name: "owner",
-                },
-              },
-              {
-                label: "Documents",
-                isMandatory: false,
-                key: "documents",
+                key: "applicationNumber",
                 type: "text",
                 populators: {
-                  name: "documents",
+                  name: "applicationNumber",
                 },
               },
             ],
@@ -383,35 +378,28 @@ export const TabSearchconfig = {
         searchResult: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
           uiConfig: {
-            customDefaultPagination: {
-              searchForm: {},
-              filterForm: {},
-              tableForm: {
-                limit: 10,
-                offset: 0,
-              },
-            },
             columns: [
               {
-                label: "Submission Name",
+                label: "Submission Type",
                 jsonPath: "applicationType",
                 additionalCustomization: true,
               },
               {
                 label: "Submission Id",
-                jsonPath: "id",
+                jsonPath: "applicationNumber",
               },
-              {
-                label: "Stage",
-                jsonPath: "",
-              },
+              // {
+              //   label: "Stage",
+              //   jsonPath: "",
+              // },
               {
                 label: "Status",
-                jsonPath: "workflow.action",
+                jsonPath: "status",
+                additionalCustomization: true,
               },
               {
                 label: "Owner",
-                jsonPath: "",
+                jsonPath: "owner",
               },
               {
                 label: "Date Added",
@@ -435,8 +423,9 @@ export const TabSearchconfig = {
     {
       label: "Documents",
       type: "search",
+      customHookName: "dristi.useEvidenceDetails",
       apiDetails: {
-        serviceName: "/evidence/artifacts/v1/_search",
+        serviceName: "/evidence/v1/_search",
         requestParam: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
         },
@@ -458,21 +447,86 @@ export const TabSearchconfig = {
       },
       sections: {
         search: {
-          uiConfig: {},
+          uiConfig: {
+            formClassName: "custom-both-clear-search",
+            primaryLabel: "ES_COMMON_SEARCH",
+            secondaryLabel: "ES_COMMON_CLEAR_SEARCH",
+            minReqFields: 0,
+            defaultValues: defaultSearchValues,
+            fields: [
+              {
+                label: "Type",
+                isMandatory: false,
+                key: "artifactType",
+                type: "dropdown",
+                populators: {
+                  name: "artifactType",
+                  optionsKey: "name",
+                  mdmsConfig: {
+                    masterName: "EvidenceType",
+                    moduleName: "Evidence",
+                    localePrefix: "EVIDENCE_TYPE",
+                    select:
+                      "(data) => {return data['Evidence'].EvidenceType?.map((item) => {return { ...item, name: item.subtype !== '' ? `${item.type} (${item.subtype})` : item.type };});}",
+                    // localePrefix: "SUBMISSION_TYPE",
+                  },
+                },
+              },
+              // customDefaultPagination: {
+              //   searchForm: {},
+              //   filterForm: {},
+              //   tableForm: {
+              //     limit: 10,
+              //     offset: 0,
+              //   },
+              // },
+              // {
+              //   label: "Stage",
+              //   isMandatory: false,
+              //   key: "stage",
+              //   type: "dropdown",
+              //   populators: {
+              //     name: "stage",
+              //     optionsKey: "value",
+              //     mdmsConfig: {
+              //       masterName: "Stage",
+              //       moduleName: "case",
+              //       // localePrefix: "SUBMISSION_TYPE",
+              //     },
+              //   },
+              // },
+              // {
+              //   label: "Status",
+              //   isMandatory: false,
+              //   key: "status",
+              //   type: "dropdown",
+              //   populators: {
+              //     name: "status",
+              //     optionsKey: "value",
+              //     mdmsConfig: {
+              //       masterName: "Status",
+              //       moduleName: "case",
+              //       // localePrefix: "SUBMISSION_TYPE",
+              //     },
+              //   },
+              // },
+              {
+                label: "Search Artifact Number",
+                isMandatory: false,
+                key: "artifactNumber",
+                type: "text",
+                populators: {
+                  name: "artifactNumber",
+                },
+              },
+            ],
+          },
 
-          show: false,
+          show: true,
         },
         searchResult: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
           uiConfig: {
-            customDefaultPagination: {
-              searchForm: {},
-              filterForm: {},
-              tableForm: {
-                limit: 10,
-                offset: 0,
-              },
-            },
             columns: [
               {
                 label: "Document Type",
@@ -480,20 +534,17 @@ export const TabSearchconfig = {
                 additionalCustomization: true,
               },
               {
-                label: "Document Id",
-                jsonPath: "id",
+                label: "Artifact Number",
+                jsonPath: "artifactNumber",
               },
               {
                 label: "Source",
                 jsonPath: "sourceType",
+                additionalCustomization: true,
               },
               {
-                label: "Status",
-                jsonPath: "status",
-              },
-              {
-                label: "Evidence Number",
-                jsonPath: "evidenceNumber",
+                label: "Owner",
+                jsonPath: "owner",
               },
               {
                 label: "Date Added",
@@ -515,10 +566,98 @@ export const TabSearchconfig = {
       },
     },
     {
+      label: "History",
+      type: "search",
+      apiDetails: {
+        serviceName: "/casemanagement/casemanager/case/v1/_history",
+        requestParam: {
+          tenantId: Digit.ULBService.getCurrentTenantId(),
+        },
+        requestBody: {
+          criteria: {
+            tenantId: Digit.ULBService.getCurrentTenantId(),
+          },
+        },
+        masterName: "commonUiConfig",
+        moduleName: "HistoryConfig",
+        minParametersForSearchForm: 0,
+        tableFormJsonPath: "requestParam",
+        filterFormJsonPath: "requestBody.Individual",
+        searchFormJsonPath: "requestBody.Individual",
+      },
+      sections: {
+        // search: {
+        //   uiConfig: {
+        //     formClassName: "custom-both-clear-search",
+        //     primaryLabel: "ES_COMMON_SEARCH",
+        //     secondaryLabel: "ES_COMMON_CLEAR_SEARCH",
+        //     minReqFields: 0,
+        //     defaultValues: defaultSearchValues,
+        //     fields: [
+        //       // {
+        //       //   label: "Stage",
+        //       //   isMandatory: false,
+        //       //   key: "stage",
+        //       //   type: "dropdown",
+        //       //   populators: {
+        //       //     name: "stage",
+        //       //     optionsKey: "value",
+        //       //     mdmsConfig: {
+        //       //       masterName: "Stage",
+        //       //       moduleName: "case",
+        //       //       // localePrefix: "SUBMISSION_TYPE",
+        //       //     },
+        //       //   },
+        //       // },
+        //       {
+        //         label: "Owner",
+        //         isMandatory: false,
+        //         key: "owner",
+        //         type: "dropdown",
+        //         populators: {
+        //           name: "owner",
+        //         },
+        //       },
+        //     ],
+        //   },
+        //   show: false,
+        // },
+        searchResult: {
+          tenantId: Digit.ULBService.getCurrentTenantId(),
+          uiConfig: {
+            columns: [
+              {
+                label: "Instance",
+                jsonPath: "instance",
+                additionalCustomization: true,
+              },
+              {
+                label: "Date",
+                jsonPath: "date",
+                additionalCustomization: true,
+              },
+              // {
+              //   label: "Stage",
+              //   jsonPath: "stage",
+              // },
+              {
+                label: "Status",
+                jsonPath: "status",
+                additionalCustomization: true,
+              },
+            ],
+            enableColumnSort: true,
+            resultsJsonPath: "history",
+          },
+          show: true,
+        },
+      },
+    },
+    {
       label: "Parties",
       type: "search",
       apiDetails: {
-        serviceName: "/case/case/v1/_search",
+        serviceName: "/case/v1/_search",
         requestParam: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
         },
@@ -549,8 +688,9 @@ export const TabSearchconfig = {
                 jsonPath: "name",
               },
               {
-                label: "Type",
+                label: "Party Type",
                 jsonPath: "partyType",
+                additionalCustomization: true,
               },
               {
                 label: "Date Added",

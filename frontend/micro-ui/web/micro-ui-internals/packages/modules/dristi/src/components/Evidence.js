@@ -1,7 +1,8 @@
 import React from "react";
-import { FactCheckIcon } from "../icons/svgIndex";
+import { FactCheckIcon, FactCrossIcon } from "../icons/svgIndex";
+import ReactTooltip from "react-tooltip";
 
-export const Evidence = ({ rowData, colData, value = "", showAsHeading = false, t }) => {
+export const Evidence = ({ rowData, colData, value = "", showAsHeading = false, t, userRoles }) => {
   const getDate = (value) => {
     const date = new Date(value);
     const day = date.getDate().toString().padStart(2, "0");
@@ -17,7 +18,7 @@ export const Evidence = ({ rowData, colData, value = "", showAsHeading = false, 
       details: {
         applicationType: rowData.artifactType,
         applicationSentOn: getDate(parseInt(rowData.auditdetails.createdTime)),
-        sender: rowData.auditdetails.createdBy,
+        sender: rowData.owner,
         additionalDetails: rowData.additionalDetails,
         applicationId: rowData.id,
         auditDetails: rowData.auditDetails,
@@ -35,10 +36,27 @@ export const Evidence = ({ rowData, colData, value = "", showAsHeading = false, 
     },
   ];
 
+  // const message = () => ;
+
   return (
     <React.Fragment>
       <div className="fack-check-icon" onClick={() => colData?.clickFunc(docObj)}>
-        {showAsHeading ? <div style={{ fontWeight: "bold", textDecoration: "underline" }}>{value}</div> : <FactCheckIcon />}
+        {userRoles?.includes("JUDGE_ROLE") && (
+          <ReactTooltip id={`mark-unmark-tooltip-${rowData.artifactNumber}`} place="left">
+            {t(rowData.isEvidence ? "UNMARK_EVIDENCE_TOOLTIP" : "MARK_EVIDENCE_TOOLTIP")}
+          </ReactTooltip>
+        )}
+        {showAsHeading ? (
+          <div style={{ textDecoration: "underline", cursor: "pointer" }}>{t(value)}</div>
+        ) : rowData.isEvidence ? (
+          <span data-tip data-for={`mark-unmark-tooltip-${rowData.artifactNumber}`} style={{ cursor: "pointer" }}>
+            <FactCrossIcon />
+          </span>
+        ) : (
+          <span data-tip data-for={`mark-unmark-tooltip-${rowData.artifactNumber}`} style={{ cursor: "pointer" }}>
+            <FactCheckIcon />
+          </span>
+        )}
       </div>
     </React.Fragment>
   );
