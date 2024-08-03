@@ -4,9 +4,9 @@ package digit.service;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.ReScheduleRequestEnrichment;
-import digit.util.MasterDataUtil;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
+import digit.util.MasterDataUtil;
 import digit.validator.ReScheduleRequestValidator;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -66,7 +65,6 @@ public class ReScheduleHearingService {
     }
 
     /**
-     *
      * @param reScheduleHearingsRequest
      * @return
      */
@@ -76,14 +74,11 @@ public class ReScheduleHearingService {
 
         List<ReScheduleHearing> reScheduleHearing = reScheduleHearingsRequest.getReScheduleHearing();
 
-//        validator.validateRescheduleRequest(reScheduleHearingsRequest);
 
         enrichment.enrichRescheduleRequest(reScheduleHearingsRequest);
 
-//        workflowService.updateWorkflowStatus(reScheduleHearingsRequest);
-
         producer.push("schedule-hearing-to-block-calendar", reScheduleHearing);
-        producer.push("check-opt-out", reScheduleHearing);
+
         producer.push(config.getRescheduleRequestCreateTopic(), reScheduleHearing);
 
         log.info("operation = create, result=SUCCESS, ReScheduleHearing={}", reScheduleHearing);
@@ -93,7 +88,6 @@ public class ReScheduleHearingService {
     }
 
     /**
-     *
      * @param reScheduleHearingsRequest
      * @return
      */
@@ -118,15 +112,14 @@ public class ReScheduleHearingService {
     }
 
     /**
-     *
      * @param request
      * @return
      */
     public List<ReScheduleHearing> search(ReScheduleHearingReqSearchRequest request, Integer limit, Integer offset) {
         return repository.getReScheduleRequest(request.getCriteria(), limit, offset);
     }
+
     /**
-     *
      * @param request
      * @return
      */
@@ -205,7 +198,6 @@ public class ReScheduleHearingService {
     }
 
     /**
-     *
      * @param hearings
      * @param requesterId
      * @return

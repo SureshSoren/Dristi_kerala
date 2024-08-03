@@ -50,8 +50,8 @@ public class RequestOptOutScheduleTask {
                 List<Long> availableDates = new ArrayList<>(suggestedDays);
 
                 for (OptOut optOut : optOuts) {
-                    List<LocalDate> optOutDates = optOut.getOptoutDates();
-                    availableDates.removeAll(optOutDates);
+//                    List<LocalDate> optOutDates = optOut.getOptoutDates();
+//                    availableDates.removeAll(optOutDates);
                 }
 
                 reScheduleHearing.setAvailableDates(availableDates);

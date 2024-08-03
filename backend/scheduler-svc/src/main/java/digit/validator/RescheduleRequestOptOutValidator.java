@@ -95,23 +95,23 @@ public class RescheduleRequestOptOutValidator {
         //opt out date validation
         for (OptOut optOut : request.getOptOuts()) {
 
-            Set<LocalDate> optoutDates = optOut.getOptoutDates().stream().map(LocalDate::from).collect(Collectors.toSet());
+//            Set<LocalDate> optoutDates = optOut.getOptoutDates().stream().map(LocalDate::from).collect(Collectors.toSet());
 
-            if(optoutDates.size() > config.getOptOutLimit()){
-                throw new CustomException("DK_OO_SELECTION_LIMIT_ERR", "you are eligible to opt out " + config.getOptOutLimit() + "dates only");
-            }
+//            if(optoutDates.size() > config.getOptOutLimit()){
+//                throw new CustomException("DK_OO_SELECTION_LIMIT_ERR", "you are eligible to opt out " + config.getOptOutLimit() + "dates only");
+//            }
 
             String rescheduleRequestId = optOut.getRescheduleRequestId();
 
             if (resultMap.containsKey(rescheduleRequestId)) {
-                resultMap.get(rescheduleRequestId)
-                        .forEach(optoutDates::remove);
+//                resultMap.get(rescheduleRequestId)
+//                        .forEach(optoutDates::remove);
             }
 
-            if (!optoutDates.isEmpty()) {
-                throw new CustomException("DK_OO_APP_ERR", "opt out dates must be from suggested days");
-
-            }
+//            if (!optoutDates.isEmpty()) {
+//                throw new CustomException("DK_OO_APP_ERR", "opt out dates must be from suggested days");
+//
+//            }
 
         }
 

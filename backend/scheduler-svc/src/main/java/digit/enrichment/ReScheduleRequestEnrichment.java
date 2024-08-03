@@ -31,15 +31,15 @@ public class ReScheduleRequestEnrichment {
         RequestInfo requestInfo = reScheduleHearingsRequest.getRequestInfo();
         log.info("starting update method for reschedule hearing enrichment");
         log.info("generating IDs for reschedule hearing enrichment using IdGenService");
-        List<String> idList = idgenUtil.getIdList(requestInfo,
-                reScheduleHearing.get(0).getTenantId(),
-                configuration.getRescheduleHearingIdFormat(), null, reScheduleHearing.size());
+//        List<String> idList = idgenUtil.getIdList(requestInfo,
+//                reScheduleHearing.get(0).getTenantId(),
+//                configuration.getRescheduleHearingIdFormat(), null, reScheduleHearing.size());
 
         AuditDetails auditDetails = getAuditDetailsReScheduleHearing(requestInfo);
 
-        int index = 0;
+//        int index = 0;
         for (ReScheduleHearing element : reScheduleHearing) {
-            element.setRescheduledRequestId(idList.get(index++));
+//            element.setRescheduledRequestId(idList.get(index++));
             element.setRowVersion(1);
             element.setAuditDetails(auditDetails);
         }

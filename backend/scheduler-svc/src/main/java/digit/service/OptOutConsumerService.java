@@ -57,11 +57,11 @@ public class OptOutConsumerService {
 
             optOuts.forEach((optOut -> {
 
-                List<LocalDate> optoutDates = optOut.getOptoutDates();
+//                List<LocalDate> optoutDates = optOut.getOptoutDates();
 
                 //todo: check size here
 
-                Collections.sort(optoutDates);
+//                Collections.sort(optoutDates);
 
                 // get the list and cancelled the hearings
                 List<ScheduleHearing> hearingList = hearingService.search(HearingSearchRequest
@@ -101,7 +101,7 @@ public class OptOutConsumerService {
                 List<Long> availableDates = reScheduleRequest.get(0).getAvailableDates();
                 Set<Long> suggestedDatesSet = existingOptOut.isEmpty() ? new HashSet<>(availableDates) : new HashSet<>(suggestedDates);
 
-                optoutDates.forEach(suggestedDatesSet::remove);
+//                optoutDates.forEach(suggestedDatesSet::remove);
 
 
                 reScheduleRequest.get(0).setAvailableDates(new ArrayList<>(suggestedDatesSet));

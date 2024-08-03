@@ -23,7 +23,7 @@ public class CalendarRowMapper implements RowMapper<JudgeCalendarRule> {
                 .id(resultSet.getString("id"))
                 .judgeId(resultSet.getString("judge_id"))
                 .ruleType(JudgeRuleType.valueOf(resultSet.getString("rule_type")))
-                .date(LocalDate.parse(resultSet.getString("date")))
+//                .date(LocalDate.parse(resultSet.getString("date")))
                 .notes(resultSet.getString("notes"))
                 .tenantId(resultSet.getString("tenant_id"))
                 .auditDetails(AuditDetails.builder()
