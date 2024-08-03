@@ -6,14 +6,12 @@ import digit.models.coremodels.AuditDetails;
 import digit.repository.HearingRepository;
 import digit.util.IdgenUtil;
 import digit.web.models.*;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +41,7 @@ public class HearingEnrichment {
         for (ScheduleHearing hearing : hearingList) {
             hearing.setAuditDetails(auditDetails);
             hearing.setRowVersion(1);
+            hearing.setStatus("SCHEDULED");
         }
 
         updateTimingInHearings(hearingList, hearingTypeMap, defaultSlots);
@@ -58,35 +57,18 @@ public class HearingEnrichment {
         HashMap<String, List<ScheduleHearing>> sameDayHearings = new HashMap<>();
         for (ScheduleHearing hearing : hearingList) {
 
-            // todo : fetch hearing for day
             ScheduleHearingSearchCriteria searchCriteria = ScheduleHearingSearchCriteria.builder()
                     .judgeId(hearing.getJudgeId())
+                    .startDateTime(hearing.getStartTime())
+                    .endDateTime(hearing.getEndTime())
                     .status(statuses).build();
 
-// redundant
-            if (hearing.getStatus() == null) hearing.setStatus("Status.SCHEDULED");
+            List<ScheduleHearing> hearings;
+            hearings = repository.getHearings(searchCriteria, null, null);
+            Integer hearingTime = hearingTypeMap.get(hearing.getHearingType()).getHearingTime();
+            updateHearingTime(hearing, defaultSlots, hearings, hearingTime);
 
-            StringBuilder key = new StringBuilder();
-            key.append(hearing.getDate()).append("-").append(hearing.getJudgeId());
 
-            List<ScheduleHearing> hearings = new ArrayList<>();
-
-            if (sameDayHearings.containsKey(key.toString())) {
-                hearings = sameDayHearings.get(key.toString());
-            } else {
-                hearings = repository.getHearings(searchCriteria, null, null);
-                sameDayHearings.put(key.toString(), hearings);
-            }
-
-            //if status is != blocked then enrich start time and end time
-            Integer hearingTime = hearingTypeMap.get(hearing.getEventType().toString()).getHearingTime();
-
-            if (hearing.getStatus() != Status.BLOCKED)
-                updateHearingTime(hearing, defaultSlots, hearings, hearingTime);
-
-            List<ScheduleHearing> hearings1 = sameDayHearings.get(key.toString());
-            hearings1.add(hearing);
-            sameDayHearings.put(key.toString(), hearings1);
         }
 
     }
@@ -112,13 +94,18 @@ public class HearingEnrichment {
     }
 
     void updateHearingTime(ScheduleHearing hearing, List<MdmsSlot> slots, List<ScheduleHearing> scheduledHearings, int hearingDuration) {
+        long startTime = hearing.getStartTime();
+
+        LocalDate date = getLocalDateFromEpoch(startTime);
+
         for (MdmsSlot slot : slots) {
             LocalTime currentStartTime = getLocalTime(slot.getSlotStartTime());
+
             boolean flag = true;
             while (!currentStartTime.isAfter(getLocalTime(slot.getSlotEndTime()))) {
                 LocalTime currentEndTime = currentStartTime.plusMinutes(hearingDuration);
-//                hearing.setStartTime(LocalDateTime.of(hearing.getDate(), currentStartTime));
-//                hearing.setEndTime(LocalDateTime.of(hearing.getDate(), currentEndTime));
+                hearing.setStartTime(LocalDateTime.of(date, currentStartTime).toEpochSecond(ZoneOffset.UTC) * 1000);
+                hearing.setEndTime(LocalDateTime.of(date, currentEndTime).toEpochSecond(ZoneOffset.UTC) * 1000);
 
                 if (canScheduleHearings(hearing, scheduledHearings, slots)) {
 //                    hearing.setStartTime(LocalDateTime.of(hearing.getDate(), currentStartTime));
@@ -127,7 +114,7 @@ public class HearingEnrichment {
                     flag = false;
                     break;
                 }
-                currentStartTime = currentStartTime.plusMinutes(15); // Move to the next time slot
+                currentStartTime = currentStartTime.plusMinutes(5); // Move to the next time slot
             }
             if (!flag) break;
         }
@@ -144,27 +131,16 @@ public class HearingEnrichment {
         }
         for (MdmsSlot slot : slots) {
 
+            // later we can directly compare long
+            LocalDateTime hearingEndTime = getLocalDateTimeFromEpoch(newHearing.getEndTime());
+            LocalDateTime slotStart = getLocalDateTime(getLocalDateTimeFromEpoch(newHearing.getStartTime()), slot.getSlotStartTime());
+            LocalDateTime slotEnd = getLocalDateTime(getLocalDateTimeFromEpoch(newHearing.getEndTime()), slot.getSlotEndTime());
 
-            if (!newHearing.getStartTime().isBefore(getLocalDateTime(newHearing.getStartTime(), slot.getSlotStartTime())) && !newHearing.getEndTime().isAfter(getLocalDateTime(newHearing.getEndTime(), slot.getSlotEndTime()))) {
+            if (hearingEndTime.isAfter(slotStart) && hearingEndTime.isBefore(slotEnd)) {
                 return true;
             }
         }
         return false;
-    }
-
-
-    LocalDateTime getLocalDateTime(LocalDateTime dateTime, String newTime) {
-
-        LocalTime time = getLocalTime(newTime);
-
-        return dateTime.with(time);
-
-    }
-
-    LocalTime getLocalTime(String time) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        // Parse the time string into a LocalTime object
-        return LocalTime.parse(time, formatter);
     }
 
 
@@ -182,5 +158,30 @@ public class HearingEnrichment {
         });
 
         updateTimingInHearings(hearing, hearingTypeMap, defaultHearings);
+    }
+
+
+    public LocalDateTime getLocalDateTimeFromEpoch(long startTime) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime), ZoneId.systemDefault());
+    }
+
+    public LocalTime getLocalTime(String time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        // Parse the time string into a LocalTime object
+        return LocalTime.parse(time, formatter);
+    }
+
+    public LocalDateTime getLocalDateTime(LocalDateTime dateTime, String newTime) {
+
+        LocalTime time = getLocalTime(newTime);
+
+        return dateTime.with(time);
+
+    }
+
+    public LocalDate getLocalDateFromEpoch(long startTime) {
+        return Instant.ofEpochSecond(startTime)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 }

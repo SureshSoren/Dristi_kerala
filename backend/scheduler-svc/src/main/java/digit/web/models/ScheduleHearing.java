@@ -31,7 +31,6 @@ public class ScheduleHearing {
     @JsonProperty("caseId")
     private String caseId;
 
-
     @JsonProperty("hearingType")
     private String hearingType;
 
@@ -40,7 +39,6 @@ public class ScheduleHearing {
 
     @JsonProperty("description")
     private String description;
-
 
     @JsonProperty("status")
     private String status;

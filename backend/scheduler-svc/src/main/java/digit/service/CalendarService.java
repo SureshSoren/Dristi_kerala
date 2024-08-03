@@ -33,21 +33,13 @@ import java.util.stream.Stream;
 public class CalendarService {
 
     private final JudgeCalendarValidator validator;
-
     private final JudgeCalendarEnrichment enrichment;
-
     private final Producer producer;
-
     private final Configuration config;
-
     private final MdmsUtil mdmsUtil;
-
     private final ServiceConstants serviceConstants;
-
     private final CalendarRepository calendarRepository;
-
     private final HearingService hearingService;
-
     private final DefaultMasterDataHelper helper;
 
 

@@ -2,6 +2,7 @@ package digit.kafka.cosumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.service.hearing.HearingProcessor;
+import digit.web.models.ReScheduleHearing;
 import digit.web.models.hearing.HearingRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,7 @@ public class HearingConsumer {
     public void listenScheduleHearing(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
         HearingRequest hearingRequest = mapper.convertValue(record, HearingRequest.class);
-
         processor.processCreateHearingRequest(hearingRequest);
-
 
     }
 

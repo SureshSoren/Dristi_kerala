@@ -95,18 +95,18 @@ public class HearingQueryBuilder {
             preparedStmtList.add(scheduleHearingSearchCriteria.getHearingType());
 
         }
-        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getFromDate())) {
-            queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_DATE(hb.hearing_date, 'YYYY-MM-DD')  >= ? ");
-            preparedStmtList.add(scheduleHearingSearchCriteria.getFromDate());
-
-        }
-        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getToDate())) {
-            queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_DATE(hb.hearing_date, 'YYYY-MM-DD') <= ? ");
-            preparedStmtList.add(scheduleHearingSearchCriteria.getToDate());
-
-        }
+//        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getFromDate())) {
+//            queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
+//            query.append(" TO_DATE(hb.hearing_date, 'YYYY-MM-DD')  >= ? ");
+//            preparedStmtList.add(scheduleHearingSearchCriteria.getFromDate());
+//
+//        }
+//        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getToDate())) {
+//            queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
+//            query.append(" TO_DATE(hb.hearing_date, 'YYYY-MM-DD') <= ? ");
+//            preparedStmtList.add(scheduleHearingSearchCriteria.getToDate());
+//
+//        }
         if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getStartDateTime())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
             query.append(" TO_TIMESTAMP(hb.start_time, 'YYYY-MM-DD HH24:MI:SS') >= ? ");
