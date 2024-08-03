@@ -1,9 +1,72 @@
 import { Button, CloseSvg } from "@egovernments/digit-ui-components";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Modal from "../../../dristi/src/components/Modal";
+import { Urls } from "../hooks/services/Urls";
+import { FileUploadIcon } from "../../../dristi/src/icons/svgIndex";
 
-function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup }) {
+function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup, setSignedDocumentUploadID }) {
   const [isSigned, setIsSigned] = useState(false);
+  const { handleEsign, checkSignStatus } = Digit.Hooks.orders.useESign();
+  const { uploadDocuments } = Digit.Hooks.orders.useDocumentUpload();
+  const [formData, setFormData] = useState({}); // storing the file upload data
+  const [fileStoreId, setFileStoreId] = useState("c162c182-103f-463e-99b6-18654ed7a5b1"); // have to set the uploaded fileStoreID
+  const [eSignFIleId, setESignFileID] = useState("2aefb901-edc6-4a45-95f8-3ea383a513f5");
+  const [pageModule, setPageModule] = useState("en");
+  const [openUploadSignatureModal, setOpenUploadSignatureModal] = useState(false);
+
+  const UploadSignatureModal = window?.Digit?.ComponentRegistryService?.getComponent("UploadSignatureModal");
+  const tenantId = window?.Digit.ULBService.getCurrentTenantId();
+  const uri = `${window.location.origin}${Urls.FileFetchById}?tenantId=${tenantId}&fileStoreId=${fileStoreId}`;
+  const name = "Signature";
+
+  const uploadModalConfig = useMemo(() => {
+    return {
+      key: "uploadSignature",
+      populators: {
+        inputs: [
+          {
+            name: name,
+            documentHeader: "Signature",
+            type: "DragDropComponent",
+            uploadGuidelines: "Ensure the image is not blurry and under 5MB.",
+            maxFileSize: 5,
+            maxFileErrorMessage: "CS_FILE_LIMIT_5_MB",
+            fileTypes: ["JPG", "PNG", "JPEG"],
+            isMultipleUpload: false,
+          },
+        ],
+        validation: {},
+      },
+    };
+  }, [name]);
+
+  const onSelect = (key, value) => {
+    if (value === null) {
+      setFormData({});
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [key]: value,
+      }));
+    }
+  };
+
+  useEffect(() => {
+    const upload = async () => {
+      if (formData?.uploadSignature?.Signature?.length > 0) {
+        const uploadedFileId = await uploadDocuments(formData?.uploadSignature?.Signature, tenantId);
+        setSignedDocumentUploadID(uploadedFileId[0]?.fileStoreId);
+        setIsSigned(true);
+      }
+    };
+
+    upload();
+  }, [formData]);
+
+  useEffect(() => {
+    checkSignStatus(name, formData, uploadModalConfig, onSelect, setIsSigned);
+  }, [checkSignStatus]);
+
   const Heading = (props) => {
     return <h1 className="heading-m">{props.label}</h1>;
   };
@@ -15,7 +78,8 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup 
       </div>
     );
   };
-  return (
+
+  return !openUploadSignatureModal ? (
     <Modal
       headerBarMain={<Heading label={t("ADD_SIGNATURE")} />}
       headerBarEnd={<CloseBtn onClick={() => handleCloseSignaturePopup()} />}
@@ -31,14 +95,15 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup 
       <div className="add-signature-main-div">
         {!isSigned ? (
           <div className="not-signed">
-            <h1>{t("YOUR_SIGNATURE")}</h1>
+            <h1 style={{ color: "#3d3c3c", fontSize: "24px", fontWeight: "bold" }}>{t("YOUR_SIGNATURE")}</h1>
             <div className="buttons-div">
               <Button
-                // icon={<FileUploadIcon />}
+                icon={<FileUploadIcon />}
                 label={t("CS_UPLOAD_ESIGNATURE")}
                 onClick={() => {
                   // setOpenUploadSignatureModal(true);
-                  setIsSigned(true);
+                  // setIsSigned(true);
+                  setOpenUploadSignatureModal(true);
                 }}
                 className={"upload-signature"}
                 labelClassName={"submission-upload-signature-label"}
@@ -47,7 +112,8 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup 
                 label={t("CS_ESIGN_AADHAR")}
                 onClick={() => {
                   // setOpenAadharModal(true);
-                  setIsSigned(true);
+                  // setIsSigned(true);
+                  handleEsign(name, eSignFIleId, pageModule);
                 }}
                 className={"aadhar-sign-in"}
                 labelClassName={"submission-aadhar-sign-in"}
@@ -55,9 +121,9 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup 
             </div>
             <div className="click-for-download">
               <h2>{t("WANT_TO_DOWNLOAD")}</h2>
-              <span style={{ color: "#007E7E", cursor: "pointer", textDecoration: "underline" }}>
+              <a href={uri} target="_blank" rel="noreferrer" style={{ color: "#007E7E", cursor: "pointer", textDecoration: "underline" }}>
                 {t("CLICK_HERE")}
-              </span>
+              </a>
             </div>
           </div>
         ) : (
@@ -68,6 +134,16 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup 
         )}
       </div>
     </Modal>
+  ) : (
+    <UploadSignatureModal
+      t={t}
+      key={name}
+      name={name}
+      setOpenUploadSignatureModal={setOpenUploadSignatureModal}
+      onSelect={onSelect}
+      config={uploadModalConfig}
+      formData={formData}
+    />
   );
 }
 

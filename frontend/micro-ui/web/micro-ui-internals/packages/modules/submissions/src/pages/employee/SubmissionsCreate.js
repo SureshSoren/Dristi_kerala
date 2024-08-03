@@ -48,6 +48,8 @@ const SubmissionsCreate = () => {
   const userInfo = Digit.UserService.getUser()?.info;
   const userType = useMemo(() => (userInfo.type === "CITIZEN" ? "citizen" : "employee"), [userInfo.type]);
   const individualId = localStorage.getItem("individualId");
+  const [signedDoucumentUploadedID, setSignedDocumentUploadID] = useState("");
+
   const submissionType = useMemo(() => {
     return formdata?.submissionType?.code;
   }, [formdata?.submissionType?.code]);
@@ -446,7 +448,12 @@ const SubmissionsCreate = () => {
         />
       )}
       {showsignatureModal && (
-        <SubmissionSignatureModal t={t} handleProceed={handleAddSignature} handleCloseSignaturePopup={handleCloseSignaturePopup} />
+        <SubmissionSignatureModal
+          t={t}
+          handleProceed={handleAddSignature}
+          handleCloseSignaturePopup={handleCloseSignaturePopup}
+          setSignedDocumentUploadID={setSignedDocumentUploadID}
+        />
       )}
       {showPaymentModal && (
         <PaymentModal t={t} handleClosePaymentModal={handleBack} handleSkipPayment={handleSkipPayment} handleMakePayment={handleMakePayment} />

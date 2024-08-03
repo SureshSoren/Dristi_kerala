@@ -81,7 +81,7 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
     checkSignStatus(name, formData, uploadModalConfig, onSelect, setIsSigned);
   }, [checkSignStatus]);
 
-  return (
+  return !openUploadSignatureModal ? (
     <Modal
       headerBarMain={<Heading label={t("ADD_SIGNATURE")} />}
       headerBarEnd={<CloseBtn onClick={handleGoBackSignatureModal} />}
@@ -148,18 +148,17 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
           </div>
         )}
       </div>
-      {openUploadSignatureModal && (
-        <UploadSignatureModal
-          t={t}
-          key={name}
-          name={name}
-          setOpenUploadSignatureModal={setOpenUploadSignatureModal}
-          onSelect={onSelect}
-          config={uploadModalConfig}
-          formData={formData}
-        />
-      )}
     </Modal>
+  ) : (
+    <UploadSignatureModal
+      t={t}
+      key={name}
+      name={name}
+      setOpenUploadSignatureModal={setOpenUploadSignatureModal}
+      onSelect={onSelect}
+      config={uploadModalConfig}
+      formData={formData}
+    />
   );
 }
 
