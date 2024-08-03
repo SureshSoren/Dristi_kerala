@@ -78,10 +78,6 @@ public class PdfEmbedder {
             List<Certificate> certificates = List.of(cert);
             appearance.setCrypto(null, certificates.toArray(new Certificate[0]), null, null);
 
-            PublicKey publicKey = decryption.getPublicKey("publicKey.cer");
-            String signature = response.substring(response.indexOf("<DocSignature error=\"NA\" id=\"1\" sigHashAlgorithm=\"SHA256\">"),response.indexOf("</DocSignature>")).
-                    replaceAll("<DocSignature error=\"NA\" id=\"1\" sigHashAlgorithm=\"SHA256\">","");
-            boolean b = decryption.verify(publicKey,"",signature);
 
 
             int contentEstimated = 8192;

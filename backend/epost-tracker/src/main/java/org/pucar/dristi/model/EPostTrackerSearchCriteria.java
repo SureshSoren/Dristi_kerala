@@ -33,9 +33,8 @@ public class EPostTrackerSearchCriteria {
     private String bookingDate;
 
     @JsonProperty("receivedDate")
-    private  String receivedDate;
+    private String receivedDate;
 
     @JsonProperty("pagination")
-    @Valid
     private Pagination pagination = null;
 }

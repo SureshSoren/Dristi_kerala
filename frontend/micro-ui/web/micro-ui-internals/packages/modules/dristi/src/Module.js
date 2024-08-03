@@ -48,12 +48,15 @@ import CustomErrorTooltip from "./components/CustomErrorTooltip";
 import Button from "./components/Button";
 import MultiUploadWrapper from "./components/MultiUploadWrapper";
 import CustomCopyTextDiv from "./components/CustomCopyTextDiv";
+import { DRISTIService } from "./services";
+import CustomChooseDate from "./components/CustomChooseDate";
+import CustomCalendar from "./components/CustomCalendar";
 import UploadSignatureModal from "./components/UploadSignatureModal";
 
 export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   const { path } = useRouteMatch();
   const history = useHistory();
-  const moduleCode = ["DRISTI", "CASE", "ORDERS"];
+  const moduleCode = ["DRISTI", "CASE", "ORDERS", "SUBMISSIONS"];
   const tenantID = tenants?.[0]?.code?.split(".")?.[0];
   const language = Digit.StoreData.getCurrentLanguage();
   const { isLoading } = Digit.Services.useStore({ stateCode, moduleCode, language });
@@ -125,6 +128,9 @@ const componentsToRegister = {
   CustomCopyTextDiv,
   SelectCustomNote,
   UploadSignatureModal,
+  DRISTIService,
+  CustomChooseDate,
+  CustomCalendar,
 };
 
 const overrideHooks = () => {

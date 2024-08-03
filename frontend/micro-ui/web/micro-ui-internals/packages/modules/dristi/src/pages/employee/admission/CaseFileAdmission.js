@@ -1,20 +1,27 @@
+import { BackButton, FormComposerV2, Header, Loader, Toast } from "@egovernments/digit-ui-react-components";
 import React, { useMemo, useState } from "react";
-import { FormComposerV2, Header, Loader, Toast, BackButton } from "@egovernments/digit-ui-react-components";
-import { CustomArrowDownIcon, RightArrow } from "../../../icons/svgIndex";
-import { reviewCaseFileFormConfig } from "../../citizen/FileCase/Config/reviewcasefileconfig";
-import AdmissionActionModal from "./AdmissionActionModal";
 import { Redirect, useHistory, useLocation } from "react-router-dom/cjs/react-router-dom.min";
-import useSearchCaseService from "../../../hooks/dristi/useSearchCaseService";
-import { DRISTIService } from "../../../services";
-import { formatDate } from "../../citizen/FileCase/CaseType";
 import CustomCaseInfoDiv from "../../../components/CustomCaseInfoDiv";
-import { selectParticipantConfig } from "../../citizen/FileCase/Config/admissionActionConfig";
-import { admitCaseSubmitConfig, scheduleCaseSubmitConfig, sendBackCase } from "../../citizen/FileCase/Config/admissionActionConfig";
-import { OrderTypes, OrderWorkflowAction } from "../../../Utils/orderWorkflow";
-import { CaseWorkflowState } from "../../../Utils/caseWorkflow";
-import { getAllAssignees } from "../../citizen/FileCase/EfilingValidationUtils";
 import { Urls } from "../../../hooks";
+import useSearchCaseService from "../../../hooks/dristi/useSearchCaseService";
+import { CustomArrowDownIcon, RightArrow } from "../../../icons/svgIndex";
+import { DRISTIService } from "../../../services";
+import { CaseWorkflowState } from "../../../Utils/caseWorkflow";
+import { OrderTypes, OrderWorkflowAction } from "../../../Utils/orderWorkflow";
+import { formatDate } from "../../citizen/FileCase/CaseType";
+import {
+  admitCaseSubmitConfig,
+  scheduleCaseSubmitConfig,
+  selectParticipantConfig,
+  sendBackCase,
+} from "../../citizen/FileCase/Config/admissionActionConfig";
+import { reviewCaseFileFormConfig } from "../../citizen/FileCase/Config/reviewcasefileconfig";
+import { getAllAssignees } from "../../citizen/FileCase/EfilingValidationUtils";
+import AdmissionActionModal from "./AdmissionActionModal";
 
+const stateSla = {
+  SCHEDULE_HEARING: 3 * 24 * 3600 * 1000,
+};
 function CaseFileAdmission({ t, path }) {
   const [isDisabled, setIsDisabled] = useState(false);
   const history = useHistory();
@@ -24,10 +31,13 @@ function CaseFileAdmission({ t, path }) {
   const [submitModalInfo, setSubmitModalInfo] = useState(null);
   const [formdata, setFormdata] = useState({ isenabled: true, data: {}, displayindex: 0 });
   const location = useLocation();
+  const todayDate = new Date().getTime();
   const searchParams = new URLSearchParams(location.search);
   const caseId = searchParams.get("caseId");
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const [caseAdmitLoader, setCaseADmitLoader] = useState(false);
+  const roles = Digit.UserService.getUser()?.info?.roles;
+  const isCaseApprover = roles.some((role) => role.code === "CASE_APPROVER");
   const { data: caseFetchResponse, isLoading } = useSearchCaseService(
     {
       criteria: [
@@ -81,7 +91,7 @@ function CaseFileAdmission({ t, path }) {
           workflow: {
             ...caseDetails?.workflow,
             action,
-            ...(action === "SEND_BACK" && { assignes: getAllAssignees(caseDetails) || [] }),
+            ...(action === "SEND_BACK" && { assignes: [caseDetails.auditDetails.createdBy] || [] }),
           },
         },
         tenantId,
@@ -109,7 +119,7 @@ function CaseFileAdmission({ t, path }) {
     },
     {
       key: "SUBMITTED_ON",
-      value: caseDetails?.filingDate,
+      value: formatDate(new Date(caseDetails?.filingDate)),
     },
   ];
   const onFormValueChange = (setValue, formData, formState, reset, setError, clearErrors, trigger, getValues) => {
@@ -239,10 +249,65 @@ function CaseFileAdmission({ t, path }) {
 
     updateCaseDetails("ADMIT", formdata).then((res) => {
       setModalInfo({ ...modalInfo, page: 1 });
+      setCaseADmitLoader(false);
+      DRISTIService.customApiService(Urls.dristi.pendingTask, {
+        pendingTask: {
+          name: "Schedule Hearing",
+          entityType: "case",
+          referenceId: `MANUAL_${caseDetails?.filingNumber}`,
+          status: "SCHEDULE_HEARING",
+          assignedTo: [],
+          assignedRole: ["JUDGE_ROLE"],
+          cnrNumber: null,
+          filingNumber: caseDetails?.filingNumber,
+          isCompleted: false,
+          stateSla: todayDate + stateSla.SCHEDULE_HEARING,
+          additionalDetails: {},
+          tenantId,
+        },
+      });
     });
-    setCaseADmitLoader(false);
   };
-  const handleScheduleCase = (props) => {
+  const scheduleHearing = async ({ purpose, participant, date }) => {
+    return DRISTIService.createHearings(
+      {
+        hearing: {
+          tenantId: tenantId,
+          filingNumber: [caseDetails.filingNumber],
+          hearingType: purpose,
+          status: true,
+          attendees: [
+            ...Object.values(participant)
+              .map((val) => val.attendees.map((attendee) => JSON.parse(attendee)))
+              .flat(Infinity),
+          ],
+          startTime: Date.parse(
+            `${date
+              .split(" ")
+              .map((date, i) => (i === 0 ? date.slice(0, date.length - 2) : date))
+              .join(" ")}`
+          ),
+          endTime: Date.parse(
+            `${date
+              .split(" ")
+              .map((date, i) => (i === 0 ? date.slice(0, date.length - 2) : date))
+              .join(" ")}`
+          ),
+          workflow: {
+            action: "CREATE",
+            assignes: [],
+            comments: "Create new Hearing",
+            documents: [{}],
+          },
+          documents: [],
+        },
+        tenantId,
+      },
+      { tenantId: tenantId }
+    );
+  };
+
+  const handleScheduleCase = async (props) => {
     setSubmitModalInfo({
       ...scheduleCaseSubmitConfig,
       caseInfo: [
@@ -253,6 +318,7 @@ function CaseFileAdmission({ t, path }) {
         },
       ],
     });
+    await scheduleHearing({ purpose: "ADMISSION", date: props.date, participant: props.participant });
     updateCaseDetails("SCHEDULE_ADMISSION_HEARING", props).then((res) => {
       setModalInfo({ ...modalInfo, page: 2 });
     });
@@ -261,7 +327,7 @@ function CaseFileAdmission({ t, path }) {
   const handleScheduleNextHearing = () => {
     const reqBody = {
       order: {
-        createdDate: formatDate(new Date()),
+        createdDate: new Date().getTime(),
         tenantId,
         cnrNumber: caseDetails?.cnrNumber,
         filingNumber: caseDetails?.filingNumber,
@@ -357,7 +423,7 @@ function CaseFileAdmission({ t, path }) {
               </div>
               <CustomCaseInfoDiv t={t} data={caseInfo} style={{ margin: "24px 0px" }} />
               <FormComposerV2
-                label={t("CS_ADMIT_CASE")}
+                label={isCaseApprover ? t("CS_ADMIT_CASE") : undefined}
                 config={formConfig}
                 onSubmit={onSubmit}
                 // defaultValues={}
@@ -367,9 +433,15 @@ function CaseFileAdmission({ t, path }) {
                 cardStyle={{ minWidth: "100%" }}
                 isDisabled={isDisabled}
                 cardClassName={`e-filing-card-form-style review-case-file`}
-                secondaryLabel={t("CS_SCHEDULE_ADMISSION_HEARING")}
-                showSecondaryLabel={caseDetails?.status !== CaseWorkflowState.ADMISSION_HEARING_SCHEDULED}
-                actionClassName="case-file-admission-action-bar"
+                secondaryLabel={
+                  caseDetails?.status === CaseWorkflowState.ADMISSION_HEARING_SCHEDULED
+                    ? t("HEARING_IS_SCHEDULED")
+                    : t("CS_SCHEDULE_ADMISSION_HEARING")
+                }
+                showSecondaryLabel={true}
+                actionClassName={`case-file-admission-action-bar ${
+                  caseDetails?.status === CaseWorkflowState.ADMISSION_HEARING_SCHEDULED && "hearing-scheduled"
+                }`}
                 showSkip={caseDetails?.status !== CaseWorkflowState.ADMISSION_HEARING_SCHEDULED}
                 onSkip={onSendBack}
                 skiplabel={t("SEND_BACK_FOR_CORRECTION")}

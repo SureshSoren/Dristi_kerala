@@ -41,7 +41,7 @@ public class EPostRepository {
         List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getEPostTrackerSearchQuery(searchCriteria, preparedStmtList);
         query = queryBuilder.addPaginationQuery(query, preparedStmtList, searchCriteria.getPagination(),limit,offset);
-        log.debug("Final query: " + query);
+        log.info("Final query: " + query);
         return jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
     }
 

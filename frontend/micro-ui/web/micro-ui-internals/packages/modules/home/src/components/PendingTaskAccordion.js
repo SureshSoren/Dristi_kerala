@@ -1,3 +1,4 @@
+import { InfoBannerIcon } from "@egovernments/digit-ui-components";
 import { CustomArrowUpIcon } from "@egovernments/digit-ui-module-dristi/src/icons/svgIndex";
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
@@ -23,9 +24,13 @@ function PendingTaskAccordion({
     setIsOpen(!isOpen);
   };
 
-  const redirectPendingTaskUrl = (url) => {
-    history.push(url);
-    setCheck(!check);
+  const redirectPendingTaskUrl = async (url, isCustomFunction = () => {}, params = {}) => {
+    if (isCustomFunction) {
+      await url(params);
+    } else {
+      history.push(url);
+      setCheck(!check);
+    }
   };
 
   return (
@@ -43,8 +48,19 @@ function PendingTaskAccordion({
             fontWeight: "700",
             lineHeight: "18.75px",
             textAlign: "left",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
           }}
-        >{`${t(accordionHeader)}${totalCount ? ` (${totalCount})` : ""}`}</span>
+          className="accordion-header"
+        >
+          {isHighlighted && (
+            <span>
+              <InfoBannerIcon fill="#9E400A" />
+            </span>
+          )}
+          <span>{`${t(accordionHeader)}${totalCount ? ` (${totalCount})` : ""}`}</span>
+        </span>
         <div
           className="icon"
           style={{
@@ -66,7 +82,7 @@ function PendingTaskAccordion({
               className={`task-item ${item?.due === "Due today" && "due-today"}`}
               key={item?.filingNumber}
               style={{ cursor: "pointer" }}
-              onClick={() => redirectPendingTaskUrl(item?.redirectUrl)}
+              onClick={() => redirectPendingTaskUrl(item?.redirectUrl, item?.isCustomFunction, item?.params)}
             >
               <input type="checkbox" value={check} />
               <div className="task-details" style={{ display: "flex", flexDirection: "column", gap: 8, marginLeft: 8 }}>
@@ -74,7 +90,8 @@ function PendingTaskAccordion({
                   {item?.actionName} : {item?.caseTitle}
                 </span>
                 <span className="task-info">
-                  {item?.caseType} - {item?.filingNumber} - {item?.due}
+                  {item?.caseType} - {item?.filingNumber} -{" "}
+                  <span style={{ ...(item?.dueDateColor && { color: item?.dueDateColor }) }}>{item?.due}</span>
                 </span>
               </div>
             </div>

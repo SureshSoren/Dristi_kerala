@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { CardText, CloseSvg, Modal } from "@egovernments/digit-ui-react-components";
 import { useTranslation } from "react-i18next";
 
@@ -20,12 +20,8 @@ const popUpStyle = {
   borderRadius: "0.3rem",
 };
 
-const ReviewDocumentModal = ({ handleClose, setOpenSigned, setShowsignatureModal, showActions = true }) => {
+const ReviewDocumentModal = ({ handleClose }) => {
   const { t } = useTranslation();
-  const [fileId, setFileID] = useState("");
-  const tenantId = window?.Digit.ULBService.getCurrentTenantId();
-  const DocViewerWrapper = window?.Digit?.ComponentRegistryService?.getComponent("DocViewerWrapper");
-
   return (
     <div>
       <Modal
@@ -33,12 +29,6 @@ const ReviewDocumentModal = ({ handleClose, setOpenSigned, setShowsignatureModal
         headerBarMain={<Heading label={"Review Document: Summons Document"} />}
         headerBarEnd={<CloseBtn onClick={handleClose} />}
         actionSaveLabel={t("E-Sign")}
-        actionSaveOnSubmit={() => {
-          if (showActions) {
-            setShowsignatureModal(true);
-            setOpenSigned(false);
-          }
-        }}
       >
         <div style={{ height: "620px" }}>
           <div className="document-info-container">

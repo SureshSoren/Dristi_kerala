@@ -149,6 +149,7 @@
 @import "./hearings/prehearing.scss";
 /* @import "./home"; */
 @import "./home/home.scss";
+@import "./home//components/reviewCard.scss";
 
 .wbh-header-container {
   display: flex !important;
@@ -931,5 +932,10 @@ input[type="number"] {
 }
 
 .dristi-font-bold {
+  font-weight: 700 !important;
+}
+
+.dristi-font-big-bold {
+  font-size: 19px !important;
   font-weight: 700 !important;
 }

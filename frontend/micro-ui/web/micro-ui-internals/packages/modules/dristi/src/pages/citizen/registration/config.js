@@ -16,6 +16,7 @@ export const userTypeOptions = [
       "ORDER_VIEWER",
       "SUBMISSION_CREATOR",
       "SUBMISSION_RESPONDER",
+      "SUBMISSION_DELETE",
     ],
     subText: "LITIGANT_SUB_TEXT",
   },
@@ -38,6 +39,7 @@ export const userTypeOptions = [
       "ORDER_VIEWER",
       "SUBMISSION_CREATOR",
       "SUBMISSION_RESPONDER",
+      "SUBMISSION_DELETE",
     ],
     apiDetails: {
       serviceName: "/advocate/advocate/v1/_create",
@@ -65,6 +67,7 @@ export const userTypeOptions = [
       "ORDER_VIEWER",
       "SUBMISSION_CREATOR",
       "SUBMISSION_RESPONDER",
+      "SUBMISSION_DELETE",
     ],
     apiDetails: {
       serviceName: "/advocate/clerk/v1/_create",
@@ -533,10 +536,9 @@ export const advocateClerkConfig = [
               name: "barRegistrationNumber",
               validation: {
                 isRequired: true,
-                pattern: /^[0-9A-Z/]{0,8}$/,
+                pattern: /^[0-9A-Z/]{0,20}$/,
                 errMsg: "BAR_REGISTRATION_NUMBER_INVALID",
-                maxlength: 8,
-                minlength: 8,
+                maxlength: 20,
               },
               isMandatory: true,
               isDependentOn: "selectUserType",

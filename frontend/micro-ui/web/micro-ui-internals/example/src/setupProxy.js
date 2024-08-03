@@ -105,7 +105,6 @@ module.exports = function (app) {
     "/payment",
     "/etreasury",
     "/payment-calculator",
-
     "/task/v1/search",
     "/analytics",
   ].forEach((location) => app.use(location, createProxy));
