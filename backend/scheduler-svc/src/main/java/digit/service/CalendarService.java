@@ -4,14 +4,13 @@ package digit.service;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.JudgeCalendarEnrichment;
-import digit.helper.DefaultMasterDataHelper;
+import digit.util.MasterDataUtil;
 import digit.kafka.Producer;
 import digit.repository.CalendarRepository;
 import digit.util.MdmsUtil;
 import digit.validator.JudgeCalendarValidator;
 import digit.web.models.*;
 import digit.web.models.enums.PeriodType;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 import org.egov.tracer.model.CustomException;
@@ -23,7 +22,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Contains method to retrieve judge availability, judge calendar ,update judge rule by judge id
@@ -40,11 +38,11 @@ public class CalendarService {
     private final ServiceConstants serviceConstants;
     private final CalendarRepository calendarRepository;
     private final HearingService hearingService;
-    private final DefaultMasterDataHelper helper;
+    private final MasterDataUtil helper;
 
 
     @Autowired
-    public CalendarService(JudgeCalendarValidator validator, JudgeCalendarEnrichment enrichment, Producer producer, Configuration config, MdmsUtil mdmsUtil, ServiceConstants serviceConstants, CalendarRepository calendarRepository, HearingService hearingService, DefaultMasterDataHelper helper) {
+    public CalendarService(JudgeCalendarValidator validator, JudgeCalendarEnrichment enrichment, Producer producer, Configuration config, MdmsUtil mdmsUtil, ServiceConstants serviceConstants, CalendarRepository calendarRepository, HearingService hearingService, MasterDataUtil helper) {
         this.validator = validator;
         this.enrichment = enrichment;
         this.producer = producer;

@@ -4,19 +4,16 @@ package digit.service;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.ReScheduleRequestEnrichment;
-import digit.helper.DefaultMasterDataHelper;
+import digit.util.MasterDataUtil;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.validator.ReScheduleRequestValidator;
 import digit.web.models.*;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,10 +48,10 @@ public class ReScheduleHearingService {
 
     private final ServiceConstants serviceConstants;
 
-    private final DefaultMasterDataHelper helper;
+    private final MasterDataUtil helper;
 
     @Autowired
-    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, DefaultMasterDataHelper helper) {
+    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, MasterDataUtil helper) {
         this.config = config;
         this.repository = repository;
         this.validator = validator;

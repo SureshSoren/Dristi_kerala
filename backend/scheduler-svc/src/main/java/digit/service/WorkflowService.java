@@ -11,7 +11,6 @@ import digit.repository.ServiceRequestRepository;
 import digit.web.models.ReScheduleHearing;
 import digit.web.models.ReScheduleHearingRequest;
 import digit.web.models.Workflow;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.models.RequestInfoWrapper;
 import org.egov.common.contract.request.RequestInfo;

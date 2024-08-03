@@ -2,7 +2,6 @@ package digit.repository.querybuilder;
 
 import digit.helper.QueryBuilderHelper;
 import digit.web.models.ScheduleHearingSearchCriteria;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;

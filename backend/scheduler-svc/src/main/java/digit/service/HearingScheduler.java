@@ -4,11 +4,10 @@ package digit.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
-import digit.helper.DefaultMasterDataHelper;
+import digit.util.MasterDataUtil;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.web.models.*;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,14 +32,14 @@ public class HearingScheduler {
 
     private final HearingService hearingService;
 
-    private final DefaultMasterDataHelper helper;
+    private final MasterDataUtil helper;
 
     private final ServiceConstants serviceConstants;
 
 
 
     @Autowired
-    public HearingScheduler(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, CalendarService calendarService, HearingService hearingService, DefaultMasterDataHelper helper, ServiceConstants serviceConstants) {
+    public HearingScheduler(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, CalendarService calendarService, HearingService hearingService, MasterDataUtil helper, ServiceConstants serviceConstants) {
         this.producer = producer;
         this.repository = repository;
         this.configuration = configuration;

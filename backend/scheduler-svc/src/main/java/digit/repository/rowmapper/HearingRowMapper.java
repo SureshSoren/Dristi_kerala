@@ -2,16 +2,12 @@ package digit.repository.rowmapper;
 
 import digit.models.coremodels.AuditDetails;
 import digit.web.models.ScheduleHearing;
-import digit.web.models.enums.EventType;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component

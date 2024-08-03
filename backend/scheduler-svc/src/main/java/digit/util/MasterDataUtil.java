@@ -1,10 +1,9 @@
-package digit.helper;
+package digit.util;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
-import digit.util.MdmsUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 import org.egov.common.contract.request.RequestInfo;
@@ -19,7 +18,7 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class DefaultMasterDataHelper {
+public class MasterDataUtil {
 
     @Autowired
     private MdmsUtil mdmsUtil;

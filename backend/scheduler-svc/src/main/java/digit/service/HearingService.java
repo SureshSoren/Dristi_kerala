@@ -4,7 +4,7 @@ package digit.service;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.HearingEnrichment;
-import digit.helper.DefaultMasterDataHelper;
+import digit.util.MasterDataUtil;
 import digit.kafka.Producer;
 import digit.repository.HearingRepository;
 import digit.validator.HearingValidator;
@@ -37,10 +37,10 @@ public class HearingService {
 
     private final ServiceConstants serviceConstants;
 
-    private final DefaultMasterDataHelper helper;
+    private final MasterDataUtil helper;
 
     @Autowired
-    public HearingService(HearingValidator hearingValidator, HearingEnrichment hearingEnrichment, Producer producer, Configuration config, HearingRepository hearingRepository, ServiceConstants serviceConstants, DefaultMasterDataHelper helper) {
+    public HearingService(HearingValidator hearingValidator, HearingEnrichment hearingEnrichment, Producer producer, Configuration config, HearingRepository hearingRepository, ServiceConstants serviceConstants, MasterDataUtil helper) {
         this.hearingValidator = hearingValidator;
         this.hearingEnrichment = hearingEnrichment;
         this.producer = producer;

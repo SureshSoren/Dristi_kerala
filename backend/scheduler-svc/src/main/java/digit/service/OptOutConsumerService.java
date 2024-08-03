@@ -9,7 +9,6 @@ import digit.util.CaseUtil;
 import digit.web.models.*;
 import digit.web.models.cases.CaseCriteria;
 import digit.web.models.cases.SearchCaseRequest;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;

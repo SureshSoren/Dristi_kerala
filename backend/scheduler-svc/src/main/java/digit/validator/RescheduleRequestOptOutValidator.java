@@ -9,7 +9,6 @@ import digit.util.CaseUtil;
 import digit.web.models.*;
 import digit.web.models.cases.CaseCriteria;
 import digit.web.models.cases.SearchCaseRequest;
-import digit.web.models.enums.Status;
 import org.apache.commons.lang3.ObjectUtils;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
