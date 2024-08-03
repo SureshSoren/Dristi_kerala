@@ -108,7 +108,7 @@ public class OptOutConsumerService {
                 reScheduleRequest.get(0).setAvailableDates(new ArrayList<>(suggestedDatesSet));
                 //if this is last one then update the status to review
                 if (representatives.size() - existingOptOut.size() == 1)
-                    reScheduleRequest.get(0).setStatus(Status.REVIEW);
+                    reScheduleRequest.get(0).setStatus(Status.REVIEW.toString());
 
 
                 producer.push(configuration.getUpdateRescheduleRequestTopic(), reScheduleRequest);

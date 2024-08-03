@@ -53,8 +53,10 @@ public class ReScheduleHearingService {
 
     private final DefaultMasterDataHelper helper;
 
+    private final ScheduleHearingConsumerService scheduleHearingConsumerService;
+
     @Autowired
-    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, DefaultMasterDataHelper helper) {
+    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, DefaultMasterDataHelper helper, ScheduleHearingConsumerService scheduleHearingConsumerService) {
         this.config = config;
         this.repository = repository;
         this.validator = validator;
@@ -66,6 +68,7 @@ public class ReScheduleHearingService {
         this.hearingScheduler = hearingScheduler;
         this.serviceConstants = serviceConstants;
         this.helper = helper;
+        this.scheduleHearingConsumerService = scheduleHearingConsumerService;
     }
 
     /**
@@ -85,10 +88,10 @@ public class ReScheduleHearingService {
 
 //        workflowService.updateWorkflowStatus(reScheduleHearingsRequest);
 
-        producer.push("schedule-hearing-to-block-calendar", reScheduleHearing);
-        producer.push("check-opt-out", reScheduleHearing);
-        producer.push(config.getRescheduleRequestCreateTopic(), reScheduleHearing);
-
+//        producer.push("schedule-hearing-to-block-calendar", reScheduleHearing);
+//        producer.push("check-opt-out", reScheduleHearing);
+//        producer.push(config.getRescheduleRequestCreateTopic(), reScheduleHearing);
+        scheduleHearingConsumerService.updateRequestForBlockCalendar(reScheduleHearingsRequest);
         log.info("operation = create, result=SUCCESS, ReScheduleHearing={}", reScheduleHearing);
 
         return reScheduleHearing;

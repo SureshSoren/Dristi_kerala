@@ -47,7 +47,7 @@ public class ReScheduleHearing {
     private Long availableAfter;
 
     @JsonProperty("status")
-    private Status status;
+    private String status;
 
     @JsonProperty("actionComment")
     private String actionComment;
@@ -73,7 +73,7 @@ public class ReScheduleHearing {
 
 
     @JsonProperty("scheduleDate")
-    @JsonFormat(pattern = "yyyy-MM-dd")// additional details
+//    @JsonFormat(pattern = "yyyy-MM-dd")// additional details
     private Long scheduleDate;
 
 

@@ -26,7 +26,7 @@ public class HearingConsumer {
         this.processor = processor;
     }
 
-    @KafkaListener(topics = {"create-hearing-application"})
+//    @KafkaListener(topics = {"create-hearing-application"})
     public void listenScheduleHearing(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
         HearingRequest hearingRequest = mapper.convertValue(record, HearingRequest.class);
@@ -34,7 +34,7 @@ public class HearingConsumer {
 
     }
 
-    @KafkaListener(topics = {"schedule-hearing-to-block-calendar"})
+//    @KafkaListener(topics = {"schedule-hearing-to-block-calendar"})
     public void listenRescheduleHearing(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     }
 }

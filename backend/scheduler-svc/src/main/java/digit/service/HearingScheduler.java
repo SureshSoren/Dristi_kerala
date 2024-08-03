@@ -57,33 +57,31 @@ public class HearingScheduler {
             log.info("operation = scheduleHearingForApprovalStatus, result = IN_PROGRESS, RescheduledRequest = {}", reScheduleHearingsRequest.getReScheduleHearing());
             List<ReScheduleHearing> hearingsNeedToBeSchedule = new ArrayList<>();
             List<String> ids = new ArrayList<>();
-            HashMap<String, LocalDate> dateMap = new HashMap<>();
+            HashMap<String, Long> dateMap = new HashMap<>();
             List<ReScheduleHearing> blockedHearings = new ArrayList<>();
-//            for (ReScheduleHearing element : reScheduleHearingsRequest.getReScheduleHearing()) {
-//                if (Objects.equals(element.getWorkflow().getAction(), "SCHEDULE")) {
-//                    hearingsNeedToBeSchedule.add(element);
-//                    ids.add(element.getHearingBookingId());
-//                    dateMap.put(element.getHearingBookingId(), element.getScheduleDate());
-//                }
-//                if (Objects.equals(element.getWorkflow().getAction(), "APPROVE")) {
-//                    blockedHearings.add(element);
-//
-//                }
-//            }
+            for (ReScheduleHearing element : reScheduleHearingsRequest.getReScheduleHearing()) {
+                if (element.getStatus().equals(Status.APPROVED.toString())) {
+                    hearingsNeedToBeSchedule.add(element);
+                    ids.add(element.getHearingBookingId());
+                    dateMap.put(element.getHearingBookingId(), element.getScheduleDate());
+                } else if (element.getStatus().equals(Status.BLOCKED.toString())) {
+                    blockedHearings.add(element);
+                }
+            }
 
             ReScheduleHearingRequest request = ReScheduleHearingRequest.builder().reScheduleHearing(blockedHearings)
                     .requestInfo(reScheduleHearingsRequest.getRequestInfo()).build();
 
-            if (!blockedHearings.isEmpty()) producer.push("schedule-hearing-to-block-calendar", request);
+//            if (!blockedHearings.isEmpty()) producer.push("schedule-hearing-to-block-calendar", request);
 
             if (!hearingsNeedToBeSchedule.isEmpty()) {
-                List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().criteria(ScheduleHearingSearchCriteria.builder()
-                                .hearingIds(ids).build())
-                        .build(), null, null);
-                for (ScheduleHearing hearing : hearings) {
-                    hearing.setStatus(Status.SCHEDULED.toString());
-//                    hearing.setDate(dateMap.get(hearing.getHearingBookingId()));
-                }
+//                List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().criteria(ScheduleHearingSearchCriteria.builder()
+//                                .hearingIds(ids).build())
+//                        .build(), null, null);
+//                for (ScheduleHearing hearing : hearings) {
+//                    hearing.setStatus(Status.SCHEDULED.toString());
+////                    hearing.setDate(dateMap.get(hearing.getHearingBookingId()));
+//                }
 
                 List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);
 
@@ -93,9 +91,9 @@ public class HearingScheduler {
                         obj -> obj
                 ));
 
-                ScheduleHearingRequest updateRequest = ScheduleHearingRequest.builder().hearing(hearings)
-                        .requestInfo(reScheduleHearingsRequest.getRequestInfo()).build();
-                hearingService.updateBulk(updateRequest, defaultSlots, hearingTypeMap);
+//                ScheduleHearingRequest updateRequest = ScheduleHearingRequest.builder().hearing(hearings)
+//                        .requestInfo(reScheduleHearingsRequest.getRequestInfo()).build();
+//                hearingService.updateBulk(updateRequest, defaultSlots, hearingTypeMap);
             }
 
 

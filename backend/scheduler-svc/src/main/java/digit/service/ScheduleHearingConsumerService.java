@@ -46,12 +46,12 @@ public class ScheduleHearingConsumerService {
 
 
     // blocked judged calendar by creating temp hearings
-    public void updateRequestForBlockCalendar(HashMap<String, Object> record) {
+    public void updateRequestForBlockCalendar(ReScheduleHearingRequest request) {
 
         try {
-            log.info("operation = updateRequestForBlockCalendar, result = IN_PROGRESS, record = {}", record);
+            log.info("operation = updateRequestForBlockCalendar, result = IN_PROGRESS, record = {}", request);
 
-            ReScheduleHearingRequest hearingUpdateRequest = mapper.convertValue(record, ReScheduleHearingRequest.class);
+            ReScheduleHearingRequest hearingUpdateRequest = request;
             RequestInfo requestInfo = hearingUpdateRequest.getRequestInfo();
 
             List<ReScheduleHearing> hearingDetails = hearingUpdateRequest.getReScheduleHearing();

@@ -15,10 +15,10 @@ public enum Status {
     }
 
     @JsonCreator
-    public static Status fromValue(String text) {
+    public static String fromValue(String text) {
         for (Status b : Status.values()) {
             if (String.valueOf(b.value).equalsIgnoreCase(text) || String.valueOf(b.name()).equalsIgnoreCase(text)) {
-                return b;
+                return b.toString();
             }
         }
         return null;

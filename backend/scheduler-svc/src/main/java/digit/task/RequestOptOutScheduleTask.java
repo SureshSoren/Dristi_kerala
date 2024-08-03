@@ -60,7 +60,7 @@ public class RequestOptOutScheduleTask {
                 }
 
                 reScheduleHearing.setAvailableDates(availableDates);
-                reScheduleHearing.setStatus(Status.REVIEW);
+                reScheduleHearing.setStatus(Status.REVIEW.toString());
             }
             producer.push(config.getUpdateRescheduleRequestTopic(), reScheduleHearings);
             log.info("operation= updateAvailableDatesFromOptOuts, result=SUCCESS");

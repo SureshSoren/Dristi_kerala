@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
@@ -68,7 +69,7 @@ public class CalendarService {
         log.info("operation = getJudgeAvailability, result = IN_PROGRESS, judgeId = {},tenantId ={}, courtId = {}", criteria.getJudgeId(), criteria.getTenantId(), criteria.getCourtId());
 
         // validating required fields
-        validator.validateSearchRequest(criteria);
+//        validator.validateSearchRequest(criteria);
 
         List<AvailabilityDTO> resultList = new ArrayList<>();
         HashMap<String, Double> dateMap = new HashMap<>();
@@ -114,8 +115,9 @@ public class CalendarService {
                 if (map.containsKey("date")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     String date = String.valueOf(map.get("date"));
-                    dateMap.put(LocalDate.parse(date, formatter).toString(), -1.0);
-                    lastDateInDefaultCalendar = Long.valueOf(date);
+                    LocalDate newDate = LocalDate.parse(date, formatter);
+                    dateMap.put(newDate.toString(), -1.0);
+                    lastDateInDefaultCalendar = newDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC)*1000;
                 }
 
             }

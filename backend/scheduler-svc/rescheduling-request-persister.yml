@@ -6,7 +6,7 @@ serviceMaps:
       fromTopic: reschedule-hearing
       isTransaction: true
       queryMaps:
-        - query: INSERT INTO hearing_booking_reschedule_request(hearing_booking_id,reschedule_request_id,requester_id,reason,status,action_comment,created_by,last_modified_by,created_time, last_modified_time ,row_version ,tenant_id ,judge_id ,case_id ,documents ,suggested_days ,available_days) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,? ,? ,? ,? ,? ,?);
+        - query: INSERT INTO hearing_booking_reschedule_request(hearing_booking_id,reschedule_request_id,requester_id,reason,status,action_comment,created_by,last_modified_by,created_time, last_modified_time ,row_version ,tenant_id ,judge_id ,case_id ,documents ,suggested_days ,available_days, schedule_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,? ,? ,? ,? ,? ,?, ?);
           basePath: $.*
           jsonMaps:
             - jsonPath: $.*.hearingBookingId
@@ -48,6 +48,8 @@ serviceMaps:
             - jsonPath: $.*.availableDates
               type: JSON
               dbType: JSONB
+
+            - jsonPath: $.*.scheduleDate
 
     - version: 1.0
       description: Update Reschedule request in table
