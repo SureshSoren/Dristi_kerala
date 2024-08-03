@@ -118,6 +118,15 @@ export const DRISTIService = {
       params,
     });
   },
+  startHearing: ({ hearing }, params) => {
+    return Request({
+      url: Urls.dristi.updateHearings,
+      useCache: false,
+      userService: false,
+      data: { hearing: { ...hearing, workflow: { action: "START" } } },
+      params,
+    });
+  },
   createHearings: (data, params) => {
     return Request({
       url: Urls.dristi.createHearings,
@@ -216,22 +225,6 @@ export const DRISTIService = {
   fetchBillFileStoreId: (data, params) =>
     Request({
       url: Urls.dristi.billFileStoreId,
-      useCache: false,
-      userService: false,
-      data,
-      params,
-    }),
-  customApiService: (url, data, params, useCache = false, userService = true) =>
-    Request({
-      url: url,
-      useCache: useCache,
-      userService: true,
-      data,
-      params,
-    }),
-  addWitness: (data, params) =>
-    Request({
-      url: Urls.case.addWitness,
       useCache: false,
       userService: false,
       data,

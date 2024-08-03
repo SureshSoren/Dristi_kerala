@@ -8,7 +8,6 @@ import EndHearing from "./EndHearing";
 import InsideHearingMainPage from "./InsideHearingMainPage";
 
 const bredCrumbStyle = { maxWidth: "min-content" };
-
 const ProjectBreadCrumb = ({ location }) => {
   const { t } = useTranslation();
   const userInfo = JSON.parse(window.localStorage.getItem("user-info"));
@@ -21,7 +20,7 @@ const ProjectBreadCrumb = ({ location }) => {
     },
     {
       path: `/${window?.contextPath}/employee`,
-      content: t(location.pathname.split("/").filter(Boolean).pop()),
+      content: t(location.pathname.split("/").pop()),
       show: true,
     },
   ];

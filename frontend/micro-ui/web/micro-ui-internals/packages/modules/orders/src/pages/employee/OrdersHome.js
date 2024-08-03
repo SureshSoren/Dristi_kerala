@@ -46,7 +46,7 @@ const OrdersHome = () => {
   const handleCreateOrder = () => {
     const reqbody = {
       order: {
-        createdDate: new Date().getTime(),
+        createdDate: formatDate(new Date()),
         tenantId,
         cnrNumber,
         filingNumber: filingNumber,

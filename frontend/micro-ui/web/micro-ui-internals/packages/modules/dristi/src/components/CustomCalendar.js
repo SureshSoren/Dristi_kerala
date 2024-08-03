@@ -52,20 +52,7 @@ function CustomCalendar({ config, t, handleSelect, onCalendarConfirm, selectedCu
       <div>
         <span className="rdrDayNumber">{date.getDate()}</span>
         {hearingCount > 0 && (
-          <div
-            style={{
-              fontSize: "8px",
-              color: "#931847",
-              marginTop: "2px",
-              top: 18,
-              right: 2,
-              position: "absolute",
-              width: "100%",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
+          <div style={{ fontSize: "8px", color: "#931847", marginTop: "2px" }}>
             {hearingCount} {t("HEARINGS")}
           </div>
         )}

@@ -45,7 +45,7 @@
 }
 
 .custom-date-selector-modal {
-  width: 390px;
+  width: 369px;
   border: 0px 0px 1px 0px;
   border-radius: 5px;
 
@@ -189,21 +189,6 @@
     box-shadow: none !important;
     svg {
       margin-left: 10px !important;
-    }
-  }
-}
-
-.case-file-admission-action-bar.hearing-scheduled {
-  .previous-button {
-    display: flex;
-    align-items: center;
-    border: none;
-    margin-right: -15px;
-    pointer-events: none !important;
-    h2 {
-      padding-top: 5px;
-      font-size: 19px;
-      font-weight: 500;
     }
   }
 }

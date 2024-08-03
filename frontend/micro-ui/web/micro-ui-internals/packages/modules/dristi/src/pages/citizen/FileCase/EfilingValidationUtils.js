@@ -891,7 +891,6 @@ export const createIndividualUser = async ({ data, documentData, tenantId }) => 
             "ORDER_VIEWER",
             "SUBMISSION_CREATOR",
             "SUBMISSION_RESPONDER",
-            "SUBMISSION_DELETE",
           ]?.map((role) => ({
             code: role,
             name: role,
@@ -951,14 +950,14 @@ const onDocumentUpload = async (fileData, filename, tenantId) => {
   return { file: fileUploadRes?.data, fileType: fileData.type, filename };
 };
 
-export const getAllAssignees = (caseDetails, getAdvocates = true, getLitigent = true) => {
+export const getAllAssignees = (caseDetails) => {
   if (Array.isArray(caseDetails?.representatives || []) && caseDetails?.representatives?.length > 0) {
     return caseDetails?.representatives
       ?.reduce((res, curr) => {
-        if (getAdvocates && curr && curr?.additionalDetails?.uuid) {
+        if (curr && curr?.additionalDetails?.uuid) {
           res.push(curr?.additionalDetails?.uuid);
         }
-        if (getLitigent && curr && curr?.representing && Array.isArray(curr?.representing || []) && curr?.representing?.length > 0) {
+        if (curr && curr?.representing && Array.isArray(curr?.representing || []) && curr?.representing?.length > 0) {
           const representingUuids = curr?.representing?.reduce((result, current) => {
             if (current && current?.additionalDetails?.uuid) {
               result.push(current?.additionalDetails?.uuid);
@@ -981,25 +980,6 @@ export const getAllAssignees = (caseDetails, getAdvocates = true, getLitigent = 
       ?.flat();
   }
   return null;
-};
-
-export const getAdvocates = (caseDetails) => {
-  let litigants = {};
-  let list = [];
-
-  caseDetails?.litigants?.forEach((litigant) => {
-    list = caseDetails?.representatives
-      ?.filter((item) => {
-        return item?.representing?.some((lit) => lit?.individualId === litigant?.individualId) && item?.additionalDetails?.uuid;
-      })
-      .map((item) => item?.additionalDetails?.uuid);
-    if (list?.length > 0) {
-      litigants[litigant?.additionalDetails?.uuid] = list;
-    } else {
-      litigants[litigant?.additionalDetails?.uuid] = [litigant?.additionalDetails?.uuid];
-    }
-  });
-  return litigants;
 };
 
 const documentUploadHandler = async (document, index, prevCaseDetails, data, pageConfig, key, selected, tenantId) => {
@@ -1857,7 +1837,6 @@ export const updateCaseDetails = async ({
     };
   }
   if (selected === "advocateDetails") {
-    const advocateDetails = {};
     const newFormData = await Promise.all(
       formdata
         .filter((item) => item.isenabled)
@@ -1879,16 +1858,6 @@ export const updateCaseDetails = async ({
               })
             );
           }
-          const advocateDetail = await DRISTIService.searchAdvocateClerk("/advocate/advocate/v1/_search", {
-            criteria: [
-              {
-                barRegistrationNumber: data?.data?.advocateBarRegNumberWithName?.[0]?.barRegistrationNumber,
-              },
-            ],
-            tenantId,
-          });
-          advocateDetails[data?.data?.advocateBarRegNumberWithName?.[0]?.advocateId] =
-            advocateDetail?.advocates?.[0]?.responseList?.[0]?.auditDetails?.createdBy;
           return {
             ...data,
             data: {
@@ -1941,7 +1910,7 @@ export const updateCaseDetails = async ({
             advocateId: data?.data?.advocateBarRegNumberWithName?.[0]?.advocateId,
             additionalDetails: {
               advocateName: data?.data?.advocateBarRegNumberWithName?.[0]?.advocateName,
-              uuid: advocateDetails?.[data?.data?.advocateBarRegNumberWithName?.[0]?.advocateId],
+              uuid: data?.data?.advocateBarRegNumberWithName?.[0]?.advocateUuid,
             },
             tenantId,
           };

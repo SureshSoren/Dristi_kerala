@@ -217,7 +217,7 @@ function ViewCaseFile({ t, inViewCase = false }) {
           workflow: {
             ...caseDetails?.workflow,
             action,
-            ...(action === CaseWorkflowAction.SEND_BACK && { assignes: [caseDetails.auditDetails.createdBy] }),
+            ...(action === CaseWorkflowAction.SEND_BACK && { assignes: getAllAssignees(caseDetails) }),
           },
         },
         tenantId,
@@ -279,9 +279,9 @@ function ViewCaseFile({ t, inViewCase = false }) {
   if (isLoading) {
     return <Loader />;
   }
-  // if (isScrutiny && state !== CaseWorkflowState.UNDER_SCRUTINY) {
-  //   history.push("/digit-ui/employee/dristi/cases");
-  // }
+  if (isScrutiny && state !== CaseWorkflowState.UNDER_SCRUTINY) {
+    history.push("/digit-ui/employee/dristi/cases");
+  }
   const sidebar = ["litigentDetails", "caseSpecificDetails", "additionalDetails"];
   const labels = {
     litigentDetails: "CS_LITIGENT_DETAILS",
@@ -309,7 +309,7 @@ function ViewCaseFile({ t, inViewCase = false }) {
     },
     {
       key: "SUBMITTED_ON",
-      value: formatDate(new Date(caseDetails?.filingDate)),
+      value: caseDetails?.filingDate,
     },
   ];
 

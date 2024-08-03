@@ -118,12 +118,6 @@ const getTotalCountFromSideMenuConfig = (sideMenuConfig, selected) => {
   return countObj;
 };
 
-const stateSla = {
-  PAYMENT_PENDING: 2,
-};
-
-const dayInMillisecond = 24 * 3600 * 1000;
-
 function EFilingCases({ path }) {
   const [params, setParmas] = useState({});
   const { t } = useTranslation();
@@ -132,7 +126,6 @@ function EFilingCases({ path }) {
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
-  const todayDate = new Date().getTime();
 
   const setFormErrors = useRef(null);
   const resetFormData = useRef(null);
@@ -1587,14 +1580,14 @@ function EFilingCases({ path }) {
         pendingTask: {
           name: "Pending Payment",
           entityType: "case",
-          referenceId: `MANUAL_${caseDetails?.filingNumber}`,
+          referenceId: caseDetails?.filingNumber,
           status: "PAYMENT_PENDING",
           assignedTo: [...assignees?.map((uuid) => ({ uuid }))],
           assignedRole: ["CASE_CREATOR"],
           cnrNumber: null,
           filingNumber: caseDetails?.filingNumber,
           isCompleted: false,
-          stateSla: stateSla.PAYMENT_PENDING * dayInMillisecond + todayDate,
+          stateSla: null,
           additionalDetails: {},
           tenantId,
         },

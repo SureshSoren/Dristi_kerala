@@ -2,16 +2,13 @@ import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import { Button, InboxSearchComposer } from "@egovernments/digit-ui-react-components";
-import { rolesToConfigMapping, userTypeOptions } from "../../configs/HomeConfig";
+import { TabLitigantSearchConfig, rolesToConfigMapping, userTypeOptions } from "../../configs/HomeConfig";
 import UpcomingHearings from "../../components/UpComingHearing";
 import { Loader } from "@egovernments/digit-ui-react-components";
 import TasksComponent from "../../components/TaskComponent";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import { HomeService, Urls } from "../../hooks/services";
 import LitigantHomePage from "./LitigantHomePage";
-import { TabLitigantSearchConfig } from "../../configs/LitigantHomeConfig";
-import ReviewCard from "../../components/ReviewCard";
-import { InboxIcon, DocumentIcon } from "../../../homeIcon";
 
 const defaultSearchValues = {
   filingNumber: "",
@@ -40,11 +37,8 @@ const HomeView = () => {
   const [callRefetch, SetCallRefetch] = useState(false);
   const [tabConfig, setTabConfig] = useState(TabLitigantSearchConfig);
   const [onRowClickData, setOnRowClickData] = useState({ url: "", params: [] });
-  const [taskType, setTaskType] = useState(state?.taskType || {});
-  const [caseType, setCaseType] = useState(state?.caseType || {});
-
+  const [taskType, setTaskType] = useState({ code: "case", name: "Case" });
   const roles = useMemo(() => Digit.UserService.getUser()?.info?.roles, [Digit.UserService]);
-  const isCourtRoomRole = useMemo(() => roles?.some((role) => role?.code === "COURT_ADMIN"), [roles]);
   const tenantId = useMemo(() => window?.Digit.ULBService.getCurrentTenantId(), []);
   const userInfo = JSON.parse(window.localStorage.getItem("user-info"));
   const userInfoType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo]);
@@ -109,10 +103,6 @@ const HomeView = () => {
     setDefaultValues(defaultSearchValues);
   }, []);
 
-  useEffect(() => {
-    state && state.taskType && setTaskType(state.taskType);
-  }, [state]);
-
   const getTotalCountForTab = useCallback(
     async function (tabConfig) {
       const updatedTabData = await Promise.all(
@@ -142,33 +132,31 @@ const HomeView = () => {
   );
 
   useEffect(() => {
-    if (!(isLoading && isFetching && isSearchLoading && isFetchCaseLoading)) {
-      if (state?.role && rolesToConfigMapping?.find((item) => item[state.role])[state.role]) {
-        const rolesToConfigMappingData = rolesToConfigMapping?.find((item) => item[state.role]);
-        const tabConfig = rolesToConfigMappingData.config;
-        const rowClickData = rolesToConfigMappingData.onRowClickRoute;
-        setOnRowClickData(rowClickData);
-        setConfig(tabConfig?.TabSearchConfig?.[0]);
-        setTabConfig(tabConfig);
-        getTotalCountForTab(tabConfig);
-      } else {
-        const rolesToConfigMappingData =
-          rolesToConfigMapping?.find((item) =>
-            item.roles?.reduce((res, curr) => {
-              if (!res) return res;
-              res = roles.some((role) => role.code === curr);
-              return res;
-            }, true)
-          ) || TabLitigantSearchConfig;
-        const tabConfig = rolesToConfigMappingData?.config;
-        const rowClickData = rolesToConfigMappingData?.onRowClickRoute;
-        setOnRowClickData(rowClickData);
-        setConfig(tabConfig?.TabSearchConfig?.[0]);
-        setTabConfig(tabConfig);
-        getTotalCountForTab(tabConfig);
-      }
+    if (state?.role && rolesToConfigMapping?.find((item) => item[state.role])[state.role]) {
+      const rolesToConfigMappingData = rolesToConfigMapping?.find((item) => item[state.role]);
+      const tabConfig = rolesToConfigMappingData.config;
+      const rowClickData = rolesToConfigMappingData.onRowClickRoute;
+      setOnRowClickData(rowClickData);
+      setConfig(tabConfig?.TabSearchConfig?.[0]);
+      setTabConfig(tabConfig);
+      getTotalCountForTab(tabConfig);
+    } else {
+      const rolesToConfigMappingData =
+        rolesToConfigMapping?.find((item) =>
+          item.roles?.reduce((res, curr) => {
+            if (!res) return res;
+            res = roles.some((role) => role.code === curr);
+            return res;
+          }, true)
+        ) || TabLitigantSearchConfig;
+      const tabConfig = rolesToConfigMappingData?.config;
+      const rowClickData = rolesToConfigMappingData?.onRowClickRoute;
+      setOnRowClickData(rowClickData);
+      setConfig(tabConfig?.TabSearchConfig?.[0]);
+      setTabConfig(tabConfig);
+      getTotalCountForTab(tabConfig);
     }
-  }, [additionalDetails, getTotalCountForTab, isFetchCaseLoading, isFetching, isLoading, isSearchLoading, roles, state, tenantId]);
+  }, [additionalDetails, getTotalCountForTab, roles, state, tenantId]);
 
   // calling case api for tab's count
   useEffect(() => {
@@ -198,7 +186,7 @@ const HomeView = () => {
 
   const handleNavigate = () => {
     const contextPath = window?.contextPath || "";
-    history.push(`/${contextPath}/${userInfoType}/hearings/`);
+    history.push(`/${contextPath}/${userInfoType}/hearings/view-hearing`);
   };
   const JoinCaseHome = Digit?.ComponentRegistryService?.getComponent("JoinCaseHome");
 
@@ -231,7 +219,7 @@ const HomeView = () => {
           );
         } else if (row?.original?.status === "ADMISSION_HEARING_SCHEDULED") {
           history.push(
-            `/${window?.contextPath}/${userInfoType}/dristi/home/view-case?caseId=${row?.original?.id}&filingNumber=${row?.original?.filingNumber}&tab=Complaints`
+            `/${window?.contextPath}/${userInfoType}/dristi/admission?caseId=${row?.original?.id}&filingNumber=${row?.original?.filingNumber}`
           );
         } else {
           history.push(
@@ -250,21 +238,6 @@ const HomeView = () => {
     history.push(`/${window?.contextPath}/${userInfoType}/dristi/landing-page`);
   }
 
-  const data = [
-    {
-      logo: <InboxIcon />,
-      title: "REVIEW_SUMMON_NOTICE_WARRANTS_TEXT",
-      pendingAction: 40,
-      actionLink: "orders/Summons&Notice",
-    },
-    {
-      logo: <DocumentIcon />,
-      title: "VIEW_ISSUED_ORDERS",
-      pendingAction: 11,
-      actionLink: "",
-    },
-  ];
-
   return (
     <div className="home-view-hearing-container">
       {individualId && userType && userInfoType === "citizen" && !caseDetails ? (
@@ -272,10 +245,7 @@ const HomeView = () => {
       ) : (
         <React.Fragment>
           <div className="left-side">
-            <div className="home-header-wrapper">
-              <UpcomingHearings handleNavigate={handleNavigate} attendeeIndividualId={individualId} userInfoType={userInfoType} t={t} />
-              {isCourtRoomRole && <ReviewCard data={data} userInfoType={userInfoType} />}
-            </div>
+            <UpcomingHearings handleNavigate={handleNavigate} />
             <div className="content-wrapper">
               <div className="header-class">
                 <div className="header">{t("CS_YOUR_CASE")}</div>
@@ -324,8 +294,6 @@ const HomeView = () => {
             <TasksComponent
               taskType={taskType}
               setTaskType={setTaskType}
-              caseType={caseType}
-              setCaseType={setCaseType}
               isLitigant={Boolean(individualId && userType && userInfoType === "citizen")}
               uuid={userInfo?.uuid}
               userInfoType={userInfoType}

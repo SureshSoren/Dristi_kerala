@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useHistory } from "react-router-dom/";
 import PreHearingModal from "../../components/PreHearingModal";
 import useGetHearings from "../../hooks/hearings/useGetHearings";
-import useGetHearingSlotMetaData from "../../hooks/useGetHearingSlotMetaData";
+import useGetHearingSlotMetaData from "../../hooks/services/useGetHearingSlotMetaData";
 
 const tenantId = window.localStorage.getItem("tenant-id");
 
@@ -34,10 +34,10 @@ const MonthlyCalendar = () => {
     `${dateRange.start?.toISOString()}-${dateRange.end?.toISOString()}`,
     dateRange.start && dateRange.end
   );
-  const { data: hearingSlots } = useGetHearingSlotMetaData(true);
+  const { data: AdvocateSlotsResponse, refetch: refetchGetHearingSlotMetaData } = useGetHearingSlotMetaData(true);
   const hearingDetails = useMemo(() => hearingResponse?.HearingList || [], [hearingResponse]);
 
-  const events = useMemo(() => hearingSlots || [], [hearingSlots]);
+  const events = useMemo(() => AdvocateSlotsResponse || [], [AdvocateSlotsResponse]);
 
   function epochToDateTimeObject(epochTime) {
     if (!epochTime || typeof epochTime !== "number") {

@@ -200,7 +200,7 @@ export const configsOrderSection202CRPC = [
     body: [
       {
         label: "REF_APPLICATION_ID",
-        isMandatory: true,
+        isMandatory: false,
         key: "refApplicationId",
         disable: true,
         type: "text",
@@ -348,7 +348,6 @@ export const configsOrderSection202CRPC = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "responseRequiredBy",
-          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -498,15 +497,13 @@ export const configsOrderMandatorySubmissions = [
         label: "SUBMISSION_PARTY",
         isMandatory: true,
         key: "submissionParty",
-        type: "dropdown",
+        type: "multiselectdropdown",
         populators: {
-          allowMultiSelect: true,
           name: "submissionParty",
           optionsKey: "name",
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
-          selectedText: "party(s)",
           options: [
             {
               code: "PARTY_1",
@@ -532,7 +529,6 @@ export const configsOrderMandatorySubmissions = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "submissionDeadline",
-          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -574,6 +570,7 @@ export const configsOrderMandatorySubmissions = [
     body: [
       {
         label: "IS_RESPONSE_REQUIRED",
+        isMandatory: true,
         key: "isResponseRequired",
         type: "radio",
         populators: {
@@ -597,16 +594,15 @@ export const configsOrderMandatorySubmissions = [
       },
       {
         label: "RESPONDING_PARTY",
+        isMandatory: true,
         key: "respondingParty",
-        type: "dropdown",
+        type: "multiselectdropdown",
         populators: {
           name: "respondingParty",
-          allowMultiSelect: true,
           optionsKey: "name",
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
-          selectedText: "party(s)",
           options: [
             {
               code: "PARTY_1",
@@ -632,7 +628,6 @@ export const configsOrderMandatorySubmissions = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "responseDeadline",
-          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -766,7 +761,6 @@ export const configsOrderSubmissionExtension = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "newSubmissionDate",
-          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -877,11 +871,20 @@ export const configsOrderTranferToADR = [
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
-          mdmsConfig: {
-            moduleName: "Order",
-            masterName: "ADRMode",
-            select: "(data) => {return data['Order'].ADRMode?.map((item) => {return item;});}",
-          },
+          options: [
+            {
+              code: "MODE_1",
+              name: "MODE_1",
+            },
+            {
+              code: "MODE_2",
+              name: "MODE_2",
+            },
+            {
+              code: "MODE_3",
+              name: "MODE_3",
+            },
+          ],
         },
       },
       {
@@ -989,7 +992,6 @@ export const configsScheduleHearingDate = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "hearingDate",
-          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -1024,7 +1026,6 @@ export const configsScheduleHearingDate = [
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
-          selectedText: "party(s)",
           options: [
             {
               code: "PARTY_1",
@@ -1077,7 +1078,7 @@ export const configsRejectRescheduleHeadingDate = [
       },
       {
         label: "ORIGINAL_HEARING_DATE",
-        isMandatory: true,
+        isMandatory: false,
         key: "originalHearingDate",
         disable: true,
         type: "date",
@@ -1199,7 +1200,6 @@ export const configsRescheduleHearingDate = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "newHearingDate",
-          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -1400,7 +1400,6 @@ export const configsAssignDateToRescheduledHearing = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "newHearingDate",
-          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -1497,7 +1496,6 @@ export const configsAssignNewHearingDate = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "newHearingDate",
-          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -1590,8 +1588,7 @@ export const configRejectSubmission = [
     body: [
       {
         label: "REF_APPLICATION_ID",
-        isMandatory: false,
-        disable: true,
+        isMandatory: false, // Change this to mandatory after system filled is implememnted
         key: "refApplicationId",
         type: "text",
         populators: { name: "refApplicationId" },
@@ -1979,7 +1976,6 @@ export const configsCaseSettlement = [
         type: "date",
         populators: {
           name: "settlementAgreementDate",
-          error: "CORE_REQUIRED_FIELD_ERROR",
         },
       },
       {
@@ -1991,14 +1987,22 @@ export const configsCaseSettlement = [
           name: "settlementMechanism",
           optionsKey: "name",
           error: "CORE_REQUIRED_FIELD_ERROR",
-          styles: { maxWidth: "100%" },
           required: true,
           isMandatory: true,
-          mdmsConfig: {
-            moduleName: "Order",
-            masterName: "SettlementMechanism",
-            select: "(data) => {return data['Order'].SettlementMechanism?.map((item) => {return item;});}",
-          },
+          options: [
+            {
+              code: "MECHANISM_1",
+              name: "MECHANISM_1",
+            },
+            {
+              code: "MECHANISM_2",
+              name: "MECHANISM_2",
+            },
+            {
+              code: "MECHANISM_3",
+              name: "MECHANISM_3",
+            },
+          ],
         },
       },
       {
@@ -3116,11 +3120,18 @@ export const configsJudgement = [
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
-          mdmsConfig: {
-            moduleName: "Order",
-            masterName: "Findings",
-            select: "(data) => {return data['Order'].Findings?.map((item) => {return item;});}",
-          },
+          options: [
+            {
+              code: "GUILTY",
+              name: "GUILTY",
+              isEnabled: true,
+            },
+            {
+              code: "NOTGUILTY",
+              name: "NOTGUILTY",
+              isEnabled: true,
+            },
+          ],
         },
       },
     ],

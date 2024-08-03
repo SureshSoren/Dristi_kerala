@@ -5,7 +5,6 @@ import useGetSubmissions from "../../../hooks/dristi/useGetSubmissions";
 import { CustomArrowOut } from "../../../icons/svgIndex";
 import EvidenceModal from "./EvidenceModal";
 import { useGetPendingTask } from "../../../../../home/src/hooks/useGetPendingTask";
-import { useHistory } from "react-router-dom";
 
 const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal }) => {
   const { t } = useTranslation();
@@ -16,8 +15,7 @@ const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal
   const [comment, setComment] = useState("");
   const userInfo = Digit.UserService.getUser()?.info;
   const userRoles = userInfo?.roles.map((role) => role.code);
-  const { caseId } = Digit.Hooks.useQueryParams();
-  const history = useHistory();
+
   const getDate = (value) => {
     const date = new Date(value);
     const day = date.getDate().toString().padStart(2, "0");
@@ -89,7 +87,7 @@ const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal
     //   };
     // });
     setDocumentSubmission(docObj);
-    // console.log(docObj);
+    console.log(docObj);
     setShow(true);
   };
 
@@ -111,7 +109,7 @@ const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal
         tenantId,
         moduleName: "Pending Tasks Service",
         moduleSearchCriteria: {
-          entityType: "async-submission-with-response-managelifecycle",
+          entityType: "asynsubmissionwithresponse",
           filingNumber: filingNumber,
           isCompleted: false,
           assignedTo: userInfo?.uuid,
@@ -130,7 +128,7 @@ const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal
         tenantId,
         moduleName: "Pending Tasks Service",
         moduleSearchCriteria: {
-          entityType: "async-order-submission-managelifecycle",
+          entityType: "asyncsubmissionwithoutresponse",
           filingNumber: filingNumber,
           isCompleted: false,
           assignedTo: userInfo?.uuid,
@@ -144,42 +142,11 @@ const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal
     config: { enable: true },
   });
 
-  let applicationsPending = [];
-  if (pendingTaskDetails && pendingTaskDetailsWithout) {
-    applicationsPending = [
-      pendingTaskDetails.data?.map((app) =>
-        app.fields.reduce(
-          (fieldObj, item) =>
-            item.key === "name"
-              ? {
-                  ...fieldObj,
-                  applicationType: item.value,
-                }
-              : {
-                  ...fieldObj,
-                  [item.key]: item.value,
-                },
-          {}
-        )
-      ),
-      pendingTaskDetailsWithout.data?.map((app) =>
-        app.fields.reduce(
-          (fieldObj, item) => ({
-            ...fieldObj,
-            [item.key]: item.value,
-          }),
-          {}
-        )
-      ),
-    ].flat(Infinity);
-
-    // console.log(applicationsPending);
-  }
   const applicationListToShow = userRoles.includes("CITIZEN")
-    ? applicationsPending
+    ? applicationRes?.applicationList?.filter((application) => application.status === "PENDINGSUBMISSION")
     : applicationRes?.applicationList?.filter((application) => application.status === "PENDINGREVIEW");
 
-  // console.log(applicationListToShow);
+  console.log(applicationListToShow);
 
   return (
     <React.Fragment>
@@ -217,16 +184,7 @@ const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal
                 cursor: "pointer",
                 background: "#ECF3FD66",
               }}
-              onClick={() => {
-                userRoles.includes("CITIZEN")
-                  ? history.push(
-                      `/digit-ui/citizen/submissions/submissions-create?filingNumber=${filingNumber}&orderNumber=${app.referenceId
-                        .split("_")
-                        .slice(1)
-                        .join("_")}`
-                    )
-                  : docSetFunc(app);
-              }}
+              onClick={() => docSetFunc(app)}
             >
               <div style={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
                 <div
@@ -237,7 +195,8 @@ const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal
                     color: "#101828",
                   }}
                 >
-                  {t(app?.applicationType)}
+                  {app?.applicationType?.charAt(0).toUpperCase()}
+                  {app?.applicationType?.slice(1).toLowerCase()}
                 </div>
                 <CustomArrowOut />
               </div>
@@ -256,16 +215,13 @@ const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal
                     fontWeight: 500,
                     fontSize: "14px",
                     lineHeight: "20px",
-                    marginLeft: "2px",
                   }}
                 >
-                  {app?.auditDetails?.createdTime
-                    ? new Date(app?.auditDetails?.createdTime).toLocaleDateString("en-in", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
-                    : "N/A"}
+                  {new Date(app?.auditDetails?.createdTime).toLocaleDateString("en-in", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </span>
               </div>
             </div>
@@ -283,7 +239,6 @@ const SubmissionReview = ({ caseData, setUpdateCounter, openSubmissionsViewModal
           modalType={"Submissions"}
           setUpdateCounter={setUpdateCounter}
           caseData={caseData}
-          caseId={caseId}
         />
       )}
     </React.Fragment>

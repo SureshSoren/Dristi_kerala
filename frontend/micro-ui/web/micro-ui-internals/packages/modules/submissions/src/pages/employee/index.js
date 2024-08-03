@@ -20,7 +20,7 @@ const ProjectBreadCrumb = ({ location }) => {
       show: true,
     },
     {
-      path: `/${window?.contextPath}/${userType}`,
+      path: `/${window?.contextPath}/employee`,
       content: t(location.pathname.split("/").pop()),
       show: true,
     },
@@ -31,7 +31,7 @@ const ProjectBreadCrumb = ({ location }) => {
 const App = ({ path, stateCode, userType, tenants }) => {
   return (
     <Switch>
-      <AppContainer className="ground-container submission-main">
+      <AppContainer className="ground-container">
         <React.Fragment>
           <ProjectBreadCrumb location={window.location} />
         </React.Fragment>

@@ -17,10 +17,6 @@ import useBillSearch from "./dristi/useBillSearch";
 import useCreateDemand from "./dristi/useCreateDemand";
 import useApplicationDetails from "./dristi/useApplicationDetails.js";
 import useEvidenceDetails from "./dristi/useEvidenceDetails.js";
-import { useToast } from "../components/Toast/useToast.js";
-import useCreateHearings from "./dristi/useCreateHearings.js";
-import useApplicationDetails from "./dristi/useApplicationDetails.js";
-import useEvidenceDetails from "./dristi/useEvidenceDetails.js";
 
 export const Urls = {
   Authenticate: "/user/oauth/token",
@@ -51,12 +47,7 @@ export const Urls = {
     fetchBill: "/billing-service/bill/v2/_fetchbill",
     searchBill: "/billing-service/bill/v2/_search",
     eTreasury: "/etreasury/payment/v1/_processChallan",
-    createHearings: "/hearing/v1/create",
-    updateHearings: "/hearing/v1/update",
     demandCreate: "/billing-service/demand/_create",
-  },
-  case: {
-    addWitness: "/case/case/v1/add/witness",
   },
   FileFetchById: "/filestore/v1/files/id",
 };

@@ -1,9 +1,11 @@
 import { Button, FormComposerV2, Modal } from "@egovernments/digit-ui-react-components";
 import React, { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { DRISTIService } from "../../../../dristi/src/services/index.js";
 import addPartyConfig from "../../configs/AddNewPartyConfig.js";
 
 const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
-  const DRISTIService = Digit?.ComponentRegistryService?.getComponent("DRISTIService");
+  const { t } = useTranslation();
   const [formConfigs, setFormConfigs] = useState([addPartyConfig(1)]);
   const [aFormData, setFormData] = useState([{}]);
   const Close = () => (
@@ -85,43 +87,32 @@ const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
     });
   };
   const onAdd = (cleanedData) => {
-    const newWitness = cleanedData.map((data) => {
-      return {
-        isenabled: true,
-        displayindex: 0,
-        data: {
-          emails: { emailId: [data.emailId], textFieldValue: "" },
-          firstName: data.partyName,
-          lastName: "",
-          phonenumbers: {
-            mobileNumber: [data.phoneNumber],
-            textFieldValue: "",
-          },
-          witnessAdditionalDetails: {
-            text: data.additionalDetails,
-          },
-          isSigned: false,
-          uuid: data.uuid,
-        },
-      };
-    });
-
     const caseDetails = {
       ...caseData?.criteria?.[0]?.responseList?.[0],
     };
     const witnessDetails = caseDetails.additionalDetails?.witnessDetails
-      ? [...caseDetails.additionalDetails?.witnessDetails?.formdata, ...newWitness]
-      : [...newWitness];
-
-    return DRISTIService.addWitness(
+      ? [...caseDetails.additionalDetails?.witnessDetails?.formdata, ...cleanedData]
+      : [...cleanedData];
+    const newcasedetails = {
+      ...caseDetails,
+      additionalDetails: {
+        ...caseDetails.additionalDetails,
+        witnessDetails: {
+          ...caseDetails?.additionalDetails?.witnessDetails,
+          formdata: witnessDetails,
+        },
+      },
+    };
+    return DRISTIService.caseUpdateService(
       {
-        tenantId,
-        caseFilingNumber: caseDetails.filingNumber,
-        additionalDetails: {
-          ...caseDetails.additionalDetails,
-          witnessDetails: {
-            formdata: witnessDetails,
+        cases: {
+          ...newcasedetails,
+          linkedCases: caseDetails?.linkedCases ? caseDetails?.linkedCases : [],
+          workflow: {
+            ...caseDetails?.workflow,
           },
+          tenantId: tenantId,
+          litigants: newcasedetails?.litigants || [],
         },
       },
       tenantId

@@ -10,11 +10,7 @@ import { hearingService } from "../services";
 function useGetHearings(data, params, keys, enabled, refetchInterval = false) {
   const { isLoading, data: hearingResponse, isFetching, refetch, error } = useQuery(
     `GET_HEARING_${keys}`,
-    () =>
-      hearingService
-        .searchHearings(data, params)
-        .then((data) => data)
-        .catch(() => null),
+    () => hearingService.searchHearings(data, params),
     {
       cacheTime: 0,
       enabled: Boolean(enabled),
