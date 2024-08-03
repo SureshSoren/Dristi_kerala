@@ -49,7 +49,7 @@ public class WorkflowService {
             ProcessInstance processInstance = getProcessInstanceForHearingReScheduler(application, reScheduleHearingRequest.getRequestInfo());
             ProcessInstanceRequest workflowRequest = new ProcessInstanceRequest(reScheduleHearingRequest.getRequestInfo(), Collections.singletonList(processInstance));
             State state = callWorkFlow(workflowRequest);
-            application.setStatus(Status.fromValue(state.getApplicationStatus()));
+//            application.setStatus(Status.fromValue(state.getApplicationStatus()));
         });
     }
 

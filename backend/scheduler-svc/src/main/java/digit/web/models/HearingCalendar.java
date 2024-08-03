@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+
 import java.util.List;
 
 @Data
@@ -20,7 +20,7 @@ public class HearingCalendar {
     private String judgeId;
 
     @JsonProperty("date")
-    private LocalDate date;
+    private Long date;
 
     @JsonProperty("isHoliday")
     private Boolean isHoliday;

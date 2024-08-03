@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+
 import java.util.List;
 
 @Data
@@ -16,7 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class OptOut {
-
 
     @JsonProperty("tenantId")
     private String tenantId;
@@ -34,7 +33,7 @@ public class OptOut {
     private String judgeId;
 
     @JsonProperty("optOutDates")             // additional details
-    private List<LocalDate> optoutDates;
+    private List<Long> optoutDates;
 
     @JsonProperty("auditDetails")
     private AuditDetails auditDetails;

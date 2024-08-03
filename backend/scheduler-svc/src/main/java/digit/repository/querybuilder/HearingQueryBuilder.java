@@ -43,9 +43,9 @@ public class HearingQueryBuilder {
         // add status block
         queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
         query.append(" ( hb.status = ? ");
-        preparedStmtList.add(Status.BLOCKED.toString());
+//        preparedStmtList.add(Status.BLOCKED.toString());
         query.append(" OR hb.status = ? )");
-        preparedStmtList.add(Status.SCHEDULED.toString());
+//        preparedStmtList.add(Status.SCHEDULED.toString());
 
 
         query.append("GROUP BY hb.hearing_date) AS meeting_hours ");

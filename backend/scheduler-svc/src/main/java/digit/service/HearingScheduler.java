@@ -80,7 +80,7 @@ public class HearingScheduler {
                                 .hearingIds(ids).build())
                         .build(), null, null);
                 for (ScheduleHearing hearing : hearings) {
-                    hearing.setStatus(Status.SCHEDULED.toString());
+//                    hearing.setStatus(Status.SCHEDULED.toString());
 //                    hearing.setDate(dateMap.get(hearing.getHearingBookingId()));
                 }
 

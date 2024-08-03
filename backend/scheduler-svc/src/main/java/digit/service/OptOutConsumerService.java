@@ -68,9 +68,9 @@ public class OptOutConsumerService {
                         .builder().requestInfo(requestInfo)
                         .criteria(ScheduleHearingSearchCriteria.builder()
                                 .rescheduleId(optOut.getRescheduleRequestId())
-                                .status(Collections.singletonList(Status.BLOCKED.toString()))
+//                                .status(Collections.singletonList(Status.BLOCKED.toString()))
                                 .build()).build(), null, null);
-                hearingList.forEach(hearing -> hearing.setStatus(Status.CANCELLED.toString()));
+//                hearingList.forEach(hearing -> hearing.setStatus(Status.CANCELLED.toString()));
 
                 //release judge calendar for opt out dates
                 hearingService.update(ScheduleHearingRequest.builder()
@@ -107,7 +107,7 @@ public class OptOutConsumerService {
                 reScheduleRequest.get(0).setAvailableDates(new ArrayList<>(suggestedDatesSet));
                 //if this is last one then update the status to review
                 if (representatives.size() - existingOptOut.size() == 1)
-                    reScheduleRequest.get(0).setStatus(Status.REVIEW);
+//                    reScheduleRequest.get(0).setStatus(Status.REVIEW);
 
 
                 producer.push(configuration.getUpdateRescheduleRequestTopic(), reScheduleRequest);

@@ -85,9 +85,9 @@ public class RescheduleRequestOptOutValidator {
         Map<String, List<Long>> resultMap = new HashMap<>();
         //check weather request is approved or not
         search.forEach((element) -> {
-            if (!element.getStatus().equals(Status.APPROVED)) {
-                throw new CustomException("DK_OO_APP_ERR", "Opt-Out is not enable for reschedule request : " + element.getRescheduledRequestId());
-            }
+//            if (!element.getStatus().equals(Status.APPROVED)) {
+//                throw new CustomException("DK_OO_APP_ERR", "Opt-Out is not enable for reschedule request : " + element.getRescheduledRequestId());
+//            }
             resultMap.put(element.getRescheduledRequestId(), element.getSuggestedDates());
         });
 

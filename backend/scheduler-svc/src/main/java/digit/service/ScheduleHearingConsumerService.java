@@ -87,7 +87,7 @@ public class ScheduleHearingConsumerService {
                                 .hearingIds(Collections.singletonList(hearingDetail.getHearingBookingId()))
                                 .build()).build(), null, null);
                 ScheduleHearing hearing = hearings.get(0);
-                hearings.get(0).setStatus(Status.RE_SCHEDULED.toString());
+//                hearings.get(0).setStatus(Status.RE_SCHEDULED.toString());
 
 
                 //reschedule hearing to unblock the calendar
@@ -104,7 +104,7 @@ public class ScheduleHearingConsumerService {
 
                     scheduleHearing.setStartTime(hearing.getStartTime());
                     scheduleHearing.setEndTime(hearing.getEndTime());
-                    scheduleHearing.setStatus(Status.BLOCKED.toString());
+//                    scheduleHearing.setStatus(Status.BLOCKED.toString());
                     udpateHearingList.add(scheduleHearing);
                     scheduleHearing.setRescheduleRequestId(hearingDetail.getRescheduledRequestId());
 

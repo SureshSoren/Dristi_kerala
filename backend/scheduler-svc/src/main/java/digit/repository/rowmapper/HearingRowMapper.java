@@ -28,7 +28,7 @@ public class HearingRowMapper implements RowMapper<ScheduleHearing> {
                 .judgeId(resultSet.getString("judge_id"))
                 .caseId(resultSet.getString("case_id"))
                 .title(resultSet.getString("title"))
-                .status(resultSet.getString("status")==null?null:Status.valueOf(resultSet.getString("status")).toString())
+//                .status(resultSet.getString("status")==null?null:Status.valueOf(resultSet.getString("status")).toString())
                 .startTime(Long.parseLong(resultSet.getString("start_time")))
                 .endTime(Long.parseLong(resultSet.getString("end_time")))
                 .auditDetails(AuditDetails.builder()

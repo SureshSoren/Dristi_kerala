@@ -151,8 +151,8 @@ public class ReScheduleHearingService {
         Long startTime = bulkRescheduling.getStartTime();
         Long fromDate = bulkRescheduling.getScheduleAfter();
 
-        ScheduleHearingSearchCriteria criteria = ScheduleHearingSearchCriteria.builder().judgeId(judgeId).startDateTime(startTime).endDateTime(endTime).tenantId(tenantId)
-                .status(Arrays.asList(Status.SCHEDULED.toString(), Status.BLOCKED.toString())).build();
+        ScheduleHearingSearchCriteria criteria = ScheduleHearingSearchCriteria.builder().judgeId(judgeId).startDateTime(startTime).endDateTime(endTime).tenantId(tenantId).build();
+//                .status(Arrays.asList(Status.SCHEDULED.toString(), Status.BLOCKED.toString())).build();
 
         List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().requestInfo(request.getRequestInfo()).criteria(criteria).build(), null, null);
 

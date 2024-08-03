@@ -1,7 +1,6 @@
 package digit.web.models;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import digit.models.coremodels.AuditDetails;
 import digit.web.models.enums.JudgeRuleType;
@@ -10,8 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-
-import java.time.LocalDate;
 
 /**
  * JudgeCalendarRule
@@ -34,8 +31,7 @@ public class JudgeCalendarRule {
     private JudgeRuleType ruleType;
 
     @JsonProperty("date")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date;
+    private Long date;
 
     @JsonProperty("notes")
     private String notes;

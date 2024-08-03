@@ -34,8 +34,6 @@ public class ReScheduleHearingReqSearchCriteria {
     @JsonProperty("requesterId")
     private String requesterId;
 
-    @JsonProperty("status")
-    private Status status;
 
     @JsonProperty("dueDate")
     private Long dueDate;

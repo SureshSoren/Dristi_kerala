@@ -291,8 +291,8 @@ public class CalendarService {
         return ScheduleHearingSearchCriteria.builder()
                 .judgeId(criteria.getJudgeId())
                 .tenantId(criteria.getTenantId())
-                .tenantId(criteria.getTenantId())
-                .status(Collections.singletonList(Status.SCHEDULED.toString())).build();
+                .tenantId(criteria.getTenantId()).build();
+//                .status(Collections.singletonList(Status.SCHEDULED.toString())).build();
 
     }
 
