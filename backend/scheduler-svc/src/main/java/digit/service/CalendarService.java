@@ -71,7 +71,7 @@ public class CalendarService {
         log.info("operation = getJudgeAvailability, result = IN_PROGRESS, judgeId = {},tenantId ={}, courtId = {}", criteria.getJudgeId(), criteria.getTenantId(), criteria.getCourtId());
 
         // validating required fields
-        validator.validateSearchRequest(criteria);
+//        validator.validateSearchRequest(criteria);
 
         List<AvailabilityDTO> resultList = new ArrayList<>();
         HashMap<String, Double> dateMap = new HashMap<>();
@@ -116,7 +116,7 @@ public class CalendarService {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     String date = String.valueOf(map.get("date"));
                     dateMap.put(LocalDate.parse(date, formatter).toString(), -1.0);
-                    lastDateInDefaultCalendar = Long.valueOf(date);
+                    lastDateInDefaultCalendar = LocalDate.parse(date, formatter).toEpochDay();
                 }
 
             }
@@ -168,7 +168,7 @@ public class CalendarService {
         CalendarSearchCriteria criteria = searchCriteriaRequest.getCriteria();
         log.info("operation = getJudgeCalendar, result = IN_PROGRESS, tenantId= {}, judgeId = {}, courtId = {}", criteria.getTenantId(), criteria.getJudgeId(), criteria.getCourtId());
 
-        validator.validateSearchRequest(criteria);
+//        validator.validateSearchRequest(criteria);
 
         List<HearingCalendar> calendar = new ArrayList<>();
         HashMap<LocalDate, List<ScheduleHearing>> dayHearingMap = new HashMap<>();
@@ -294,6 +294,8 @@ public class CalendarService {
         log.info("operation = getHearingSearchCriteriaFromJudgeSearch, result = SUCCESS, ScheduleHearingSearchCriteria = {}", criteria);
 
         return ScheduleHearingSearchCriteria.builder()
+                .startDateTime(fromDate)
+                .endDateTime(toDate)
                 .judgeId(criteria.getJudgeId())
                 .tenantId(criteria.getTenantId())
                 .tenantId(criteria.getTenantId()).build();

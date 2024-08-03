@@ -28,7 +28,7 @@ public class HearingSchedulerConsumer {
     }
 
 
-    @KafkaListener(topics = {"schedule-hearing-to-block-calendar"})
+//    @KafkaListener(topics = {"schedule-hearing-to-block-calendar"})
     public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
         try {
@@ -40,7 +40,7 @@ public class HearingSchedulerConsumer {
     }
 
 
-    @KafkaListener(topics = {"check-opt-out"})
+//    @KafkaListener(topics = {"check-opt-out"})
     public void listenOptOut(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
         try {

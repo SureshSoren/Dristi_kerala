@@ -28,7 +28,7 @@ public class JudgeCalendarRule {
     private String judgeId;
 
     @JsonProperty("ruleType")
-    private JudgeRuleType ruleType;
+    private String ruleType;
 
     @JsonProperty("date")
     private Long date;

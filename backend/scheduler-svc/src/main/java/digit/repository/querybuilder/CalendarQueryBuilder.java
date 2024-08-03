@@ -43,13 +43,13 @@ public class CalendarQueryBuilder {
 
         if (!ObjectUtils.isEmpty(searchCriteria.getFromDate())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_DATE(jc.date, 'YYYY-MM-DD') >= ? ");
+            query.append(" jc.date >= ? ");
             preparedStmtList.add(searchCriteria.getFromDate());
         }
 
         if (!ObjectUtils.isEmpty(searchCriteria.getToDate())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_DATE(jc.date, 'YYYY-MM-DD') <= ? ");
+            query.append(" jc.date <= ?");
             preparedStmtList.add(searchCriteria.getToDate());
         }
 

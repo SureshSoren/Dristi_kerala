@@ -50,7 +50,7 @@ public class RequestOptOutScheduleTask {
                 List<Long> availableDates = new ArrayList<>(suggestedDays);
 
                 for (OptOut optOut : optOuts) {
-                    List<LocalDate> optOutDates = optOut.getOptoutDates();
+                    List<Long> optOutDates = optOut.getOptoutDates();
                     availableDates.removeAll(optOutDates);
                 }
 

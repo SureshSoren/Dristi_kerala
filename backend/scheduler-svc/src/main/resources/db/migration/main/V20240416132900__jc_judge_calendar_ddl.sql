@@ -3,7 +3,7 @@ CREATE TABLE judge_calendar_rules (
     judge_id                varchar(64),
     id                      varchar(64),
     rule_type               varchar(64),
-    date                    varchar(64),
+    date                    bigint,
     notes                   text,
     created_by              character varying(64),
     created_time            bigint,
