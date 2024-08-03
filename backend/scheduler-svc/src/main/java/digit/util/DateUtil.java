@@ -32,4 +32,10 @@ public class DateUtil {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
     }
+
+    public Long getEPochFromLocalDate(LocalDate date) {
+
+        return date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+    }
 }

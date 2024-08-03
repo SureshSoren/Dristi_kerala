@@ -4,9 +4,10 @@ package digit.service;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.JudgeCalendarEnrichment;
-import digit.util.MasterDataUtil;
 import digit.kafka.Producer;
 import digit.repository.CalendarRepository;
+import digit.util.DateUtil;
+import digit.util.MasterDataUtil;
 import digit.util.MdmsUtil;
 import digit.validator.JudgeCalendarValidator;
 import digit.web.models.*;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Contains method to retrieve judge availability, judge calendar ,update judge rule by judge id
@@ -39,10 +41,11 @@ public class CalendarService {
     private final CalendarRepository calendarRepository;
     private final HearingService hearingService;
     private final MasterDataUtil helper;
+    private final DateUtil dateUtil;
 
 
     @Autowired
-    public CalendarService(JudgeCalendarValidator validator, JudgeCalendarEnrichment enrichment, Producer producer, Configuration config, MdmsUtil mdmsUtil, ServiceConstants serviceConstants, CalendarRepository calendarRepository, HearingService hearingService, MasterDataUtil helper) {
+    public CalendarService(JudgeCalendarValidator validator, JudgeCalendarEnrichment enrichment, Producer producer, Configuration config, MdmsUtil mdmsUtil, ServiceConstants serviceConstants, CalendarRepository calendarRepository, HearingService hearingService, MasterDataUtil helper, DateUtil dateUtil) {
         this.validator = validator;
         this.enrichment = enrichment;
         this.producer = producer;
@@ -52,13 +55,15 @@ public class CalendarService {
         this.calendarRepository = calendarRepository;
         this.hearingService = hearingService;
         this.helper = helper;
+        this.dateUtil = dateUtil;
     }
 
     /**
      * This function calculate availability of judge by considering his leaves , hearings and default court calendar
+     *
      * @param searchCriteriaRequest not null request which contains request info and judge availability search criteria
      * @return list of availability dto
-     * @exception CustomException if there are no available date from start date (fromDate) in next six months
+     * @throws CustomException if there are no available date from start date (fromDate) in next six months
      */
 
     public List<AvailabilityDTO> getJudgeAvailability(JudgeAvailabilitySearchRequest searchCriteriaRequest) {
@@ -76,8 +81,6 @@ public class CalendarService {
 
         // calculate bandwidth for judge from slot of court
         double totalHrs = defaultSlots.stream().reduce(0.0, (total, slot) -> total + slot.getSlotDuration() / 60.0, Double::sum);
-
-//      if (criteria.getNumberOfSuggestedDays() == null) criteria.setNumberOfSuggestedDays(5);
 
         //TODO:Configure for different courts
         Map<String, Map<String, JSONArray>> defaultCalendarResponse = mdmsUtil.fetchMdmsData(searchCriteriaRequest.getRequestInfo(), criteria.getTenantId(), serviceConstants.DEFAULT_JUDGE_CALENDAR_MODULE_NAME, Collections.singletonList(serviceConstants.DEFAULT_JUDGE_CALENDAR_MASTER_NAME));
@@ -124,24 +127,24 @@ public class CalendarService {
         Long dateAfterSixMonths = criteria.getFromDate();// configurable?
 
         //last date which is store in default calendar
-        Long endDate = lastDateInDefaultCalendar == null ? lastDateInDefaultCalendar: dateAfterSixMonths;
-        // check startDate in date map if its exits and value is true then add to the result list
-//        Stream.iterate(criteria.getFromDate(), startDate -> startDate.isBefore(endDate), startDate -> startDate.plusDays(1))
-//                .takeWhile(startDate -> resultList.size() != criteria.getNumberOfSuggestedDays()).forEach(startDate -> {
-//
-//                    if (dateMap.containsKey(startDate.toString()) && dateMap.get(startDate.toString()) != -1.0 && dateMap.get(startDate.toString()) < totalHrs)
-//                        resultList.add(AvailabilityDTO.builder()
-//                                .date(startDate.toString())
-//                                .occupiedBandwidth(dateMap.get(startDate.toString())).build());
-//
-//                    // this case will cover no holiday,no leave and no hearing for day
-//                    if (!dateMap.containsKey(startDate.toString()))
-//                        resultList.add(AvailabilityDTO.builder()
-//                                .date(startDate.toString())
-//                                .occupiedBandwidth(0.0).build());
-//
-//
-//                });
+        Long endDate = lastDateInDefaultCalendar == null ? lastDateInDefaultCalendar : dateAfterSixMonths;
+//         check startDate in date map if its exits and value is true then add to the result list
+        Stream.iterate(criteria.getFromDate(), startDate -> startDate < (endDate), startDate -> dateUtil.getEPochFromLocalDate(dateUtil.getLocalDateFromEpoch(startDate).plusDays(1)))
+                .takeWhile(startDate -> resultList.size() != criteria.getNumberOfSuggestedDays()).forEach(startDate -> {
+
+                    if (dateMap.containsKey(startDate.toString()) && dateMap.get(startDate.toString()) != -1.0 && dateMap.get(startDate.toString()) < totalHrs)
+                        resultList.add(AvailabilityDTO.builder()
+                                .date(startDate.toString())
+                                .occupiedBandwidth(dateMap.get(startDate.toString())).build());
+
+                    // this case will cover no holiday,no leave and no hearing for day
+                    if (!dateMap.containsKey(startDate.toString()))
+                        resultList.add(AvailabilityDTO.builder()
+                                .date(startDate.toString())
+                                .occupiedBandwidth(0.0).build());
+
+
+                });
 
         if (resultList.isEmpty()) {
             throw new CustomException("NO_AVAILABLE_DATES", "There are no available dates in next 6 months from provided start date");
@@ -155,8 +158,9 @@ public class CalendarService {
 
     /**
      * This function calculate the judge calendar for asked period time considering judge personal rules , default court calendar and judge hearings
-     * @param searchCriteriaRequest  not null request which contains request info and calendar search criteria
-     * @return  list of HearingCalendar
+     *
+     * @param searchCriteriaRequest not null request which contains request info and calendar search criteria
+     * @return list of HearingCalendar
      */
 
     public List<HearingCalendar> getJudgeCalendar(JudgeCalendarSearchRequest searchCriteriaRequest) {
@@ -178,11 +182,11 @@ public class CalendarService {
 
 
         // getting from date and to date and assigning it to criteria
-//        if (criteria.getPeriodType() != null) {
-//            Pair<Long, Long> fromDateToDate = getFromAndToDateFromPeriodType(criteria.getPeriodType());
-//            criteria.setFromDate(fromDateToDate.getKey());
-//            criteria.setToDate(fromDateToDate.getValue());
-//        }
+        if (criteria.getPeriodType() != null) {
+            Pair<Long, Long> fromDateToDate = getFromAndToDateFromPeriodType(criteria.getPeriodType());
+            criteria.setFromDate(fromDateToDate.getKey());
+            criteria.setToDate(fromDateToDate.getValue());
+        }
         //fetch judge calendar rule
         List<JudgeCalendarRule> judgeCalendarRule;
         try {
@@ -196,7 +200,7 @@ public class CalendarService {
         for (int i = 0; i < loopLength; i++) {
 
             if (i < judgeCalendarRule.size())
-                leaveMap.put(judgeCalendarRule.get(i).getDate(), judgeCalendarRule.get(i));
+                leaveMap.put(dateUtil.getLocalDateFromEpoch(judgeCalendarRule.get(i).getDate()), judgeCalendarRule.get(i));
             if (i < court000334.size()) {
                 LinkedHashMap map = (LinkedHashMap) court000334.get(i);
                 if (map.containsKey("date")) {
@@ -219,31 +223,30 @@ public class CalendarService {
             throw new CustomException("", "");
         }
 
-//        hearings.forEach((hearing) -> {
-//
-//            if (dayHearingMap.containsKey(hearing.getDate())) {
-//                dayHearingMap.get(hearing.getDate()).add(hearing);
-//            } else {
-//                dayHearingMap.put(hearing.getDate(), new ArrayList<>(Collections.singletonList(hearing)));
-//            }
-//
-//        });
+        hearings.forEach((hearing) -> {
+            dayHearingMap.computeIfAbsent(dateUtil.getLocalDateFromEpoch(hearing.getStartTime()), k -> new ArrayList<>()).add(hearing);
+        });
 
-        //generating calendar response
-//        for (LocalDate start = scheduleHearingSearchCriteria.getFromDate(); start.isBefore(scheduleHearingSearchCriteria.getToDate()) || start.isEqual(scheduleHearingSearchCriteria.getToDate()); start = start.plusDays(1)) {
-//            List<ScheduleHearing> hearingOfaDay = dayHearingMap.getOrDefault(start, new ArrayList<>());
-//
-//            HearingCalendar calendarOfDay = HearingCalendar.builder()
-//                    .judgeId(criteria.getJudgeId())
-//                    .isOnLeave(leaveMap.containsKey(start) && leaveMap.get(start) instanceof JudgeCalendarRule)
-//                    .isHoliday(leaveMap.containsKey(start) && leaveMap.get(start) instanceof LinkedHashMap<?, ?>)
-//                    .notes("note")
+        LocalDate startDate = dateUtil.getLocalDateFromEpoch(scheduleHearingSearchCriteria.getStartDateTime());
+        LocalDate endDate = dateUtil.getLocalDateFromEpoch(scheduleHearingSearchCriteria.getEndDateTime());
+
+        for (LocalDate start = startDate; !start.isAfter(endDate); start = start.plusDays(1)) {
+
+
+            //generating calendar response
+            List<ScheduleHearing> hearingOfaDay = dayHearingMap.getOrDefault(start, new ArrayList<>());
+
+            HearingCalendar calendarOfDay = HearingCalendar.builder()
+                    .judgeId(criteria.getJudgeId())
+                    .isOnLeave(leaveMap.containsKey(start) && leaveMap.get(start) instanceof JudgeCalendarRule)
+                    .isHoliday(leaveMap.containsKey(start) && leaveMap.get(start) instanceof LinkedHashMap<?, ?>)
+                    .notes("note")
 //                    .date(start)
-//                    .description("description")
-//                    .hearings(hearingOfaDay).build();
-//            calendar.add(calendarOfDay);
-//
-//        }
+                    .description("description")
+                    .hearings(hearingOfaDay).build();
+            calendar.add(calendarOfDay);
+
+        }
         log.info("operation = getJudgeAvailability, result = SUCCESS, HearingCalendar = {}", calendar);
 
         return calendar;
@@ -251,6 +254,7 @@ public class CalendarService {
 
     /**
      * This function update the judge calendar rule for judge
+     *
      * @param judgeCalendarUpdateRequest not null request with request info and list of JudgeCalendarRule
      * @return list of judge calendar rule
      */
@@ -272,6 +276,7 @@ public class CalendarService {
 
     /**
      * Function to convert judge search criteria to hearing search criteria
+     *
      * @param criteria calendar search criteria
      * @return Hearing search criteria
      */
@@ -279,12 +284,12 @@ public class CalendarService {
     private ScheduleHearingSearchCriteria getHearingSearchCriteriaFromJudgeSearch(CalendarSearchCriteria criteria) {
         log.info("operation = getHearingSearchCriteriaFromJudgeSearch, result = IN_PROGRESS, CalendarSearchCriteria = {}", criteria);
 
-//        Long fromDate = null, toDate = null;
-//
-//        if (criteria.getFromDate() != null && criteria.getToDate() != null) {
-//            fromDate = criteria.getFromDate();
-//            toDate = criteria.getToDate();
-//        }
+        Long fromDate = null, toDate = null;
+
+        if (criteria.getFromDate() != null && criteria.getToDate() != null) {
+            fromDate = criteria.getFromDate();
+            toDate = criteria.getToDate();
+        }
 
         log.info("operation = getHearingSearchCriteriaFromJudgeSearch, result = SUCCESS, ScheduleHearingSearchCriteria = {}", criteria);
 
@@ -298,12 +303,13 @@ public class CalendarService {
 
     /**
      * Function to process period type enum and convert it into form and to date
+     *
      * @param periodType enum
      * @return Pair Object with from date in key and to date in value
      */
-    public Pair<LocalDate, LocalDate> getFromAndToDateFromPeriodType(PeriodType periodType) {
+    public Pair<Long, Long> getFromAndToDateFromPeriodType(PeriodType periodType) {
         log.info("operation = getFromAndToDateFromPeriodType, result = IN_PROGRESS, PeriodType = {}", periodType);
-        Pair<LocalDate, LocalDate> pair = new Pair<>();
+        Pair<Long, Long> pair = new Pair<>();
 
         LocalDate fromDate = null, toDate = null;
         LocalDate currentDate = LocalDate.now();
@@ -333,8 +339,8 @@ public class CalendarService {
             }
         }
 
-        pair.setKey(fromDate);
-        pair.setValue(toDate);
+        pair.setKey(dateUtil.getEPochFromLocalDate(fromDate));
+        pair.setValue(dateUtil.getEPochFromLocalDate(toDate));
 
         log.info("operation = getFromAndToDateFromPeriodType, result = SUCCESS, fromDate = {} , toDate = {}", fromDate, toDate);
         return pair;
