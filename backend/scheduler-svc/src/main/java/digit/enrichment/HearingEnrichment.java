@@ -4,6 +4,7 @@ package digit.enrichment;
 import digit.config.Configuration;
 import digit.models.coremodels.AuditDetails;
 import digit.repository.HearingRepository;
+import digit.util.DateUtil;
 import digit.util.IdgenUtil;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +23,13 @@ import java.util.Map;
 @Slf4j
 public class HearingEnrichment {
 
-    @Autowired
-    private IdgenUtil idgenUtil;
 
     @Autowired
     private HearingRepository repository;
 
     @Autowired
-    private Configuration configuration;
+    private DateUtil dateUtil;
+
 
 
     public void enrichScheduleHearing(ScheduleHearingRequest schedulingRequests, List<MdmsSlot> defaultSlots, Map<String, MdmsHearing> hearingTypeMap) {
@@ -96,13 +96,13 @@ public class HearingEnrichment {
     void updateHearingTime(ScheduleHearing hearing, List<MdmsSlot> slots, List<ScheduleHearing> scheduledHearings, int hearingDuration) {
         long startTime = hearing.getStartTime();
 
-        LocalDate date = getLocalDateFromEpoch(startTime);
+        LocalDate date = dateUtil.getLocalDateFromEpoch(startTime);
 
         for (MdmsSlot slot : slots) {
-            LocalTime currentStartTime = getLocalTime(slot.getSlotStartTime());
+            LocalTime currentStartTime = dateUtil.getLocalTime(slot.getSlotStartTime());
 
             boolean flag = true;
-            while (!currentStartTime.isAfter(getLocalTime(slot.getSlotEndTime()))) {
+            while (!currentStartTime.isAfter(dateUtil.getLocalTime(slot.getSlotEndTime()))) {
                 LocalTime currentEndTime = currentStartTime.plusMinutes(hearingDuration);
                 hearing.setStartTime(LocalDateTime.of(date, currentStartTime).toEpochSecond(ZoneOffset.UTC) * 1000);
                 hearing.setEndTime(LocalDateTime.of(date, currentEndTime).toEpochSecond(ZoneOffset.UTC) * 1000);
@@ -132,9 +132,9 @@ public class HearingEnrichment {
         for (MdmsSlot slot : slots) {
 
             // later we can directly compare long
-            LocalDateTime hearingEndTime = getLocalDateTimeFromEpoch(newHearing.getEndTime());
-            LocalDateTime slotStart = getLocalDateTime(getLocalDateTimeFromEpoch(newHearing.getStartTime()), slot.getSlotStartTime());
-            LocalDateTime slotEnd = getLocalDateTime(getLocalDateTimeFromEpoch(newHearing.getEndTime()), slot.getSlotEndTime());
+            LocalDateTime hearingEndTime = dateUtil.getLocalDateTimeFromEpoch(newHearing.getEndTime());
+            LocalDateTime slotStart = dateUtil.getLocalDateTime(dateUtil.getLocalDateTimeFromEpoch(newHearing.getStartTime()), slot.getSlotStartTime());
+            LocalDateTime slotEnd = dateUtil.getLocalDateTime(dateUtil.getLocalDateTimeFromEpoch(newHearing.getEndTime()), slot.getSlotEndTime());
 
             if (hearingEndTime.isAfter(slotStart) && hearingEndTime.isBefore(slotEnd)) {
                 return true;
@@ -161,27 +161,5 @@ public class HearingEnrichment {
     }
 
 
-    public LocalDateTime getLocalDateTimeFromEpoch(long startTime) {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime), ZoneId.systemDefault());
-    }
 
-    public LocalTime getLocalTime(String time) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        // Parse the time string into a LocalTime object
-        return LocalTime.parse(time, formatter);
-    }
-
-    public LocalDateTime getLocalDateTime(LocalDateTime dateTime, String newTime) {
-
-        LocalTime time = getLocalTime(newTime);
-
-        return dateTime.with(time);
-
-    }
-
-    public LocalDate getLocalDateFromEpoch(long startTime) {
-        return Instant.ofEpochSecond(startTime)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-    }
 }
