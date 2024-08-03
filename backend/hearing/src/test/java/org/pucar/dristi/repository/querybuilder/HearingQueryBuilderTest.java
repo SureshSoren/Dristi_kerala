@@ -56,10 +56,12 @@ class HearingQueryBuilderTest {
         String cnrNumber = "CNR123";
         String applicationNumber = "APP456";
         String hearingId = "HEARING789";
+        String hearingType = "type1";
         String filingNumber = "FILE123";
         String tenantId = "tenant1";
         LocalDate fromDate = LocalDate.of(2023, 1, 1);
         LocalDate toDate = LocalDate.of(2023, 12, 31);
+        String attendeeIndividualId = "Ind-01";
 
         HearingCriteria criteria = HearingCriteria.builder()
                 .cnrNumber(cnrNumber)
@@ -69,6 +71,8 @@ class HearingQueryBuilderTest {
                 .tenantId(tenantId)
                 .fromDate(fromDate)
                 .toDate(toDate)
+                .hearingType(hearingType)
+                .attendeeIndividualId(attendeeIndividualId)
                 .build();
 
         // Act
@@ -83,14 +87,18 @@ class HearingQueryBuilderTest {
         assertTrue(query.contains("AND tenantId = ?"));
         assertTrue(query.contains("AND startTime >= ?"));
         assertTrue(query.contains("AND startTime <= ?"));
-        assertEquals(7, preparedStmtList.size());
+        assertTrue(query.contains("AND hearingtype = ?"));
+        assertTrue(query.contains("AND EXISTS (SELECT 1 FROM jsonb_array_elements(attendees) elem WHERE elem->>'individualId' = ?)"));
+        assertEquals(9, preparedStmtList.size());
         assertEquals("[\"CNR123\"]", preparedStmtList.get(0));
         assertEquals("[\"APP456\"]", preparedStmtList.get(1));
         assertEquals("HEARING789", preparedStmtList.get(2));
-        assertEquals("[\"FILE123\"]", preparedStmtList.get(3));
-        assertEquals("tenant1", preparedStmtList.get(4));
-        assertEquals(fromDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000, preparedStmtList.get(5));
-        assertEquals(toDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000, preparedStmtList.get(6));
+        assertEquals(hearingType, preparedStmtList.get(3));
+        assertEquals("[\"FILE123\"]", preparedStmtList.get(4));
+        assertEquals("tenant1", preparedStmtList.get(5));
+        assertEquals(fromDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000, preparedStmtList.get(6));
+        assertEquals(toDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000, preparedStmtList.get(7));
+        assertEquals(attendeeIndividualId, preparedStmtList.get(8));
     }
 
     @Test
@@ -155,6 +163,7 @@ class HearingQueryBuilderTest {
         String hearingId = "hearing123";
         String tenantId = "tenant1";
         String vcLink = "test_vc_link";
+        String notes = "updatedNote";
         List<String> transcriptList = List.of("transcript1", "transcript2");
         AuditDetails auditDetails = new AuditDetails();
         auditDetails.setLastModifiedBy("user1");
@@ -170,6 +179,7 @@ class HearingQueryBuilderTest {
                 .auditDetails(auditDetails)
                 .additionalDetails(additionalDetails)
                 .attendees(attendees)
+                .notes(notes)
                 .build();
 
         String transcriptJson = "[\"transcript1\",\"transcript2\"]";
@@ -184,16 +194,17 @@ class HearingQueryBuilderTest {
         String query = hearingQueryBuilder.buildUpdateTranscriptAdditionalAttendeesQuery(preparedStmtList, hearing);
 
         // Assert
-        assertEquals("UPDATE dristi_hearing SET transcript = ?::jsonb , additionaldetails = ?::jsonb , attendees = ?::jsonb , vclink = ? , lastModifiedBy = ? , lastModifiedTime = ? WHERE hearingId = ? AND tenantId = ?", query);
-        assertEquals(8, preparedStmtList.size());
+        assertEquals("UPDATE dristi_hearing SET transcript = ?::jsonb , additionaldetails = ?::jsonb , attendees = ?::jsonb , vclink = ? , notes = ? , lastModifiedBy = ? , lastModifiedTime = ? WHERE hearingId = ? AND tenantId = ?", query);
+        assertEquals(9, preparedStmtList.size());
         assertEquals(transcriptJson, preparedStmtList.get(0));
         assertEquals(additionalDetailsJson, preparedStmtList.get(1));
         assertEquals(attendeesJson, preparedStmtList.get(2));
         assertEquals(vcLink,preparedStmtList.get(3));
-        assertEquals("user1", preparedStmtList.get(4));
-        assertEquals(123456789L, preparedStmtList.get(5));
-        assertEquals(hearingId, preparedStmtList.get(6));
-        assertEquals(tenantId, preparedStmtList.get(7));
+        assertEquals(notes,preparedStmtList.get(4));
+        assertEquals("user1", preparedStmtList.get(5));
+        assertEquals(123456789L, preparedStmtList.get(6));
+        assertEquals(hearingId, preparedStmtList.get(7));
+        assertEquals(tenantId, preparedStmtList.get(8));
     }
 
     @Test
