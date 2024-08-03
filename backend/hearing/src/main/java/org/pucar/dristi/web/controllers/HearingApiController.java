@@ -7,13 +7,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import org.egov.common.contract.response.ResponseInfo;
 import org.pucar.dristi.service.HearingService;
+import org.pucar.dristi.service.WitnessDepositionPdfService;
 import org.pucar.dristi.util.ResponseInfoFactory;
 import org.pucar.dristi.web.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,11 +28,14 @@ public class HearingApiController {
 
     private HearingService hearingService;
     private ResponseInfoFactory responseInfoFactory;
+    private WitnessDepositionPdfService witnessDepositionPdfService;
 
     @Autowired
-    public HearingApiController(HearingService hearingService, ResponseInfoFactory responseInfoFactory) {
+    public HearingApiController(HearingService hearingService, ResponseInfoFactory responseInfoFactory,
+                                WitnessDepositionPdfService witnessDepositionPdfService) {
         this.hearingService = hearingService;
         this.responseInfoFactory = responseInfoFactory;
+        this.witnessDepositionPdfService = witnessDepositionPdfService;
     }
 
     @RequestMapping(value = "/v1/create", method = RequestMethod.POST)
@@ -95,5 +102,13 @@ public class HearingApiController {
 
     }
 
+    @PostMapping("/witnessDeposition/v1/_getPdf")
+    public ResponseEntity<Object> hearingV1getWitnessDepositionPdf(@Valid @RequestBody PdfRequest pdfRequest) {
+        MultipartFile pdfResponse = witnessDepositionPdfService.getWitnessDepositionPdf(pdfRequest);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"witness_deposition_pdf.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfResponse);
+    }
 }
 
