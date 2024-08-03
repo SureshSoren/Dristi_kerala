@@ -29,14 +29,13 @@ module.exports = function (app) {
     "/case",
     "/individual",
     "/evidence",
+    "/casemanagement",
     "/application",
     "/case",
     "/order",
     "/inbox",
     "/hearing",
-    "/payment",
-    "/etreasury",
-    "/payment-calculator",
     "/case",
+    "/analytics",
   ].forEach((location) => app.use(location, createProxy));
 };

@@ -53,6 +53,8 @@ function AdmissionActionModal({
   disabled,
   filingNumber,
   isCaseAdmitted = false,
+  caseAdmittedSubmit = () => {},
+  caseAdmitLoader,
 }) {
   const history = useHistory();
   const [showErrorToast, setShowErrorToast] = useState(false);
@@ -80,7 +82,9 @@ function AdmissionActionModal({
     });
   }, [t]);
 
-  const [scheduleHearingParams, setScheduleHearingParam] = useState({ purpose: "Admission Purpose" });
+  const [scheduleHearingParams, setScheduleHearingParam] = useState(!isCaseAdmitted ? { purpose: "Admission Purpose" } : {});
+  const isGenerateOrderDisabled = useMemo(() => Boolean(!scheduleHearingParams?.purpose || !scheduleHearingParams?.date), [scheduleHearingParams]);
+  console.log("first", scheduleHearingParams, isGenerateOrderDisabled);
 
   const onSubmit = (props, wordLimit) => {
     const words = props?.commentForLitigant?.trim()?.split(/\s+/);
@@ -114,7 +118,7 @@ function AdmissionActionModal({
   const [selectedChip, setSelectedChip] = React.useState(null);
 
   const setPurposeValue = (value, input) => {
-    setScheduleHearingParam({ ...scheduleHearingParams, purpose: value.code });
+    setScheduleHearingParam({ ...scheduleHearingParams, purpose: isCaseAdmitted ? value : value.code });
   };
 
   const showCustomDateModal = () => {
@@ -131,6 +135,14 @@ function AdmissionActionModal({
     setScheduleHearingParam({
       ...scheduleHearingParams,
       date: newSelectedChip,
+    });
+  };
+
+  const handleCloseCustomDate = () => {
+    setModalInfo({ ...modalInfo, page: 0, showDate: false, showCustomDate: false });
+    setScheduleHearingParam({
+      ...scheduleHearingParams,
+      date: "",
     });
   };
 
@@ -170,6 +182,7 @@ function AdmissionActionModal({
           headerBarMain={<Heading label={t(stepItems[1].headModal)} />}
           actionSaveLabel={t(stepItems[1]?.submitText)}
           headerBarEnd={<CloseBtn onClick={() => setShowModal(false)} />}
+          isDisabled={caseAdmitLoader}
           actionSaveOnSubmit={(props) => handleAdmitCase(props)}
         >
           <CardText>{t(stepItems[1]?.text)}</CardText>
@@ -199,6 +212,8 @@ function AdmissionActionModal({
             handleClickDate={handleClickDate}
             disabled={disabled}
             isCaseAdmitted={isCaseAdmitted}
+            isSubmitBarDisabled={isGenerateOrderDisabled}
+            caseAdmittedSubmit={caseAdmittedSubmit}
           />
         </Modal>
       )}
@@ -229,7 +244,7 @@ function AdmissionActionModal({
       {modalInfo?.showDate && (
         <Modal
           headerBarMain={<Heading label={t(stepItems[3].headModal)} />}
-          headerBarEnd={<CloseBtn onClick={() => setModalInfo({ ...modalInfo, page: 0, showDate: false, showCustomDate: false })} />}
+          headerBarEnd={<CloseBtn onClick={handleCloseCustomDate} />}
           // actionSaveLabel={t("CS_COMMON_CONFIRM")}
           hideSubmit={true}
           popmoduleClassName={"custom-date-selector-modal"}
@@ -256,7 +271,7 @@ function AdmissionActionModal({
           }
           actionCancelLabel={t(submitModalInfo?.backButtonText)}
           actionCancelOnSubmit={() => {
-            history.push(`/employee`);
+            history.push(`/${window?.contextPath}/employee`);
           }}
           actionSaveOnSubmit={() => {
             if (submitModalInfo?.nextButtonText === "SCHEDULE_NEXT_HEARING") {

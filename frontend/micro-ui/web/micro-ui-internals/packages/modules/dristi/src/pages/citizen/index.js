@@ -9,8 +9,9 @@ import ApplicationDetails from "../employee/ApplicationDetails";
 import CitizenHome from "./Home";
 import LandingPage from "./Home/LandingPage";
 import { userTypeOptions } from "./registration/config";
+import Breadcrumb from "../../components/BreadCrumb";
 
-const App = ({ stateCode, tenantId, result }) => {
+const App = ({ stateCode, tenantId }) => {
   const [hideBack, setHideBack] = useState(false);
   const { toastMessage, toastType, closeToast } = useToast();
   const Digit = window?.Digit || {};
@@ -47,6 +48,9 @@ const App = ({ stateCode, tenantId, result }) => {
   );
 
   const individualId = useMemo(() => data?.Individual?.[0]?.individualId, [data?.Individual]);
+  if (individualId && !localStorage.getItem(individualId)) {
+    localStorage.setItem("individualId", individualId);
+  }
 
   const userType = useMemo(() => data?.Individual?.[0]?.additionalFields?.fields?.find((obj) => obj.key === "userType")?.value, [data?.Individual]);
   const { data: searchData, isLoading: isSearchLoading } = Digit.Hooks.dristi.useGetAdvocateClerk(
@@ -77,8 +81,23 @@ const App = ({ stateCode, tenantId, result }) => {
       searchResult?.[0]?.status === "INACTIVE"
     );
   }, [searchResult, userType]);
-
   const hideHomeCrumb = [`${path}/home`];
+
+  const citizenCrumb = [
+    {
+      path: `/digit-ui/citizen/home/home-pending-task`,
+      content: t("ES_COMMON_HOME"),
+      show: !hideHomeCrumb.includes(location.pathname),
+      isLast: false,
+    },
+    {
+      path: `${path}/view-case`,
+      content: t("VIEW_CASE"),
+      show: location.pathname.includes("/view-case"),
+      isLast: true,
+    },
+  ];
+
   const whiteListedRoutes = [
     `${path}/home/register`,
     `${path}/home/register/otp`,
@@ -98,8 +117,7 @@ const App = ({ stateCode, tenantId, result }) => {
     `${path}/home/application-details`,
   ];
   const registerScreenRoute = [`${path}/home/login`, `${path}/home/registration/mobile-number`, `${path}/home/registration/otp`];
-  const eSignWindowObject = localStorage.getItem("eSignWindowObject");
-  const retrievedObject = JSON.parse(eSignWindowObject);
+
   if (!isUserLoggedIn && !whiteListedRoutes.includes(location.pathname)) {
     history.push(`${path}/home/login`);
   }
@@ -112,13 +130,6 @@ const App = ({ stateCode, tenantId, result }) => {
   }
   if (isUserLoggedIn && registerScreenRoute.includes(location.pathname)) {
     history.push(`${path}/home/registration/user-name`);
-  }
-  if (result) {
-    localStorage.setItem("isSignSuccess", result);
-  }
-  if (isUserLoggedIn && retrievedObject) {
-    history.push(`${retrievedObject?.path}${retrievedObject?.param}`);
-    localStorage.removeItem("eSignWindowObject");
   }
   if (isLoading) {
     return <Loader />;
@@ -133,6 +144,7 @@ const App = ({ stateCode, tenantId, result }) => {
               <BackButton />
             </div>
           )}
+          {location.pathname.includes("/view-case") && <Breadcrumb crumbs={citizenCrumb} breadcrumbStyle={{ paddingLeft: 20 }}></Breadcrumb>}
 
           {userType !== "LITIGANT" && (
             <PrivateRoute exact path={`${path}/home/application-details`} component={(props) => <ApplicationDetails {...props} />} />

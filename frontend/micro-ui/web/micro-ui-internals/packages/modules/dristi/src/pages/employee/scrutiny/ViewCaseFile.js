@@ -12,7 +12,7 @@ import { CustomArrowDownIcon, FlagIcon } from "../../../icons/svgIndex";
 import { DRISTIService } from "../../../services";
 import { formatDate } from "../../citizen/FileCase/CaseType";
 import { reviewCaseFileFormConfig } from "../../citizen/FileCase/Config/reviewcasefileconfig";
-
+import { getAllAssignees } from "../../citizen/FileCase/EfilingValidationUtils";
 function ViewCaseFile({ t, inViewCase = false }) {
   const history = useHistory();
   const roles = Digit.UserService.getUser()?.info?.roles;
@@ -214,10 +214,10 @@ function ViewCaseFile({ t, inViewCase = false }) {
         cases: {
           ...newcasedetails,
           linkedCases: caseDetails?.linkedCases ? caseDetails?.linkedCases : [],
-          filingDate: formatDate(new Date()),
           workflow: {
             ...caseDetails?.workflow,
             action,
+            ...(action === CaseWorkflowAction.SEND_BACK && { assignes: [caseDetails.auditDetails.createdBy] }),
           },
         },
         tenantId,
@@ -279,9 +279,9 @@ function ViewCaseFile({ t, inViewCase = false }) {
   if (isLoading) {
     return <Loader />;
   }
-  if (isScrutiny && state !== CaseWorkflowState.UNDER_SCRUTINY) {
-    history.push("/digit-ui/employee/dristi/cases");
-  }
+  // if (isScrutiny && state !== CaseWorkflowState.UNDER_SCRUTINY) {
+  //   history.push("/digit-ui/employee/dristi/cases");
+  // }
   const sidebar = ["litigentDetails", "caseSpecificDetails", "additionalDetails"];
   const labels = {
     litigentDetails: "CS_LITIGENT_DETAILS",
@@ -309,7 +309,7 @@ function ViewCaseFile({ t, inViewCase = false }) {
     },
     {
       key: "SUBMITTED_ON",
-      value: caseDetails?.filingDate,
+      value: formatDate(new Date(caseDetails?.filingDate)),
     },
   ];
 

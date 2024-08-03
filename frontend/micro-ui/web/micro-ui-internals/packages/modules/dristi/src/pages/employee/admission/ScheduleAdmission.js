@@ -29,6 +29,8 @@ function ScheduleAdmission({
   handleClickDate,
   disabled = true,
   isCaseAdmitted = false,
+  isSubmitBarDisabled = false,
+  caseAdmittedSubmit = () => {},
 }) {
   const getNextNDates = (n) => {
     const today = new Date();
@@ -60,7 +62,7 @@ function ScheduleAdmission({
     if (!scheduleHearingParams?.date && !modalInfo?.showCustomDate) {
       setShowErrorToast(true);
     } else {
-      setModalInfo({ ...modalInfo, page: 1 });
+      isCaseAdmitted ? caseAdmittedSubmit(scheduleHearingParams) : setModalInfo({ ...modalInfo, page: 1 });
     }
   };
 
@@ -210,7 +212,8 @@ function ScheduleAdmission({
           variation="primary"
           onSubmit={handleSubmit}
           className="primary-label-btn select-participant-submit"
-          label={selectedChip ? t("CS_COMMON_CONTINUE") : t("CS_SELECT_PARTICIPANT")}
+          disabled={isSubmitBarDisabled}
+          label={isCaseAdmitted ? t("GENERATE_ORDERS_LINK") : selectedChip ? t("CS_COMMON_CONTINUE") : t("CS_SELECT_PARTICIPANT")}
         ></SubmitBar>
       </div>
 
