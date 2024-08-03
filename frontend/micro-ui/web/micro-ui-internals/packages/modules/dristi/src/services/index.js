@@ -154,6 +154,22 @@ export const DRISTIService = {
       params,
     });
   },
+    customApiService: (url, data, params, useCache = false, userService = true) =>
+        Request({
+            url: url,
+            useCache: useCache,
+            userService: true,
+            data,
+            params,
+        }),
+    addWitness: (data, params) =>
+        Request({
+            url: Urls.case.addWitness,
+            useCache: false,
+            userService: false,
+            data,
+            params,
+        }),
   createDemand: (data, params) =>
     Request({
       url: Urls.dristi.demandCreate,
@@ -162,17 +178,58 @@ export const DRISTIService = {
       data,
       params,
     }),
-  customApiService: (url, data, params, useCache = false, userService = true) =>
+  eSignService: (data, params) => {
+    return Request({
+      url: Urls.dristi.eSign,
+      useCache: false,
+      userService: false,
+      data,
+      params,
+    });
+  },
+  createDemand: (data, params) =>
     Request({
-      url: url,
-      useCache: useCache,
+      url: Urls.dristi.demandCreate,
+      useCache: false,
       userService: true,
       data,
       params,
     }),
-  addWitness: (data, params) =>
+  getPaymentBreakup: (data, params) =>
     Request({
-      url: Urls.case.addWitness,
+      url: Urls.dristi.paymentCalculator,
+      useCache: false,
+      userService: false,
+      data,
+      params,
+    }),
+  callFetchBill: (data, params) =>
+    Request({
+      url: Urls.dristi.fetchBill,
+      useCache: false,
+      userService: true,
+      data,
+      params,
+    }),
+  callETreasury: (data, params) =>
+    Request({
+      url: Urls.dristi.eTreasury,
+      useCache: false,
+      userService: true,
+      data,
+      params,
+    }),
+  callSearchBill: (data, params) =>
+    Request({
+      url: Urls.dristi.searchBill,
+      useCache: false,
+      userService: true,
+      data,
+      params,
+    }),
+  fetchBillFileStoreId: (data, params) =>
+    Request({
+      url: Urls.dristi.billFileStoreId,
       useCache: false,
       userService: false,
       data,

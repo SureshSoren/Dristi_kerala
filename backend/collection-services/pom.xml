@@ -23,7 +23,6 @@
     <lombok.version>1.18.22</lombok.version>
     <commons-lang-version>2.6</commons-lang-version>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.egov.services</groupId>

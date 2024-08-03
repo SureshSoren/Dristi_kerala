@@ -3,6 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Switch } from "react-router-dom";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import Breadcrumb from "../../components/BreadCrumb";
 import { useToast } from "../../components/Toast/useToast";
 import AdmittedCases from "./AdmittedCases/AdmittedCase";
@@ -14,14 +15,20 @@ import CaseFileAdmission from "./admission/CaseFileAdmission";
 import Home from "./home";
 import ViewCaseFile from "./scrutiny/ViewCaseFile";
 
-const EmployeeApp = ({ path, url, userType, tenants, parentRoute }) => {
+const EmployeeApp = ({ path, url, userType, tenants, parentRoute, result }) => {
   const { t } = useTranslation();
   const location = useLocation();
+  const history = useHistory();
   const { toastMessage, toastType, closeToast } = useToast();
   const Inbox = window?.Digit?.ComponentRegistryService?.getComponent("Inbox");
   const hideHomeCrumb = [`${path}/cases`];
   const roles = window?.Digit.UserService.getUser()?.info?.roles;
   const isJudge = roles.some((role) => role.code === "CASE_APPROVER");
+  const token = window.localStorage.getItem("token");
+  const isUserLoggedIn = Boolean(token);
+  const eSignWindowObject = localStorage.getItem("eSignWindowObject");
+  const retrievedObject = JSON.parse(eSignWindowObject);
+
   const employeeCrumbs = [
     {
       path: `/digit-ui/employee`,
@@ -60,6 +67,13 @@ const EmployeeApp = ({ path, url, userType, tenants, parentRoute }) => {
       isLast: true,
     },
   ];
+  if (result) {
+    localStorage.setItem("isSignSuccess", result);
+  }
+  if (isUserLoggedIn && retrievedObject) {
+    history.push(`${retrievedObject?.path}${retrievedObject?.param}`);
+    localStorage.removeItem("eSignWindowObject");
+  }
   return (
     <Switch>
       <React.Fragment>

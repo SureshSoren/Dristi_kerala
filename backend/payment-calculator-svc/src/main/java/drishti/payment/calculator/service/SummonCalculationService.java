@@ -18,13 +18,11 @@ import java.util.List;
 public class SummonCalculationService {
 
     private final SummonFactory summonFactory;
-//    private final DemandService demandService;
     private final Configuration config;
 
     @Autowired
     public SummonCalculationService(SummonFactory summonFactory,  Configuration config) {
         this.summonFactory = summonFactory;
-//        this.demandService = demandService;
         this.config = config;
     }
 
@@ -41,7 +39,6 @@ public class SummonCalculationService {
             Calculation calculation = context.calculatePayment(requestInfo, criteria);
             response.add(calculation);
         }
-//        demandService.generateDemands(requestInfo, response, config.getSummonModuleCode(), config.getSummonTaxHeadMasterCode());
         return response;
 
     }

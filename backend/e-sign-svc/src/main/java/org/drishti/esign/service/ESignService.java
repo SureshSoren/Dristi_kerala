@@ -52,6 +52,7 @@ public class ESignService {
         ESignXmlData eSignXmlData = formDataSetter.setFormXmlData(fileHash, new ESignXmlData());
         eSignXmlData.setTxn(tenantId + "-" +  pageModule + "-" + fileStoreId);
         String strToEncrypt = xmlGenerator.generateXml(eSignXmlData);  // this method is writing in testing.xml
+        log.info(strToEncrypt);
         String xmlData = "";
 
         try {

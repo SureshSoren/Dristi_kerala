@@ -51,6 +51,7 @@ import CustomCopyTextDiv from "./components/CustomCopyTextDiv";
 import { DRISTIService } from "./services";
 import CustomChooseDate from "./components/CustomChooseDate";
 import CustomCalendar from "./components/CustomCalendar";
+import UploadSignatureModal from "./components/UploadSignatureModal";
 
 export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   const { path } = useRouteMatch();
@@ -64,11 +65,13 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
     return <Loader />;
   }
   Digit.SessionStorage.set("DRISTI_TENANTS", tenants);
-
+  const urlParams = new URLSearchParams(window.location.search);
+  const result = urlParams.get("result");
+  console.log(result, "result");
   if (userType === "citizen" && userInfo?.type !== "EMPLOYEE") {
     return (
       <ToastProvider>
-        <CitizenApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} tenantId={tenantID} />
+        <CitizenApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} tenantId={tenantID} result={result} />
       </ToastProvider>
     );
   }
@@ -77,7 +80,7 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   }
   return (
     <ToastProvider>
-      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants}></EmployeeApp>
+      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} result={result}></EmployeeApp>
     </ToastProvider>
   );
 };
@@ -123,6 +126,8 @@ const componentsToRegister = {
   MultiUploadWrapper,
   Button,
   CustomCopyTextDiv,
+  SelectCustomNote,
+  UploadSignatureModal,
   DRISTIService,
   CustomChooseDate,
   CustomCalendar,

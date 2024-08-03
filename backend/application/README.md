@@ -22,4 +22,3 @@ Workflow related to Application module:
 
 API-specs for application 
 [application-api-specs](../../api_specifications/application-api-0.1.0.yaml)
-

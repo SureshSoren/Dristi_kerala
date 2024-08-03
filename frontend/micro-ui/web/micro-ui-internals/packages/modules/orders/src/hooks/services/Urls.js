@@ -6,4 +6,5 @@ export const Urls = {
     orderSearch: "/order/v1/search",
     pendingTask: "/analytics/pending_task/v1/create",
   },
+  FileFetchById: "/filestore/v1/files/id",
 };
