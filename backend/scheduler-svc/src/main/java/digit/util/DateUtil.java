@@ -28,7 +28,7 @@ public class DateUtil {
     }
 
     public LocalDate getLocalDateFromEpoch(long startTime) {
-        return Instant.ofEpochSecond(startTime)
+        return Instant.ofEpochMilli(startTime)
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
     }

@@ -50,7 +50,7 @@ public class HearingProcessor {
         ScheduleHearing scheduleHearing = customMapper.hearingToScheduleHearingConversion(hearing);
 
         scheduleHearing.setStartTime(startTimeAndEndTime.getKey());
-        scheduleHearing.setStartTime(startTimeAndEndTime.getValue());
+        scheduleHearing.setEndTime(startTimeAndEndTime.getValue());
 
         // currently one judge only
         scheduleHearing.setJudgeId(presidedBy.getJudgeID().get(0));

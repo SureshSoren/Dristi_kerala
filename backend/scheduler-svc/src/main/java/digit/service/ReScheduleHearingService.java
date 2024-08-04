@@ -83,7 +83,7 @@ public class ReScheduleHearingService {
 //        workflowService.updateWorkflowStatus(reScheduleHearingsRequest);
 
         producer.push("schedule-hearing-to-block-calendar", reScheduleHearing);
-        producer.push("check-opt-out", reScheduleHearing);
+//        producer.push("check-opt-out", reScheduleHearing);
         producer.push(config.getRescheduleRequestCreateTopic(), reScheduleHearing);
 
         log.info("operation = create, result=SUCCESS, ReScheduleHearing={}", reScheduleHearing);
