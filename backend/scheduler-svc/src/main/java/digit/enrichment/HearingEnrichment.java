@@ -102,8 +102,8 @@ public class HearingEnrichment {
             boolean flag = true;
             while (!currentStartTime.isAfter(dateUtil.getLocalTime(slot.getSlotEndTime()))) {
                 LocalTime currentEndTime = currentStartTime.plusMinutes(hearingDuration);
-                hearing.setStartTime(LocalDateTime.of(date, currentStartTime).toEpochSecond(ZoneOffset.UTC) * 1000);
-                hearing.setEndTime(LocalDateTime.of(date, currentEndTime).toEpochSecond(ZoneOffset.UTC) * 1000);
+                hearing.setStartTime(dateUtil.getEpochFromLocalDateTime(LocalDateTime.of(date, currentStartTime)));
+                hearing.setEndTime(dateUtil.getEpochFromLocalDateTime(LocalDateTime.of(date, currentEndTime)));
 
                 if (canScheduleHearings(hearing, scheduledHearings, slots)) {
 //                    hearing.setStartTime(LocalDateTime.of(hearing.getDate(), currentStartTime));

@@ -38,4 +38,9 @@ public class DateUtil {
         return date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
     }
+
+
+    public Long getEpochFromLocalDateTime(LocalDateTime dateTime) {
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
 }
