@@ -23,14 +23,14 @@ public class RescheduleRequestOptOutRowMapper implements RowMapper<OptOut> {
 
     @Override
     public OptOut mapRow(ResultSet rs, int rowNum) throws SQLException {
-//        try {
+        try {
             return OptOut.builder()
                     .judgeId(rs.getString("judge_id"))
                     .caseId(rs.getString("case_id"))
                     .rescheduleRequestId(rs.getString("reschedule_request_id"))
                     .individualId(rs.getString("individual_id"))
-//                    .optoutDates(rs.getString("opt_out_dates") == null ? null : objectMapper.readValue(rs.getString("opt_out_dates"), new TypeReference<List<LocalDate>>() {
-//                    }))
+                    .optoutDates(rs.getString("opt_out_dates") == null ? null : objectMapper.readValue(rs.getString("opt_out_dates"), new TypeReference<List<Long>>() {
+                    }))
                     .rowVersion(rs.getInt("row_version"))
                     .auditDetails(AuditDetails.builder()
                             .createdBy(rs.getString("created_by"))
@@ -40,9 +40,9 @@ public class RescheduleRequestOptOutRowMapper implements RowMapper<OptOut> {
                             .build())
                     .tenantId(rs.getString("tenant_id"))
                     .build();
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
 
     }

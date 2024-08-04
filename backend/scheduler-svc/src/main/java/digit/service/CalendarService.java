@@ -71,7 +71,7 @@ public class CalendarService {
         log.info("operation = getJudgeAvailability, result = IN_PROGRESS, judgeId = {},tenantId ={}, courtId = {}", criteria.getJudgeId(), criteria.getTenantId(), criteria.getCourtId());
 
         // validating required fields
-        validator.validateSearchRequest(criteria);
+//        validator.validateSearchRequest(criteria);
 
         List<AvailabilityDTO> resultList = new ArrayList<>();
         HashMap<String, Double> dateMap = new HashMap<>();
@@ -115,8 +115,8 @@ public class CalendarService {
                 if (map.containsKey("date")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     String date = String.valueOf(map.get("date"));
-                    dateMap.put(LocalDate.parse(date, formatter).toString(), -1.0);
-                    lastDateInDefaultCalendar = Long.valueOf(date);
+                    dateMap.put(String.valueOf(LocalDate.parse(date, formatter).toEpochDay()), -1.0);
+                    lastDateInDefaultCalendar = LocalDate.parse(date, formatter).toEpochDay();
                 }
 
             }
@@ -124,13 +124,13 @@ public class CalendarService {
         }
 
         // calculating date after 6 month from provided date
-        Long dateAfterSixMonths = criteria.getFromDate();// configurable?
+        Long dateAfterSixMonths = criteria.getToDate();// configurable?
 
         //last date which is store in default calendar
         Long endDate = lastDateInDefaultCalendar == null ? lastDateInDefaultCalendar : dateAfterSixMonths;
 //         check startDate in date map if its exits and value is true then add to the result list
         Stream.iterate(criteria.getFromDate(), startDate -> startDate < (endDate), startDate -> dateUtil.getEPochFromLocalDate(dateUtil.getLocalDateFromEpoch(startDate).plusDays(1)))
-                .takeWhile(startDate -> resultList.size() != criteria.getNumberOfSuggestedDays()).forEach(startDate -> {
+                .takeWhile(startDate -> resultList.size() < criteria.getNumberOfSuggestedDays()).forEach(startDate -> {
 
                     if (dateMap.containsKey(startDate.toString()) && dateMap.get(startDate.toString()) != -1.0 && dateMap.get(startDate.toString()) < totalHrs)
                         resultList.add(AvailabilityDTO.builder()
@@ -142,8 +142,6 @@ public class CalendarService {
                         resultList.add(AvailabilityDTO.builder()
                                 .date(startDate.toString())
                                 .occupiedBandwidth(0.0).build());
-
-
                 });
 
         if (resultList.isEmpty()) {
@@ -168,7 +166,7 @@ public class CalendarService {
         CalendarSearchCriteria criteria = searchCriteriaRequest.getCriteria();
         log.info("operation = getJudgeCalendar, result = IN_PROGRESS, tenantId= {}, judgeId = {}, courtId = {}", criteria.getTenantId(), criteria.getJudgeId(), criteria.getCourtId());
 
-        validator.validateSearchRequest(criteria);
+//        validator.validateSearchRequest(criteria);
 
         List<HearingCalendar> calendar = new ArrayList<>();
         HashMap<LocalDate, List<ScheduleHearing>> dayHearingMap = new HashMap<>();
@@ -241,7 +239,7 @@ public class CalendarService {
                     .isOnLeave(leaveMap.containsKey(start) && leaveMap.get(start) instanceof JudgeCalendarRule)
                     .isHoliday(leaveMap.containsKey(start) && leaveMap.get(start) instanceof LinkedHashMap<?, ?>)
                     .notes("note")
-//                    .date(start)
+                    .date(dateUtil.getEPochFromLocalDate(start))
                     .description("description")
                     .hearings(hearingOfaDay).build();
             calendar.add(calendarOfDay);
@@ -294,6 +292,8 @@ public class CalendarService {
         log.info("operation = getHearingSearchCriteriaFromJudgeSearch, result = SUCCESS, ScheduleHearingSearchCriteria = {}", criteria);
 
         return ScheduleHearingSearchCriteria.builder()
+                .startDateTime(fromDate)
+                .endDateTime(toDate)
                 .judgeId(criteria.getJudgeId())
                 .tenantId(criteria.getTenantId())
                 .tenantId(criteria.getTenantId()).build();

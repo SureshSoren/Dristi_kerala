@@ -36,15 +36,15 @@ public class HearingQueryBuilder {
     public String getJudgeAvailableDatesQuery(ScheduleHearingSearchCriteria scheduleHearingSearchCriteria, List<Object> preparedStmtList) {
         StringBuilder query = new StringBuilder("SELECT meeting_hours.hearing_date AS date,meeting_hours.total_hours  AS hours ");
         query.append("FROM (");
-        query.append("SELECT hb.hearing_date, SUM(EXTRACT(EPOCH FROM (TO_TIMESTAMP(hb.end_time, 'YYYY-MM-DD HH24:MI:SS') - TO_TIMESTAMP(hb.start_time, 'YYYY-MM-DD HH24:MI:SS'))) / 3600) AS total_hours ");
+        query.append("SELECT hb.hearing_date, SUM((hb.end_time - hb.start_time) / 3600000) AS total_hours ");
         query.append("FROM hearing_booking hb ");
 
         getWhereFields(scheduleHearingSearchCriteria, query, preparedStmtList, null, null);
         // add status block
-        queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-        query.append(" ( hb.status = ? ");
+//        queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
+//        query.append(" ( hb.status = ? ");
 //        preparedStmtList.add(Status.BLOCKED.toString());
-        query.append(" OR hb.status = ? )");
+//        query.append(" OR hb.status = ? )");
 //        preparedStmtList.add(Status.SCHEDULED.toString());
 
 
@@ -108,13 +108,13 @@ public class HearingQueryBuilder {
 //        }
         if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getStartDateTime())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_TIMESTAMP(hb.start_time, 'YYYY-MM-DD HH24:MI:SS') >= ? ");
+            query.append(" hb.start_time >= ? ");
             preparedStmtList.add(scheduleHearingSearchCriteria.getStartDateTime());
 
         }
         if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getEndDateTime())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_TIMESTAMP(hb.end_time , 'YYYY-MM-DD HH24:MI:SS') <= ? ");
+            query.append(" hb.end_time <= ? ");
             preparedStmtList.add(scheduleHearingSearchCriteria.getEndDateTime());
 
         }
