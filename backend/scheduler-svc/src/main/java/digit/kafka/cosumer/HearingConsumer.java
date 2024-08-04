@@ -34,9 +34,7 @@ public class HearingConsumer {
 
     }
 
-    @KafkaListener(topics = {"schedule-hearing-to-block-calendar"})
-    public void listenRescheduleHearing(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-    }
+
 }
 
 

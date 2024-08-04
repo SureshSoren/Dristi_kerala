@@ -4,6 +4,7 @@ package digit.service.hearing;
 import digit.kafka.Producer;
 import digit.mapper.CustomMapper;
 import digit.service.HearingService;
+import digit.util.DateUtil;
 import digit.web.models.Pair;
 import digit.web.models.ScheduleHearing;
 import digit.web.models.ScheduleHearingRequest;
@@ -14,10 +15,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,11 +28,14 @@ public class HearingProcessor {
 
     private final Producer producer;
 
+    private final DateUtil dateUtil;
+
     @Autowired
-    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, Producer producer) {
+    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, Producer producer, DateUtil dateUtil) {
         this.customMapper = customMapper;
         this.hearingService = hearingService;
         this.producer = producer;
+        this.dateUtil = dateUtil;
     }
 
 
@@ -50,7 +51,7 @@ public class HearingProcessor {
         ScheduleHearing scheduleHearing = customMapper.hearingToScheduleHearingConversion(hearing);
 
         scheduleHearing.setStartTime(startTimeAndEndTime.getKey());
-        scheduleHearing.setStartTime(startTimeAndEndTime.getValue());
+        scheduleHearing.setEndTime(startTimeAndEndTime.getValue());
 
         // currently one judge only
         scheduleHearing.setJudgeId(presidedBy.getJudgeID().get(0));
@@ -74,15 +75,10 @@ public class HearingProcessor {
 
     private Pair<Long, Long> getStartTimeAndEndTime(Long epochTime) {
 
-        Instant instant = Instant.ofEpochSecond(epochTime);
-        ZoneId systemZoneId = ZoneId.systemDefault();
-        ZonedDateTime zonedDateTime = instant.atZone(systemZoneId);
-        LocalDate localDate = zonedDateTime.toLocalDate();
-        ZonedDateTime startOfDay = localDate.atStartOfDay(systemZoneId);
-        ZonedDateTime endOfDay = startOfDay.plusDays(1);
-
-        long startEpochMillis = startOfDay.toInstant().toEpochMilli();
-        long endEpochMillis = endOfDay.toInstant().toEpochMilli();
+        LocalDate startOfDay = dateUtil.getLocalDateFromEpoch(epochTime);
+        LocalDate nextday = startOfDay.plusDays(1);
+        long startEpochMillis = dateUtil.getEPochFromLocalDate(startOfDay);
+        long endEpochMillis = dateUtil.getEPochFromLocalDate(nextday);
 
         return new Pair<>(startEpochMillis, endEpochMillis);
     }

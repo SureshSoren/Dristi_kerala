@@ -50,35 +50,22 @@ public class HearingService {
         this.helper = helper;
     }
 
-    /**
-     * This function schedule a hearing for particular judge on provided date after validating
-     * @param schedulingRequests request object with request info and list of schedule hearing object
-     * @return list of schedule hearing with status schedule
-     * @exception org.egov.tracer.model.CustomException if provided date is not available for hearing
-     */
+
 
     public List<ScheduleHearing> schedule(ScheduleHearingRequest schedulingRequests) {
         log.info("operation = schedule, result = IN_PROGRESS, ScheduleHearingRequest={}, Hearing={}", schedulingRequests, schedulingRequests.getHearing());
 
-        // master data for default slots of court
         List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);
 
-//        double totalHrs = defaultSlots.stream().reduce(0.0, (total, slot) -> total + slot.getSlotDuration() / 60.0, Double::sum);
-        // get hearings and default timing
         List<MdmsHearing> defaultHearings = helper.getDataFromMDMS(MdmsHearing.class, serviceConstants.DEFAULT_HEARING_MASTER_NAME);
+
         Map<String, MdmsHearing> hearingTypeMap = defaultHearings.stream().collect(Collectors.toMap(
                 MdmsHearing::getHearingType,
                 obj -> obj
         ));
-        //validate hearing request here
-        //
-        // not required
-//        hearingValidator.validateHearing(schedulingRequests, totalHrs, hearingTypeMap);
 
-        // enhance the hearing request here
         hearingEnrichment.enrichScheduleHearing(schedulingRequests, defaultSlots, hearingTypeMap);
 
-        //push to kafka
         producer.push(config.getScheduleHearingTopic(), schedulingRequests.getHearing());
 
         return schedulingRequests.getHearing();

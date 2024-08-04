@@ -1,22 +1,25 @@
 package digit.service;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.ReScheduleRequestEnrichment;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
+import digit.util.CaseUtil;
 import digit.util.MasterDataUtil;
 import digit.validator.ReScheduleRequestValidator;
 import digit.web.models.*;
+import digit.web.models.cases.CaseCriteria;
+import digit.web.models.cases.SearchCaseRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -28,29 +31,21 @@ import java.util.stream.Collectors;
 public class ReScheduleHearingService {
 
     private final Configuration config;
-
     private final ReScheduleRequestRepository repository;
-
     private final ReScheduleRequestValidator validator;
-
     private final ReScheduleRequestEnrichment enrichment;
-
     private final Producer producer;
-
     private final WorkflowService workflowService;
-
     private final HearingService hearingService;
-
     private final CalendarService calendarService;
-
     private final HearingScheduler hearingScheduler;
-
     private final ServiceConstants serviceConstants;
-
     private final MasterDataUtil helper;
+    private final CaseUtil caseUtil;
+    private final Configuration configuration;
 
     @Autowired
-    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, MasterDataUtil helper) {
+    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, MasterDataUtil helper, CaseUtil caseUtil, Configuration configuration) {
         this.config = config;
         this.repository = repository;
         this.validator = validator;
@@ -62,6 +57,8 @@ public class ReScheduleHearingService {
         this.hearingScheduler = hearingScheduler;
         this.serviceConstants = serviceConstants;
         this.helper = helper;
+        this.caseUtil = caseUtil;
+        this.configuration = configuration;
     }
 
     /**
@@ -77,7 +74,83 @@ public class ReScheduleHearingService {
 
         enrichment.enrichRescheduleRequest(reScheduleHearingsRequest);
 
-        producer.push("schedule-hearing-to-block-calendar", reScheduleHearing);
+
+        try {
+
+
+            RequestInfo requestInfo = reScheduleHearingsRequest.getRequestInfo();
+
+            List<ReScheduleHearing> hearingDetails = reScheduleHearingsRequest.getReScheduleHearing();
+            String tenantId = hearingDetails.get(0).getTenantId();
+
+            for (ReScheduleHearing hearingDetail : hearingDetails) {
+
+                SearchCaseRequest searchCaseRequest = SearchCaseRequest.builder().RequestInfo(requestInfo).tenantId("kl").criteria(Collections.singletonList(CaseCriteria.builder().caseId(hearingDetail.getCaseId()).build())).build();
+                JsonNode representatives = caseUtil.getRepresentatives(searchCaseRequest);
+                Set<String> representativeIds = caseUtil.getIdsFromJsonNodeArray(representatives);
+                int noOfAttendees = representativeIds.size();
+                Integer numberOfSuggestedDays = Math.toIntExact(configuration.getOptOutLimit() * noOfAttendees + 1);
+
+                List<AvailabilityDTO> availability = calendarService.getJudgeAvailability(JudgeAvailabilitySearchRequest
+                        .builder()
+                        .requestInfo(requestInfo)
+                        .criteria(JudgeAvailabilitySearchCriteria.builder()
+                                .judgeId(hearingDetail.getJudgeId())
+                                .fromDate(hearingDetail.getAvailableAfter())
+                                .courtId("0001")  //TODO: need to configure somewhere
+                                .numberOfSuggestedDays(numberOfSuggestedDays) //TODO: later we change this to no of attendees
+                                .tenantId(tenantId)
+                                .build()).build());
+
+                // update here all the suggestedDay in reschedule hearing day
+
+                List<Long> suggestedDays = availability.stream().map(
+                                (suggestedDate) -> Long.valueOf(suggestedDate.getDate()))
+                        .toList();
+                hearingDetail.setSuggestedDates(suggestedDays);
+                hearingDetail.setRowVersion(hearingDetail.getRowVersion() + 1);
+
+
+                List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder()
+                        .requestInfo(requestInfo)
+                        .criteria(ScheduleHearingSearchCriteria.builder()
+                                .hearingIds(Collections.singletonList(hearingDetail.getHearingBookingId()))
+                                .build()).build(), null, null);
+                ScheduleHearing hearing = hearings.get(0);
+//                hearings.get(0).setStatus(Status.RE_SCHEDULED.toString());
+
+
+                //reschedule hearing to unblock the calendar
+                hearingService.update(ScheduleHearingRequest.builder()
+                        .requestInfo(requestInfo).hearing(hearings).build());
+
+
+                List<ScheduleHearing> udpateHearingList = new ArrayList<>();
+
+                for (AvailabilityDTO availabilityDTO : availability) {
+                    //TODO: update logic to assign start time and end time
+
+                    ScheduleHearing scheduleHearing = new ScheduleHearing(hearing);
+
+                    scheduleHearing.setStartTime(hearing.getStartTime());
+                    scheduleHearing.setEndTime(hearing.getEndTime());
+//                    scheduleHearing.setStatus(Status.BLOCKED.toString());
+                    udpateHearingList.add(scheduleHearing);
+                    scheduleHearing.setRescheduleRequestId(hearingDetail.getRescheduledRequestId());
+
+                }
+                hearingService.schedule(ScheduleHearingRequest.builder()
+                        .requestInfo(requestInfo).hearing(udpateHearingList).build());
+
+            }
+            log.info("operation = updateRequestForBlockCalendar, result = SUCCESS");
+
+            producer.push(configuration.getUpdateRescheduleRequestTopic(), hearingDetails);
+        } catch (Exception e) {
+            log.error("KAFKA_PROCESS_ERROR:", e);
+            log.error("DK_SH_APP_ERR: error while blocking the calendar", e);
+        }
+
 
         producer.push(config.getRescheduleRequestCreateTopic(), reScheduleHearing);
 
