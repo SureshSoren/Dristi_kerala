@@ -86,10 +86,17 @@ public class ReScheduleHearingService {
             for (ReScheduleHearing hearingDetail : hearingDetails) {
 
                 SearchCaseRequest searchCaseRequest = SearchCaseRequest.builder().RequestInfo(requestInfo).tenantId("kl").criteria(Collections.singletonList(CaseCriteria.builder().caseId(hearingDetail.getCaseId()).build())).build();
+                JsonNode litigants = caseUtil.getLitigants(searchCaseRequest);
+                Set<String> litigantIds = caseUtil.getIndividualIds(litigants);
                 JsonNode representatives = caseUtil.getRepresentatives(searchCaseRequest);
                 Set<String> representativeIds = caseUtil.getIdsFromJsonNodeArray(representatives);
                 int noOfAttendees = representativeIds.size();
                 Integer numberOfSuggestedDays = Math.toIntExact(configuration.getOptOutLimit() * noOfAttendees + 1);
+
+                litigantIds = caseUtil.getLitigantsFromRepresentatives(litigantIds, representatives);
+
+                hearingDetail.setRepresentatives(representativeIds);
+                hearingDetail.setLitigants(litigantIds);
 
                 List<AvailabilityDTO> availability = calendarService.getJudgeAvailability(JudgeAvailabilitySearchRequest
                         .builder()
@@ -103,7 +110,6 @@ public class ReScheduleHearingService {
                                 .build()).build());
 
                 // update here all the suggestedDay in reschedule hearing day
-
                 List<Long> suggestedDays = availability.stream().map(
                                 (suggestedDate) -> Long.valueOf(suggestedDate.getDate()))
                         .toList();
@@ -117,7 +123,6 @@ public class ReScheduleHearingService {
                                 .hearingIds(Collections.singletonList(hearingDetail.getHearingBookingId()))
                                 .build()).build(), null, null);
                 ScheduleHearing hearing = hearings.get(0);
-//                hearings.get(0).setStatus(Status.RE_SCHEDULED.toString());
 
 
                 //reschedule hearing to unblock the calendar
@@ -134,7 +139,6 @@ public class ReScheduleHearingService {
 
                     scheduleHearing.setStartTime(hearing.getStartTime());
                     scheduleHearing.setEndTime(hearing.getEndTime());
-//                    scheduleHearing.setStatus(Status.BLOCKED.toString());
                     udpateHearingList.add(scheduleHearing);
                     scheduleHearing.setRescheduleRequestId(hearingDetail.getRescheduledRequestId());
 
