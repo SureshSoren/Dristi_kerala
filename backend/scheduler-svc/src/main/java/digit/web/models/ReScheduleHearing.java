@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 
 @Data
@@ -65,6 +66,11 @@ public class ReScheduleHearing {
     @JsonProperty("availableDates")             // additional details
     private List<Long> availableDates;
 
+    @JsonProperty("representatives")
+    private Set<String> representatives;
+
+    @JsonProperty("litigants")
+    private Set<String> litigants;
 
     @JsonProperty("scheduleDate")
     @JsonFormat(pattern = "yyyy-MM-dd")// additional details

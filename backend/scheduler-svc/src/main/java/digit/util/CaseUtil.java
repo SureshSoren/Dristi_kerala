@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
 import digit.repository.ServiceRequestRepository;
 import digit.web.models.cases.SearchCaseRequest;
+import io.swagger.util.Json;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,10 +104,42 @@ public class CaseUtil {
                 if (id != null) {
                     response.add(String.valueOf(id.asText()));
                 }
-
             }
         }
         log.info("operation = getIdsFromJsonNodeArray, result = SUCCESS");
         return response;
+    }
+
+    public Set<String> getIndividualIds(JsonNode nodeArray) {
+        log.info("operation = getIndividualIds, result = IN_PROGRESS");
+        Set<String> response = new HashSet<>();
+        if (nodeArray != null && nodeArray.isArray()) {
+            for (JsonNode node : nodeArray) {
+                JsonNode id = node.get("individualId");
+                if (id != null) {
+                    response.add(String.valueOf(id.asText()));
+                }
+
+            }
+        }
+        log.info("operation = getIndividualIds, result = SUCCESS");
+        return response;
+    }
+
+    public Set<String> getLitigantsFromRepresentatives(Set<String> litigants, JsonNode representatives) {
+        log.info("operation = getLitigantsFromRepresentatives, result = IN_PROGRESS");
+        if (representatives != null && representatives.isArray()) {
+            for (JsonNode node : representatives) {
+                JsonNode representing = node.get("representing");
+                for(JsonNode node1 : representing){
+                    JsonNode individualId = node1.get("individualId");
+                    if(litigants.contains(individualId.asText())){
+                        litigants.remove(individualId.asText());
+                    }
+                }
+            }
+        }
+        log.info("operation = getLitigantsFromRepresentatives, result = SUCCESS");
+        return litigants;
     }
 }
