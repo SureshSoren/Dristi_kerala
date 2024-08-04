@@ -8,6 +8,7 @@ import digit.enrichment.ReScheduleRequestEnrichment;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.util.CaseUtil;
+import digit.util.DateUtil;
 import digit.util.MasterDataUtil;
 import digit.validator.ReScheduleRequestValidator;
 import digit.web.models.*;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,8 +46,10 @@ public class ReScheduleHearingService {
     private final CaseUtil caseUtil;
     private final Configuration configuration;
 
+    private final DateUtil dateUtil;
+
     @Autowired
-    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, MasterDataUtil helper, CaseUtil caseUtil, Configuration configuration) {
+    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, MasterDataUtil helper, CaseUtil caseUtil, Configuration configuration, DateUtil dateUtil) {
         this.config = config;
         this.repository = repository;
         this.validator = validator;
@@ -59,6 +63,7 @@ public class ReScheduleHearingService {
         this.helper = helper;
         this.caseUtil = caseUtil;
         this.configuration = configuration;
+        this.dateUtil = dateUtil;
     }
 
     /**
@@ -73,7 +78,6 @@ public class ReScheduleHearingService {
 
 
         enrichment.enrichRescheduleRequest(reScheduleHearingsRequest);
-
 
         try {
 
@@ -123,6 +127,7 @@ public class ReScheduleHearingService {
                                 .hearingIds(Collections.singletonList(hearingDetail.getHearingBookingId()))
                                 .build()).build(), null, null);
                 ScheduleHearing hearing = hearings.get(0);
+                hearing.setStatus("RESCHEDULE");
 
 
                 //reschedule hearing to unblock the calendar
@@ -137,10 +142,14 @@ public class ReScheduleHearingService {
 
                     ScheduleHearing scheduleHearing = new ScheduleHearing(hearing);
 
-                    scheduleHearing.setStartTime(hearing.getStartTime());
-                    scheduleHearing.setEndTime(hearing.getEndTime());
-                    udpateHearingList.add(scheduleHearing);
+
+                    long blockedDate = Long.parseLong(availabilityDTO.getDate());
+                    scheduleHearing.setStartTime(blockedDate);
+                    scheduleHearing.setEndTime(blockedDate);
                     scheduleHearing.setRescheduleRequestId(hearingDetail.getRescheduledRequestId());
+                    scheduleHearing.setStatus("BLOCKED");
+
+                    udpateHearingList.add(scheduleHearing);
 
                 }
                 hearingService.schedule(ScheduleHearingRequest.builder()
@@ -149,9 +158,8 @@ public class ReScheduleHearingService {
             }
             log.info("operation = updateRequestForBlockCalendar, result = SUCCESS");
 
-            producer.push(configuration.getUpdateRescheduleRequestTopic(), hearingDetails);
         } catch (Exception e) {
-            log.error("KAFKA_PROCESS_ERROR:", e);
+
             log.error("DK_SH_APP_ERR: error while blocking the calendar", e);
         }
 

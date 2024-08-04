@@ -81,7 +81,7 @@ public class HearingService {
     public List<ScheduleHearing> update(ScheduleHearingRequest scheduleHearingRequest) {
         log.info("operation = update, result = IN_PROGRESS, ScheduleHearingRequest={}, Hearing={}", scheduleHearingRequest, scheduleHearingRequest.getHearing());
 
-        //  enrich the audit details
+
         hearingEnrichment.enrichUpdateScheduleHearing(scheduleHearingRequest.getRequestInfo(), scheduleHearingRequest.getHearing());
 
         producer.push(config.getScheduleHearingUpdateTopic(), scheduleHearingRequest.getHearing());

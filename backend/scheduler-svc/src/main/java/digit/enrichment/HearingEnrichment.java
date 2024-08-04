@@ -1,7 +1,6 @@
 package digit.enrichment;
 
 
-
 import digit.models.coremodels.AuditDetails;
 import digit.repository.HearingRepository;
 import digit.util.DateUtil;
@@ -11,11 +10,10 @@ import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -29,7 +27,6 @@ public class HearingEnrichment {
     private DateUtil dateUtil;
 
 
-
     public void enrichScheduleHearing(ScheduleHearingRequest schedulingRequests, List<MdmsSlot> defaultSlots, Map<String, MdmsHearing> hearingTypeMap) {
 
         RequestInfo requestInfo = schedulingRequests.getRequestInfo();
@@ -39,7 +36,9 @@ public class HearingEnrichment {
         for (ScheduleHearing hearing : hearingList) {
             hearing.setAuditDetails(auditDetails);
             hearing.setRowVersion(1);
-            hearing.setStatus("SCHEDULED");
+            if (hearing.getStatus().equals("BLOCKED")) {
+                hearing.setHearingBookingId(UUID.randomUUID().toString());
+            }
         }
 
         updateTimingInHearings(hearingList, hearingTypeMap, defaultSlots);
@@ -157,7 +156,6 @@ public class HearingEnrichment {
 
         updateTimingInHearings(hearing, hearingTypeMap, defaultHearings);
     }
-
 
 
 }

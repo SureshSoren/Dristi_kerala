@@ -56,6 +56,7 @@ public class HearingProcessor {
         // currently one judge only
         scheduleHearing.setJudgeId(presidedBy.getJudgeID().get(0));
         scheduleHearing.setCourtId(presidedBy.getCourtID());
+        scheduleHearing.setStatus("SCHEDULED");
 
         ScheduleHearingRequest request = ScheduleHearingRequest.builder()
                 .hearing(Collections.singletonList(scheduleHearing))
@@ -70,7 +71,7 @@ public class HearingProcessor {
 
         hearingRequest.setHearing(hearing);
 
-        producer.push("update topic", hearingRequest);
+        producer.push("update-topic", hearingRequest);
     }
 
     private Pair<Long, Long> getStartTimeAndEndTime(Long epochTime) {
