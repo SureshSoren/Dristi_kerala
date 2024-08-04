@@ -1,43 +1,63 @@
 package org.drishti.esign.web.controllers;
 
-import org.junit.Test;
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.drishti.esign.TestConfiguration;
+import org.drishti.esign.service.ESignService;
+import org.drishti.esign.util.ResponseInfoFactory;
+import org.drishti.esign.web.models.ESignRequest;
+import org.drishti.esign.web.models.ESignResponse;
+import org.drishti.esign.web.models.ESignXmlForm;
+import org.drishti.esign.web.models.SignDocRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
-/**
-* API tests for EsignApiController
-*/
-@Ignore
-@RunWith(SpringRunner.class)
-@WebMvcTest(EsignApiController.class)
-@Import(TestConfiguration.class)
+@ExtendWith(MockitoExtension.class)
 public class EsignApiControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Mock
+    private ESignService eSignService;
 
-    @Test
-    public void esignV1CreatePostSuccess() throws Exception {
-        mockMvc.perform(post("/esign/v1/_create").contentType(MediaType
-        .APPLICATION_JSON_UTF8))
-        .andExpect(status().isOk());
+    @InjectMocks
+    private EsignApiController esignApiController;
+
+    @BeforeEach
+    public void setup() {
+        esignApiController = new EsignApiController(eSignService);
     }
 
     @Test
-    public void esignV1CreatePostFailure() throws Exception {
-        mockMvc.perform(post("/esign/v1/_create").contentType(MediaType
-        .APPLICATION_JSON_UTF8))
-        .andExpect(status().isBadRequest());
+    public void testESignDoc() {
+        ESignRequest request = new ESignRequest();
+        ESignXmlForm eSignXmlForm = new ESignXmlForm();
+        ESignResponse expectedResponse = ESignResponse.builder()
+                .responseInfo(ResponseInfoFactory.createResponseInfoFromRequestInfo(request.getRequestInfo(), true))
+                .eSignForm(eSignXmlForm).build();
+
+        when(eSignService.signDoc(request)).thenReturn(eSignXmlForm);
+
+        ResponseEntity<ESignResponse> responseEntity = esignApiController.eSignDoc(request);
+
+        assertEquals(ResponseEntity.accepted().body(expectedResponse), responseEntity);
+        verify(eSignService, times(1)).signDoc(request);
+    }
+
+    @Test
+    public void testESignDOC() {
+        SignDocRequest request = new SignDocRequest();
+        String fileStoreId = "testFileStoreId";
+
+        when(eSignService.signDocWithDigitalSignature(request)).thenReturn(fileStoreId);
+
+        ResponseEntity<String> responseEntity = esignApiController.eSignDOC(request);
+
+        assertEquals(ResponseEntity.accepted().body(fileStoreId), responseEntity);
+        verify(eSignService, times(1)).signDocWithDigitalSignature(request);
     }
 
 }

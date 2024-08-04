@@ -3,6 +3,7 @@ package org.drishti.esign.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.drishti.esign.cipher.Encryption;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -47,6 +48,9 @@ public class XmlSigning {
      * @return Document
      */
 
+    @Autowired
+    private Encryption encryption;
+
     public Document getXmlDocument(String xmlFilePath) {
         Document doc = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -73,7 +77,7 @@ public class XmlSigning {
         KeyInfoFactory keyInfoFact = xmlSigFactory.getKeyInfoFactory();
 
         try {
-            PublicKey privKey = new Encryption().getPublicKey("testasp.cer");
+            PublicKey privKey = encryption.getPublicKey("testasp.cer");
             keyValue = keyInfoFact.newKeyValue(privKey);
         } catch (KeyException ex) {
             ex.printStackTrace();
