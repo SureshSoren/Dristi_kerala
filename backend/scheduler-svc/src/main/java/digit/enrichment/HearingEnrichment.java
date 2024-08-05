@@ -36,7 +36,7 @@ public class HearingEnrichment {
         for (ScheduleHearing hearing : hearingList) {
             hearing.setAuditDetails(auditDetails);
             hearing.setRowVersion(1);
-            if (hearing.getStatus().equals("BLOCKED")) {
+            if (hearing.getStatus()!=null && hearing.getStatus().equals("BLOCKED")) {
                 hearing.setHearingBookingId(UUID.randomUUID().toString());
             }
         }

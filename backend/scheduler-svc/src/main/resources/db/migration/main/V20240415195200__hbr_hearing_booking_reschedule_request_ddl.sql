@@ -4,7 +4,6 @@ CREATE TABLE hearing_booking_reschedule_request (
     reschedule_request_id       character varying(64),
     requester_id                character varying(64),
     reason                      text,
-    status                      character varying(64),
     action_comment              text,
     created_by                  character varying(64),
     created_time                bigint,
@@ -14,7 +13,8 @@ CREATE TABLE hearing_booking_reschedule_request (
     tenant_id                   character varying(64),
     case_id                    character varying(64),
     judge_id                    character varying(64),
-    documents                   jsonb,
+    representatives             jsonb,
+    litigants                   jsonb,
     suggested_days              jsonb,
     available_days              jsonb,
 
