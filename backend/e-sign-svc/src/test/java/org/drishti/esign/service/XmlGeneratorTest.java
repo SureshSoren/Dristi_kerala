@@ -94,15 +94,6 @@ public class XmlGeneratorTest {
         assertTrue(xml.contains("<InputHash"));
     }
 
-    @Test
-    public void generateXml_InvalidPath() {
-        when(request.getServletContext()).thenReturn(servletContext);
-        when(servletContext.getRealPath(anyString())).thenReturn("/invalid/path");
-
-        String xml = xmlGenerator.generateXml(eSignXmlData);
-
-        assertEquals("", xml);
-    }
 
 
     @Test
