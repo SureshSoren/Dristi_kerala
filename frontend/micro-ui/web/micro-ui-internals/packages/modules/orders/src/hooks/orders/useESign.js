@@ -87,6 +87,7 @@ const useESign = () => {
 
       localStorage.removeItem("name");
       localStorage.removeItem("isSignSuccess");
+      localStorage.removeItem("signStatus");
     }
   };
 

@@ -470,10 +470,22 @@ const SubmissionsCreate = () => {
 
   const updateSubmission = async (action) => {
     try {
+      const localStorageID = localStorage.getItem("fileStoreId");
+      const documents =
+        signedDoucumentUploadedID !== "" || localStorageID
+          ? [
+              {
+                signaturedDocument: {
+                  fileStoreId: signedDoucumentUploadedID || localStorageID,
+                },
+              },
+            ]
+          : [{}];
+      localStorage.removeItem("fileStoreId");
       const reqBody = {
         application: {
           ...applicationDetails,
-          workflow: { ...applicationDetails?.workflow, documents: [{}], action },
+          workflow: { ...applicationDetails?.workflow, documents, action },
           tenantId,
         },
         tenantId,

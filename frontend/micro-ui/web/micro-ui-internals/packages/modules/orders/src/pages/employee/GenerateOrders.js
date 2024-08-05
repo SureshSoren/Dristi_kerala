@@ -510,7 +510,19 @@ const GenerateOrders = () => {
 
   const updateOrder = async (order, action) => {
     try {
-      return await ordersService.updateOrder({ order: { ...order, workflow: { ...order.workflow, action, documents: [{}] } } }, { tenantId });
+      const localStorageID = localStorage.getItem("fileStoreId");
+      const documents =
+        signedDoucumentUploadedID !== "" || localStorageID
+          ? [
+              {
+                signaturedDocument: {
+                  fileStoreId: signedDoucumentUploadedID || localStorageID,
+                },
+              },
+            ]
+          : [{}];
+      localStorage.removeItem("fileStoreId");
+      return await ordersService.updateOrder({ order: { ...order, workflow: { ...order.workflow, action, documents } } }, { tenantId });
     } catch (error) {
       return null;
     }

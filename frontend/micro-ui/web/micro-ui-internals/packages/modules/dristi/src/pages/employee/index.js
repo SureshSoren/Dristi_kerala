@@ -15,7 +15,7 @@ import CaseFileAdmission from "./admission/CaseFileAdmission";
 import Home from "./home";
 import ViewCaseFile from "./scrutiny/ViewCaseFile";
 
-const EmployeeApp = ({ path, url, userType, tenants, parentRoute, result }) => {
+const EmployeeApp = ({ path, url, userType, tenants, parentRoute, result, fileStoreId }) => {
   const { t } = useTranslation();
   const location = useLocation();
   const history = useHistory();
@@ -69,6 +69,9 @@ const EmployeeApp = ({ path, url, userType, tenants, parentRoute, result }) => {
   ];
   if (result) {
     localStorage.setItem("isSignSuccess", result);
+  }
+  if (fileStoreId) {
+    localStorage.setItem("fileStoreId", fileStoreId);
   }
   if (isUserLoggedIn && retrievedObject) {
     history.push(`${retrievedObject?.path}${retrievedObject?.param}`);
