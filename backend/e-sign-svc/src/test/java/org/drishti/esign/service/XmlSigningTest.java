@@ -125,14 +125,5 @@ public class XmlSigningTest {
         verify(keyInfoFactory).newKeyInfo(Collections.singletonList(keyValue));
     }
 
-//    @Test
-//    public void getKeyInfo_ThrowsExceptionWhenPublicKeyRetrievalFails() throws Exception {
-//        when(xmlSignatureFactory.getKeyInfoFactory()).thenReturn(keyInfoFactory);
-//
-//        KeyInfo keyInfo = xmlSigning.getKeyInfo(xmlSignatureFactory, "testasp.cer");
-//        when(encryption.getPublicKey(anyString())).thenThrow(new RuntimeException("Test Exception"));
-//
-//        Assertions.assertNull(keyInfo);
-//        verify(encryption).getPublicKey(anyString());
-//    }
+
 }
