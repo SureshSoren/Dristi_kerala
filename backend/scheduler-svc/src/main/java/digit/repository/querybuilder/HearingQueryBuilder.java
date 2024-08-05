@@ -16,7 +16,7 @@ import java.util.List;
 public class HearingQueryBuilder {
 
     private static final String FROM_TABLES = " FROM hearing_booking hb ";
-    private final String BASE_APPLICATION_QUERY = "SELECT  hb.hearing_booking_id, hb.tenant_id, hb.court_id, hb.judge_id, hb.case_id, hb.hearing_date, hb.event_type, hb.title, hb.description, hb.status, hb.start_time, hb.end_time, hb.created_by,hb.last_modified_by,hb.created_time,hb.last_modified_time, hb.row_version ,hb.reschedule_request_id";
+    private final String BASE_APPLICATION_QUERY = "SELECT  hb.hearing_booking_id, hb.tenant_id, hb.court_id, hb.judge_id, hb.case_id, hb.hearing_type, hb.title, hb.description, hb.status, hb.start_time, hb.end_time, hb.created_by,hb.last_modified_by,hb.created_time,hb.last_modified_time, hb.row_version ,hb.reschedule_request_id";
     private final String ORDER_BY = " ORDER BY ";
     private final String GROUP_BY = " GROUP BY ";
     private final String LIMIT_OFFSET = " LIMIT ? OFFSET ?";
@@ -90,7 +90,7 @@ public class HearingQueryBuilder {
         }
         if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getHearingType())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" hb.event_type = ? ");
+            query.append(" hb.hearing_type = ? ");
             preparedStmtList.add(scheduleHearingSearchCriteria.getHearingType());
 
         }
