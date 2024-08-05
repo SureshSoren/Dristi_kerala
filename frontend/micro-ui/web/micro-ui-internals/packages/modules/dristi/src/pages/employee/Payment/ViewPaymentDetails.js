@@ -220,14 +220,14 @@ const ViewPaymentDetails = ({ location, match }) => {
             showTable: true,
             showCopytext: true,
           },
-          amount: chequeDetails?.totalAmount,
+          amount: totalAmount,
           fileStoreId: "c162c182-103f-463e-99b6-18654ed7a5b1",
         },
       });
       setIsDisabled(false);
     } catch (err) {
       history.push(`/${window?.contextPath}/employee/dristi/pending-payment-inbox/response`, {
-        state: { success: false, amount: chequeDetails?.totalAmount },
+        state: { success: false, amount: totalAmount },
       });
       setIsDisabled(false);
     }
