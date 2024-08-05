@@ -52,7 +52,10 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
       localStorage.removeItem("formdata");
     }
   }, [isSignSuccess, formData]);
+  console.log(process.env.REACT_APP_ESIGN_FILESTORE_ID, "process.env.REACT_APP_ESIGN_FILESTORE_ID");
   const handleAadharClick = async (data, name) => {
+    const fileStoreId = process.env.REACT_APP_ESIGN_FILESTORE_ID;
+    console.log(fileStoreId, "Constant");
     try {
       localStorage.setItem("signStatus", JSON.stringify({ [config.key]: { [name]: [true] } }));
       localStorage.setItem("formData", JSON.stringify(formData));
