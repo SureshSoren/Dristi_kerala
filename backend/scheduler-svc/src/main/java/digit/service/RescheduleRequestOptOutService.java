@@ -52,8 +52,6 @@ public class RescheduleRequestOptOutService {
 
         producer.push(config.getOptOutTopic(), request.getOptOut());
 
-        producer.push("check-opt-out", request);
-
         log.info("operation = create, result = SUCCESS, OptOut = {}", request.getOptOut());
 
         return request.getOptOut();

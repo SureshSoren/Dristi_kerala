@@ -5,7 +5,10 @@ import digit.config.Configuration;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.repository.RescheduleRequestOptOutRepository;
-import digit.web.models.*;
+import digit.web.models.OptOut;
+import digit.web.models.OptOutSearchCriteria;
+import digit.web.models.ReScheduleHearing;
+import digit.web.models.ReScheduleHearingReqSearchCriteria;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,25 +21,31 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+import static digit.config.ServiceConstants.INACTIVE;
+
 @Component
 @Slf4j
 @EnableScheduling
 public class RequestOptOutScheduleTask {
 
-    @Autowired
-    ReScheduleRequestRepository reScheduleRepository;
+    private final ReScheduleRequestRepository reScheduleRepository;
+
+    private final RescheduleRequestOptOutRepository requestOptOutRepository;
+
+    private final Producer producer;
+
+    private final Configuration config;
 
     @Autowired
-    RescheduleRequestOptOutRepository requestOptOutRepository;
-
-    @Autowired
-    private Producer producer;
-
-    @Autowired
-    private Configuration config;
+    public RequestOptOutScheduleTask(ReScheduleRequestRepository reScheduleRepository, RescheduleRequestOptOutRepository requestOptOutRepository, Producer producer, Configuration config) {
+        this.reScheduleRepository = reScheduleRepository;
+        this.requestOptOutRepository = requestOptOutRepository;
+        this.producer = producer;
+        this.config = config;
+    }
 
     @Scheduled(cron = "${drishti.cron.opt-out.due.date}", zone = "Asia/Kolkata")
-    public void updateAvailableDatesFromOptOuts(){
+    public void updateAvailableDatesFromOptOuts() {
         try {
             log.info("operation = updateAvailableDatesFromOptOuts, result=IN_PROGRESS");
             Long dueDate = LocalDate.now().minusDays(config.getOptOutDueDate()).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
@@ -55,11 +64,17 @@ public class RequestOptOutScheduleTask {
                 }
 
                 reScheduleHearing.setAvailableDates(availableDates);
-//                reScheduleHearing.setStatus(Status.REVIEW);
+                reScheduleHearing.setStatus(INACTIVE);
+
+                //todo: audit details
+
+                //open pending task for judge
+
+                //unblock judge calendar for suggested days - available days
             }
             producer.push(config.getUpdateRescheduleRequestTopic(), reScheduleHearings);
             log.info("operation= updateAvailableDatesFromOptOuts, result=SUCCESS");
-        } catch(Exception e){
+        } catch (Exception e) {
             throw new CustomException("DK_SH_APP_ERR", "Error in setting available dates.");
         }
     }

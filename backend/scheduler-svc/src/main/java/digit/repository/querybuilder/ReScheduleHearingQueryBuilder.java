@@ -68,11 +68,11 @@ public class ReScheduleHearingQueryBuilder {
             query.append(" hbr.requester_id = ? ");
             preparedStmtList.add(searchCriteria.getRequesterId());
         }
-//        if (!ObjectUtils.isEmpty(searchCriteria.getStatus())) {
-//            helper.addClauseIfRequired(query, preparedStmtList);
-//            query.append(" hbr.status = ? ");
-//            preparedStmtList.add(searchCriteria.getStatus().toString());
-//        }
+        if (!ObjectUtils.isEmpty(searchCriteria.getStatus())) {
+            helper.addClauseIfRequired(query, preparedStmtList);
+            query.append(" hbr.status = ? ");
+            preparedStmtList.add(searchCriteria.getStatus().toString());
+        }
         if (!ObjectUtils.isEmpty(searchCriteria.getDueDate())) {
             helper.addClauseIfRequired(query, preparedStmtList);
             query.append(" hbr.last_modified_time < ?  ");

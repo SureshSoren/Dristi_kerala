@@ -43,6 +43,9 @@ public class ReScheduleHearing {
     @JsonProperty("reason")
     private String reason;
 
+    @JsonProperty("status")
+    private String status;
+
     @JsonProperty("availableAfter")
     @NotNull
     private Long availableAfter;

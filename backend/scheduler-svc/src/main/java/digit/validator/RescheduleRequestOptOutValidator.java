@@ -2,9 +2,9 @@ package digit.validator;
 
 
 import digit.config.Configuration;
+import digit.config.ServiceConstants;
 import digit.repository.RescheduleRequestOptOutRepository;
 import digit.service.ReScheduleHearingService;
-import digit.util.CaseUtil;
 import digit.web.models.*;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +46,11 @@ public class RescheduleRequestOptOutValidator {
             throw new CustomException("DK_OO_INVALID_APPLICATION_ID", "No request with application id:" + optOut.getRescheduleRequestId() + " system");
         }
         ReScheduleHearing rescheduleReq = reScheduleHearings.get(0);
+
+
+        if (ServiceConstants.INACTIVE.equals(rescheduleReq.getStatus())) {
+            throw new CustomException("DK_OO_REQUEST_COMPLETED", "Opt out is no longer supported for request");
+        }
 
 
         Set<String> litigants = rescheduleReq.getLitigants();
