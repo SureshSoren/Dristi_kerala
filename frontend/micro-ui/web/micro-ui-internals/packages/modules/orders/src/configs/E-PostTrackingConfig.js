@@ -1,4 +1,14 @@
+import { sortBy } from "lodash";
+
 export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
+  const defaultSearchValues = {
+    pagination: {
+      sortBy: "",
+      order: "",
+    },
+    deliveryStatusList: {},
+    processNumber: "",
+  };
   const TabSearchConfig = [
     {
       label: "All",
@@ -8,7 +18,7 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
         serviceName: "/epost-tracker/epost/v1/_getEPost",
         requestParam: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
-          limit: 5,
+          limit: 10,
           offset: 0,
         },
         requestBody: {
@@ -39,6 +49,7 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
             primaryLabel: "ES_COMMON_SEARCH",
             secondaryLabel: "ES_COMMON_CLEAR_SEARCH",
             minReqFields: 0,
+            defaultValues: defaultSearchValues,
             fields: [
               {
                 type: "component",
@@ -58,8 +69,6 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
               {
                 isMandatory: false,
                 type: "text",
-                key: "caseId",
-                // label: "Process Number",
                 disable: false,
                 showIcon: true,
                 icon: "SearchIcon",
@@ -73,11 +82,10 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
                 type: "dropdown",
                 isMandatory: false,
                 disable: false,
-                // label: "Status",
                 populators: {
                   defaultText: "Status",
-                  styles: { width: "350px" },
-                  name: "deliveryStatusList.[0]",
+                  styles: { width: "250px" },
+                  name: "deliveryStatusList.selected",
                   options: ["IN_TRANSIT", "NOT_UPDATED", "DELIVERED", "NOT_DELIVERED"],
                 },
               },
@@ -144,7 +152,7 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
         serviceName: "/epost-tracker/epost/v1/_getEPost",
         requestParam: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
-          limit: 5,
+          limit: 10,
           offset: 0,
         },
         requestBody: {
@@ -175,6 +183,7 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
             primaryLabel: "ES_COMMON_SEARCH",
             secondaryLabel: "ES_COMMON_CLEAR_SEARCH",
             minReqFields: 0,
+            defaultValues: defaultSearchValues,
             fields: [
               {
                 type: "component",
@@ -206,12 +215,10 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
                 type: "dropdown",
                 isMandatory: false,
                 disable: false,
-                // label: "Status",
                 populators: {
-                  // defaultText: "Status",
                   styles: { width: "250px" },
-                  name: "deliveryStatusList.[0]",
-                  options: ["IN_TRANSIT", "NOT_UPDATED"],
+                  name: "deliveryStatusList.selected",
+                  options: inboxFilters,
                 },
               },
               // {
@@ -277,7 +284,7 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
         serviceName: "/epost-tracker/epost/v1/_getEPost",
         requestParam: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
-          limit: 5,
+          limit: 10,
           offset: 0,
         },
         requestBody: {
@@ -308,6 +315,7 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
             primaryLabel: "ES_COMMON_SEARCH",
             secondaryLabel: "ES_COMMON_CLEAR_SEARCH",
             minReqFields: 0,
+            defaultValues: defaultSearchValues,
             fields: [
               {
                 type: "component",
@@ -339,12 +347,10 @@ export const EpostTrackingConfig = ({ inboxFilters, outboxFilters }) => {
                 type: "dropdown",
                 isMandatory: false,
                 disable: false,
-                // label: "Status",
                 populators: {
-                  // defaultText: "Status",
                   styles: { width: "250px" },
-                  name: "deliveryStatusList.[0]",
-                  options: ["DELIVERED", "NOT_DELIVERED"],
+                  name: "deliveryStatusList.selected",
+                  options: outboxFilters,
                 },
               },
               // {

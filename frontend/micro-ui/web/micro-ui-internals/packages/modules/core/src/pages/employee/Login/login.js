@@ -56,10 +56,10 @@ const Login = ({ config: propsConfig, t, isDisabled }) => {
     }
     const userInfo = JSON.parse(window.localStorage.getItem("user-info"));
     const userType = userInfo?.type === "CITIZEN" ? "citizen" : "employee";
-    function hasDepositionEditorRole() {
-      return userInfo.roles.some((userRole) => userRole.name === "DEPOSITION_EDITOR");
+    function hasPostManagerRole() {
+      return userInfo.roles.some((userRole) => userRole.name === "POST_MANAGER");
     }
-    if (hasDepositionEditorRole()) {
+    if (hasPostManagerRole()) {
       redirectPath = `/${window?.contextPath}/${userType}/orders/tracking`;
     }
     history.replace(redirectPath);
@@ -85,8 +85,8 @@ const Login = ({ config: propsConfig, t, isDisabled }) => {
     } catch (err) {
       setShowToast(
         err?.response?.data?.error_description ||
-        (err?.message == "ES_ERROR_USER_NOT_PERMITTED" && t("ES_ERROR_USER_NOT_PERMITTED")) ||
-        t("INVALID_LOGIN_CREDENTIALS")
+          (err?.message == "ES_ERROR_USER_NOT_PERMITTED" && t("ES_ERROR_USER_NOT_PERMITTED")) ||
+          t("INVALID_LOGIN_CREDENTIALS")
       );
       setTimeout(closeToast, 5000);
     }
