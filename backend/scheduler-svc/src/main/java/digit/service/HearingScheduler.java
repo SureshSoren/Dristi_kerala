@@ -4,21 +4,15 @@ package digit.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
-import digit.helper.DefaultMasterDataHelper;
+import digit.util.MasterDataUtil;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
-import digit.util.MdmsUtil;
 import digit.web.models.*;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONArray;
-import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,14 +32,14 @@ public class HearingScheduler {
 
     private final HearingService hearingService;
 
-    private final DefaultMasterDataHelper helper;
+    private final MasterDataUtil helper;
 
     private final ServiceConstants serviceConstants;
 
 
 
     @Autowired
-    public HearingScheduler(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, CalendarService calendarService, HearingService hearingService, DefaultMasterDataHelper helper, ServiceConstants serviceConstants) {
+    public HearingScheduler(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, CalendarService calendarService, HearingService hearingService, MasterDataUtil helper, ServiceConstants serviceConstants) {
         this.producer = producer;
         this.repository = repository;
         this.configuration = configuration;
@@ -64,17 +58,17 @@ public class HearingScheduler {
             List<String> ids = new ArrayList<>();
             HashMap<String, LocalDate> dateMap = new HashMap<>();
             List<ReScheduleHearing> blockedHearings = new ArrayList<>();
-            for (ReScheduleHearing element : reScheduleHearingsRequest.getReScheduleHearing()) {
-                if (Objects.equals(element.getWorkflow().getAction(), "SCHEDULE")) {
-                    hearingsNeedToBeSchedule.add(element);
-                    ids.add(element.getHearingBookingId());
-                    dateMap.put(element.getHearingBookingId(), element.getScheduleDate());
-                }
-                if (Objects.equals(element.getWorkflow().getAction(), "APPROVE")) {
-                    blockedHearings.add(element);
-
-                }
-            }
+//            for (ReScheduleHearing element : reScheduleHearingsRequest.getReScheduleHearing()) {
+//                if (Objects.equals(element.getWorkflow().getAction(), "SCHEDULE")) {
+//                    hearingsNeedToBeSchedule.add(element);
+//                    ids.add(element.getHearingBookingId());
+//                    dateMap.put(element.getHearingBookingId(), element.getScheduleDate());
+//                }
+//                if (Objects.equals(element.getWorkflow().getAction(), "APPROVE")) {
+//                    blockedHearings.add(element);
+//
+//                }
+//            }
 
             ReScheduleHearingRequest request = ReScheduleHearingRequest.builder().reScheduleHearing(blockedHearings)
                     .requestInfo(reScheduleHearingsRequest.getRequestInfo()).build();
@@ -82,12 +76,12 @@ public class HearingScheduler {
             if (!blockedHearings.isEmpty()) producer.push("schedule-hearing-to-block-calendar", request);
 
             if (!hearingsNeedToBeSchedule.isEmpty()) {
-                List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().criteria(HearingSearchCriteria.builder()
+                List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().criteria(ScheduleHearingSearchCriteria.builder()
                                 .hearingIds(ids).build())
                         .build(), null, null);
                 for (ScheduleHearing hearing : hearings) {
-                    hearing.setStatus(Status.SCHEDULED);
-                    hearing.setDate(dateMap.get(hearing.getHearingBookingId()));
+//                    hearing.setStatus(Status.SCHEDULED.toString());
+//                    hearing.setDate(dateMap.get(hearing.getHearingBookingId()));
                 }
 
                 List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);

@@ -1,6 +1,6 @@
 package digit.web.models;
 
-import java.time.LocalDate;
+
 
 public interface SearchCriteria {
 
@@ -10,7 +10,7 @@ public interface SearchCriteria {
 
     String getCourtId();
 
-    LocalDate getFromDate();
+    Long getFromDate();
 
-    LocalDate getToDate();
+    Long getToDate();
 }

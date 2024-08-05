@@ -2,13 +2,11 @@ package digit.web.models;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import digit.web.models.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -36,8 +34,6 @@ public class ReScheduleHearingReqSearchCriteria {
     @JsonProperty("requesterId")
     private String requesterId;
 
-    @JsonProperty("status")
-    private Status status;
 
     @JsonProperty("dueDate")
     private Long dueDate;

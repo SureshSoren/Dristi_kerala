@@ -2,21 +2,18 @@ package digit.web.models;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import digit.web.models.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class HearingSearchCriteria {
+public class ScheduleHearingSearchCriteria {
 
 
     @JsonProperty("hearingIds")
@@ -28,13 +25,6 @@ public class HearingSearchCriteria {
     @JsonProperty("courtId")
     private String courtId;
 
-    @JsonProperty("fromDate")
-    private LocalDate fromDate;
-
-    @JsonProperty("toDate")
-    private LocalDate toDate;
-
-    //TODO: this should be enum
     @JsonProperty("hearingType")
     private String hearingType;
 
@@ -45,13 +35,13 @@ public class HearingSearchCriteria {
     private String tenantId;
     // to search in a one date between hours (to make it more flexible search)
     @JsonProperty("startDateTime")
-    private LocalDateTime startDateTime;
+    private Long startDateTime;
 
     @JsonProperty("endDateTime")
-    private LocalDateTime endDateTime;
+    private Long endDateTime;
 
     @JsonProperty("status")
-    private List<Status> status;
+    private List<String> status;
 
     @JsonProperty("rescheduleId")
     private String rescheduleId;

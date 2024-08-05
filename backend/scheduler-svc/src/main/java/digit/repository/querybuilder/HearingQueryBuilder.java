@@ -1,9 +1,7 @@
 package digit.repository.querybuilder;
 
 import digit.helper.QueryBuilderHelper;
-import digit.web.models.HearingSearchCriteria;
-import digit.web.models.enums.EventType;
-import digit.web.models.enums.Status;
+import digit.web.models.ScheduleHearingSearchCriteria;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,29 +23,29 @@ public class HearingQueryBuilder {
     @Autowired
     private QueryBuilderHelper queryBuilderHelper;
 
-    public String getHearingQuery(HearingSearchCriteria hearingSearchCriteria, List<Object> preparedStmtList, Integer limit, Integer offset) {
+    public String getHearingQuery(ScheduleHearingSearchCriteria scheduleHearingSearchCriteria, List<Object> preparedStmtList, Integer limit, Integer offset) {
 
         StringBuilder query = new StringBuilder(BASE_APPLICATION_QUERY);
         query.append(FROM_TABLES);
 
-        getWhereFields(hearingSearchCriteria, query, preparedStmtList, limit, offset);
+        getWhereFields(scheduleHearingSearchCriteria, query, preparedStmtList, limit, offset);
 
         return query.toString();
     }
 
-    public String getJudgeAvailableDatesQuery(HearingSearchCriteria hearingSearchCriteria, List<Object> preparedStmtList) {
+    public String getJudgeAvailableDatesQuery(ScheduleHearingSearchCriteria scheduleHearingSearchCriteria, List<Object> preparedStmtList) {
         StringBuilder query = new StringBuilder("SELECT meeting_hours.hearing_date AS date,meeting_hours.total_hours  AS hours ");
         query.append("FROM (");
-        query.append("SELECT hb.hearing_date, SUM(EXTRACT(EPOCH FROM (TO_TIMESTAMP(hb.end_time, 'YYYY-MM-DD HH24:MI:SS') - TO_TIMESTAMP(hb.start_time, 'YYYY-MM-DD HH24:MI:SS'))) / 3600) AS total_hours ");
+        query.append("SELECT hb.hearing_date, SUM((hb.end_time - hb.start_time) / 3600000) AS total_hours ");
         query.append("FROM hearing_booking hb ");
 
-        getWhereFields(hearingSearchCriteria, query, preparedStmtList, null, null);
+        getWhereFields(scheduleHearingSearchCriteria, query, preparedStmtList, null, null);
         // add status block
-        queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-        query.append(" ( hb.status = ? ");
-        preparedStmtList.add(Status.BLOCKED.toString());
-        query.append(" OR hb.status = ? )");
-        preparedStmtList.add(Status.SCHEDULED.toString());
+//        queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
+//        query.append(" ( hb.status = ? ");
+//        preparedStmtList.add(Status.BLOCKED.toString());
+//        query.append(" OR hb.status = ? )");
+//        preparedStmtList.add(Status.SCHEDULED.toString());
 
 
         query.append("GROUP BY hb.hearing_date) AS meeting_hours ");
@@ -56,86 +54,86 @@ public class HearingQueryBuilder {
     }
 
 
-    private void getWhereFields(HearingSearchCriteria hearingSearchCriteria, StringBuilder query, List<Object> preparedStmtList, Integer limit, Integer offset) {
+    private void getWhereFields(ScheduleHearingSearchCriteria scheduleHearingSearchCriteria, StringBuilder query, List<Object> preparedStmtList, Integer limit, Integer offset) {
 
 
-        if (!CollectionUtils.isEmpty(hearingSearchCriteria.getHearingIds())) {
+        if (!CollectionUtils.isEmpty(scheduleHearingSearchCriteria.getHearingIds())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" hb.hearing_booking_id IN ( ").append(queryBuilderHelper.createQuery(hearingSearchCriteria.getHearingIds())).append(" ) ");
-            queryBuilderHelper.addToPreparedStatement(preparedStmtList, hearingSearchCriteria.getHearingIds());
+            query.append(" hb.hearing_booking_id IN ( ").append(queryBuilderHelper.createQuery(scheduleHearingSearchCriteria.getHearingIds())).append(" ) ");
+            queryBuilderHelper.addToPreparedStatement(preparedStmtList, scheduleHearingSearchCriteria.getHearingIds());
         }
 
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getTenantId())) {
+        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getTenantId())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
             query.append(" hb.tenant_id = ? ");
-            preparedStmtList.add(hearingSearchCriteria.getTenantId());
+            preparedStmtList.add(scheduleHearingSearchCriteria.getTenantId());
 
         }
 
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getJudgeId())) {
+        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getJudgeId())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
             query.append(" hb.judge_id = ? ");
-            preparedStmtList.add(hearingSearchCriteria.getJudgeId());
+            preparedStmtList.add(scheduleHearingSearchCriteria.getJudgeId());
 
         }
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getCourtId())) {
+        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getCourtId())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
             query.append(" hb.court_id = ? ");
-            preparedStmtList.add(hearingSearchCriteria.getCourtId());
+            preparedStmtList.add(scheduleHearingSearchCriteria.getCourtId());
 
         }
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getCaseId())) {
+        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getCaseId())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
             query.append(" hb.case_id = ? ");
-            preparedStmtList.add(hearingSearchCriteria.getCaseId());
+            preparedStmtList.add(scheduleHearingSearchCriteria.getCaseId());
 
         }
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getHearingType())) {
+        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getHearingType())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
             query.append(" hb.event_type = ? ");
-            preparedStmtList.add(hearingSearchCriteria.getHearingType());
+            preparedStmtList.add(scheduleHearingSearchCriteria.getHearingType());
 
         }
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getFromDate())) {
+//        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getFromDate())) {
+//            queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
+//            query.append(" TO_DATE(hb.hearing_date, 'YYYY-MM-DD')  >= ? ");
+//            preparedStmtList.add(scheduleHearingSearchCriteria.getFromDate());
+//
+//        }
+//        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getToDate())) {
+//            queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
+//            query.append(" TO_DATE(hb.hearing_date, 'YYYY-MM-DD') <= ? ");
+//            preparedStmtList.add(scheduleHearingSearchCriteria.getToDate());
+//
+//        }
+        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getStartDateTime())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_DATE(hb.hearing_date, 'YYYY-MM-DD')  >= ? ");
-            preparedStmtList.add(hearingSearchCriteria.getFromDate());
+            query.append(" hb.start_time >= ? ");
+            preparedStmtList.add(scheduleHearingSearchCriteria.getStartDateTime());
 
         }
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getToDate())) {
+        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getEndDateTime())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_DATE(hb.hearing_date, 'YYYY-MM-DD') <= ? ");
-            preparedStmtList.add(hearingSearchCriteria.getToDate());
-
-        }
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getStartDateTime())) {
-            queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_TIMESTAMP(hb.start_time, 'YYYY-MM-DD HH24:MI:SS') >= ? ");
-            preparedStmtList.add(hearingSearchCriteria.getStartDateTime());
-
-        }
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getEndDateTime())) {
-            queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-            query.append(" TO_TIMESTAMP(hb.end_time , 'YYYY-MM-DD HH24:MI:SS') <= ? ");
-            preparedStmtList.add(hearingSearchCriteria.getEndDateTime());
+            query.append(" hb.end_time <= ? ");
+            preparedStmtList.add(scheduleHearingSearchCriteria.getEndDateTime());
 
         }
 
-        if (!ObjectUtils.isEmpty(hearingSearchCriteria.getRescheduleId())) {
+        if (!ObjectUtils.isEmpty(scheduleHearingSearchCriteria.getRescheduleId())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
             query.append("hb.reschedule_request_id = ? ");
-            preparedStmtList.add(hearingSearchCriteria.getRescheduleId());
+            preparedStmtList.add(scheduleHearingSearchCriteria.getRescheduleId());
         }
 
-        if (!CollectionUtils.isEmpty(hearingSearchCriteria.getStatus())) {
+        if (!CollectionUtils.isEmpty(scheduleHearingSearchCriteria.getStatus())) {
             queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
             query.append(" ( ");
-            for (int i = 0; i < hearingSearchCriteria.getStatus().size() - 1; i++) {
+            for (int i = 0; i < scheduleHearingSearchCriteria.getStatus().size() - 1; i++) {
                 query.append(" hb.status = ? ").append(" or ");
-                preparedStmtList.add(hearingSearchCriteria.getStatus().get(i+1).toString());
+                preparedStmtList.add(scheduleHearingSearchCriteria.getStatus().get(i+1).toString());
             }
             query.append("hb.status = ? )");
-            preparedStmtList.add(hearingSearchCriteria.getStatus().get(0).toString());
+            preparedStmtList.add(scheduleHearingSearchCriteria.getStatus().get(0).toString());
 
         }
 

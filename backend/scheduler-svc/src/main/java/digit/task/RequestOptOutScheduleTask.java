@@ -5,10 +5,7 @@ import digit.config.Configuration;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.repository.RescheduleRequestOptOutRepository;
-import digit.service.ReScheduleHearingService;
-import digit.web.controllers.ReScheduleHearingController;
 import digit.web.models.*;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,22 +40,22 @@ public class RequestOptOutScheduleTask {
         try {
             log.info("operation = updateAvailableDatesFromOptOuts, result=IN_PROGRESS");
             Long dueDate = LocalDate.now().minusDays(config.getOptOutDueDate()).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
-            List<ReScheduleHearing> reScheduleHearings = reScheduleRepository.getReScheduleRequest(ReScheduleHearingReqSearchCriteria.builder().tenantId(config.getEgovStateTenantId()).status(Status.APPROVED).dueDate(dueDate).build(), null, null);
+            List<ReScheduleHearing> reScheduleHearings = reScheduleRepository.getReScheduleRequest(ReScheduleHearingReqSearchCriteria.builder().tenantId(config.getEgovStateTenantId()).dueDate(dueDate).build(), null, null);
 
             for (ReScheduleHearing reScheduleHearing : reScheduleHearings) {
                 List<OptOut> optOuts = requestOptOutRepository.getOptOut(OptOutSearchCriteria.builder().judgeId(reScheduleHearing.getJudgeId()).caseId(reScheduleHearing.getCaseId()).rescheduleRequestId(reScheduleHearing.getRescheduledRequestId()).tenantId(reScheduleHearing.getTenantId()).build(), null, null);
 
 
-                List<LocalDate> suggestedDays = new ArrayList<>(reScheduleHearing.getSuggestedDates());
-                List<LocalDate> availableDates = new ArrayList<>(suggestedDays);
+                List<Long> suggestedDays = new ArrayList<>(reScheduleHearing.getSuggestedDates());
+                List<Long> availableDates = new ArrayList<>(suggestedDays);
 
                 for (OptOut optOut : optOuts) {
-                    List<LocalDate> optOutDates = optOut.getOptoutDates();
+                    List<Long> optOutDates = optOut.getOptoutDates();
                     availableDates.removeAll(optOutDates);
                 }
 
                 reScheduleHearing.setAvailableDates(availableDates);
-                reScheduleHearing.setStatus(Status.REVIEW);
+//                reScheduleHearing.setStatus(Status.REVIEW);
             }
             producer.push(config.getUpdateRescheduleRequestTopic(), reScheduleHearings);
             log.info("operation= updateAvailableDatesFromOptOuts, result=SUCCESS");

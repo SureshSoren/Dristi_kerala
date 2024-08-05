@@ -31,15 +31,15 @@ public class ReScheduleRequestEnrichment {
         RequestInfo requestInfo = reScheduleHearingsRequest.getRequestInfo();
         log.info("starting update method for reschedule hearing enrichment");
         log.info("generating IDs for reschedule hearing enrichment using IdGenService");
-        List<String> idList = idgenUtil.getIdList(requestInfo,
-                reScheduleHearing.get(0).getTenantId(),
-                configuration.getRescheduleHearingIdFormat(), null, reScheduleHearing.size());
+//        List<String> idList = idgenUtil.getIdList(requestInfo,
+//                reScheduleHearing.get(0).getTenantId(),
+//                configuration.getRescheduleHearingIdFormat(), null, reScheduleHearing.size());
 
         AuditDetails auditDetails = getAuditDetailsReScheduleHearing(requestInfo);
 
-        int index = 0;
+//        int index = 0;
         for (ReScheduleHearing element : reScheduleHearing) {
-            element.setRescheduledRequestId(idList.get(index++));
+//            element.setRescheduledRequestId(idList.get(index++));
             element.setRowVersion(1);
             element.setAuditDetails(auditDetails);
         }
@@ -64,25 +64,25 @@ public class ReScheduleRequestEnrichment {
         HashMap<String, LocalDate> scheduleDateMap = new HashMap<>();
 
 
-        reScheduleHearingsRequest.getReScheduleHearing().forEach((element) ->
-        {
-            map.put(element.getRescheduledRequestId(), element.getWorkflow());
-            availableAfterMap.put(element.getRescheduledRequestId(), element.getAvailableAfter());
-
-            scheduleDateMap.put(element.getRescheduledRequestId(), element.getScheduleDate());
-        });
+//        reScheduleHearingsRequest.getReScheduleHearing().forEach((element) ->
+//        {
+//            map.put(element.getRescheduledRequestId(), element.getWorkflow());
+//            availableAfterMap.put(element.getRescheduledRequestId(), element.getAvailableAfter());
+//
+//            scheduleDateMap.put(element.getRescheduledRequestId(), element.getScheduleDate());
+//        });
         String auditingUser = reScheduleHearingsRequest.getRequestInfo().getUserInfo().getUuid();
-        existingReScheduleHearingsReq.forEach((updateHearing) -> {
-
-            Workflow workflowNeedToUpdate = map.get(updateHearing.getRescheduledRequestId());
-            updateHearing.setWorkflow(workflowNeedToUpdate);
-            updateHearing.getAuditDetails().setLastModifiedBy(auditingUser);
-            updateHearing.getAuditDetails().setLastModifiedTime(System.currentTimeMillis());
-            updateHearing.setRowVersion(updateHearing.getRowVersion() + 1);
-            updateHearing.setAvailableAfter(availableAfterMap.get(updateHearing.getRescheduledRequestId()));
-            updateHearing.setScheduleDate(scheduleDateMap.get(updateHearing.getRescheduledRequestId()));
-
-        });
+//        existingReScheduleHearingsReq.forEach((updateHearing) -> {
+//
+//            Workflow workflowNeedToUpdate = map.get(updateHearing.getRescheduledRequestId());
+//            updateHearing.setWorkflow(workflowNeedToUpdate);
+//            updateHearing.getAuditDetails().setLastModifiedBy(auditingUser);
+//            updateHearing.getAuditDetails().setLastModifiedTime(System.currentTimeMillis());
+//            updateHearing.setRowVersion(updateHearing.getRowVersion() + 1);
+//            updateHearing.setAvailableAfter(availableAfterMap.get(updateHearing.getRescheduledRequestId()));
+//            updateHearing.setScheduleDate(scheduleDateMap.get(updateHearing.getRescheduledRequestId()));
+//
+//        });
 
         reScheduleHearingsRequest.setReScheduleHearing(existingReScheduleHearingsReq);
 

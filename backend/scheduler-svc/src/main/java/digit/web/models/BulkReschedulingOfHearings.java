@@ -7,8 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+
+
 
 @Data
 @AllArgsConstructor
@@ -20,11 +20,11 @@ public class BulkReschedulingOfHearings {
     private String judgeId;
 
     @JsonProperty("startTime")
-    private LocalDateTime startTime;
+    private Long startTime;
 
     @JsonProperty("endTime")
-    private LocalDateTime endTime;
+    private Long endTime;
 
     @JsonProperty("scheduleAfter")
-    private LocalDate scheduleAfter;
+    private Long scheduleAfter;
 }

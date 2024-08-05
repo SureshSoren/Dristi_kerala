@@ -1,14 +1,14 @@
-package digit.helper;
+package digit.util;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
-import digit.util.MdmsUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class DefaultMasterDataHelper {
+public class MasterDataUtil {
 
     @Autowired
     private MdmsUtil mdmsUtil;
@@ -27,7 +27,7 @@ public class DefaultMasterDataHelper {
     @Autowired
     private Configuration config;
 
-
+    @Cacheable(value = "mdms-cache", key = "#masterName")
     public <T> List<T> getDataFromMDMS(Class<T> clazz, String masterName) {
         log.info("operation = getDataFromMDMS, result = IN_PROGRESS");
         RequestInfo requestInfo = new RequestInfo();

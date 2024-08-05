@@ -4,16 +4,13 @@ package digit.web.models;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import digit.models.coremodels.AuditDetails;
-import digit.web.models.enums.Status;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.egov.common.contract.models.Document;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 
 @Data
@@ -44,17 +41,14 @@ public class ReScheduleHearing {
     private String reason;
 
     @JsonProperty("availableAfter")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate availableAfter;
+    private Long availableAfter;
 
-    @JsonProperty("status")
-    private Status status;
 
     @JsonProperty("actionComment")
     private String actionComment;
 
-    @JsonProperty("workflow")
-    private Workflow workflow;
+//    @JsonProperty("workflow")
+//    private Workflow workflow;
 
     @JsonProperty("auditDetails")
     private AuditDetails auditDetails;
@@ -62,20 +56,25 @@ public class ReScheduleHearing {
     @JsonProperty("rowVersion")
     private Integer rowVersion = null;
 
-    @JsonProperty("documents")
-    @Valid
-    private List<Document> documents = null;
+//    @JsonProperty("documents")
+//    @Valid
+//    private List<Document> documents = null;
 
     @JsonProperty("suggestedDates")             // additional details
-    private List<LocalDate> suggestedDates;
+    private List<Long> suggestedDates;
 
     @JsonProperty("availableDates")             // additional details
-    private List<LocalDate> availableDates;
+    private List<Long> availableDates;
 
+    @JsonProperty("representatives")
+    private Set<String> representatives;
+
+    @JsonProperty("litigants")
+    private Set<String> litigants;
 
     @JsonProperty("scheduleDate")
     @JsonFormat(pattern = "yyyy-MM-dd")// additional details
-    private LocalDate scheduleDate;
+    private Long scheduleDate;
 
 
 }

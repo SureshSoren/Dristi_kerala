@@ -1,0 +1,87 @@
+package digit.service.hearing;
+
+
+import digit.kafka.Producer;
+import digit.mapper.CustomMapper;
+import digit.service.HearingService;
+import digit.util.DateUtil;
+import digit.web.models.Pair;
+import digit.web.models.ScheduleHearing;
+import digit.web.models.ScheduleHearingRequest;
+import digit.web.models.hearing.Hearing;
+import digit.web.models.hearing.HearingRequest;
+import digit.web.models.hearing.PresidedBy;
+import org.egov.common.contract.request.RequestInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
+@Service
+public class HearingProcessor {
+
+    private final CustomMapper customMapper;
+
+    private final HearingService hearingService;
+
+    private final Producer producer;
+
+    private final DateUtil dateUtil;
+
+    @Autowired
+    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, Producer producer, DateUtil dateUtil) {
+        this.customMapper = customMapper;
+        this.hearingService = hearingService;
+        this.producer = producer;
+        this.dateUtil = dateUtil;
+    }
+
+
+    public void processCreateHearingRequest(HearingRequest hearingRequest) {
+
+        Hearing hearing = hearingRequest.getHearing();
+        RequestInfo requestInfo = hearingRequest.getRequestInfo();
+        PresidedBy presidedBy = hearing.getPresidedBy();
+
+        Pair<Long, Long> startTimeAndEndTime = getStartTimeAndEndTime(hearing.getStartTime());
+
+
+        ScheduleHearing scheduleHearing = customMapper.hearingToScheduleHearingConversion(hearing);
+
+        scheduleHearing.setStartTime(startTimeAndEndTime.getKey());
+        scheduleHearing.setEndTime(startTimeAndEndTime.getValue());
+
+        // currently one judge only
+        scheduleHearing.setJudgeId(presidedBy.getJudgeID().get(0));
+        scheduleHearing.setCourtId(presidedBy.getCourtID());
+        scheduleHearing.setStatus("SCHEDULED");
+
+        ScheduleHearingRequest request = ScheduleHearingRequest.builder()
+                .hearing(Collections.singletonList(scheduleHearing))
+                .requestInfo(requestInfo)
+                .build();
+
+        List<ScheduleHearing> scheduledHearings = hearingService.schedule(request);   // BLOCKED THE JUDGE CALENDAR
+        ScheduleHearing scheduledHearing = scheduledHearings.get(0);
+
+        hearing.setStartTime(scheduledHearing.getStartTime());
+        hearing.setEndTime(scheduledHearing.getEndTime());
+
+        hearingRequest.setHearing(hearing);
+
+        producer.push("update-topic", hearingRequest);
+    }
+
+    private Pair<Long, Long> getStartTimeAndEndTime(Long epochTime) {
+
+        LocalDate startOfDay = dateUtil.getLocalDateFromEpoch(epochTime);
+        LocalDate nextday = startOfDay.plusDays(1);
+        long startEpochMillis = dateUtil.getEPochFromLocalDate(startOfDay);
+        long endEpochMillis = dateUtil.getEPochFromLocalDate(nextday);
+
+        return new Pair<>(startEpochMillis, endEpochMillis);
+    }
+
+}

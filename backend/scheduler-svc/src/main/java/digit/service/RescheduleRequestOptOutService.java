@@ -6,9 +6,7 @@ import digit.enrichment.RescheduleRequestOptOutEnrichment;
 import digit.kafka.Producer;
 import digit.repository.RescheduleRequestOptOutRepository;
 import digit.validator.RescheduleRequestOptOutValidator;
-import digit.web.models.OptOut;
-import digit.web.models.OptOutRequest;
-import digit.web.models.OptOutSearchRequest;
+import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,13 +27,16 @@ public class RescheduleRequestOptOutService {
 
     private final Configuration config;
 
+    private final ReScheduleHearingService reScheduleHearingService;
+
     @Autowired
-    public RescheduleRequestOptOutService(RescheduleRequestOptOutRepository optOutRepository, RescheduleRequestOptOutValidator optOutValidator, RescheduleRequestOptOutEnrichment optOutEnrichment, Producer producer, Configuration config) {
+    public RescheduleRequestOptOutService(RescheduleRequestOptOutRepository optOutRepository, RescheduleRequestOptOutValidator optOutValidator, RescheduleRequestOptOutEnrichment optOutEnrichment, Producer producer, Configuration config, ReScheduleHearingService reScheduleHearingService) {
         this.optOutRepository = optOutRepository;
         this.optOutValidator = optOutValidator;
         this.optOutEnrichment = optOutEnrichment;
         this.producer = producer;
         this.config = config;
+        this.reScheduleHearingService = reScheduleHearingService;
     }
 
     /**

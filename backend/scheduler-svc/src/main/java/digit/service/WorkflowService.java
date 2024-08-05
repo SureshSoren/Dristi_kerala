@@ -11,7 +11,6 @@ import digit.repository.ServiceRequestRepository;
 import digit.web.models.ReScheduleHearing;
 import digit.web.models.ReScheduleHearingRequest;
 import digit.web.models.Workflow;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.models.RequestInfoWrapper;
 import org.egov.common.contract.request.RequestInfo;
@@ -50,7 +49,7 @@ public class WorkflowService {
             ProcessInstance processInstance = getProcessInstanceForHearingReScheduler(application, reScheduleHearingRequest.getRequestInfo());
             ProcessInstanceRequest workflowRequest = new ProcessInstanceRequest(reScheduleHearingRequest.getRequestInfo(), Collections.singletonList(processInstance));
             State state = callWorkFlow(workflowRequest);
-            application.setStatus(Status.fromValue(state.getApplicationStatus()));
+//            application.setStatus(Status.fromValue(state.getApplicationStatus()));
         });
     }
 
@@ -65,7 +64,7 @@ public class WorkflowService {
     private ProcessInstance getProcessInstanceForHearingReScheduler(ReScheduleHearing application, RequestInfo requestInfo) {
 
         log.info("operation= getProcessInstanceForHearingReScheduler, result=IN_PROGRESS, tenantId={}", application.getTenantId());
-        Workflow workflow = application.getWorkflow();
+        Workflow workflow = new Workflow();
 
         ProcessInstance processInstance = new ProcessInstance();
         processInstance.setBusinessId(application.getRescheduledRequestId());

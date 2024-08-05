@@ -19,7 +19,7 @@ serviceMaps:
 
             - jsonPath: $.*.date
 
-            - jsonPath: $.*.eventType
+            - jsonPath: $.*.hearingType
 
             - jsonPath: $.*.title
 
@@ -63,7 +63,7 @@ serviceMaps:
 
             - jsonPath: $.*.date
 
-            - jsonPath: $.*.eventType
+            - jsonPath: $.*.hearingType
 
             - jsonPath: $.*.title
 
