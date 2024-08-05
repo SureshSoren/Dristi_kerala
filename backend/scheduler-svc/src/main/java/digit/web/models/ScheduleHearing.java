@@ -43,6 +43,9 @@ public class ScheduleHearing {
     @JsonProperty("status")
     private String status;
 
+    @JsonProperty("hearingDate")
+    private long hearingDate;
+
     @JsonProperty("startTime")
     private long startTime;
 
