@@ -43,39 +43,39 @@ public class RescheduleRequestOptOutService {
      * @param request
      * @return
      */
-    public List<OptOut> create(OptOutRequest request) {
-        log.info("operation = create, result = IN_PROGRESS, OptOut = {}", request.getOptOuts());
+    public OptOut create(OptOutRequest request) {
+        log.info("operation = create, result = IN_PROGRESS, OptOut = {}", request.getOptOut());
 
         optOutValidator.validateRequest(request);
 
         optOutEnrichment.enrichCreateRequest(request);
 
-        producer.push(config.getOptOutTopic(), request.getOptOuts());
+        producer.push(config.getOptOutTopic(), request.getOptOut());
 
         producer.push("check-opt-out", request);
 
-        log.info("operation = create, result = SUCCESS, OptOut = {}", request.getOptOuts());
+        log.info("operation = create, result = SUCCESS, OptOut = {}", request.getOptOut());
 
-        return request.getOptOuts();
+        return request.getOptOut();
     }
 
     /**
      * @param request
      * @return
      */
-    public List<OptOut> update(OptOutRequest request) {
-        log.info("operation = update, result = IN_PROGRESS, OptOut = {}", request.getOptOuts());
-
-        optOutValidator.validateUpdateRequest(request);
-
-        optOutEnrichment.enrichUpdateRequest(request);
-
-        producer.push(config.getOptOutUpdateTopic(), request.getOptOuts());
-
-        log.info("operation = update, result = SUCCESS, OptOut = {}", request.getOptOuts());
-
-        return request.getOptOuts();
-    }
+//    public List<OptOut> update(OptOutRequest request) {
+//        log.info("operation = update, result = IN_PROGRESS, OptOut = {}", request.getOptOuts());
+//
+//        optOutValidator.validateUpdateRequest(request);
+//
+//        optOutEnrichment.enrichUpdateRequest(request);
+//
+//        producer.push(config.getOptOutUpdateTopic(), request.getOptOuts());
+//
+//        log.info("operation = update, result = SUCCESS, OptOut = {}", request.getOptOuts());
+//
+//        return request.getOptOuts();
+//    }
 
     /**
      * @param request

@@ -1,18 +1,19 @@
 package digit.web.models;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import digit.models.coremodels.AuditDetails;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Set;
 
-
+@Validated
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,12 +21,14 @@ import java.util.Set;
 public class ReScheduleHearing {
 
     @JsonProperty("rescheduledRequestId")
+    @NotNull
     private String rescheduledRequestId;
 
     @JsonProperty("hearingBookingId")
     private String hearingBookingId;
 
     @JsonProperty("tenantId")
+    @NotNull
     private String tenantId;
 
     @JsonProperty("judgeId")
@@ -41,29 +44,13 @@ public class ReScheduleHearing {
     private String reason;
 
     @JsonProperty("availableAfter")
+    @NotNull
     private Long availableAfter;
 
-
-    @JsonProperty("actionComment")
-    private String actionComment;
-
-//    @JsonProperty("workflow")
-//    private Workflow workflow;
-
-    @JsonProperty("auditDetails")
-    private AuditDetails auditDetails;
-
-    @JsonProperty("rowVersion")
-    private Integer rowVersion = null;
-
-//    @JsonProperty("documents")
-//    @Valid
-//    private List<Document> documents = null;
-
-    @JsonProperty("suggestedDates")             // additional details
+    @JsonProperty("suggestedDates")
     private List<Long> suggestedDates;
 
-    @JsonProperty("availableDates")             // additional details
+    @JsonProperty("availableDates")
     private List<Long> availableDates;
 
     @JsonProperty("representatives")
@@ -72,9 +59,11 @@ public class ReScheduleHearing {
     @JsonProperty("litigants")
     private Set<String> litigants;
 
-    @JsonProperty("scheduleDate")
-    @JsonFormat(pattern = "yyyy-MM-dd")// additional details
-    private Long scheduleDate;
+    @JsonProperty("auditDetails")
+    private AuditDetails auditDetails;
+
+    @JsonProperty("rowVersion")
+    private Integer rowVersion = null;
 
 
 }

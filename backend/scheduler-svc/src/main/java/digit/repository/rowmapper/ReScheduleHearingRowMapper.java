@@ -34,7 +34,7 @@ public class ReScheduleHearingRowMapper implements RowMapper<ReScheduleHearing> 
                     .requesterId(resultSet.getString("requester_id"))
                     .reason(resultSet.getString("reason"))
 //                    .status(resultSet.getString("status")==null?null: Status.valueOf(resultSet.getString("status")))
-                    .actionComment(resultSet.getString("action_comment"))
+//                    .actionComment(resultSet.getString("action_comment"))
                     .suggestedDates(resultSet.getString("suggested_days") == null ? null : objectMapper.readValue(resultSet.getString("suggested_days"), new TypeReference<>() {
                     }))
                     .availableDates(resultSet.getString("available_days") == null ? null : objectMapper.readValue(resultSet.getString("available_days"), new TypeReference<>() {

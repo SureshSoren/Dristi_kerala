@@ -300,7 +300,6 @@ public class ReScheduleHearingService {
                     .caseId(hearing.getCaseId())
                     .tenantId(hearing.getTenantId())
                     .requesterId(requesterId)
-                    .actionComment("AUTO SCHEDULE BY JUDGE")
                     .reason("reschedule by judge")
                     .build();
 

@@ -3,7 +3,10 @@ package digit.web.controllers;
 
 import digit.service.RescheduleRequestOptOutService;
 import digit.util.ResponseInfoFactory;
-import digit.web.models.*;
+import digit.web.models.OptOut;
+import digit.web.models.OptOutRequest;
+import digit.web.models.OptOutResponse;
+import digit.web.models.OptOutSearchRequest;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -34,30 +37,30 @@ public class RescheduleRequestOptOutApiController {
     @RequestMapping(value = "/hearing/v1/_opt-out", method = RequestMethod.POST)
     public ResponseEntity<OptOutResponse> optOutDates(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody OptOutRequest request) {
         log.info("api = /hearing/v1/_opt-out, result = IN_PROGRESS");
-        List<OptOut> optOutResponse = optOutService.create(request);
+        OptOut optOutResponse = optOutService.create(request);
         OptOutResponse response = OptOutResponse.builder().responseInfo(ResponseInfoFactory.createResponseInfo(request.getRequestInfo(), true))
-                .optOuts(optOutResponse).build();
+                .optOut(optOutResponse).build();
         log.info("api = /hearing/v1/_opt-out, result = SUCCESS");
         return ResponseEntity.accepted().body(response);
     }
 
-    @RequestMapping(value = "/hearing/v1/opt-out/_update", method = RequestMethod.POST)
-    public ResponseEntity<OptOutResponse> updateOptOut(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody OptOutRequest request) {
-        log.info("api = /hearing/v1/opt-out/_update, result = IN_PROGRESS");
-        List<OptOut> optOutResponse = optOutService.update(request);
-        OptOutResponse response = OptOutResponse.builder().responseInfo(ResponseInfoFactory.createResponseInfo(request.getRequestInfo(), true))
-                .optOuts(optOutResponse).build();
-        log.info("api = /hearing/v1/opt-out/_update, result = SUCCESS");
-        return ResponseEntity.accepted().body(response);
-    }
+//    @RequestMapping(value = "/hearing/v1/opt-out/_update", method = RequestMethod.POST)
+//    public ResponseEntity<OptOutResponse> updateOptOut(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody OptOutRequest request) {
+//        log.info("api = /hearing/v1/opt-out/_update, result = IN_PROGRESS");
+//        OptOut optOutResponse = optOutService.update(request);
+//        OptOutResponse response = OptOutResponse.builder().responseInfo(ResponseInfoFactory.createResponseInfo(request.getRequestInfo(), true))
+//                .optOut(optOutResponse).build();
+//        log.info("api = /hearing/v1/opt-out/_update, result = SUCCESS");
+//        return ResponseEntity.accepted().body(response);
+//    }
 
     @RequestMapping(value = "/hearing/v1/opt-out/_search", method = RequestMethod.POST)
-    public ResponseEntity<OptOutResponse> searchOptOut(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody OptOutSearchRequest request, @NotNull @Min(0) @Max(1000) @ApiParam(value = "Pagination - limit records in response", required = true) @Valid @RequestParam(value = "limit", required = true) Integer limit, @NotNull @Min(1) @ApiParam(value = "Pagination - offset for which response is returned", required = true) @Valid @RequestParam(value = "offset", required = true) Integer offset) {
+    public ResponseEntity<List<OptOut>> searchOptOut(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody OptOutSearchRequest request, @NotNull @Min(0) @Max(1000) @ApiParam(value = "Pagination - limit records in response", required = true) @Valid @RequestParam(value = "limit", required = true) Integer limit, @NotNull @Min(1) @ApiParam(value = "Pagination - offset for which response is returned", required = true) @Valid @RequestParam(value = "offset", required = true) Integer offset) {
         log.info("api =/hearing/v1/opt-out/_search, result = IN_PROGRESS");
         List<OptOut> optOuts = optOutService.search(request, limit, offset);
-        OptOutResponse response = OptOutResponse.builder().responseInfo(ResponseInfoFactory.createResponseInfo(request.getRequestInfo(), true))
-                .optOuts(optOuts).build();
+//        OptOutResponse response = OptOutResponse.builder().responseInfo(ResponseInfoFactory.createResponseInfo(request.getRequestInfo(), true))
+//                .optOuts(optOuts).build();
         log.info("api = /hearing/v1/opt-out/_search, result = SUCCESS");
-        return ResponseEntity.accepted().body(response);
+        return ResponseEntity.accepted().body(optOuts);
     }
 }
