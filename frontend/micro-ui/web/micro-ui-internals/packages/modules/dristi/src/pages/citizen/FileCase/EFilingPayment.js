@@ -33,7 +33,7 @@ const Heading = (props) => {
   return <h1 className="heading-m">{props.label}</h1>;
 };
 
-function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = mockSubmitModalInfo, amount = 2000, path }) {
+function EFilingPayment({ t, submitModalInfo = mockSubmitModalInfo, path }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const history = useHistory();
   const onCancel = () => {
@@ -335,7 +335,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
             className={"secondary-button-selector"}
             label={t("CS_GO_TO_HOME")}
             labelClassName={"secondary-label-selector"}
-            style={{minWidth: "30%"}}
+            style={{ minWidth: "30%" }}
             onButtonClick={() => {
               history.push(`/${window?.contextPath}/citizen/dristi/home`);
             }}
@@ -345,7 +345,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
             className={"secondary-button-selector"}
             label={t("CS_PRINT_CASE_FILE")}
             labelClassName={"secondary-label-selector"}
-            style={{minWidth: "30%"}}
+            style={{ minWidth: "30%" }}
             onButtonClick={() => {}}
           />
           <Button
@@ -369,7 +369,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
             <div className="payment-due-wrapper" style={{ display: "flex", flexDirection: "column" }}>
               <div className="payment-due-text" style={{ fontSize: "18px" }}>
                 {`${t("CS_DUE_PAYMENT")} `}
-                <span style={{ fontWeight: 700 }}>Rs {amount}/-.</span>
+                <span style={{ fontWeight: 700 }}>Rs {totalAmount}/-.</span>
                 {` ${t("CS_MANDATORY_STEP_TO_FILE_CASE")}`}
               </div>
               <div className="payment-calculator-wrapper" style={{ display: "flex", flexDirection: "column" }}>
