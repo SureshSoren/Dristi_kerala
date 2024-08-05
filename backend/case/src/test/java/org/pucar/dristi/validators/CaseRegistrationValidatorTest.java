@@ -14,7 +14,6 @@ import static org.pucar.dristi.config.ServiceConstants.INVALID_FILESTORE_ID;
 import static org.pucar.dristi.config.ServiceConstants.SAVE_DRAFT_CASE_WORKFLOW_ACTION;
 import static org.pucar.dristi.config.ServiceConstants.SUBMIT_CASE_WORKFLOW_ACTION;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.repository.CaseRepository;
-import org.pucar.dristi.service.CaseService;
 import org.pucar.dristi.service.IndividualService;
 import org.pucar.dristi.util.AdvocateUtil;
 import org.pucar.dristi.util.FileStoreUtil;
@@ -109,7 +107,7 @@ public class CaseRegistrationValidatorTest {
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
         courtCase.setCaseCategory("civil");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         courtCase.setCaseCategory("category");
 //        courtCase.setStatutesAndSections();
 
@@ -126,7 +124,7 @@ public class CaseRegistrationValidatorTest {
         courtCase.setLitigants(List.of(party));
 
         courtCase.setStatutesAndSections(List.of(new StatuteSection()));
-        courtCase.setFilingDate(LocalDate.parse("2021-12-12"));
+        courtCase.setFilingDate(System.currentTimeMillis());
 
         Workflow workflow = new Workflow();
         workflow.setAction(SUBMIT_CASE_WORKFLOW_ACTION);
@@ -180,7 +178,7 @@ public class CaseRegistrationValidatorTest {
         request.setRequestInfo(new RequestInfo());
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         request.setCases(courtCase);
 
         Exception exception = assertThrows(CustomException.class, () -> validator.validateCaseRegistration(request));
@@ -192,7 +190,7 @@ public class CaseRegistrationValidatorTest {
         request.setRequestInfo(new RequestInfo());
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         courtCase.setCaseCategory("category1");
         request.setCases(courtCase);
 
@@ -205,7 +203,7 @@ public class CaseRegistrationValidatorTest {
         request.setRequestInfo(new RequestInfo());
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         courtCase.setCaseCategory("category1");
         Workflow workflow = new Workflow();
         workflow.setAction(SUBMIT_CASE_WORKFLOW_ACTION);
@@ -224,7 +222,7 @@ public class CaseRegistrationValidatorTest {
         request.setRequestInfo(new RequestInfo());
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         courtCase.setCaseCategory("category1");
         Workflow workflow = new Workflow();
         workflow.setAction(DELETE_DRAFT_WORKFLOW_ACTION);
@@ -240,13 +238,12 @@ public class CaseRegistrationValidatorTest {
     @Test
     void testValidateCaseRegistration_WithMissingUserInfo() {
         CaseRequest request = new CaseRequest();
-        RequestInfo requestInfo = new RequestInfo();
         requestInfo.setUserInfo(null);
         request.setRequestInfo(requestInfo);
         request.setRequestInfo(new RequestInfo());
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         courtCase.setCaseCategory("category1");
         Workflow workflow = new Workflow();
         workflow.setAction(SUBMIT_CASE_WORKFLOW_ACTION);
@@ -259,11 +256,11 @@ public class CaseRegistrationValidatorTest {
         courtCase.setLitigants(litigantList);
         request.setCases(courtCase);
 
-        Exception exception = assertThrows(CustomException.class, () -> validator.validateCaseRegistration(request));
+         assertThrows(CustomException.class, () -> validator.validateCaseRegistration(request));
     }
 
     @Test
-    void testValidateApplicationExistence_ExistingApplication() {
+    void testvalidateUpdateRequest_ExistingApplication() {
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
         courtCase.setCaseCategory("civil");
@@ -282,7 +279,7 @@ public class CaseRegistrationValidatorTest {
         LinkedCase linkedCase = LinkedCase.builder().id(UUID.randomUUID()).caseNumber("caseNumber").build();
 //        courtCase.setLinkedCases(List.of(linkedCase));
         courtCase.setStatutesAndSections(List.of(new StatuteSection()));
-        courtCase.setFilingDate(LocalDate.parse("2021-12-12"));
+        courtCase.setFilingDate(System.currentTimeMillis());
         Map<String, Map<String, JSONArray>> mdmsRes = new HashMap<>();
         mdmsRes.put("case", new HashMap<>());
         List<String> masterList = new ArrayList<>();
@@ -295,6 +292,7 @@ public class CaseRegistrationValidatorTest {
         List<CaseCriteria> caseCriteriaList = new ArrayList<>();
         CaseCriteria caseCriteria = new CaseCriteria();
         caseCriteria.setCaseId(linkedCase.getId().toString());
+        caseCriteria.setResponseList(Collections.singletonList(courtCase));
         caseCriteriaList.add(caseCriteria);
         caseSearchRequest.setRequestInfo(new RequestInfo());
         caseSearchRequest.setCriteria(caseCriteriaList);
@@ -313,15 +311,14 @@ public class CaseRegistrationValidatorTest {
         lenient().when(advocateUtil.doesAdvocateExist(requestInfo, "123")).thenReturn(true);
         lenient().when(configuration.getCaseBusinessServiceName()).thenReturn("case");
 
-        lenient().when(caseRepository.getApplications(any(), any())).thenReturn((List.of(CaseCriteria.builder().filingNumber(courtCase.getFilingNumber()).caseId(String.valueOf(courtCase.getId()))
-                .cnrNumber(courtCase.getCnrNumber()).courtCaseNumber(courtCase.getCourtCaseNumber()).build())));
+        when(caseRepository.getApplications(any(), any())).thenReturn(caseCriteriaList);
 
-        Boolean result = validator.validateApplicationExistence(caseRequest);
+        Boolean result = validator.validateUpdateRequest(caseRequest);
         assertTrue(result);
     }
 
     @Test
-    void testValidateApplicationExistence_EmptyApplication() {
+    void testvalidateUpdateRequest_EmptyApplication() {
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
         courtCase.setCaseCategory("civil");
@@ -340,7 +337,7 @@ public class CaseRegistrationValidatorTest {
         LinkedCase linkedCase = LinkedCase.builder().id(UUID.randomUUID()).caseNumber("caseNumber").build();
         courtCase.setLinkedCases(List.of(linkedCase));
         courtCase.setStatutesAndSections(List.of(new StatuteSection()));
-        courtCase.setFilingDate(LocalDate.parse("2021-12-12"));
+        courtCase.setFilingDate(System.currentTimeMillis());
         Map<String, Map<String, JSONArray>> mdmsRes = new HashMap<>();
         mdmsRes.put("case", new HashMap<>());
         List<String> masterList = new ArrayList<>();
@@ -353,11 +350,12 @@ public class CaseRegistrationValidatorTest {
         List<CaseCriteria> caseCriteriaList = new ArrayList<>();
         CaseCriteria caseCriteria = new CaseCriteria();
         caseCriteria.setCaseId(linkedCase.getId().toString());
+        caseCriteria.setResponseList(new ArrayList<>());
         caseCriteriaList.add(caseCriteria);
         caseSearchRequest.setRequestInfo(new RequestInfo());
         caseSearchRequest.setCriteria(caseCriteriaList);
 
-        lenient().when(caseRepository.getApplications(any(), any())).thenReturn((Collections.emptyList()));
+        when(caseRepository.getApplications(any(), any())).thenReturn((Collections.singletonList(caseCriteria)));
         CaseRequest caseRequest = new CaseRequest();
         caseRequest.setCases(courtCase);
         User userInfo = new User();
@@ -366,12 +364,12 @@ public class CaseRegistrationValidatorTest {
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.setUserInfo(userInfo);
         caseRequest.setRequestInfo(requestInfo);
-        Boolean result = validator.validateApplicationExistence(caseRequest);
+        Boolean result = validator.validateUpdateRequest(caseRequest);
         assertTrue(!result);
     }
 
     @Test
-    void testValidateApplicationExistence_ExistingApplication_INVALID_LINKEDCASE_ID() {
+    void testvalidateUpdateRequest_ExistingApplication_INVALID_LINKEDCASE_ID() {
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
         courtCase.setCaseCategory("civil");
@@ -390,7 +388,7 @@ public class CaseRegistrationValidatorTest {
         LinkedCase linkedCase = LinkedCase.builder().id(UUID.randomUUID()).caseNumber("caseNumber").build();
         courtCase.setLinkedCases(List.of(linkedCase));
         courtCase.setStatutesAndSections(List.of(new StatuteSection()));
-        courtCase.setFilingDate(LocalDate.parse("2021-12-12"));
+        courtCase.setFilingDate(System.currentTimeMillis());
         Map<String, Map<String, JSONArray>> mdmsRes = new HashMap<>();
         mdmsRes.put("case", new HashMap<>());
         List<String> masterList = new ArrayList<>();
@@ -420,22 +418,21 @@ public class CaseRegistrationValidatorTest {
         lenient().when(caseRepository.getApplications(any(), any())).thenReturn((List.of(CaseCriteria.builder().filingNumber(courtCase.getFilingNumber()).caseId(String.valueOf(courtCase.getId()))
                 .cnrNumber(courtCase.getCnrNumber()).courtCaseNumber(courtCase.getCourtCaseNumber()).build())));
 
-        assertThrows(Exception.class, () -> validator.validateApplicationExistence(caseRequest));
+        assertThrows(Exception.class, () -> validator.validateUpdateRequest(caseRequest));
     }
 
     @Test
-    void testValidateApplicationExistence_ExistingApplicationMissingTenantId() {
+    void testvalidateUpdateRequest_ExistingApplicationMissingTenantId() {
         CaseCriteria caseCriteria = new CaseCriteria();
         CourtCase courtCase = new CourtCase();
-//        courtCase.setTenantId("pg");
         CaseRequest caseRequest = new CaseRequest();
         caseRequest.setCases(courtCase);
         caseRequest.setRequestInfo(new RequestInfo());
-        assertThrows(CustomException.class, () -> validator.validateApplicationExistence(caseRequest));
+        assertThrows(CustomException.class, () -> validator.validateUpdateRequest(caseRequest));
     }
 
     @Test
-    void testValidateApplicationExistence_ExistingApplicationMissingFilingDate() {
+    void testvalidateUpdateRequest_ExistingApplicationMissingFilingDate() {
         CourtCase courtCase = new CourtCase();
         CaseCriteria caseCriteria = new CaseCriteria();
         courtCase.setTenantId("pg");
@@ -446,10 +443,10 @@ public class CaseRegistrationValidatorTest {
         caseRequest.setCases(courtCase);
         caseRequest.setRequestInfo(new RequestInfo());
 
-        assertThrows(CustomException.class, () -> validator.validateApplicationExistence(caseRequest));
+        assertThrows(CustomException.class, () -> validator.validateUpdateRequest(caseRequest));
     }
     @Test
-    void testValidateApplicationExistence_ExistingApplicationMissingFilingDateNotThrowOnSaveDraft() {
+    void testvalidateUpdateRequest_ExistingApplicationMissingFilingDateNotThrowOnSaveDraft() {
         CourtCase courtCase = new CourtCase();
         CaseCriteria caseCriteria = new CaseCriteria();
         courtCase.setTenantId("pg");
@@ -460,11 +457,11 @@ public class CaseRegistrationValidatorTest {
         caseRequest.setCases(courtCase);
         caseRequest.setRequestInfo(new RequestInfo());
 
-        assertThrows(CustomException.class, () -> validator.validateApplicationExistence(caseRequest));
+        assertThrows(CustomException.class, () -> validator.validateUpdateRequest(caseRequest));
     }
 
     @Test
-    void testValidateApplicationExistence_ExistingApplication_INDIVIDUAL_NOT_FOUND() {
+    void testvalidateUpdateRequest_ExistingApplication_INDIVIDUAL_NOT_FOUND() {
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
         courtCase.setCaseCategory("civil");
@@ -481,9 +478,8 @@ public class CaseRegistrationValidatorTest {
         courtCase.setWorkflow(workflow);
         courtCase.setLitigants(List.of(party));
         LinkedCase linkedCase = LinkedCase.builder().id(UUID.randomUUID()).caseNumber("caseNumber").build();
-//        courtCase.setLinkedCases(List.of(linkedCase));
         courtCase.setStatutesAndSections(List.of(new StatuteSection()));
-        courtCase.setFilingDate(LocalDate.parse("2021-12-12"));
+        courtCase.setFilingDate(System.currentTimeMillis());
         Map<String, Map<String, JSONArray>> mdmsRes = new HashMap<>();
         mdmsRes.put("case", new HashMap<>());
         List<String> masterList = new ArrayList<>();
@@ -510,15 +506,15 @@ public class CaseRegistrationValidatorTest {
         CaseRequest caseRequest = new CaseRequest();
         caseRequest.setCases(courtCase);
         caseRequest.setRequestInfo(new RequestInfo());
-        assertThrows(CustomException.class, () -> validator.validateApplicationExistence(caseRequest));
+        assertThrows(CustomException.class, () -> validator.validateUpdateRequest(caseRequest));
     }
 
     @Test
-    void testValidateApplicationExistence_ExistingApplicationMissingCaseCategory() {
+    void testvalidateUpdateRequest_ExistingApplicationMissingCaseCategory() {
         CourtCase courtCase = new CourtCase();
         CaseCriteria caseCriteria = new CaseCriteria();
         courtCase.setTenantId("pg");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         Workflow workflow = new Workflow();
         workflow.setAction(SUBMIT_CASE_WORKFLOW_ACTION);
         courtCase.setWorkflow(workflow);
@@ -527,14 +523,14 @@ public class CaseRegistrationValidatorTest {
         caseRequest.setRequestInfo(new RequestInfo());
         lenient().when(caseRepository.getApplications(any(), any())).thenReturn(List.of(caseCriteria));
 
-        assertThrows(CustomException.class, () -> validator.validateApplicationExistence(caseRequest));
+        assertThrows(CustomException.class, () -> validator.validateUpdateRequest(caseRequest));
     }
 
     @Test
-    void testValidateApplicationExistence_ExistingApplicationMissingStatutes() {
+    void testvalidateUpdateRequest_ExistingApplicationMissingStatutes() {
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         courtCase.setCaseCategory("categ1");
         Workflow workflow = new Workflow();
         workflow.setAction(SUBMIT_CASE_WORKFLOW_ACTION);
@@ -545,14 +541,14 @@ public class CaseRegistrationValidatorTest {
         caseRequest.setRequestInfo(new RequestInfo());
         lenient().when(caseRepository.getApplications(any(), any())).thenReturn(List.of(caseCriteria));
 
-        assertThrows(CustomException.class, () -> validator.validateApplicationExistence(caseRequest));
+        assertThrows(CustomException.class, () -> validator.validateUpdateRequest(caseRequest));
     }
 
     @Test
-    void testValidateApplicationExistence_ExistingApplicationMissingLitigantsNotThrowWhenWhenDeleteAction() {
+    void testvalidateUpdateRequest_ExistingApplicationMissingLitigantsNotThrowWhenWhenDeleteAction() {
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         courtCase.setCaseCategory("categ1");
         courtCase.setStatutesAndSections(List.of(StatuteSection.builder().tenantId("pb").build()));
         CaseCriteria caseCriteria = new CaseCriteria();
@@ -564,14 +560,14 @@ public class CaseRegistrationValidatorTest {
         caseRequest.setCases(courtCase);
         caseRequest.setRequestInfo(new RequestInfo());
 
-        assertThrows(CustomException.class, () -> validator.validateApplicationExistence(caseRequest));
+        assertThrows(CustomException.class, () -> validator.validateUpdateRequest(caseRequest));
     }
 
     @Test
-    void testValidateApplicationExistence_ExistingApplicationMissingLitigants() {
+    void testvalidateUpdateRequest_ExistingApplicationMissingLitigants() {
         CourtCase courtCase = new CourtCase();
         courtCase.setTenantId("pg");
-        courtCase.setFilingDate(LocalDate.now());
+        courtCase.setFilingDate(System.currentTimeMillis());
         courtCase.setCaseCategory("categ1");
         courtCase.setStatutesAndSections(List.of(StatuteSection.builder().tenantId("pb").build()));
         CaseCriteria caseCriteria = new CaseCriteria();
@@ -583,11 +579,11 @@ public class CaseRegistrationValidatorTest {
         caseRequest.setCases(courtCase);
         caseRequest.setRequestInfo(new RequestInfo());
 
-        assertThrows(CustomException.class, () -> validator.validateApplicationExistence(caseRequest));
+        assertThrows(CustomException.class, () -> validator.validateUpdateRequest(caseRequest));
     }
 
     @Test
-    void testValidateApplicationExistence_NoExistingApplication() {
+    void testvalidateUpdateRequest_NoExistingApplication() {
         CourtCase courtCase = new CourtCase();
         courtCase.setFilingNumber("Filing123");
         CaseRequest caseRequest = new CaseRequest();
@@ -595,8 +591,7 @@ public class CaseRegistrationValidatorTest {
         caseRequest.setRequestInfo(new RequestInfo());
 
         lenient().when(caseRepository.getApplications(any(), any())).thenReturn(new ArrayList<>());
-
-        Exception exception = assertThrows(CustomException.class, () -> validator.validateApplicationExistence(caseRequest));
+       assertThrows(CustomException.class, () -> validator.validateUpdateRequest(caseRequest));
     }
     @Test
     public void testValidateLitigantJoinCase_ValidIndividualIdAndDocuments() {

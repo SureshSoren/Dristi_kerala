@@ -9,20 +9,20 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import static com.pucar.drishti.config.ServiceConstants.INVALID_TRANSACTION;
+import static com.pucar.drishti.config.ServiceConstants.INVALID_TRANSACTION_EXCEPTION;
+
 @Component
 @Slf4j
 public class FileStoreUtil {
 
     private final RestTemplate restTemplate;
 
-    private final ObjectMapper mapper;
-
     private final Configuration configs;
 
     @Autowired
-    public FileStoreUtil(RestTemplate restTemplate, ObjectMapper mapper, Configuration configs) {
+    public FileStoreUtil(RestTemplate restTemplate, Configuration configs) {
         this.restTemplate = restTemplate;
-        this.mapper = mapper;
         this.configs = configs;
     }
 
@@ -38,8 +38,8 @@ public class FileStoreUtil {
             return object;
 
         } catch (Exception e) {
-            log.error("INVALID_TRANSACTION","this transaction is not initiated by drishti");
-            throw new CustomException("INVALID_TRANSACTION_EXCEPTION", "invalid transaction id for e-sign");
+            log.error(INVALID_TRANSACTION,e);
+            throw new CustomException(INVALID_TRANSACTION_EXCEPTION, e.getMessage());
 
         }
 

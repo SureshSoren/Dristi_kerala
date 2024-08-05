@@ -5,18 +5,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.models.Workflow;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
+import org.egov.common.contract.user.UserDetailResponse;
+import org.egov.common.contract.user.UserSearchRequest;
 import org.egov.common.contract.workflow.*;
 import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.repository.ServiceRequestRepository;
-import org.pucar.dristi.web.models.Application;
-import org.pucar.dristi.web.models.ApplicationRequest;
-import org.pucar.dristi.web.models.RequestInfoWrapper;
+import org.pucar.dristi.util.UserUtil;
+import org.pucar.dristi.web.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,15 +30,18 @@ public class WorkflowService {
     private final ObjectMapper mapper;
     private final ServiceRequestRepository repository;
     private final Configuration config;
+    private final UserUtil userUtil;
 
     @Autowired
     public WorkflowService(
             ObjectMapper mapper,
             ServiceRequestRepository repository,
-            Configuration config) {
+            Configuration config,
+            UserUtil userUtil) {
         this.mapper = mapper;
         this.repository = repository;
         this.config = config;
+        this.userUtil = userUtil;
     }
 
 
@@ -83,12 +88,7 @@ public class WorkflowService {
             processInstance.setDocuments(workflow.getDocuments());
             processInstance.setComment(workflow.getComments());
             if (!CollectionUtils.isEmpty(workflow.getAssignes())) {
-                List<User> users = new ArrayList<>();
-                workflow.getAssignes().forEach(uuid -> {
-                    User user = new User();
-                    user.setUuid(uuid);
-                    users.add(user);
-                });
+                List<User> users = getUserListFromUserUuid(workflow.getAssignes());
                 processInstance.setAssignes(users);
             }
             return processInstance;
@@ -101,13 +101,13 @@ public class WorkflowService {
     }
     String getBusinessServiceFromAppplication(Application application) {
         if(application.getReferenceId() == null){
-            return ASYNC_VOLUNTARY_SUBMISSION_SERVICES;
+            return config.getAsyncVoluntarySubBusinessServiceName();
         }
         else if(application.isResponseRequired()){
-            return ASYNSUBMISSIONWITHRESPONSE;
+            return config.getAsyncOrderSubWithResponseBusinessServiceName();
         }
         else {
-            return ASYNCSUBMISSIONWITHOUTRESPONSE;
+            return config.getAsyncOrderSubBusinessServiceName();
         }
     }
 
@@ -127,7 +127,39 @@ public class WorkflowService {
             throw new CustomException(WORKFLOW_SERVICE_EXCEPTION, e.getMessage());
         }
     }
+    public ProcessInstanceRequest getProcessInstanceForApplicationPayment(ApplicationSearchRequest updateRequest, String tenantId, String businessService) {
 
+        ApplicationCriteria criteria = updateRequest.getCriteria();
+
+        String businessName = getBusinessName(businessService);
+
+        ProcessInstance process = ProcessInstance.builder()
+                .businessService(businessService)
+                .businessId(criteria.getApplicationNumber())
+                .comment("Payment for Application processed")
+                .moduleName(businessName) // Use the retrieved business name
+                .tenantId(tenantId)
+                .action("PAY")
+                .build();
+
+        return ProcessInstanceRequest.builder()
+                .requestInfo(updateRequest.getRequestInfo())
+                .processInstances(Arrays.asList(process))
+                .build();
+    }
+
+    private String getBusinessName(String businessService) {
+        if (businessService.equals(config.getAsyncOrderSubBusinessServiceName())) {
+            return config.getAsyncOrderSubBusinessName();
+        } else if (businessService.equals(config.getAsyncOrderSubWithResponseBusinessServiceName())) {
+            return config.getAsyncOrderSubWithResponseBusinessName();
+        } else if (businessService.equals(config.getAsyncVoluntarySubBusinessServiceName())) {
+            return config.getAsyncVoluntarySubBusinessName();
+        } else {
+            throw new CustomException("INVALID_BUSINESS_SERVICE",
+                    "No business name found for the business service: " + businessService);
+        }
+    }
     private StringBuilder getSearchURLForProcessInstanceWithParams(String tenantId, String businessService) {
         StringBuilder url = new StringBuilder(config.getWfHost());
         url.append(config.getWfProcessInstanceSearchPath());
@@ -141,5 +173,18 @@ public class WorkflowService {
             return null;
         }
         return Workflow.builder().action(processInstance.getState().getState()).comments(processInstance.getComment()).build();
+    }
+    public List<User> getUserListFromUserUuid(List<String> uuids) {
+        List<User> users = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(uuids)) {
+            UserSearchRequest userSearchRequest = new UserSearchRequest();
+            userSearchRequest.setUuid(uuids);
+            StringBuilder uri = new StringBuilder(config.getUserHost()).append(config.getUserSearchEndpoint());
+            UserDetailResponse userDetailResponse = userUtil.userCall(userSearchRequest, uri);
+            if (userDetailResponse != null && !CollectionUtils.isEmpty(userDetailResponse.getUser())) {
+                users = userDetailResponse.getUser().stream().map(user -> User.builder().uuid(user.getUuid()).roles(user.getRoles()).build()).toList();
+            }
+        }
+        return users;
     }
 }

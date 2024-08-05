@@ -1,5 +1,6 @@
 package org.pucar.dristi.web.models;
 
+
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,8 +25,11 @@ public class SMSRequest {
     private Long expiryTime;
     private String templateId;
 
+    //Unused for future upgrades
     private String locale;
     private String tenantId;
+    private String email;
+    private String[] users;
 
     private String contentType;
 

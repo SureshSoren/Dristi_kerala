@@ -3,7 +3,10 @@ package org.pucar.dristi.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.egov.common.contract.models.Workflow;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.User;
 import org.egov.common.contract.response.ResponseInfo;
+import org.egov.common.contract.user.UserDetailResponse;
+import org.egov.common.contract.user.UserSearchRequest;
 import org.egov.common.contract.workflow.ProcessInstance;
 import org.egov.common.contract.workflow.ProcessInstanceRequest;
 import org.egov.common.contract.workflow.ProcessInstanceResponse;
@@ -16,11 +19,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.repository.ServiceRequestRepository;
+import org.pucar.dristi.util.UserUtil;
 import org.pucar.dristi.web.models.Application;
+import org.pucar.dristi.web.models.ApplicationCriteria;
 import org.pucar.dristi.web.models.ApplicationRequest;
+import org.pucar.dristi.web.models.ApplicationSearchRequest;
 
 
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,6 +52,9 @@ public class WorkflowServiceTest {
     private Application mockApplication;
     @Mock
     private ObjectMapper mapper;
+
+    @Mock
+    private UserUtil userUtil;
 
     @Test
     void updateWorkflowStatus_Success() {
@@ -107,7 +117,7 @@ public class WorkflowServiceTest {
         String result = workflowService.getBusinessServiceFromAppplication(mockApplication);
 
         // Assert
-        assertEquals(ASYNC_VOLUNTARY_SUBMISSION_SERVICES, result);
+        assertEquals(config.getAsyncVoluntarySubBusinessServiceName(), result);
     }
 
     @Test
@@ -120,7 +130,7 @@ public class WorkflowServiceTest {
         String result = workflowService.getBusinessServiceFromAppplication(mockApplication);
 
         // Assert
-        assertEquals(ASYNSUBMISSIONWITHRESPONSE, result);
+        assertEquals(config.getAsyncOrderSubWithResponseBusinessServiceName(), result);
     }
 
     @Test
@@ -133,7 +143,7 @@ public class WorkflowServiceTest {
         String result = workflowService.getBusinessServiceFromAppplication(mockApplication);
 
         // Assert
-        assertEquals(ASYNCSUBMISSIONWITHOUTRESPONSE, result);
+        assertEquals(config.getAsyncOrderSubBusinessServiceName(), result);
     }
     @Test
     void updateWorkflowStatus_Exception() {
@@ -195,5 +205,116 @@ public class WorkflowServiceTest {
         assertThrows(CustomException.class, () -> workflowService.callWorkFlow(workflowReq));
     }
 
+    @Test
+    void getUserListFromUserUuid_withValidUuids_returnsUserList() {
+        // Given
+        List<String> uuids = List.of("uuid1", "uuid2");
+        User user1 = User.builder().uuid("uuid1").build();
+        User user2 = User.builder().uuid("uuid2").build();
+        UserDetailResponse userDetailResponse = new UserDetailResponse(ResponseInfo.builder().build(),List.of(user1, user2));
+        when(config.getUserSearchEndpoint()).thenReturn("search");
+        when(config.getUserHost()).thenReturn("http://localhost:8080/user/");
+        when(userUtil.userCall(any(UserSearchRequest.class), any(StringBuilder.class))).thenReturn(userDetailResponse);
 
+        // When
+        List<User> result = workflowService.getUserListFromUserUuid(uuids);
+
+        // Then
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(user -> user.getUuid().equals("uuid1")));
+        assertTrue(result.stream().anyMatch(user -> user.getUuid().equals("uuid2")));
+    }
+
+    @Test
+    void getUserListFromUserUuid_withEmptyUuidList_returnsEmptyList() {
+        // Given
+        List<String> uuids = Collections.emptyList();
+
+        // When
+        List<User> result = workflowService.getUserListFromUserUuid(uuids);
+
+        // Then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getUserListFromUserUuid_withNullUuidList_returnsEmptyList() {
+        // Given
+        List<String> uuids = null;
+
+        // When
+        List<User> result = workflowService.getUserListFromUserUuid(uuids);
+
+        // Then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getUserListFromUserUuid_withInvalidUuids_returnsEmptyList() {
+        // Given
+        List<String> uuids = List.of("invalidUuid");
+        when(config.getUserSearchEndpoint()).thenReturn("search");
+        when(config.getUserHost()).thenReturn("http://localhost:8080/user/");
+        when(userUtil.userCall(any(UserSearchRequest.class), any(StringBuilder.class))).thenReturn(null);
+
+        // When
+        List<User> result = workflowService.getUserListFromUserUuid(uuids);
+
+        // Then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetProcessInstanceForApplicationPayment_ValidBusinessService() {
+        // Arrange
+        String tenantId = "tenant-id";
+        String businessService = "orderSubBusinessService";
+        String businessName = "Order Sub Business";
+        ApplicationSearchRequest updateRequest = new ApplicationSearchRequest();
+        updateRequest.setRequestInfo(new RequestInfo());
+        ApplicationCriteria criteria = ApplicationCriteria.builder()
+                .applicationNumber("12345")
+                .build();
+        updateRequest.setCriteria(criteria);
+
+        when(config.getAsyncOrderSubBusinessServiceName()).thenReturn("orderSubBusinessService");
+        when(config.getAsyncOrderSubBusinessName()).thenReturn(businessName);
+
+        // Act
+        ProcessInstanceRequest processInstanceRequest = workflowService.getProcessInstanceForApplicationPayment(updateRequest, tenantId, businessService);
+
+        // Assert
+        assertNotNull(processInstanceRequest);
+        assertEquals(1, processInstanceRequest.getProcessInstances().size());
+        ProcessInstance processInstance = processInstanceRequest.getProcessInstances().get(0);
+        assertEquals(businessService, processInstance.getBusinessService());
+        assertEquals(criteria.getApplicationNumber(), processInstance.getBusinessId());
+        assertEquals("Payment for Application processed", processInstance.getComment());
+        assertEquals(businessName, processInstance.getModuleName());
+        assertEquals(tenantId, processInstance.getTenantId());
+        assertEquals("PAY", processInstance.getAction());
+    }
+
+    @Test
+    void testGetProcessInstanceForApplicationPayment_InvalidBusinessService() {
+        // Arrange
+        String tenantId = "tenant-id";
+        String businessService = "invalidBusinessService";
+        ApplicationSearchRequest updateRequest = new ApplicationSearchRequest();
+        updateRequest.setRequestInfo(new RequestInfo());
+        ApplicationCriteria criteria = ApplicationCriteria.builder()
+                .filingNumber("12345")
+                .build();
+        updateRequest.setCriteria(criteria);
+
+        when(config.getAsyncOrderSubBusinessServiceName()).thenReturn("orderSubBusinessService");
+        when(config.getAsyncOrderSubWithResponseBusinessServiceName()).thenReturn("orderSubWithResponseBusinessService");
+        when(config.getAsyncVoluntarySubBusinessServiceName()).thenReturn("voluntarySubBusinessService");
+
+        // Act & Assert
+        CustomException exception = assertThrows(CustomException.class, () ->
+                workflowService.getProcessInstanceForApplicationPayment(updateRequest, tenantId, businessService)
+        );
+        assertEquals("No business name found for the business service: " + businessService, exception.getMessage());
+    }
 }

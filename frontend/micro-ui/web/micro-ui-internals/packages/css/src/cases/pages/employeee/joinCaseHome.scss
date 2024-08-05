@@ -57,6 +57,7 @@
       }
     }
     .icon-div {
+      cursor: pointer;
       height: 40px;
       display: flex;
       align-items: center;
@@ -171,6 +172,7 @@
 .complainants-respondents {
   display: flex;
   padding-bottom: 24px;
+  gap: 24px;
 }
 
 .general-details-vek,

@@ -32,9 +32,7 @@ public class IPostUtil {
         JSONArray array = response.get(SUMMON_MODULE).get(I_POST_MASTER);
         Object object = array.get(0);
 
-        IPostConfigParams iPostConfigParams = objectMapper.convertValue(object, IPostConfigParams.class);
+        return objectMapper.convertValue(object, IPostConfigParams.class);
         //todo :add other methods
-        return iPostConfigParams;
-
     }
 }

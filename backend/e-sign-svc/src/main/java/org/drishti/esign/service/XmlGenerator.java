@@ -2,6 +2,7 @@ package org.drishti.esign.service;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.drishti.esign.web.models.ESignXmlData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.io.*;
 
 
 @Component
+@Slf4j
 public class XmlGenerator {
 
     @Autowired
@@ -111,7 +113,7 @@ public class XmlGenerator {
 
             // Root Directory.
             String uploadRootPath = request.getServletContext().getRealPath("upload");
-            System.out.println("uploadRootPath=" + uploadRootPath);
+            log.info("uploadRootPath=" + uploadRootPath);
 
             File uploadRootDir = new File(uploadRootPath);
             // Create directory if it not exists.
@@ -172,7 +174,7 @@ public class XmlGenerator {
             stream.write(writer.toString().getBytes());
             stream.close();
 
-            //System.out.println("Write file: " + serverFile);
+
 
 
         } catch (Exception e) {
@@ -183,80 +185,7 @@ public class XmlGenerator {
 
 
 
-//    public String generateXml(ESignXmlData aspXmlDetais) {
-//        try {
-//            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-//            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-//            Document doc = docBuilder.newDocument();
-//
-//            Element esign = doc.createElement("Esign");
-//            doc.appendChild(esign);
-//
-//            addAttributes(esign, aspXmlDetais,
-//                    "ver", "sc", "ts", "txn", "ekycId", "ekycIdType", "aspId", "AuthMode", "responseSigType", "responseUrl");
-//
-//            Element docs = doc.createElement("Docs");
-//            esign.appendChild(docs);
-//
-//            Element inputHash = doc.createElement("InputHash");
-//            addAttributes(inputHash, aspXmlDetais, "id", "hashAlgorithm", "docInfo");
-//            inputHash.appendChild(doc.createTextNode(aspXmlDetais.getDocHashHex()));
-//            docs.appendChild(inputHash);
-//
-//            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-//            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-//            DOMSource source = new DOMSource(doc);
-//
-//            String uploadRootPath = request.getServletContext().getRealPath("upload");
-//            File uploadRootDir = new File(uploadRootPath);
-//            uploadRootDir.mkdirs();
-//
-//            File serverFile = new File(uploadRootDir, "Testing.xml");
-//            StringWriter writer = new StringWriter();
-//            transformer.transform(source, new StreamResult(writer));
-//            writeToFile(serverFile, writer.toString());
-//
-//            return writer.toString();
-//        } catch (ParserConfigurationException | TransformerException e) {
-//            e.printStackTrace();
-//            return "";
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//    private void addAttributes(Element element, ESignXmlData aspXmlDetais, String... attributeNames) {
-//        for (String attributeName : attributeNames) {
-//            Attr attr = element.getOwnerDocument().createAttribute(attributeName);
-//            attr.setValue(getAttributeValue(aspXmlDetais, attributeName));
-//            element.setAttributeNode(attr);
-//        }
-//    }
-//
-//    private String getAttributeValue(ESignXmlData aspXmlDetais, String attributeName) {
-//        return switch (attributeName) {
-//            case "ver" -> aspXmlDetais.getVer();
-//            case "sc" -> aspXmlDetais.getSc();
-//            case "ts" -> aspXmlDetais.getTs();
-//            case "txn" -> aspXmlDetais.getTxn();
-//            case "ekycId" -> aspXmlDetais.getEkycId();
-//            case "ekycIdType" -> aspXmlDetais.getEkycIdType();
-//            case "aspId" -> aspXmlDetais.getAspId();
-//            case "AuthMode" -> aspXmlDetais.getAuthMode();
-//            case "responseSigType" -> aspXmlDetais.getResponseSigType();
-//            case "responseUrl" -> aspXmlDetais.getResponseUrl();
-//            case "id" -> aspXmlDetais.getId();
-//            case "hashAlgorithm" -> aspXmlDetais.getHashAlgorithm();
-//            case "docInfo" -> aspXmlDetais.getDocInfo();
-//            default -> throw new IllegalArgumentException("Unknown attribute name: " + attributeName);
-//        };
-//    }
-//
-//    private void writeToFile(File file, String content) throws IOException {
-//        try (BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(file))) {
-//            stream.write(content.getBytes());
-//        }
-//    }
+
 
 
 }

@@ -1,6 +1,5 @@
 package org.pucar.dristi.repository;
 
-import org.egov.common.contract.models.Document;
 import org.egov.tracer.model.CustomException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,18 +7,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pucar.dristi.repository.querybuilder.EvidenceQueryBuilder;
-import org.pucar.dristi.repository.rowmapper.CommentRowMapper;
-import org.pucar.dristi.repository.rowmapper.DocumentRowMapper;
 import org.pucar.dristi.repository.rowmapper.EvidenceRowMapper;
 import org.pucar.dristi.web.models.Artifact;
-import org.pucar.dristi.web.models.Comment;
 import org.pucar.dristi.web.models.EvidenceSearchCriteria;
 import org.pucar.dristi.web.models.Pagination;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -36,12 +30,6 @@ class EvidenceRepositoryTest {
     @Mock
     private EvidenceRowMapper evidenceRowMapper;
 
-    @Mock
-    private DocumentRowMapper documentRowMapper;
-
-    @Mock
-    private CommentRowMapper commentRowMapper;
-
     @InjectMocks
     private EvidenceRepository evidenceRepository;
 
@@ -55,35 +43,49 @@ class EvidenceRepositoryTest {
         EvidenceSearchCriteria criteria = new EvidenceSearchCriteria();
         Pagination pagination = new Pagination();
 
+        UUID artifactId = UUID.randomUUID();
+        Artifact artifact = new Artifact();
+        artifact.setId(artifactId);
+
+        List<Artifact> artifactList = Collections.singletonList(artifact);
+
+        // Mock Queries
         String artifactQuery = "SELECT * FROM artifact";
-        String documentQuery = "SELECT * FROM document";
-        String commentQuery = "SELECT * FROM comment";
         String countQuery = "SELECT COUNT(*) FROM artifact";
 
-        List<Artifact> artifactList = new ArrayList<>();
-        Artifact artifact = new Artifact();
-        artifact.setId(UUID.randomUUID());
-        artifactList.add(artifact);
-
-        List<Comment> commentList = new ArrayList<>();
-
-        when(queryBuilder.getArtifactSearchQuery(anyList(), any(), any(), any(), any(), any(), any(), any(), any()))
+        // Mock responses
+        when(queryBuilder.getArtifactSearchQuery(anyList(), any(EvidenceSearchCriteria.class)))
                 .thenReturn(artifactQuery);
         when(queryBuilder.addOrderByQuery(anyString(), any(Pagination.class))).thenReturn(artifactQuery);
         when(queryBuilder.addPaginationQuery(anyString(), any(Pagination.class), anyList())).thenReturn(artifactQuery);
-        when(queryBuilder.getDocumentSearchQuery(anyList(), anyList())).thenReturn(documentQuery);
-        when(queryBuilder.getCommentSearchQuery(anyList(), anyList())).thenReturn(commentQuery);
         when(queryBuilder.getTotalCountQuery(anyString())).thenReturn(countQuery);
-        when(jdbcTemplate.query(eq(artifactQuery), any(Object[].class), eq(evidenceRowMapper))).thenReturn(artifactList);
-        when(jdbcTemplate.query(eq(documentQuery), any(Object[].class), eq(documentRowMapper))).thenReturn(mock(Document.class));
-        when(jdbcTemplate.query(eq(commentQuery), any(Object[].class), eq(commentRowMapper))).thenReturn(commentList);
+
+        // Mock count query result
         when(jdbcTemplate.queryForObject(eq(countQuery), any(Object[].class), eq(Integer.class))).thenReturn(1);
 
+        // Mock artifact query result
+        when(jdbcTemplate.query(eq(artifactQuery), any(Object[].class), eq(evidenceRowMapper))).thenReturn(artifactList);
+
+        // Execute
         List<Artifact> result = evidenceRepository.getArtifacts(criteria, pagination);
 
+        // Verify results
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(1, pagination.getTotalCount());
+
+        Artifact resultArtifact = result.get(0);
+        assertEquals(artifactId, resultArtifact.getId());
+
+
+
+        // Verify method interactions
+        verify(queryBuilder).getArtifactSearchQuery(anyList(), any(EvidenceSearchCriteria.class));
+        verify(queryBuilder).addOrderByQuery(anyString(), any(Pagination.class));
+        verify(queryBuilder).addPaginationQuery(anyString(), any(Pagination.class), anyList());
+        verify(queryBuilder).getTotalCountQuery(anyString());
+        verify(jdbcTemplate).query(eq(artifactQuery), any(Object[].class), eq(evidenceRowMapper));
+        verify(jdbcTemplate).queryForObject(eq(countQuery), any(Object[].class), eq(Integer.class));
     }
 
     @Test
@@ -93,7 +95,7 @@ class EvidenceRepositoryTest {
 
         String artifactQuery = "SELECT * FROM artifact";
 
-        when(queryBuilder.getArtifactSearchQuery(anyList(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(queryBuilder.getArtifactSearchQuery(anyList(), any(EvidenceSearchCriteria.class)))
                 .thenReturn(artifactQuery);
         when(queryBuilder.addOrderByQuery(anyString(), any(Pagination.class))).thenReturn(artifactQuery);
         when(queryBuilder.addPaginationQuery(anyString(), any(Pagination.class), anyList())).thenReturn(artifactQuery);
@@ -112,17 +114,30 @@ class EvidenceRepositoryTest {
         Pagination pagination = new Pagination();
         String artifactQuery = "SELECT * FROM artifact";
 
-        when(queryBuilder.getArtifactSearchQuery(anyList(), any(), any(), any(), any(), any(), any(), any(), any()))
+        // Mock query builder responses
+        when(queryBuilder.getArtifactSearchQuery(anyList(), any(EvidenceSearchCriteria.class)))
                 .thenReturn(artifactQuery);
         when(queryBuilder.addOrderByQuery(anyString(), any(Pagination.class))).thenReturn(artifactQuery);
         when(queryBuilder.addPaginationQuery(anyString(), any(Pagination.class), anyList())).thenReturn(artifactQuery);
-        when(jdbcTemplate.query(eq(artifactQuery), any(Object[].class), eq(evidenceRowMapper))).thenThrow(new RuntimeException("Some error"));
 
+        // Mock JDBC query to throw a RuntimeException
+        when(jdbcTemplate.query(eq(artifactQuery), any(Object[].class), eq(evidenceRowMapper)))
+                .thenThrow(new RuntimeException("Some error"));
+
+        // Execute and assert the CustomException is thrown
         CustomException exception = assertThrows(CustomException.class, () -> {
             evidenceRepository.getArtifacts(criteria, pagination);
         });
 
+        // Verify exception code and message
         assertEquals("ARTIFACT_SEARCH_EXCEPTION", exception.getCode());
-        assertFalse(exception.getMessage().contains("Some error"));
+        assertFalse(exception.getMessage().contains("Error while fetching artifact list: Some error"));
+
+        // Verify that the methods were called in the expected order
+        verify(queryBuilder).getArtifactSearchQuery(anyList(), any(EvidenceSearchCriteria.class));
+        verify(queryBuilder).addOrderByQuery(anyString(), any(Pagination.class));
+        verify(queryBuilder).getTotalCountQuery(anyString());
+        verifyNoMoreInteractions(queryBuilder); // Ensure no other methods were called
     }
+
 }

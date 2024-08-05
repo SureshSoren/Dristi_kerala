@@ -14,10 +14,7 @@ import org.drishti.esign.web.models.ESignXmlForm;
 import org.drishti.esign.web.models.SignDocRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @jakarta.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2024-06-19T13:37:37.165763478+05:30[Asia/Kolkata]")
@@ -33,7 +30,7 @@ public class EsignApiController {
         this.eSignService = eSignService;
     }
 
-    @RequestMapping(value = "/v1/_esign", method = RequestMethod.POST)
+    @PostMapping("/v1/_esign")
     public ResponseEntity<ESignResponse> eSignDoc(@Parameter(in = ParameterIn.DEFAULT, description = "ESign Doc Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody ESignRequest request) {
         log.info("api=/v1/_esign, result = IN_PROGRESS");
         ESignXmlForm eSignXmlForm = eSignService.signDoc(request);
@@ -44,7 +41,7 @@ public class EsignApiController {
     }
 
 
-    @RequestMapping(value = "/v1/_signed", method = RequestMethod.POST)
+    @PostMapping("/v1/_signed")
     public ResponseEntity<String> eSignDOC(@Parameter(in = ParameterIn.DEFAULT, description = "ESign Doc Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody SignDocRequest request) {
         log.info("api=/v1/_signed, result = IN_PROGRESS");
         String fileStoreId = eSignService.signDocWithDigitalSignature(request);

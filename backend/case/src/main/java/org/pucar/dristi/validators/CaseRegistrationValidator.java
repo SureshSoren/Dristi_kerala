@@ -33,7 +33,6 @@ import org.pucar.dristi.web.models.CourtCase;
 import org.pucar.dristi.web.models.JoinCaseRequest;
 import org.pucar.dristi.web.models.Party;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -76,15 +75,12 @@ public class CaseRegistrationValidator {
 	public void validateCaseRegistration(CaseRequest caseRequest) throws CustomException {
 		CourtCase courtCase = caseRequest.getCases();
 
-		if (ObjectUtils.isEmpty(courtCase.getTenantId()))
-			throw new CustomException(VALIDATION_ERR, "tenantId is mandatory for creating case");
 		if (ObjectUtils.isEmpty(courtCase.getCaseCategory()))
 			throw new CustomException(VALIDATION_ERR, "caseCategory is mandatory for creating case");
 		if (ObjectUtils.isEmpty(courtCase.getStatutesAndSections()))
 			throw new CustomException(VALIDATION_ERR, "statute and sections is mandatory for creating case");
 		if (!(SAVE_DRAFT_CASE_WORKFLOW_ACTION.equalsIgnoreCase(courtCase.getWorkflow().getAction())
-				|| DELETE_DRAFT_WORKFLOW_ACTION.equalsIgnoreCase(courtCase.getWorkflow().getAction()))) {
-			if (ObjectUtils.isEmpty(courtCase.getLitigants()))
+				|| DELETE_DRAFT_WORKFLOW_ACTION.equalsIgnoreCase(courtCase.getWorkflow().getAction())) && ObjectUtils.isEmpty(courtCase.getLitigants())) {
 				throw new CustomException(VALIDATION_ERR, "litigants is mandatory for creating case");
 		}
 		if (ObjectUtils.isEmpty(caseRequest.getRequestInfo().getUserInfo())) {
@@ -92,19 +88,14 @@ public class CaseRegistrationValidator {
 		}
 	}
 
-	//TODO: Since this method is only called on update and it is checking various things apart from existence, it
-	//should be renamed to validateUpdateRequest. Cognitive load on this method is too high. Request to rewrite/refactor
-	public Boolean validateApplicationExistence(CaseRequest caseRequest) {
+	public Boolean validateUpdateRequest(CaseRequest caseRequest) {
 		validateCaseRegistration(caseRequest);
 		CourtCase courtCase = caseRequest.getCases();
 		RequestInfo requestInfo = caseRequest.getRequestInfo();
 
-		if (ObjectUtils.isEmpty(courtCase.getTenantId()))
-			throw new CustomException(VALIDATION_ERR, "tenantId is mandatory for updating case");
 		if (!(SUBMIT_CASE_WORKFLOW_ACTION.equalsIgnoreCase(courtCase.getWorkflow().getAction())
 				|| SAVE_DRAFT_CASE_WORKFLOW_ACTION.equalsIgnoreCase(courtCase.getWorkflow().getAction())
-				|| DELETE_DRAFT_WORKFLOW_ACTION.equalsIgnoreCase(courtCase.getWorkflow().getAction()))) {
-			if (ObjectUtils.isEmpty(courtCase.getFilingDate()))
+				|| DELETE_DRAFT_WORKFLOW_ACTION.equalsIgnoreCase(courtCase.getWorkflow().getAction())) && ObjectUtils.isEmpty(courtCase.getFilingDate())) {
 				throw new CustomException(VALIDATION_ERR, "filingDate is mandatory for updating case");
 		}
 
@@ -112,8 +103,20 @@ public class CaseRegistrationValidator {
 				.builder().filingNumber(courtCase.getFilingNumber()).caseId(String.valueOf(courtCase.getId()))
 				.cnrNumber(courtCase.getCnrNumber()).courtCaseNumber(courtCase.getCourtCaseNumber()).build()),
 				requestInfo);
-		if (existingApplications.isEmpty())
+		if (existingApplications.get(0).getResponseList().isEmpty())
 			return false;
+		//For not allowing certain fields to update
+		setUnEditableOnUpdate(existingApplications.get(0).getResponseList().get(0), caseRequest);
+
+		validateMDMSData(requestInfo,courtCase);
+		validateDocuments(courtCase);
+		validateRepresentative(requestInfo,courtCase);
+		validateLinkedCase(courtCase,existingApplications.get(0).getResponseList());
+
+		return true;
+	}
+
+	private void validateMDMSData(RequestInfo requestInfo, CourtCase courtCase){
 		Map<String, Map<String, JSONArray>> mdmsData = mdmsUtil.fetchMdmsData(requestInfo, courtCase.getTenantId(),
 				config.getCaseBusinessServiceName(), createMasterDetails());
 
@@ -128,6 +131,9 @@ public class CaseRegistrationValidator {
 					throw new CustomException(INDIVIDUAL_NOT_FOUND, INVALID_COMPLAINANT_DETAILS);
 			});
 		}
+	}
+
+	private void validateDocuments(CourtCase courtCase){
 		if (courtCase.getDocuments() != null && !courtCase.getDocuments().isEmpty()) {
 			courtCase.getDocuments().forEach(document -> {
 				if (document.getFileStore() != null) {
@@ -137,6 +143,9 @@ public class CaseRegistrationValidator {
 					throw new CustomException(INVALID_FILESTORE_ID, INVALID_DOCUMENT_DETAILS);
 			});
 		}
+	}
+
+	private void validateRepresentative(RequestInfo requestInfo, CourtCase courtCase){
 		if (courtCase.getRepresentatives() != null && !courtCase.getRepresentatives().isEmpty()) {
 			courtCase.getRepresentatives().forEach(rep -> {
 				if (rep.getAdvocateId() != null) {
@@ -146,23 +155,32 @@ public class CaseRegistrationValidator {
 					throw new CustomException(INVALID_ADVOCATE_ID, INVALID_ADVOCATE_DETAILS);
 			});
 		}
+	}
+
+	private void validateLinkedCase(CourtCase courtCase, List<CourtCase> existingApplications ){
 		if (courtCase.getLinkedCases() != null && !courtCase.getLinkedCases().isEmpty()) {
 			boolean isValidLinkedCase = courtCase.getLinkedCases().stream().allMatch(linkedCase -> existingApplications
-					.get(0).getResponseList().stream()
+					.stream()
 					.anyMatch(existingCase -> existingCase.getLinkedCases().stream()
 							.anyMatch(existingLinkedCase -> (linkedCase.getId() != null
 									&& linkedCase.getId().equals(existingLinkedCase.getId()))
 									|| (linkedCase.getIsActive() != null
-											&& linkedCase.getIsActive().equals(existingLinkedCase.getIsActive()))
+									&& linkedCase.getIsActive().equals(existingLinkedCase.getIsActive()))
 									|| (linkedCase.getCaseNumber() != null
-											&& linkedCase.getCaseNumber().equals(existingLinkedCase.getCaseNumber()))
+									&& linkedCase.getCaseNumber().equals(existingLinkedCase.getCaseNumber()))
 									|| (linkedCase.getReferenceUri() != null && linkedCase.getReferenceUri()
-											.equals(existingLinkedCase.getReferenceUri())))));
+									.equals(existingLinkedCase.getReferenceUri())))));
 			if (!isValidLinkedCase)
 				throw new CustomException(INVALID_LINKEDCASE_ID, "Invalid linked case details");
 		}
+	}
 
-		return true;
+	private void setUnEditableOnUpdate(CourtCase courtCase, CaseRequest caseRequest) {
+		caseRequest.getCases().setFilingDate(courtCase.getFilingDate());
+		caseRequest.getCases().setCaseNumber(courtCase.getCaseNumber());
+		caseRequest.getCases().setCnrNumber(courtCase.getCnrNumber());
+		caseRequest.getCases().setRegistrationDate(courtCase.getRegistrationDate());
+		caseRequest.getCases().setTenantId(courtCase.getTenantId());
 	}
 
 	public boolean canLitigantJoinCase(JoinCaseRequest joinCaseRequest) {

@@ -1,8 +1,6 @@
 package org.pucar.dristi.web.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +25,9 @@ public class OrderCriteria {
 
     @JsonProperty("applicationNumber")
     private String applicationNumber = null;
+
+    @JsonProperty("orderType")
+    private String orderType = null;
 
     @JsonProperty("orderNumber")
     private String orderNumber = null;

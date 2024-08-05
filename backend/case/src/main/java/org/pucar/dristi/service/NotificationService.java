@@ -1,5 +1,6 @@
 package org.pucar.dristi.service;
 
+
 import com.jayway.jsonpath.JsonPath;
 import digit.models.coremodels.RequestInfoWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ public class NotificationService {
         if (StringUtils.isEmpty(message)) {
             log.info("SMS content has not been configured for this case");
             return;
+
         }
         pushNotification(request, message);
     }

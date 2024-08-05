@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import SignatureCard from "./SignatureCard";
 import { DRISTIService } from "../services";
-import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import isEqual from "lodash/isEqual";
 
 function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
@@ -62,7 +61,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
           uidToken: "3456565",
           consent: "6564",
           authType: "6546",
-          fileStoreId: "0cdd01bf-5c6c-43de-86df-48406ce4f5a8",
+          fileStoreId: process.env.REACT_APP_ESIGN_FILESTORE_ID,
           tenantId: "kl",
           pageModule: "ci",
         },

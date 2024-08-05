@@ -76,9 +76,4 @@ public class ServiceConstants {
 	public static final String ADVOCATE_LIST_QUERY = "Final advocate list query :: {}";
 	public static final String DOCUMENT_LIST_QUERY = "Final document query :: {}";
 	public static final String AND = " AND ";
-	public static final String ADVOCATE_CREATE_SUBJECT = "Advocate Application Created";
-	public static final String ADVOCATE_UPDATE_SUBJECT = "Advocate Application Updated";
-	public static final String ADVOCATE_CLERK_UPDATE_SUBJECT = "Clerk Application Updated";
-	public static final String ADVOCATE_APPROVE = "ADVOCATE_APPROVE";
-	public static final String ADVOCATE_CLERK_APPROVE = "ADVOCATE_CLERK_APPROVE";
 }

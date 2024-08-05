@@ -33,9 +33,7 @@ public class EFillingUtil {
         JSONArray array = response.get(CASE_MODULE).get(E_FILLING_MASTER);
         Object object = array.get(0);
 
-        EFilingParam eFilingParam = objectMapper.convertValue(object, EFilingParam.class);
-
-        return eFilingParam;
+        return objectMapper.convertValue(object, EFilingParam.class);
 
     }
 }
