@@ -91,4 +91,26 @@ public class PostalServiceValidatorTest {
         assertEquals("DK_PC_DIS_ERR", exception.getCode());
         assertEquals("distance is mandatory for creating postal.", exception.getMessage());
     }
+
+    @Test
+    public void testValidateExistingPostalServiceRequest_Success() {
+        PostalService postalService = new PostalService();
+        postalService.setPostalHubId("postalHubId");
+
+        PostalServiceRequest request = new PostalServiceRequest();
+        request.setPostalServices(Collections.singletonList(postalService));
+
+        assertDoesNotThrow(() -> postalServiceValidator.validateExistingPostalServiceRequest(request));
+    }
+
+    @Test
+    public void testValidateExistingPostalServiceRequest_MissingPostalHubId() {
+        PostalService postalService = new PostalService();
+
+        PostalServiceRequest request = new PostalServiceRequest();
+        request.setPostalServices(Collections.singletonList(postalService));
+
+        CustomException exception = assertThrows(CustomException.class, () -> postalServiceValidator.validateExistingPostalServiceRequest(request));
+        assertEquals("DK_PC_HUB_ERR", exception.getCode());
+    }
 }

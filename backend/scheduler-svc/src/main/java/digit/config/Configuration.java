@@ -146,7 +146,6 @@ public class Configuration {
     @Value("${drishti.case.endpoint}")
     private String caseEndpoint;
 
-
     @Value("${drishti.opt-out.selection.limit}")
     private Long optOutLimit;
 }

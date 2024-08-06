@@ -18,14 +18,11 @@ public class FileStoreUtil {
 
     private final RestTemplate restTemplate;
 
-    private final ObjectMapper mapper;
-
     private final Configuration configs;
 
     @Autowired
-    public FileStoreUtil(RestTemplate restTemplate, ObjectMapper mapper, Configuration configs) {
+    public FileStoreUtil(RestTemplate restTemplate, Configuration configs) {
         this.restTemplate = restTemplate;
-        this.mapper = mapper;
         this.configs = configs;
     }
 

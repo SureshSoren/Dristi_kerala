@@ -1,5 +1,6 @@
 package drishti.payment.calculator.util;
 
+import lombok.NoArgsConstructor;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.model.CustomException;
@@ -8,10 +9,9 @@ import org.springframework.stereotype.Component;
 import static drishti.payment.calculator.config.ServiceConstants.*;
 
 @Component
+@NoArgsConstructor
 public class ResponseInfoFactory {
 
-    private ResponseInfoFactory() {
-    }
     public static ResponseInfo createResponseInfoFromRequestInfo(final RequestInfo requestInfo, final boolean success) {
 
         final String apiId = requestInfo != null ? requestInfo.getApiId() : "";

@@ -1,20 +1,14 @@
 package digit.web.models;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import digit.models.coremodels.AuditDetails;
-import digit.web.models.enums.EventType;
-import digit.web.models.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.egov.tracer.model.Error;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -37,13 +31,8 @@ public class ScheduleHearing {
     @JsonProperty("caseId")
     private String caseId;
 
-    @JsonProperty("date")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date;
-
-    //TODO: this should be enum
-    @JsonProperty("eventType")
-    private EventType eventType;
+    @JsonProperty("hearingType")
+    private String hearingType;
 
     @JsonProperty("title")
     private String title;
@@ -51,17 +40,17 @@ public class ScheduleHearing {
     @JsonProperty("description")
     private String description;
 
-    //TODO: this should be enum
     @JsonProperty("status")
-    private Status status;
+    private String status;
+
+    @JsonProperty("hearingDate")
+    private long hearingDate;
 
     @JsonProperty("startTime")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime startTime;
+    private long startTime;
 
     @JsonProperty("endTime")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime endTime;
+    private long endTime;
 
     @JsonProperty("auditDetails")
     private AuditDetails auditDetails;
@@ -80,27 +69,36 @@ public class ScheduleHearing {
     private Integer hearingTimeInMinutes = null;
 
     //  copy constructor
-    public ScheduleHearing(ScheduleHearing another) {
-        this.hearingBookingId = another.hearingBookingId;
-        this.tenantId = another.tenantId;
-        this.courtId = another.courtId;
-        this.judgeId = another.judgeId;
-        this.caseId = another.caseId;
-        this.date = another.date;
-        this.eventType = another.eventType;
-        this.title = another.title;
-        this.description = another.description;
-        this.status = another.status;
-        this.startTime = another.startTime;
-        this.endTime = another.endTime;
-        this.auditDetails = another.auditDetails;
-        this.rowVersion = another.rowVersion;
-        this.errors = another.errors;
-        this.rescheduleRequestId = another.rescheduleRequestId;
-        this.hearingTimeInMinutes = another.hearingTimeInMinutes;
+    public ScheduleHearing(ScheduleHearing hearingObject) {
+        this.hearingBookingId = hearingObject.hearingBookingId;
+        this.tenantId = hearingObject.tenantId;
+        this.courtId = hearingObject.courtId;
+        this.judgeId = hearingObject.judgeId;
+        this.caseId = hearingObject.caseId;
+        this.hearingType = hearingObject.hearingType;
+        this.title = hearingObject.title;
+        this.description = hearingObject.description;
+        this.status = hearingObject.status;
+        this.startTime = hearingObject.startTime;
+        this.endTime = hearingObject.endTime;
+        this.auditDetails = hearingObject.auditDetails;
+        this.rowVersion = hearingObject.rowVersion;
+        this.errors = hearingObject.errors;
+        this.rescheduleRequestId = hearingObject.rescheduleRequestId;
+        this.hearingTimeInMinutes = hearingObject.hearingTimeInMinutes;
     }
 
     public boolean overlapsWith(ScheduleHearing other) {
-        return !((!startTime.isBefore(other.endTime)) || (!endTime.isAfter(other.startTime)));
+        return !(startTime >= other.endTime || endTime <= other.startTime);
+
     }
+
+    public boolean isBefore(long time1, long time2) {
+        return time1 < time2;
+    }
+
+    public boolean isAfter(long time1, long time2) {
+        return time1 > time2;
+    }
+
 }

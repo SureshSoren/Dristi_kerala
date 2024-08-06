@@ -29,7 +29,7 @@ public class RescheduleRequestOptOutRowMapper implements RowMapper<OptOut> {
                     .caseId(rs.getString("case_id"))
                     .rescheduleRequestId(rs.getString("reschedule_request_id"))
                     .individualId(rs.getString("individual_id"))
-                    .optoutDates(rs.getString("opt_out_dates") == null ? null : objectMapper.readValue(rs.getString("opt_out_dates"), new TypeReference<List<LocalDate>>() {
+                    .optoutDates(rs.getString("opt_out_dates") == null ? null : objectMapper.readValue(rs.getString("opt_out_dates"), new TypeReference<List<Long>>() {
                     }))
                     .rowVersion(rs.getInt("row_version"))
                     .auditDetails(AuditDetails.builder()

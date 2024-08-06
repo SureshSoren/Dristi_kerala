@@ -12,12 +12,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class PostalHubValidator {
 
-    private final PostalHubRepository repository;
-
-    public PostalHubValidator(PostalHubRepository repository) {
-        this.repository = repository;
-    }
-
     public void validatePostalHubRequest(PostalHubRequest request) {
         request.getPostalHubs().forEach(hub -> {
             if (ObjectUtils.isEmpty(hub.getTenantId()))
@@ -35,9 +29,8 @@ public class PostalHubValidator {
 
     public void validateExistingPostalHubRequest(PostalHubRequest request) {
         request.getPostalHubs().forEach(hub -> {
-            PostalHub postalHub = repository.getPostalHub(HubSearchCriteria.builder().hubId(hub.getHubId()).build()).get(0);
-            if(hub.getAddress().getId().equals(postalHub.getAddress().getId()))
-                throw new CustomException("Duplicate Address", "Address already exists");
+            if(ObjectUtils.isEmpty(hub.getHubId()))
+                throw new CustomException("DK_PC_ID_ERR", "id is mandatory for updating postal hub");
         });
     }
 }

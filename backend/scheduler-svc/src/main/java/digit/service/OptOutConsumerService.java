@@ -9,7 +9,6 @@ import digit.util.CaseUtil;
 import digit.web.models.*;
 import digit.web.models.cases.CaseCriteria;
 import digit.web.models.cases.SearchCaseRequest;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +48,6 @@ public class OptOutConsumerService {
 
 
     public void checkAndScheduleHearingForOptOut(HashMap<String, Object> record) {
-
-
         try {
             log.info("operation = checkAndScheduleHearingForOptOut, result = IN_PROGRESS, record = {}", record);
             OptOutRequest optOutRequest = mapper.convertValue(record, OptOutRequest.class);
@@ -60,21 +57,20 @@ public class OptOutConsumerService {
 
             optOuts.forEach((optOut -> {
 
-                List<LocalDate> optoutDates = optOut.getOptoutDates();
+//                List<LocalDate> optoutDates = optOut.getOptoutDates();
 
                 //todo: check size here
 
-                Collections.sort(optoutDates);
+//                Collections.sort(optoutDates);
 
                 // get the list and cancelled the hearings
                 List<ScheduleHearing> hearingList = hearingService.search(HearingSearchRequest
                         .builder().requestInfo(requestInfo)
-                        .criteria(HearingSearchCriteria.builder()
+                        .criteria(ScheduleHearingSearchCriteria.builder()
                                 .rescheduleId(optOut.getRescheduleRequestId())
-                                .status(Collections.singletonList(Status.BLOCKED))
-                                .fromDate(optoutDates.get(0))
-                                .toDate(optoutDates.get(optoutDates.size() - 1)).build()).build(), null, null);
-                hearingList.forEach(hearing -> hearing.setStatus(Status.CANCELLED));
+//                                .status(Collections.singletonList(Status.BLOCKED.toString()))
+                                .build()).build(), null, null);
+//                hearingList.forEach(hearing -> hearing.setStatus(Status.CANCELLED.toString()));
 
                 //release judge calendar for opt out dates
                 hearingService.update(ScheduleHearingRequest.builder()
@@ -101,17 +97,17 @@ public class OptOutConsumerService {
                         .rescheduledRequestId(Collections.singletonList(rescheduleRequestId)).build(), null, null);
 
 
-                List<LocalDate> suggestedDates = reScheduleRequest.get(0).getSuggestedDates();
-                List<LocalDate> availableDates = reScheduleRequest.get(0).getAvailableDates();
-                Set<LocalDate> suggestedDatesSet = existingOptOut.isEmpty() ? new HashSet<>(availableDates) : new HashSet<>(suggestedDates);
+                List<Long> suggestedDates = reScheduleRequest.get(0).getSuggestedDates();
+                List<Long> availableDates = reScheduleRequest.get(0).getAvailableDates();
+                Set<Long> suggestedDatesSet = existingOptOut.isEmpty() ? new HashSet<>(availableDates) : new HashSet<>(suggestedDates);
 
-                optoutDates.forEach(suggestedDatesSet::remove);
+//                optoutDates.forEach(suggestedDatesSet::remove);
 
 
                 reScheduleRequest.get(0).setAvailableDates(new ArrayList<>(suggestedDatesSet));
                 //if this is last one then update the status to review
                 if (representatives.size() - existingOptOut.size() == 1)
-                    reScheduleRequest.get(0).setStatus(Status.REVIEW);
+//                    reScheduleRequest.get(0).setStatus(Status.REVIEW);
 
 
                 producer.push(configuration.getUpdateRescheduleRequestTopic(), reScheduleRequest);

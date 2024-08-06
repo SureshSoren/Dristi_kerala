@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -25,10 +24,10 @@ public class CalendarSearchCriteria implements SearchCriteria {
     private String courtId;             // required field
 
     @JsonProperty("fromDate")
-    private LocalDate fromDate;
+    private Long fromDate;
 
     @JsonProperty("toDate")
-    private LocalDate toDate;
+    private Long toDate;
 
     @JsonProperty("periodType")
     private PeriodType periodType;

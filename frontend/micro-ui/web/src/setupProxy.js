@@ -29,7 +29,7 @@ module.exports = function (app) {
     "/case",
     "/individual",
     "/evidence",
-   "/casemanagement",
+    "/casemanagement",
     "/application",
     "/case",
     "/order",
@@ -42,5 +42,6 @@ module.exports = function (app) {
     "/case",
     "/analytics",
     "/epost-tracker",
+    "/task",
   ].forEach((location) => app.use(location, createProxy));
 };

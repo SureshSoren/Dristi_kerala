@@ -1,7 +1,10 @@
 const defaultSearchValues = {
   stage: "",
-  type: "",
+  type: {
+    type: "NIA S138",
+  },
   caseNameOrId: "",
+  sortCaseListByStartDate: "",
 };
 
 export const preHearingConfig = {
@@ -36,6 +39,21 @@ export const preHearingConfig = {
         },
         fields: [
           {
+            type: "component",
+            component: "CustomSortComponent",
+            isMandatory: false,
+            disable: false,
+            name: "Newest",
+            key: "sortCaseListByStartDate",
+            sortBy: "startTime",
+            ascText: "First",
+            descText: "Last",
+            showAdditionalText: true,
+            showIcon: true,
+            icon: "UpDownArrowIcon",
+            populators: {},
+          },
+          {
             label: "Type",
             isMandatory: false,
             key: "type",
@@ -67,10 +85,10 @@ export const preHearingConfig = {
               optionsKey: "stage",
               options: [
                 {
-                  stage: "Pre-Trial",
+                  stage: ["Pre-Trial"],
                 },
                 {
-                  stage: "Inquiry",
+                  stage: ["Inquiry"],
                 },
               ],
             },

@@ -1,11 +1,12 @@
-import { Button, FormComposerV2, Modal } from "@egovernments/digit-ui-react-components";
+import { Button, CloseSvg, FormComposerV2, Modal } from "@egovernments/digit-ui-react-components";
 import React, { useCallback, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { DRISTIService } from "../../../../dristi/src/services/index.js";
 import addPartyConfig from "../../configs/AddNewPartyConfig.js";
+import { useTranslation } from "react-i18next";
+import SelectCustomNote from "@egovernments/digit-ui-module-dristi/src/components/SelectCustomNote.js";
 
-const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
+const AddParty = ({ onCancel, onAddSuccess, caseData, tenantId }) => {
   const { t } = useTranslation();
+  const DRISTIService = Digit?.ComponentRegistryService?.getComponent("DRISTIService");
   const [formConfigs, setFormConfigs] = useState([addPartyConfig(1)]);
   const [aFormData, setFormData] = useState([{}]);
   const Close = () => (
@@ -17,11 +18,8 @@ const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
 
   const CloseBtn = (props) => {
     return (
-      <div onClick={props?.onClick} style={props?.isMobileView ? { padding: 5 } : null}>
-        <div className={"icon-bg-secondary"} style={{ backgroundColor: "#505A5F" }}>
-          {" "}
-          <Close />{" "}
-        </div>
+      <div onClick={props.onClick} style={{ height: "100%", display: "flex", alignItems: "center", paddingRight: "20px", cursor: "pointer" }}>
+        <CloseSvg />
       </div>
     );
   };
@@ -51,7 +49,9 @@ const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
     return errors;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e?.stopPropagation();
+    e?.preventDefault();
     const cleanedData = aFormData
       .map(({ data }) => {
         const newData = {};
@@ -63,7 +63,6 @@ const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
             newData[newKey] = data[key];
           }
         });
-        newData.isSigned = false;
         newData.uuid = generateUUID();
         const errors = validateFormData(newData);
         if (Object.keys(errors).length > 0) {
@@ -75,8 +74,12 @@ const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
       .filter(Boolean);
 
     if (cleanedData.length === aFormData.length) {
-      onAdd(cleanedData);
-      onDismiss();
+      onAdd(cleanedData)
+        .catch(console.error)
+        .then(() => {
+          onAddSuccess();
+          onCancel();
+        });
     }
   };
   const generateUUID = () => {
@@ -86,33 +89,44 @@ const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
       return v.toString(16);
     });
   };
-  const onAdd = (cleanedData) => {
+  const onAdd = async (cleanedData) => {
+    const newWitness = cleanedData.map((data) => {
+      return {
+        isenabled: true,
+        displayindex: 0,
+        data: {
+          emails: { emailId: [data.emailId], textFieldValue: "" },
+          firstName: data.partyName,
+          lastName: "",
+          phonenumbers: {
+            mobileNumber: [data.phoneNumber],
+            textFieldValue: "",
+          },
+          addressDetails: [{ addressDetails: data?.address }],
+          witnessAdditionalDetails: {
+            text: data.additionalDetails,
+          },
+          uuid: data.uuid,
+        },
+      };
+    });
+
     const caseDetails = {
       ...caseData?.criteria?.[0]?.responseList?.[0],
     };
     const witnessDetails = caseDetails.additionalDetails?.witnessDetails
-      ? [...caseDetails.additionalDetails?.witnessDetails?.formdata, ...cleanedData]
-      : [...cleanedData];
-    const newcasedetails = {
-      ...caseDetails,
-      additionalDetails: {
-        ...caseDetails.additionalDetails,
-        witnessDetails: {
-          ...caseDetails?.additionalDetails?.witnessDetails,
-          formdata: witnessDetails,
-        },
-      },
-    };
-    return DRISTIService.caseUpdateService(
+      ? [...caseDetails.additionalDetails?.witnessDetails?.formdata, ...newWitness]
+      : [...newWitness];
+
+    return DRISTIService.addWitness(
       {
-        cases: {
-          ...newcasedetails,
-          linkedCases: caseDetails?.linkedCases ? caseDetails?.linkedCases : [],
-          workflow: {
-            ...caseDetails?.workflow,
+        tenantId,
+        caseFilingNumber: caseDetails.filingNumber,
+        additionalDetails: {
+          ...caseDetails.additionalDetails,
+          witnessDetails: {
+            formdata: witnessDetails,
           },
-          tenantId: tenantId,
-          litigants: newcasedetails?.litigants || [],
         },
       },
       tenantId
@@ -130,13 +144,30 @@ const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
 
   return (
     <Modal
-      headerBarMain={<h1 className="heading-m">Add New Party</h1>}
-      headerBarEnd={<CloseBtn onClick={onDismiss} />}
-      actionCancelLabel="Back"
+      headerBarMain={<h1 className="heading-m">{t("ADD_NEW_PARTY")}</h1>}
+      headerBarEnd={<CloseBtn onClick={onCancel} />}
+      actionCancelLabel={t("HEARING_BACK")}
       actionCancelOnSubmit={onCancel}
-      actionSaveLabel="Add"
+      actionSaveLabel={t("HEARING_ADD")}
       actionSaveOnSubmit={handleSubmit}
     >
+      <div style={{ padding: "16px 24px" }}>
+        <SelectCustomNote
+          config={{
+            populators: {
+              inputs: [
+                {
+                  infoHeader: "CS_PLEASE_COMMON_NOTE",
+                  infoText: "NEW_PARTY_NOTE",
+                  infoTooltipMessage: "Tooltip",
+                  type: "InfoComponent",
+                },
+              ],
+            },
+          }}
+          t={t}
+        />
+      </div>
       {formConfigs.map((config, index) => (
         <FormComposerV2
           key={index}
@@ -144,11 +175,12 @@ const AddParty = ({ onCancel, onDismiss, caseData, tenantId }) => {
           onFormValueChange={(setValue, formData, formState, reset, setError, clearErrors, trigger, getValues) => {
             onFormValueChange(formData, index);
           }}
+          fieldStyle={{ width: "100%" }}
         />
       ))}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3rem" }}>
-        <Button onButtonClick={handleAddParty} label="Add Party" />
-        <Button onButtonClick={handleRemoveParty} label="Remove Party" />
+        <Button onButtonClick={handleAddParty} label={t("CASE_ADD_PARTY")} />
+        <Button onButtonClick={handleRemoveParty} label={t("REMOVE_PARTY")} />
       </div>
     </Modal>
   );

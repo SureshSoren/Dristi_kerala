@@ -21,5 +21,5 @@ public class HearingSearchRequest {
 
     @JsonProperty("SearchCriteria")
     @Valid
-    private HearingSearchCriteria criteria = null;
+    private ScheduleHearingSearchCriteria criteria = null;
 }

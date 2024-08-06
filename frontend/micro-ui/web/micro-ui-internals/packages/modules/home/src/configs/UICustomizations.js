@@ -3,6 +3,8 @@ import React from "react";
 import _ from "lodash";
 import { Button } from "@egovernments/digit-ui-react-components";
 import OverlayDropdown from "../components/custom_dropdown";
+import { formatDateDifference } from "../../../orders/src/utils";
+import { formatDate } from "../../../cases/src/utils";
 
 const customColumnStyle = { whiteSpace: "nowrap" };
 
@@ -115,6 +117,7 @@ export const UICustomizations = {
       const { createdFrom, createdTo } = data;
       if ((createdFrom === "" && createdTo !== "") || (createdFrom !== "" && createdTo === ""))
         return { warning: true, label: "ES_COMMON_ENTER_DATE_RANGE" };
+      else if (!data?.filingNumber?.trim() && !data?.caseType?.trim()) return { label: "PlEASE_APPLY_FILTER_CASE_ID", error: true };
       return false;
     },
     preProcess: (requestCriteria, additionalDetails) => {
@@ -158,17 +161,19 @@ export const UICustomizations = {
       const today = new Date();
       const formattedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
       switch (key) {
+        case "Draft Name":
+        case "Case Name":
+          return (
+            <span className="case-name-on-hover">
+              {row?.caseTitle ? (row?.caseTitle?.trim().endsWith("vs") ? `${row?.caseTitle} _______` : row?.caseTitle) : t("CASE_UNTITLED")}
+            </span>
+          );
         case "Case Type":
           return <span>NIA S138</span>;
         case "Stage":
           return t(row?.status);
         case "Filing Date":
-          const date = new Date(value);
-          const day = date.getDate().toString().padStart(2, "0");
-          const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is zero-based
-          const year = date.getFullYear();
-          const formattedDate = `${day}-${month}-${year}`;
-          return <span>{formattedDate}</span>;
+          return <span>{formatDate(new Date(value))}</span>;
         case "Last Edited":
           const createdAt = new Date(value);
           const formattedCreatedAt = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate());
@@ -244,14 +249,14 @@ export const UICustomizations = {
       switch (key) {
         case "Case Type":
           return <span>NIA S138</span>;
-        case "Stage":
-          return t(row?.status);
+        case "Scrutiny Status":
+          return t(row?.status === "UNDER_SCRUTINY" ? "IN_PROGRESS" : "NOT_STARTED");
         case "Days Since Filing":
           const createdAt = new Date(value);
           const formattedCreatedAt = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate());
           const differenceInTime = formattedToday.getTime() - formattedCreatedAt.getTime();
           const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
-          return <span style={{ color: differenceInDays > 30 && "#9E400A", fontWeight: differenceInDays > 30 ? 500 : 400 }}>{differenceInDays}</span>;
+          return <span style={{ color: differenceInDays > 2 && "#9E400A", fontWeight: differenceInDays > 2 ? 500 : 400 }}>{differenceInDays}</span>;
         default:
           return t("ES_COMMON_NA");
       }
@@ -319,12 +324,7 @@ export const UICustomizations = {
         case "Case Type":
           return <span>NIA S138</span>;
         case "Filing Date":
-          const date = new Date(value);
-          const day = date.getDate().toString().padStart(2, "0");
-          const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is zero-based
-          const year = date.getFullYear();
-          const formattedDate = `${day}-${month}-${year}`;
-          return <span>{formattedDate}</span>;
+          return <span>{formatDate(new Date(value))}</span>;
         case "Stage":
           return t(row?.status);
         default:
@@ -342,6 +342,56 @@ export const UICustomizations = {
     additionalValidations: (type, data, keys) => {
       if (type === "date") {
         return data[keys.start] && data[keys.end] ? () => new Date(data[keys.start]).getTime() <= new Date(data[keys.end]).getTime() : true;
+      }
+    },
+  },
+  reviewSummonWarrantNotice: {
+    preProcess: (requestCriteria, additionalDetails) => {
+      const filterList = Object.keys(requestCriteria.state.searchForm)
+        ?.map((key) => {
+          if (requestCriteria.state.searchForm[key]) return { [key]: requestCriteria.state.searchForm[key] };
+        })
+        ?.filter((filter) => filter)
+        .reduce(
+          (fieldObj, item) => ({
+            ...fieldObj,
+            ...item,
+          }),
+          {}
+        );
+      const tenantId = window?.Digit.ULBService.getStateId();
+      return {
+        ...requestCriteria,
+        body: {
+          ...requestCriteria.body,
+          criteria: {
+            ...requestCriteria.body.criteria,
+            ...filterList,
+          },
+          tenantId,
+          pagination: {
+            limit: requestCriteria?.state?.tableForm?.limit,
+            offSet: requestCriteria?.state?.tableForm?.offset,
+          },
+        },
+        config: {
+          ...requestCriteria?.config,
+          select: (data) => {
+            return { ...data, list: data.list?.filter((order) => order.taskType) };
+          },
+        },
+      };
+    },
+    additionalCustomizations: (row, key, column, value, t, searchResult) => {
+      switch (key) {
+        case "Case Name & ID":
+          return t(value);
+        case "Status":
+          return t(value);
+        case "Issued":
+          return `${formatDateDifference(value)} days ago`;
+        default:
+          return t("ES_COMMON_NA");
       }
     },
   },

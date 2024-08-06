@@ -49,10 +49,10 @@ public class EpostUtil {
     }
 
     public EPostTracker updateEPostTracker(EPostRequest ePostRequest) {
-        Pagination pagination = Pagination.builder().limit(5).offSet(0).build();
+        Pagination pagination = Pagination.builder().build();
         EPostTrackerSearchCriteria searchCriteria = EPostTrackerSearchCriteria.builder()
                 .processNumber(ePostRequest.getEPostTracker().getProcessNumber()).pagination(pagination).build();
-        List<EPostTracker> ePostTrackers = ePostRepository.getEPostTrackerList(searchCriteria);
+        List<EPostTracker> ePostTrackers = ePostRepository.getEPostTrackerList(searchCriteria,5,0);
         if (ePostTrackers.size() != 1) {
             throw new RuntimeException("Invalid EPost Tracker field with processNumber : " + ePostRequest.getEPostTracker().getProcessNumber());
         }

@@ -5,7 +5,9 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.drishti.esign.cipher.Decryption;
 import org.drishti.esign.util.ByteArrayMultipartFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.util.Calendar;
@@ -25,6 +28,9 @@ import java.util.List;
 public class PdfEmbedder {
 
     PdfSignatureAppearance appearance;
+
+    @Autowired
+    Decryption decryption;
 
     public MultipartFile signPdfWithDSAndReturnMultipartFile(Resource resource, String response) throws IOException {
 
@@ -74,7 +80,6 @@ public class PdfEmbedder {
 
 
 
-
             int contentEstimated = 8192;
             String errorCode = response.substring(response.indexOf("errCode"), response.indexOf("errMsg"));
             errorCode = errorCode.trim();
@@ -92,7 +97,7 @@ public class PdfEmbedder {
                 // handle error case
             }
 
-//            stamper.close();
+
             bos.close();
 
             return new ByteArrayMultipartFile("signedDoc.pdf", bos.toByteArray());

@@ -8,7 +8,7 @@ export const paymentInboxConfig = {
       criteria: [
         {
           defaultValues: true,
-          status: "PAYMENT_PENDING",
+          status: ["PAYMENT_PENDING"],
           filingNumber: "",
         },
       ],
@@ -30,7 +30,7 @@ export const paymentInboxConfig = {
         defaultValues: {
           filingNumber: "",
           isActive: false,
-          stage: "",
+          stage: [],
         },
         fields: [
           {
@@ -109,6 +109,11 @@ export const paymentInboxConfig = {
             jsonPath: "substage",
           },
 
+          {
+            label: "Amount Due",
+            jsonPath: "amountDue",
+            additionalCustomization: true,
+          },
           {
             label: "Action",
             jsonPath: "id",

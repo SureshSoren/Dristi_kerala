@@ -1,7 +1,9 @@
 package org.drishti.esign.service;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.drishti.esign.cipher.Encryption;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -36,6 +38,7 @@ import java.util.Collections;
  */
 
 @Component
+@Slf4j
 public class XmlSigning {
 
     /**
@@ -44,20 +47,17 @@ public class XmlSigning {
      * @param xmlFilePath , file path of the XML document
      * @return Document
      */
-    //Encryption encryption = new Encryption();
+
+    @Autowired
+    private Encryption encryption;
+
     public Document getXmlDocument(String xmlFilePath) {
         Document doc = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);
         try {
             doc = dbf.newDocumentBuilder().parse(new FileInputStream(xmlFilePath));
-        } catch (ParserConfigurationException ex) {
-            ex.printStackTrace();
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (SAXException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
+        } catch (ParserConfigurationException | SAXException | IOException ex) {
             ex.printStackTrace();
         }
         return doc;
@@ -77,7 +77,7 @@ public class XmlSigning {
         KeyInfoFactory keyInfoFact = xmlSigFactory.getKeyInfoFactory();
 
         try {
-            PublicKey privKey = new Encryption().getPublicKey("testasp.cer");
+            PublicKey privKey = encryption.getPublicKey("testasp.cer");
             keyValue = keyInfoFact.newKeyValue(privKey);
         } catch (KeyException ex) {
             ex.printStackTrace();
@@ -105,7 +105,7 @@ public class XmlSigning {
         } catch (TransformerException ex) {
             ex.printStackTrace();
         }
-        System.out.println("XML file with attached digital signature generated successfully ...");
+        log.info("XML file with attached digital signature generated successfully ...");
     }
 
 
@@ -134,7 +134,7 @@ public class XmlSigning {
         // read public key DER file
         // read private key DER file
         // Load the KeyStore and get the signing key and certificate.
-        //RSAPrivateKey privKey = getPrivateKey();
+
 
         // Instantiate the document to be signed.
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -168,10 +168,8 @@ public class XmlSigning {
         is.setCharacterStream(new StringReader(esignResponse));
 
         Document doc = db.parse(is);
-        //Document doc = getXmlDocument(esignResponse);
         NodeList node = doc.getElementsByTagName("DocSignature");
-        String sig = node.item(0).getTextContent();
-        return sig;
+        return node.item(0).getTextContent();
     }
 
 

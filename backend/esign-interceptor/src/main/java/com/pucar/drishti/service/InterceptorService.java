@@ -38,6 +38,7 @@ public class InterceptorService {
     public String process(String response, String espId, String tenantId, String fileStoreId) {
         log.info("operation = process, result = IN_PROGRESS, response = {}, espId = {} , tenantId = {} , fileStoreId = {}",response,espId,tenantId,fileStoreId);
         log.info("generating token for created user");
+        log.info(espId);
         String token = oAuthForDristi();
         log.info ("validating by calling filestore id");
         util.fetchFileStoreObjectById(fileStoreId, tenantId); // validation of transaction
@@ -62,10 +63,10 @@ public class InterceptorService {
         SignDocParameter parameter = SignDocParameter.builder()
                 .fileStoreId(fileStoreId).response(response).tenantId(tenantId).build();
 
-        SignDocRequest request = SignDocRequest.builder().requestInfo(requestInfo)
-                .eSignParameter(parameter).build();
         log.info("operation = getSignDocRequest, result = SUCCESS, token = {} , response = {} , fileStoreId = {} , tenantId = {}",token,response,fileStoreId,tenantId);
-        return request;
+        return SignDocRequest.builder().requestInfo(requestInfo).eSignParameter(parameter).build();
+        
+
     }
 
     private String oAuthForDristi() {
@@ -91,8 +92,7 @@ public class InterceptorService {
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
         Object response = restCall.fetchResult(uri, request);
-        String accessToken = ((LinkedHashMap) response).get("access_token").toString();
         log.info("operation = oAuthForDristi, result = SUCCESS");
-        return accessToken;
+        return ((LinkedHashMap) response).get("access_token").toString();
     }
 }

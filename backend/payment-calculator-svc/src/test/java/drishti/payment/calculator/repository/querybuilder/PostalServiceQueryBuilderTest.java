@@ -26,7 +26,7 @@ public class PostalServiceQueryBuilderTest {
         Integer offset = 0;
         List<Object> preparedStmtList = new ArrayList<>();
 
-        String query = postalServiceQueryBuilder.getPostalServiceQuery(criteria, preparedStmtList, limit, offset);
+        String query = postalServiceQueryBuilder.getPostalServiceQuery(criteria, preparedStmtList, new ArrayList<>());
 
         assertNotNull(query);
         assertTrue(query.contains("SELECT *  FROM postal_service ps"));

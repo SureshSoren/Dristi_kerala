@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import SignatureCard from "./SignatureCard";
 import { DRISTIService } from "../services";
 import isEqual from "lodash/isEqual";
+import { getFilestoreId } from "../Utils/fileStoreUtil";
 
 function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
   const inputs = useMemo(
@@ -52,6 +53,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
       localStorage.removeItem("formdata");
     }
   }, [isSignSuccess, formData]);
+  const filestoreId = getFilestoreId();
   const handleAadharClick = async (data, name) => {
     try {
       localStorage.setItem("signStatus", JSON.stringify({ [config.key]: { [name]: [true] } }));
@@ -61,7 +63,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
           uidToken: "3456565",
           consent: "6564",
           authType: "6546",
-          fileStoreId: "2aefb901-edc6-4a45-95f8-3ea383a513f5",
+          fileStoreId: filestoreId,
           tenantId: "kl",
           pageModule: "ci",
         },

@@ -15,6 +15,8 @@ export const applicationTypeConfig = [
             moduleName: "Order",
             masterName: "OrderType",
             localePrefix: "ORDER_TYPE",
+            select:
+              "(data) => {return data['Order'].OrderType?.filter((item)=>[`BAIL`,`SECTION_202_CRPC`, `MANDATORY_SUBMISSIONS_RESPONSES`, `REFERRAL_CASE_TO_ADR`, `SCHEDULE_OF_HEARING_DATE`, `WARRANT`, `OTHERS`, `JUDGEMENT`].includes(item.type)).map((item) => {return { ...item, name: 'ORDER_TYPE_'+item.code };});}",
           },
         },
       },
@@ -348,6 +350,7 @@ export const configsOrderSection202CRPC = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "responseRequiredBy",
+          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -491,19 +494,26 @@ export const configsOrderMandatorySubmissions = [
         isMandatory: true,
         key: "documentName",
         type: "text",
-        populators: { name: "documentName" },
+        populators: {
+          name: "documentName",
+          error: "CORE_REQUIRED_FIELD_ERROR",
+          required: true,
+          isMandatory: true,
+        },
       },
       {
         label: "SUBMISSION_PARTY",
         isMandatory: true,
         key: "submissionParty",
-        type: "multiselectdropdown",
+        type: "dropdown",
         populators: {
+          allowMultiSelect: true,
           name: "submissionParty",
           optionsKey: "name",
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
+          selectedText: "party(s)",
           options: [
             {
               code: "PARTY_1",
@@ -529,6 +539,7 @@ export const configsOrderMandatorySubmissions = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "submissionDeadline",
+          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -570,8 +581,8 @@ export const configsOrderMandatorySubmissions = [
     body: [
       {
         label: "IS_RESPONSE_REQUIRED",
-        isMandatory: true,
         key: "isResponseRequired",
+        isMandatory: true,
         type: "radio",
         populators: {
           name: "isResponseRequired",
@@ -594,15 +605,16 @@ export const configsOrderMandatorySubmissions = [
       },
       {
         label: "RESPONDING_PARTY",
-        isMandatory: true,
         key: "respondingParty",
-        type: "multiselectdropdown",
+        type: "dropdown",
         populators: {
           name: "respondingParty",
+          allowMultiSelect: true,
           optionsKey: "name",
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
+          selectedText: "party(s)",
           options: [
             {
               code: "PARTY_1",
@@ -621,13 +633,14 @@ export const configsOrderMandatorySubmissions = [
       },
       {
         label: "RESPONSE_DEADLINE",
-        isMandatory: true,
+        isMandatory: false,
         key: "responseDeadline",
         type: "date",
         labelChildren: "OutlinedInfoIcon",
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "responseDeadline",
+          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -761,6 +774,7 @@ export const configsOrderSubmissionExtension = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "newSubmissionDate",
+          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -871,20 +885,11 @@ export const configsOrderTranferToADR = [
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
-          options: [
-            {
-              code: "MODE_1",
-              name: "MODE_1",
-            },
-            {
-              code: "MODE_2",
-              name: "MODE_2",
-            },
-            {
-              code: "MODE_3",
-              name: "MODE_3",
-            },
-          ],
+          mdmsConfig: {
+            moduleName: "Order",
+            masterName: "ADRMode",
+            select: "(data) => {return data['Order'].ADRMode?.map((item) => {return item;});}",
+          },
         },
       },
       {
@@ -992,6 +997,7 @@ export const configsScheduleHearingDate = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "hearingDate",
+          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -1026,6 +1032,7 @@ export const configsScheduleHearingDate = [
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
+          selectedText: "party(s)",
           options: [
             {
               code: "PARTY_1",
@@ -1078,7 +1085,7 @@ export const configsRejectRescheduleHeadingDate = [
       },
       {
         label: "ORIGINAL_HEARING_DATE",
-        isMandatory: false,
+        isMandatory: true,
         key: "originalHearingDate",
         disable: true,
         type: "date",
@@ -1200,6 +1207,7 @@ export const configsRescheduleHearingDate = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "newHearingDate",
+          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -1400,6 +1408,7 @@ export const configsAssignDateToRescheduledHearing = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "newHearingDate",
+          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -1496,6 +1505,7 @@ export const configsAssignNewHearingDate = [
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
         populators: {
           name: "newHearingDate",
+          error: "CORE_REQUIRED_FIELD_ERROR",
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -1588,7 +1598,8 @@ export const configRejectSubmission = [
     body: [
       {
         label: "REF_APPLICATION_ID",
-        isMandatory: false, // Change this to mandatory after system filled is implememnted
+        isMandatory: false,
+        disable: true,
         key: "refApplicationId",
         type: "text",
         populators: { name: "refApplicationId" },
@@ -1976,6 +1987,7 @@ export const configsCaseSettlement = [
         type: "date",
         populators: {
           name: "settlementAgreementDate",
+          error: "CORE_REQUIRED_FIELD_ERROR",
         },
       },
       {
@@ -1987,22 +1999,14 @@ export const configsCaseSettlement = [
           name: "settlementMechanism",
           optionsKey: "name",
           error: "CORE_REQUIRED_FIELD_ERROR",
+          styles: { maxWidth: "100%" },
           required: true,
           isMandatory: true,
-          options: [
-            {
-              code: "MECHANISM_1",
-              name: "MECHANISM_1",
-            },
-            {
-              code: "MECHANISM_2",
-              name: "MECHANISM_2",
-            },
-            {
-              code: "MECHANISM_3",
-              name: "MECHANISM_3",
-            },
-          ],
+          mdmsConfig: {
+            moduleName: "Order",
+            masterName: "SettlementMechanism",
+            select: "(data) => {return data['Order'].SettlementMechanism?.map((item) => {return item;});}",
+          },
         },
       },
       {
@@ -2082,12 +2086,40 @@ export const configsIssueSummons = [
   {
     body: [
       {
-        label: "REF_APPLICATION_ID",
-        isMandatory: false,
-        key: "refApplicationId",
+        type: "date",
+        label: "Date for Hearing",
+        labelChildren: "OutlinedInfoIcon",
+        isMandatory: true,
         disable: true,
-        type: "text",
-        populators: { name: "refApplicationId" },
+        populators: {
+          name: "date",
+          validation: {
+            max: {
+              patternType: "date",
+              masterName: "commonUiConfig",
+              moduleName: "maxDateValidation",
+            },
+          },
+        },
+      },
+      {
+        isMandatory: true,
+        type: "component",
+        component: "SummonsOrderComponent",
+        key: "SummonsOrder",
+        label: "Party to Summon",
+        populators: {
+          inputs: [
+            {
+              name: "select party",
+              type: "dropdown",
+            },
+            {
+              name: "select deleivery channels",
+              type: "checkbox",
+            },
+          ],
+        },
       },
       {
         label: "COURT_NAME",
@@ -2423,6 +2455,14 @@ export const configsOthers = [
 
 export const configsBail = [
   {
+    defaultValues: {
+      orderType: {
+        id: 9,
+        type: "BAIL",
+        isactive: true,
+        code: "BAIL",
+      },
+    },
     body: [
       {
         label: "REF_APPLICATION_ID",
@@ -2513,26 +2553,12 @@ export const configsBail = [
         },
       },
       {
-        label: "BAIL_AMOUNT",
-        isMandatory: true,
-        key: "bailAmount",
-        type: "number",
-        populators: { name: "bailAmount" },
-      },
-      {
-        label: "OTHER_CONDITIONS",
-        isMandatory: true,
-        key: "otherConditions",
-        type: "text",
+        inline: true,
+        label: "Brief Summary",
+        type: "textarea",
+        key: "briefSummary",
         populators: {
-          name: "otherConditions",
-          error: "CS_ALPHANUMERIC_ALLOWED",
-          validation: {
-            customValidationFn: {
-              moduleName: "dristiOrders",
-              masterName: "alphaNumericInputTextValidation",
-            },
-          },
+          name: "briefSummary",
         },
       },
     ],
@@ -2604,11 +2630,11 @@ export const configsCreateOrderSchedule = [
       {
         label: "DATE_OF_HEARING",
         isMandatory: true,
-        key: "doh",
+        key: "dateOfHearing",
         type: "date",
         disable: false,
         populators: {
-          name: "doh",
+          name: "dateOfHearing",
           error: "Required",
         },
       },
@@ -2663,34 +2689,28 @@ export const configsCreateOrderWarrant = [
       {
         label: "DATE_OF_HEARING",
         isMandatory: true,
-        key: "doh",
+        key: "dateOfHearing",
         type: "date",
-        disable: false,
+        disable: true,
         populators: {
-          name: "doh",
+          name: "dateOfHearing",
           error: "Required",
         },
       },
       {
         isMandatory: true,
-        key: "Warrant For",
-        type: "dropdown",
+        key: "warrantFor",
+        type: "text",
         label: "WARRANT_FOR_PARTY",
-        disable: false,
+        disable: true,
         populators: {
           name: "warrantFor",
-          optionsKey: "code",
           error: "required ",
-          mdmsConfig: {
-            masterName: "OrderType",
-            moduleName: "Order",
-            localePrefix: "ORDER_TYPE",
-          },
         },
       },
       {
         isMandatory: true,
-        key: "Warrant Type",
+        key: "warrantType",
         type: "dropdown",
         label: "WARRANT_TYPE",
         disable: false,
@@ -2698,34 +2718,90 @@ export const configsCreateOrderWarrant = [
           name: "warrantType",
           optionsKey: "code",
           error: "required ",
-          mdmsConfig: {
-            masterName: "OrderType",
-            moduleName: "Order",
-            localePrefix: "ORDER_TYPE",
-          },
+          options: [
+            {
+              code: "Warrant_Type_1",
+              name: "Warrant_Type_1",
+            },
+          ],
         },
       },
       {
         isMandatory: true,
-        type: "radio",
-        key: "bailable",
-        label: "Is this a bailable warrant?",
-        disable: false,
+        type: "component",
+        component: "SelectUserTypeComponent",
+        key: "bailInfo",
+        withoutLabel: true,
         populators: {
-          name: "bailable",
-          optionsKey: "name",
-          error: "Error!",
-          required: false,
-          options: [
+          inputs: [
             {
-              code: "Yes",
-              name: "ES_COMMON_YES",
+              label: "IS_WARRANT_BAILABLE",
+              type: "radioButton",
+              name: "isBailable",
+              optionsKey: "name",
+              error: "CORE_REQUIRED_FIELD_ERROR",
+              validation: {},
+              styles: {
+                marginBottom: 0,
+              },
+              clearFields: { noOfSureties: "", bailableAmount: "" },
+              isMandatory: true,
+              disableFormValidation: false,
+              options: [
+                {
+                  code: true,
+                  name: "ES_COMMON_YES",
+                },
+                {
+                  code: false,
+                  name: "ES_COMMON_NO",
+                },
+              ],
             },
             {
-              code: "No",
-              name: "ES_COMMON_NO",
+              label: "NO_OF_SURETIES",
+              type: "radioButton",
+              name: "noOfSureties",
+              optionsKey: "name",
+              error: "CORE_REQUIRED_FIELD_ERROR",
+              validation: {},
+              isMandatory: true,
+              disableFormValidation: false,
+              isDependentOn: "isBailable",
+              dependentKey: {
+                isBailable: ["code"],
+              },
+              styles: {
+                marginBottom: 0,
+              },
+              options: [
+                {
+                  code: 1,
+                  name: "One",
+                },
+                {
+                  code: 2,
+                  name: "Two",
+                },
+              ],
+            },
+            {
+              label: "BAILABLE_AMOUNT",
+              type: "text",
+              name: "bailableAmount",
+              isDependentOn: "isBailable",
+              dependentKey: {
+                isBailable: ["code"],
+              },
+              error: "CORE_REQUIRED_FIELD_ERROR",
+              validation: {
+                isNumber: true,
+              },
+              isMandatory: true,
+              disableFormValidation: false,
             },
           ],
+          validation: {},
         },
       },
       // {
@@ -2815,11 +2891,11 @@ export const configsCreateOrderSummon = [
       {
         label: "DATE_OF_HEARING",
         isMandatory: true,
-        key: "doh",
+        key: "dateOfHearing",
         type: "date",
         disable: false,
         populators: {
-          name: "doh",
+          name: "dateOfHearing",
           error: "Required",
         },
       },
@@ -3120,18 +3196,11 @@ export const configsJudgement = [
           error: "CORE_REQUIRED_FIELD_ERROR",
           required: true,
           isMandatory: true,
-          options: [
-            {
-              code: "GUILTY",
-              name: "GUILTY",
-              isEnabled: true,
-            },
-            {
-              code: "NOTGUILTY",
-              name: "NOTGUILTY",
-              isEnabled: true,
-            },
-          ],
+          mdmsConfig: {
+            moduleName: "Order",
+            masterName: "Findings",
+            select: "(data) => {return data['Order'].Findings?.map((item) => {return item;});}",
+          },
         },
       },
     ],

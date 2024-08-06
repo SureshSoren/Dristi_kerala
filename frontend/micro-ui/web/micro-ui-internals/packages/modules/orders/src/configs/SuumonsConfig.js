@@ -6,7 +6,7 @@ const defaultSearchValues = {
 
 export const SummonsTabsConfig = {
   tenantId: "pg",
-  moduleName: "commonCampaignUiConfig",
+  moduleName: "reviewSummonWarrantNotice",
   showTab: true,
   SummonsTabsConfig: [
     {
@@ -16,12 +16,15 @@ export const SummonsTabsConfig = {
         serviceName: "/task/v1/search",
         requestParam: {
           tenantId: Digit.ULBService.getCurrentTenantId(),
+          limit: 10,
+          offset: 0,
         },
         requestBody: {
+          apiOperation: "SEARCH",
           criteria: {},
         },
         masterName: "commonUiConfig",
-        moduleName: "SearchIndividualConfig",
+        moduleName: "reviewSummonWarrantNotice",
         minParametersForSearchForm: 0,
         tableFormJsonPath: "requestParam",
         filterFormJsonPath: "requestBody.criteria",
@@ -37,6 +40,18 @@ export const SummonsTabsConfig = {
             defaultValues: defaultSearchValues,
             fields: [
               {
+                type: "component",
+                component: "CustomSortComponent",
+                isMandatory: false,
+                disable: false,
+                name: "Issue Date",
+                key: "sortCaseListByDate",
+                sortBy: "createdDate",
+                showIcon: true,
+                icon: "UpDownArrowIcon",
+                populators: {},
+              },
+              {
                 label: "Order Type",
                 isMandatory: false,
                 key: "taskType",
@@ -48,6 +63,10 @@ export const SummonsTabsConfig = {
                   optionsCustomStyle: {
                     overflowX: "hidden",
                   },
+                  styles: {
+                    maxWidth: "200px",
+                    minWidth: "150px",
+                  },
                 },
               },
               {
@@ -58,9 +77,13 @@ export const SummonsTabsConfig = {
                 disable: false,
                 populators: {
                   name: "status",
-                  options: ["Signed", "Sign Pending"],
+                  options: ["Signed", "Sign Pending", "Sent", "Delivered", "Not Delivered"],
                   optionsCustomStyle: {
                     overflowX: "hidden",
+                  },
+                  styles: {
+                    maxWidth: "200px",
+                    minWidth: "150px",
                   },
                 },
               },
@@ -105,7 +128,8 @@ export const SummonsTabsConfig = {
               },
               {
                 label: "Issued",
-                jsonPath: "issued",
+                jsonPath: "createdDate",
+                additionalCustomization: true,
               },
             ],
             enableColumnSort: true,
@@ -113,6 +137,9 @@ export const SummonsTabsConfig = {
           },
           show: true,
         },
+      },
+      additionalDetails: {
+        sortBy: "sortCaseListByDate",
       },
     },
     {
@@ -127,7 +154,7 @@ export const SummonsTabsConfig = {
           criteria: {},
         },
         masterName: "commonUiConfig",
-        moduleName: "SearchIndividualConfig",
+        moduleName: "reviewSummonWarrantNotice",
         minParametersForSearchForm: 0,
         tableFormJsonPath: "requestParam",
         filterFormJsonPath: "requestBody.criteria",
@@ -143,6 +170,18 @@ export const SummonsTabsConfig = {
             defaultValues: defaultSearchValues,
             fields: [
               {
+                type: "component",
+                component: "CustomSortComponent",
+                isMandatory: false,
+                disable: false,
+                name: "Issue Date",
+                key: "sortCaseListByDate",
+                sortBy: "createdDate",
+                showIcon: true,
+                icon: "UpDownArrowIcon",
+                populators: {},
+              },
+              {
                 label: "Order Type",
                 isMandatory: false,
                 key: "taskType",
@@ -154,6 +193,10 @@ export const SummonsTabsConfig = {
                   optionsCustomStyle: {
                     overflowX: "hidden",
                   },
+                  styles: {
+                    maxWidth: "200px",
+                    minWidth: "150px",
+                  },
                 },
               },
               {
@@ -164,9 +207,13 @@ export const SummonsTabsConfig = {
                 disable: false,
                 populators: {
                   name: "status",
-                  options: ["Signed", "Sign Pending"],
+                  options: ["Signed", "Sign Pending", "Sent", "Delivered", "Not Delivered"],
                   optionsCustomStyle: {
                     overflowX: "hidden",
+                  },
+                  styles: {
+                    maxWidth: "200px",
+                    minWidth: "150px",
                   },
                 },
               },
@@ -211,7 +258,8 @@ export const SummonsTabsConfig = {
               },
               {
                 label: "Issued",
-                jsonPath: "issued",
+                jsonPath: "createdDate",
+                additionalCustomization: true,
               },
             ],
             enableColumnSort: true,
@@ -219,6 +267,9 @@ export const SummonsTabsConfig = {
           },
           show: true,
         },
+      },
+      additionalDetails: {
+        sortBy: "sortCaseListByDate",
       },
     },
   ],

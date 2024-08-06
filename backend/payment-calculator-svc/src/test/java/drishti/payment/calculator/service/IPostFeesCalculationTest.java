@@ -69,7 +69,7 @@ public class IPostFeesCalculationTest {
     @Test
     void testCalculatePayment() {
         when(iPostUtil.getIPostFeesDefaultData(any(RequestInfo.class), anyString())).thenReturn(iPostFeesDefaultData);
-        when(repository.getPostalService(any(PostalServiceSearchCriteria.class), any(), any())).thenReturn(postalServices);
+        when(repository.getPostalService(any(PostalServiceSearchCriteria.class))).thenReturn(postalServices);
 
         Calculation result = iPostFeesCalculation.calculatePayment(requestInfo, criteria);
 
@@ -78,7 +78,7 @@ public class IPostFeesCalculationTest {
         assertEquals("tenant1", result.getTenantId());
 
         verify(iPostUtil, times(1)).getIPostFeesDefaultData(any(RequestInfo.class), anyString());
-        verify(repository, times(1)).getPostalService(any(PostalServiceSearchCriteria.class), any(), any());
+        verify(repository, times(1)).getPostalService(any(PostalServiceSearchCriteria.class));
     }
 
     @Test

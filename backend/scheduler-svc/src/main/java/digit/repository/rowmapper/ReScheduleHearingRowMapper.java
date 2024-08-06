@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.models.coremodels.AuditDetails;
 import digit.web.models.ReScheduleHearing;
-import digit.web.models.enums.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,8 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.List;
 
 
 @Component
@@ -36,7 +33,7 @@ public class ReScheduleHearingRowMapper implements RowMapper<ReScheduleHearing> 
                     .caseId(resultSet.getString("case_id"))
                     .requesterId(resultSet.getString("requester_id"))
                     .reason(resultSet.getString("reason"))
-                    .status(resultSet.getString("status")==null?null: Status.valueOf(resultSet.getString("status")))
+//                    .status(resultSet.getString("status")==null?null: Status.valueOf(resultSet.getString("status")))
                     .actionComment(resultSet.getString("action_comment"))
                     .suggestedDates(resultSet.getString("suggested_days") == null ? null : objectMapper.readValue(resultSet.getString("suggested_days"), new TypeReference<>() {
                     }))

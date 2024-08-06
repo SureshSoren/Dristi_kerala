@@ -60,7 +60,7 @@ public class PostalHubServiceTest {
         HubSearchRequest searchRequest = new HubSearchRequest();
         List<PostalHub> postalHubs = Collections.singletonList(new PostalHub());
 
-        when(repository.getPostalHub(searchRequest.getCriteria(), null, null)).thenReturn(postalHubs);
+        when(repository.getPostalHub(searchRequest.getCriteria())).thenReturn(postalHubs);
 
         List<PostalHub> result = postalHubService.search(searchRequest);
 
