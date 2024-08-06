@@ -1,16 +1,19 @@
 import { FormComposerV2 } from "@egovernments/digit-ui-components";
-import { Modal } from "@egovernments/digit-ui-react-components";
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import NextHearingModal from "../../components/NextHearingModal";
 import SummaryModal from "../../components/SummaryModal";
+import Modal from "@egovernments/digit-ui-module-dristi/src/components/Modal";
+import { hearingService } from "../../hooks/services";
+import { useTranslation } from "react-i18next";
 
-const AdjournHearing = (props) => {
-  const { hearing } = props;
+const AdjournHearing = ({ hearing, updateTranscript }) => {
   const { hearingId } = Digit.Hooks.useQueryParams();
   const [disable, setDisable] = useState(true);
   const [stepper, setStepper] = useState(1);
+  const { t } = useTranslation();
   const [reasonFormData, setReasonFormData] = useState({});
+  const [transcript, setTranscript] = useState(hearing.transcript[0]);
 
   const history = useHistory();
 
@@ -96,14 +99,30 @@ const AdjournHearing = (props) => {
       if (formData.reason.code !== "Select a Reason") setDisable(false);
     }
   };
+  const adjournHearing = async (updatedTranscriptText) => {
+    try {
+      const updatedHearing = structuredClone(hearing);
+      updatedHearing.transcript[0] = updatedTranscriptText;
+      updatedHearing.workflow.action = "CLOSE";
+      updatedHearing.additionalDetails.purposeOfAdjournment = {
+        reason: reasonFormData.reason.code,
+      };
+      return await hearingService.updateHearing(
+        { tenantId: Digit.ULBService.getCurrentTenantId(), hearing: updatedHearing, hearingType: "", status: "" },
+        { applicationNumber: "", cnrNumber: "" }
+      );
+    } catch (error) {
+      console.error("Error Ending hearing:", error);
+    }
+  };
 
   return (
     <div>
       {stepper === 1 && (
         <Modal
-          headerBarMain={<Heading label={"Are you sure you wish to adjourn this hearing?"} />}
+          headerBarMain={<Heading label={t("ARE_SURE_ADJOURN_HEARING")} />}
           headerBarEnd={<CloseBtn onClick={() => handleNavigate(`/employee/hearings/inside-hearing?hearingId=${hearingId}`)} />}
-          actionSaveLabel="Adjourn Hearing"
+          actionSaveLabel={t("ADJOURN_HEARING")}
           actionSaveOnSubmit={onSubmit}
           style={{ marginTop: "5px" }}
           isDisabled={disable}
@@ -133,9 +152,25 @@ const AdjournHearing = (props) => {
         </Modal>
       )}
       {stepper === 2 && (
-        <SummaryModal handleConfirmationModal={handleConfirmationModal} hearingId={hearingId} stepper={stepper} setStepper={setStepper} />
+        <SummaryModal
+          transcript={transcript}
+          setTranscript={setTranscript}
+          handleConfirmationModal={handleConfirmationModal}
+          hearingId={hearingId}
+          onSaveSummary={(updatedTranscriptText) => {
+            adjournHearing(updatedTranscriptText).then(() => {
+              setStepper((stepper) => stepper + 1);
+            });
+          }}
+          onCancel={() => {
+            setTranscript(hearing.transcript[0]);
+            setStepper((stepper) => stepper - 1);
+          }}
+        />
       )}
-      {stepper === 3 && <NextHearingModal hearingId={hearingId} hearing={hearing} stepper={stepper} setStepper={setStepper} />}
+      {stepper === 3 && (
+        <NextHearingModal transcript={transcript} hearingId={hearingId} hearing={hearing} stepper={stepper} setStepper={setStepper} />
+      )}
     </div>
   );
 };

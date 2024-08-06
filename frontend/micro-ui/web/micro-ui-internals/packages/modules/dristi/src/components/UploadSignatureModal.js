@@ -31,7 +31,6 @@ function UploadSignatureModal({ t, setOpenUploadSignatureModal, config, onSelect
   };
 
   const onSubmit = () => {
-    localStorage.setItem("formData", JSON.stringify(formData));
     toast.success(t("CS_E_SIGN_VERIFIED"));
     setOpenUploadSignatureModal(false);
   };

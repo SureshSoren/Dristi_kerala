@@ -51,7 +51,8 @@ import CustomCopyTextDiv from "./components/CustomCopyTextDiv";
 import { DRISTIService } from "./services";
 import CustomChooseDate from "./components/CustomChooseDate";
 import CustomCalendar from "./components/CustomCalendar";
-import UploadSignatureModal from "./components/UploadSignatureModal";
+import CommentComponent from "./components/CommentComponent";
+import { RightArrow } from "./icons/svgIndex";
 
 export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   const { path } = useRouteMatch();
@@ -65,13 +66,11 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
     return <Loader />;
   }
   Digit.SessionStorage.set("DRISTI_TENANTS", tenants);
-  const urlParams = new URLSearchParams(window.location.search);
-  const result = urlParams.get("result");
-  console.log(result, "result");
+
   if (userType === "citizen" && userInfo?.type !== "EMPLOYEE") {
     return (
       <ToastProvider>
-        <CitizenApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} tenantId={tenantID} result={result} />
+        <CitizenApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} tenantId={tenantID} />
       </ToastProvider>
     );
   }
@@ -80,7 +79,7 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   }
   return (
     <ToastProvider>
-      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} result={result}></EmployeeApp>
+      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants}></EmployeeApp>
     </ToastProvider>
   );
 };
@@ -118,6 +117,7 @@ const componentsToRegister = {
   AdvocateNameDetails,
   CustomRadioInfoComponent,
   Modal,
+  CommentComponent,
   CustomCaseInfoDiv,
   CustomErrorTooltip,
   CustomSortComponent,
@@ -126,11 +126,10 @@ const componentsToRegister = {
   MultiUploadWrapper,
   Button,
   CustomCopyTextDiv,
-  SelectCustomNote,
-  UploadSignatureModal,
   DRISTIService,
   CustomChooseDate,
   CustomCalendar,
+  RightArrow,
 };
 
 const overrideHooks = () => {
