@@ -237,6 +237,9 @@ const JoinCaseHome = ({ refreshInbox }) => {
   const userInfoType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo]);
   const token = window.localStorage.getItem("token");
   const isUserLoggedIn = Boolean(token);
+  const [eSignFIleId, setESignFileID] = useState("2aefb901-edc6-4a45-95f8-3ea383a513f5");
+  const [pageModule, setPageModule] = useState("en");
+  const { handleEsign, checkJoinACaseESignStatus } = Digit.Hooks.orders.useESign();
 
   const documentUploaderConfig = {
     key: "vakalatnama",
@@ -617,6 +620,162 @@ const JoinCaseHome = ({ refreshInbox }) => {
     { key: "Advocate Fees", value: 1000, currency: "Rs" },
     { key: "Total Fees", value: 2000, currency: "Rs", isTotalFee: true },
   ];
+
+  const saveStateToLocalStorage = () => {
+    const state = {
+      show,
+      step,
+      caseNumber,
+      caseDetails,
+      searchCaseResult,
+      userType,
+      barRegNumber,
+      barDetails,
+      selectedParty,
+      representingYourself,
+      roleOfNewAdvocate,
+      parties,
+      advocateDetail,
+      advocateDetailForm,
+      replaceAdvocateDocuments,
+      primaryAdvocateDetail,
+      isSearchingCase,
+      party,
+      validationCode,
+      isDisabled,
+      errors,
+      caseInfo,
+      formData,
+      affidavitText,
+      success,
+      advocateId,
+      userUUID,
+      individualId,
+      individualAddress,
+      name,
+      isSignedAdvocate,
+      isSignedParty,
+      complainantList,
+      respondentList,
+      individualDoc,
+      advocateName,
+      joinCaseRequest,
+    };
+
+    localStorage.setItem("appState", JSON.stringify(state));
+    saveFileToLocalStorage(adovacteVakalatnama);
+  };
+
+  const saveFileToLocalStorage = (adovacteVakalatnama) => {
+    const file = adovacteVakalatnama?.adcVakalatnamaFileUpload?.document[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const base64String = e.target.result;
+
+        const fileData = {
+          fileName: file.name,
+          base64String: base64String,
+          lastModified: file.lastModified,
+          size: file.size,
+          type: file.type,
+        };
+
+        const storedData = {
+          ...adovacteVakalatnama,
+          adcVakalatnamaFileUpload: {
+            ...adovacteVakalatnama.adcVakalatnamaFileUpload,
+            document: [fileData],
+          },
+        };
+
+        localStorage.setItem("adovacteVakalatnama", JSON.stringify(storedData));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const loadFileFromLocalStorage = () => {
+    const storedData = localStorage.getItem("adovacteVakalatnama");
+
+    if (storedData) {
+      const storedObject = JSON.parse(storedData);
+      const fileData = storedObject.adcVakalatnamaFileUpload.document[0];
+
+      const byteString = atob(fileData.base64String.split(",")[1]);
+
+      const mimeType = fileData.base64String.split(",")[0].match(/:(.*?);/)[1];
+
+      const byteArray = new Uint8Array(byteString.length);
+      for (let i = 0; i < byteString.length; i++) {
+        byteArray[i] = byteString.charCodeAt(i);
+      }
+
+      const restoredFile = new File([byteArray], fileData.fileName, { type: mimeType });
+
+      const restoredObject = {
+        ...storedObject,
+        adcVakalatnamaFileUpload: {
+          ...storedObject.adcVakalatnamaFileUpload,
+          document: [restoredFile],
+        },
+      };
+
+      return restoredObject;
+    }
+
+    return {};
+  };
+
+  const loadStateFromLocalStorage = () => {
+    const storedState = localStorage.getItem("appState");
+    const restoredVakalatnamaFile = loadFileFromLocalStorage();
+
+    if (storedState) {
+      const state = JSON.parse(storedState);
+
+      setShow(state.show);
+      setStep(state.step);
+      setCaseNumber(state.caseNumber);
+      setCaseDetails(state.caseDetails);
+      setSearchCaseResult(state.searchCaseResult);
+      setUserType(state.userType);
+      setBarRegNumber(state.barRegNumber);
+      setBarDetails(state.barDetails);
+      setSelectedParty(state.selectedParty);
+      setRepresentingYourself(state.representingYourself);
+      setRoleOfNewAdvocate(state.roleOfNewAdvocate);
+      setParties(state.parties);
+      setAdvocateDetail(state.advocateDetail);
+      setAdvocateDetailForm(state.advocateDetailForm);
+      setReplaceAdvocateDocuments(state.replaceAdvocateDocuments);
+      setPrimaryAdvocateDetail(state.primaryAdvocateDetail);
+      setIsSearchingCase(state.isSearchingCase);
+      setParty(state.party);
+      setValidationCode(state.validationCode);
+      setIsDisabled(state.isDisabled);
+      setErrors(state.errors);
+      setCaseInfo(state.caseInfo);
+      setFormData(state.formData);
+      setAffidavitText(state.affidavitText);
+      setSuccess(state.success);
+      setMessageHeader(state.messageHeader);
+      setAdvocateId(state.advocateId);
+      setUserUUID(state.userUUID);
+      setAdovacteVakalatnama(restoredVakalatnamaFile);
+      setIndividualId(state.individualId);
+      setIndividualAddress(state.individualAddress);
+      setName(state.name);
+      setIsSignedAdvocate(state.isSignedAdvocate);
+      setIsSignedParty(state.isSignedParty);
+      setComplainantList(state.complainantList);
+      setRespondentList(state.respondentList);
+      setIndividualDoc(state.individualDoc);
+      setAdvocateName(state.advocateName);
+      setJoinCaseRequest(state.joinCaseRequest);
+    }
+  };
 
   const modalItem = [
     // 0
@@ -1123,7 +1282,9 @@ const JoinCaseHome = ({ refreshInbox }) => {
                       label={"E-Sign"}
                       onButtonClick={() => {
                         setIsDisabled(false);
-                        setIsSignedAdvocate(true);
+                        // setIsSignedAdvocate(true);
+                        saveStateToLocalStorage();
+                        handleEsign("Advocate", eSignFIleId, pageModule);
                       }}
                       className={"aadhar-sign-in"}
                       labelClassName={"aadhar-sign-in"}
@@ -1149,7 +1310,9 @@ const JoinCaseHome = ({ refreshInbox }) => {
                     <CustomButton
                       label={"E-Sign"}
                       onButtonClick={() => {
-                        setIsSignedParty(true);
+                        // setIsSignedParty(true);
+                        saveStateToLocalStorage();
+                        handleEsign("Party", eSignFIleId, pageModule);
                       }}
                       className={"aadhar-sign-in"}
                       labelClassName={"aadhar-sign-in"}
@@ -1460,6 +1623,8 @@ const JoinCaseHome = ({ refreshInbox }) => {
     setAdvocateDetailForm({});
     setReplaceAdvocateDocuments({});
     setAdovacteVakalatnama({});
+    localStorage.removeItem("adovacteVakalatnama");
+    localStorage.removeItem("appState");
   };
 
   const submitJoinCase = async (data) => {
@@ -1576,9 +1741,11 @@ const JoinCaseHome = ({ refreshInbox }) => {
       }
     } else if (step === 3) {
       setIsDisabled(true);
-      if (searchLitigantInRepresentives().isFound) setStep(step + 3);
-      else setStep(step + 4);
+      if (searchLitigantInRepresentives().isFound) setStep(step + 1);
+      else setStep(step + 1);
     } else if (step === 4) {
+      localStorage.removeItem("adovacteVakalatnama");
+      localStorage.removeItem("appState");
       setStep(step + 1);
       setIsDisabled(false);
     } else if (step === 5) {
@@ -2111,6 +2278,19 @@ const JoinCaseHome = ({ refreshInbox }) => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleKeyDown]);
+
+  useEffect(() => {
+    loadStateFromLocalStorage();
+    const isSignSuccess = localStorage.getItem("esignProcess");
+    if (isSignSuccess) {
+      // setStep(4);
+      setShow(true);
+      // setShowsignatureModal(true);
+      localStorage.removeItem("esignProcess");
+    }
+    checkJoinACaseESignStatus(setIsSignedAdvocate, setIsSignedParty);
+    // localStorage.removeItem("appState");
+  }, []);
 
   return (
     <div>
