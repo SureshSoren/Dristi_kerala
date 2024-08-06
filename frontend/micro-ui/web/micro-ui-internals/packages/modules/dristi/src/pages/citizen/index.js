@@ -11,7 +11,7 @@ import LandingPage from "./Home/LandingPage";
 import { userTypeOptions } from "./registration/config";
 import Breadcrumb from "../../components/BreadCrumb";
 
-const App = ({ stateCode, tenantId, result }) => {
+const App = ({ stateCode, tenantId, result, fileStoreId }) => {
   const [hideBack, setHideBack] = useState(false);
   const { toastMessage, toastType, closeToast } = useToast();
   const Digit = window?.Digit || {};
@@ -134,6 +134,9 @@ const App = ({ stateCode, tenantId, result }) => {
   }
   if (result) {
     localStorage.setItem("isSignSuccess", result);
+  }
+  if (fileStoreId) {
+    localStorage.setItem("fileStoreId", fileStoreId);
   }
   if (isUserLoggedIn && retrievedObject) {
     history.push(`${retrievedObject?.path}${retrievedObject?.param}`);

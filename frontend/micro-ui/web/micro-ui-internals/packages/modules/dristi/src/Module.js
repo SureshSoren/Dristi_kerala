@@ -70,11 +70,20 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   Digit.SessionStorage.set("DRISTI_TENANTS", tenants);
   const urlParams = new URLSearchParams(window.location.search);
   const result = urlParams.get("result");
+  const fileStoreId = urlParams.get("filestoreId");
   console.log(result, "result");
   if (userType === "citizen" && userInfo?.type !== "EMPLOYEE") {
     return (
       <ToastProvider>
-        <CitizenApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} tenantId={tenantID} result={result} />
+        <CitizenApp
+          path={path}
+          stateCode={stateCode}
+          userType={userType}
+          tenants={tenants}
+          tenantId={tenantID}
+          result={result}
+          fileStoreId={fileStoreId}
+        />
       </ToastProvider>
     );
   }
@@ -83,7 +92,7 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   }
   return (
     <ToastProvider>
-      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} result={result}></EmployeeApp>
+      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} result={result} fileStoreId={fileStoreId}></EmployeeApp>
     </ToastProvider>
   );
 };
