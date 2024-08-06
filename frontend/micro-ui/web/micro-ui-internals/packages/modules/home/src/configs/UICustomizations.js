@@ -16,6 +16,41 @@ const handleNavigate = (path) => {
 };
 
 export const UICustomizations = {
+  EpostTrackingUiConfig: {
+    preProcess: (requestCriteria, additionalDetails) => {
+      const ePostTrackerSearchCriteria = {
+        ...requestCriteria?.body?.ePostTrackerSearchCriteria,
+        processNumber: requestCriteria?.state?.searchForm?.processNumber ? requestCriteria?.state?.searchForm?.processNumber : "",
+        deliveryStatusList: requestCriteria?.state?.searchForm?.deliveryStatusList?.selected
+          ? [requestCriteria?.state?.searchForm?.deliveryStatusList?.selected]
+          : requestCriteria?.body?.ePostTrackerSearchCriteria.deliveryStatusList,
+        pagination: {
+          sortBy: requestCriteria?.state?.searchForm?.pagination?.sortBy
+            ? requestCriteria?.state?.searchForm?.pagination?.sortBy
+            : requestCriteria?.body?.ePostTrackerSearchCriteria?.pagination?.sortBy,
+          orderBy: requestCriteria?.state?.searchForm?.pagination?.order
+            ? requestCriteria?.state?.searchForm?.pagination?.order
+            : requestCriteria?.body?.ePostTrackerSearchCriteria?.pagination?.orderBy,
+        },
+      };
+      return {
+        ...requestCriteria,
+        body: {
+          ...requestCriteria?.body,
+          ePostTrackerSearchCriteria,
+          processNumber: "",
+          deliveryStatusList: {},
+          pagination: {
+            sortBy: "",
+            order: "",
+          },
+        },
+        config: {
+          ...requestCriteria?.config,
+        },
+      };
+    },
+  },
   SearchHearingsConfig: {
     customValidationCheck: (data) => {
       const { createdFrom, createdTo } = data;

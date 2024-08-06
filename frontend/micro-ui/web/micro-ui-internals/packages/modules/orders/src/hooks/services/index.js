@@ -51,3 +51,22 @@ export const ordersService = {
       params,
     }),
 };
+
+export const EpostService = {
+  EpostUpdate: (data, params)=> 
+    Request({
+      url: Urls.Epost.EpostUpdate,
+      useCache: true,
+      userService: true,
+      data,
+      params,
+    }),
+  customApiService: (url, data, params, useCache = false, userService = true) =>
+      Request({
+        url: url,
+        useCache: useCache,
+        userService,
+        data,
+        params,
+      }),
+}

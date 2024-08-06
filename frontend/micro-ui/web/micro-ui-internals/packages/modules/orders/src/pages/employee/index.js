@@ -7,6 +7,7 @@ import OrdersCreate from "./OrdersCreate";
 import OrdersHome from "./OrdersHome";
 import GenerateOrders from "./GenerateOrders";
 import PaymentStatus from "../../components/PaymentStatus";
+import EpostTrackingPage from "./E-PostTracking";
 import PaymentForSummonModal from "./PaymentForSummonModal";
 import MakeSubmissionBail from "./MakeSubmissionBail";
 // import MakeSubmission from "./MakeSubmission";
@@ -51,6 +52,7 @@ const App = ({ path, stateCode, userType, tenants }) => {
         <PrivateRoute path={`${path}/payment-modal`} component={() => <PaymentForSummonModal />} />
         <PrivateRoute path={`${path}/makesubmissionbail`} component={() => <MakeSubmissionBail />} />
         {/* <PrivateRoute path={`${path}/make-submission`} component={() => <MakeSubmission />} /> */}
+        <PrivateRoute path={`${path}/tracking`} component={() => <EpostTrackingPage />} />
       </AppContainer>
     </Switch>
   );
