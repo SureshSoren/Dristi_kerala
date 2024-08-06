@@ -5,6 +5,7 @@ import digit.kafka.Producer;
 import digit.mapper.CustomMapper;
 import digit.service.HearingService;
 import digit.util.DateUtil;
+import digit.util.HearingUtil;
 import digit.web.models.Pair;
 import digit.web.models.ScheduleHearing;
 import digit.web.models.ScheduleHearingRequest;
@@ -30,12 +31,15 @@ public class HearingProcessor {
 
     private final DateUtil dateUtil;
 
+    private final HearingUtil hearingUtil;
+
     @Autowired
-    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, Producer producer, DateUtil dateUtil) {
+    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, Producer producer, DateUtil dateUtil, HearingUtil hearingUtil) {
         this.customMapper = customMapper;
         this.hearingService = hearingService;
         this.producer = producer;
         this.dateUtil = dateUtil;
+        this.hearingUtil = hearingUtil;
     }
 
 
@@ -71,7 +75,7 @@ public class HearingProcessor {
 
         hearingRequest.setHearing(hearing);
 
-        producer.push("update-topic", hearingRequest);
+        hearingUtil.callHearing(hearingRequest);
     }
 
     private Pair<Long, Long> getStartTimeAndEndTime(Long epochTime) {
