@@ -87,13 +87,46 @@ const useESign = () => {
         setIsSigned(true);
       }
 
+      localStorage.removeItem("signStatus");
       localStorage.removeItem("name");
       localStorage.removeItem("isSignSuccess");
       localStorage.removeItem("signStatus");
     }
   };
 
-  return { handleEsign, checkSignStatus };
+  const checkJoinACaseESignStatus = (setIsSignedAdvocate, setIsSignedParty) => {
+    const isSignSuccess = localStorage.getItem("isSignSuccess");
+    const storedESignObj = localStorage.getItem("signStatus");
+    const parsedESignObj = JSON.parse(storedESignObj);
+
+    if (isSignSuccess) {
+      if (isSignSuccess === "success") {
+        const joinCaseData = JSON.parse(localStorage.getItem("appState"));
+        parsedESignObj?.forEach((sign) => {
+          if (sign?.name === "Advocate" && sign?.isSigned) {
+            setIsSignedAdvocate(true);
+            if (joinCaseData) {
+              joinCaseData.isSignedAdvocate = true;
+            }
+          } else if (sign?.name === "Party" && sign?.isSigned) {
+            setIsSignedParty(true);
+            if (joinCaseData) {
+              joinCaseData.isSignedParty = true;
+            }
+          }
+        });
+        if (joinCaseData) {
+          localStorage.setItem("appState", JSON.stringify(joinCaseData));
+        }
+      }
+
+      localStorage.removeItem("signStatus");
+      localStorage.removeItem("name");
+      localStorage.removeItem("isSignSuccess");
+    }
+  };
+
+  return { handleEsign, checkSignStatus, checkJoinACaseESignStatus };
 };
 
 export default useESign;
