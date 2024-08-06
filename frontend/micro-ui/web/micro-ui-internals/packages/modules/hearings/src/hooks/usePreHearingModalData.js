@@ -16,6 +16,9 @@ const usePreHearingModalData = ({ url, params, body, config = {}, plainAccessReq
       filingNumber: caseNameOrId,
     };
   }
+  body.pagination = {
+    ...body.criteria?.pagination,
+  };
 
   const fetchCombinedData = async () => {
     //need to filter this hearing list response based on slot
@@ -29,11 +32,17 @@ const usePreHearingModalData = ({ url, params, body, config = {}, plainAccessReq
     }));
 
     const filingNumbers = [];
+    /**
+     * @type {Map<string,any[]>}
+     */
     const filingNumberToHearing = new Map();
     for (const hearing of hearingListResponse.HearingList) {
       const filingNumber = hearing.filingNumber[0];
       filingNumbers.push(filingNumber);
-      filingNumberToHearing.set(filingNumber, hearing);
+      if (!filingNumberToHearing.has(filingNumber)) {
+        filingNumberToHearing.set(filingNumber, []);
+      }
+      filingNumberToHearing.get(filingNumber).push(hearing);
     }
 
     const caseBody = {
@@ -86,20 +95,26 @@ const usePreHearingModalData = ({ url, params, body, config = {}, plainAccessReq
         const pendingTaskDetail = pendingTaskResponses.find((taskResponse) => taskResponse.filingNumber === filingNumber);
         const pendingTasksData = pendingTaskDetail ? pendingTaskDetail.data.length : 0;
 
-        return {
-          caseId: caseData.id,
-          filingNumber,
-          caseName: caseData?.caseTitle || "",
-          cnrNumber: caseData.cnrNumber,
-          stage: caseData?.stage || "",
-          caseType: caseData?.caseType || "",
-          pendingTasks: pendingTasksData || "-",
-          hearingId: filingNumberToHearing.get(filingNumber).hearingId,
-          hearing: filingNumberToHearing.get(filingNumber),
-        };
-      });
+        return (
+          filingNumberToHearing.get(filingNumber)?.map((hearing) => {
+            return {
+              caseId: caseData.id,
+              filingNumber,
+              caseName: caseData?.caseTitle || "",
+              cnrNumber: caseData.cnrNumber,
+              stage: caseData?.stage || "",
+              caseType: caseData?.caseType || "NIA S138",
+              pendingTasks: pendingTasksData || "-",
+              hearingId: hearing.hearingId,
+              hearing: hearing,
+              courtId: caseData.courtId,
+            };
+          }) || []
+        );
+      })
+      .flat();
 
-    return { items: combinedData };
+    return { items: combinedData, TotalCount: hearingListResponse.TotalCount };
   };
 
   const { isLoading, data, isFetching, refetch, error } = useQuery("GET_PRE_HEARING_DATA", fetchCombinedData, {

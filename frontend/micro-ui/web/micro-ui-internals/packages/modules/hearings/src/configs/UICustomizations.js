@@ -3,24 +3,17 @@ import React from "react";
 import OverlayDropdown from "../components/HearingOverlayDropdown";
 import { hearingService } from "../hooks/services";
 
-const formatDate = (date) => {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${year}-${month}-${day}`;
-};
-
 export const UICustomizations = {
   PreHearingsConfig: {
-    preProcess: (requestCriteria) => {
+    preProcess: (requestCriteria, additionalDetails) => {
       const updatedCriteria = {
         pagination: {
-          limit: 5,
-          offset: 0,
+          ...requestCriteria.state.tableForm,
+          ...requestCriteria?.state?.searchForm?.sortCaseListByStartDate,
         },
-        limit: 5,
         fromDate: requestCriteria?.params.fromDate,
         toDate: requestCriteria?.params.toDate,
+        attendeeIndividualId: additionalDetails?.attendeeIndividualId ? additionalDetails?.attendeeIndividualId : "",
       };
 
       return {
@@ -99,57 +92,8 @@ export const UICustomizations = {
             {
               label: "Reschedule hearing",
               id: "reschedule",
-              action: (history) => {
-                const date = new Date(row.hearing.startTime);
-                const requestBody = {
-                  order: {
-                    createdDate: new Date().getTime(),
-                    tenantId: Digit.ULBService.getCurrentTenantId(),
-                    filingNumber: row.filingNumber,
-                    statuteSection: {
-                      tenantId: Digit.ULBService.getCurrentTenantId(),
-                    },
-                    orderType: "INITIATING_RESCHEDULING_OF_HEARING_DATE",
-                    status: "",
-                    isActive: true,
-                    workflow: {
-                      action: OrderWorkflowAction.SAVE_DRAFT,
-                      comments: "Creating order",
-                      assignes: null,
-                      rating: null,
-                      documents: [{}],
-                    },
-                    documents: [],
-                    additionalDetails: {
-                      formdata: {
-                        orderType: {
-                          type: "INITIATING_RESCHEDULING_OF_HEARING_DATE",
-                          isactive: true,
-                          code: "INITIATING_RESCHEDULING_OF_HEARING_DATE",
-                          name: "ORDER_TYPE_INITIATING_RESCHEDULING_OF_HEARING_DATE",
-                        },
-                        originalHearingDate: formatDate(date),
-                      },
-                    },
-                  },
-                };
-                ordersService
-                  .createOrder(requestBody, { tenantId: Digit.ULBService.getCurrentTenantId() })
-                  .then((res) => {
-                    searchParams.set("filingNumber", row.filingNumber);
-                    searchParams.set("orderNumber", res.order.orderNumber);
-                    history.push({
-                      pathname: `/${window.contextPath}/${userType}/orders/generate-orders`,
-                      search: searchParams.toString(),
-                      state: {
-                        caseId: row.caseId,
-                        tab: "Orders",
-                      },
-                    });
-                  })
-                  .catch((err) => {
-                    console.error(err);
-                  });
+              action: (history, column) => {
+                column.openRescheduleDialog(row);
               },
             },
           ];
@@ -255,6 +199,58 @@ export const UICustomizations = {
         ];
       }
       return [];
+    },
+  },
+  summonWarrantConfig: {
+    preProcess: (requestCriteria, additionalDetails) => {
+      // We need to change tenantId "processSearchCriteria" here
+      const tenantId = window?.Digit.ULBService.getStateId();
+
+      return {
+        ...requestCriteria,
+        config: {
+          ...requestCriteria?.config,
+          select: (data) => {
+            const taskData = data?.list
+              ?.filter((data) => data?.filingNumber === additionalDetails?.filingNumber && data?.orderId === additionalDetails?.orderId)
+              ?.map((data) => {
+                const taskDetail = JSON.parse(data?.taskDetails || "{}");
+                const channelDetailsEnum = {
+                  SMS: "phone",
+                  Email: "email",
+                  Post: "address",
+                  Police: "address",
+                };
+                return {
+                  deliveryChannel: taskDetail?.deliveryChannels?.channelName,
+                  channelDetails: taskDetail?.respondentDetails?.[channelDetailsEnum?.[taskDetail?.deliveryChannels?.channelName]],
+                  status: data?.status,
+                  remarks: taskDetail?.deliveryChannels?.status,
+                };
+              });
+            console.log("taskData", taskData);
+            return { list: taskData };
+          },
+        },
+      };
+    },
+    additionalValidations: (type, data, keys) => {
+      if (type === "date") {
+        return data[keys.start] && data[keys.end] ? () => new Date(data[keys.start]).getTime() <= new Date(data[keys.end]).getTime() : true;
+      }
+    },
+    MobileDetailsOnClick: (row, tenantId) => {
+      let link;
+      Object.keys(row).map((key) => {
+        if (key === "Case ID") link = ``;
+      });
+      return link;
+    },
+    additionalCustomizations: (row, key, column, value, t, searchResult) => {
+      switch (key) {
+        default:
+          return t("ES_COMMON_NA");
+      }
     },
   },
 };
