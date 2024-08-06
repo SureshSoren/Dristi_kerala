@@ -26,6 +26,12 @@ public class Properties {
     @Value("${egov.mdms.search.endpoint}")
     private String mdmsSearchEndpoint;
 
+    @Value("${egov.file.store.host}")
+    private String fileStoreHost;
+    
+    @Value("${egov.file.store.endpoint}")
+    private String fileStoreEndpoint;
+
     @Value("${state.level.tenant.id}")
     private String stateLevelTenantId;
 }

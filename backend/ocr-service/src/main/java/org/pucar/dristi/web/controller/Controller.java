@@ -39,7 +39,7 @@ public class Controller {
 
         logger.info("Received request to process image with file: ");
 
-        Map<String, Object> response = service.callOCR(file, wordCheckList, distanceCutoff, documentType, extractData);
+        Map<String, Object> response = service.callOCR(file.getResource(), wordCheckList, distanceCutoff, documentType, extractData);
         return ResponseEntity.ok(response);
     }
 
@@ -50,12 +50,12 @@ public class Controller {
 
     @PostMapping("/ocr/verify")
     public ResponseEntity<Map<String, Object>> verifyDocument(
-            @RequestParam("file") MultipartFile file,
+            @RequestParam("fileStoreId") String fileStoreId,
             @RequestParam("documentType") String documentType) {
 
-        logger.info("Received request to verify image for documentType: {}", documentType);
+        logger.info("Received request to verify image {}, for documentType: {}", fileStoreId, documentType);
 
-        Map<String, Object> response = service.verifyDocument(file, documentType);
+        Map<String, Object> response = service.verifyDocument(fileStoreId, documentType);
         return ResponseEntity.ok(response);
     }
 

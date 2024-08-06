@@ -5,12 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -27,14 +27,14 @@ public class Util {
         this.restTemplate = restTemplate;
     }
 
-    public ResponseEntity<Map<String, Object>> callOCR(String url, MultipartFile file, List<String> wordCheckList,
+    public ResponseEntity<Map<String, Object>> callOCR(String url, Resource resource, List<String> wordCheckList,
                                                        Integer distanceCutoff, String docType, Boolean extractData) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-        body.add("file", file.getResource());
+        body.add("file", resource);
 
         if (wordCheckList != null) {
             body.add(ServiceConstants.OCR_REQUEST_PARAMETER_WORDS_CHECK_LIST, wordCheckList);

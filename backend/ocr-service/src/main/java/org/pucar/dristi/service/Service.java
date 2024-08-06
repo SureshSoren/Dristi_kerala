@@ -7,13 +7,14 @@ import jakarta.annotation.PostConstruct;
 import net.minidev.json.JSONArray;
 import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.config.Properties;
+import org.pucar.dristi.util.FileStoreUtil;
 import org.pucar.dristi.util.MdmsFetcher;
 import org.pucar.dristi.util.Util;
 import org.pucar.dristi.web.model.DocumentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,15 +31,18 @@ public class Service {
     private final Properties properties;
     private MdmsFetcher mdmsFetcher;
     private ObjectMapper objectMapper;
+    private FileStoreUtil fileStoreUtil;
 
     private Map<String, List<String>> keyWordsByDocument;
 
     @Autowired
-    public Service(Util utils, Properties properties, MdmsFetcher mdmsFetcher, ObjectMapper objectMapper) {
+    public Service(Util utils, Properties properties, MdmsFetcher mdmsFetcher,
+                   ObjectMapper objectMapper, FileStoreUtil fileStoreUtil) {
         this.utils = utils;
         this.properties = properties;
         this.mdmsFetcher = mdmsFetcher;
         this.objectMapper = objectMapper;
+        this.fileStoreUtil = fileStoreUtil;
     }
 
     @PostConstruct
@@ -59,14 +63,16 @@ public class Service {
         return this.keyWordsByDocument.keySet();
     }
 
-    public Map<String, Object> callOCR(MultipartFile file, List<String> wordCheckList, Integer distanceCutoff, String docType, Boolean extractData) {
+    public Map<String, Object> callOCR(Resource resource, List<String> wordCheckList, Integer distanceCutoff, String docType, Boolean extractData) {
         String url = properties.getOcrHost() + properties.getOcrEndPoint();
-        return utils.callOCR(url, file, wordCheckList, distanceCutoff, docType, extractData).getBody();
+        return utils.callOCR(url, resource, wordCheckList, distanceCutoff, docType, extractData).getBody();
     }
 
-    public Map<String, Object> verifyDocument(MultipartFile file, String documentType) {
+    public Map<String, Object> verifyDocument(String fileStoreId, String documentType) {
+
+        Resource resource = fileStoreUtil.getFileFromStore(fileStoreId);
         List<String> keywords = this.keyWordsByDocument.get(documentType);
         log.info(keywords.toString());
-        return callOCR(file, keywords, null, documentType, null);
+        return callOCR(resource, keywords, null, documentType, null);
     }
 }
