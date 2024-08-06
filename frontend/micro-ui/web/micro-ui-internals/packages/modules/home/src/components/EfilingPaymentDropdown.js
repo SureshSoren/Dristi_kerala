@@ -8,7 +8,7 @@ import useSearchCaseService from "@egovernments/digit-ui-module-dristi/src/hooks
 import { useToast } from "@egovernments/digit-ui-module-dristi/src/components/Toast/useToast";
 import { DRISTIService } from "@egovernments/digit-ui-module-dristi/src/services";
 import { Urls } from "../hooks/services";
-import usePaymentProcess from "@egovernments/digit-ui-module-dristi/src/pages/citizen/FileCase/usePaymentProcess";
+import usePaymentProcess from "../hooks/usePaymentProcess";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 

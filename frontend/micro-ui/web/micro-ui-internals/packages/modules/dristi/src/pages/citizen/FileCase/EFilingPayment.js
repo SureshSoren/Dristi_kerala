@@ -8,7 +8,7 @@ import useSearchCaseService from "../../../hooks/dristi/useSearchCaseService";
 import { useToast } from "../../../components/Toast/useToast";
 import { DRISTIService } from "../../../services";
 import { Urls } from "../../../hooks";
-import usePaymentProcess from "./usePaymentProcess";
+import usePaymentProcess from "../../../../../home/src/hooks/usePaymentProcess";
 
 const mockSubmitModalInfo = {
   header: "CS_HEADER_FOR_E_FILING_PAYMENT",

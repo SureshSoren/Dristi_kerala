@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { DRISTIService } from "../../../services";
-import { useToast } from "../../../components/Toast/useToast";
-import { Urls } from "../../../hooks";
+import { DRISTIService } from "@egovernments/digit-ui-module-dristi/src/services";
+import { useToast } from "@egovernments/digit-ui-module-dristi/src/components/Toast/useToast";
+import { Urls } from "@egovernments/digit-ui-module-dristi/src/hooks";
 
 const usePaymentProcess = ({ tenantId, consumerCode, service, path, caseDetails, totalAmount, mockSubmitModalInfo, scenario }) => {
   const history = useHistory();
