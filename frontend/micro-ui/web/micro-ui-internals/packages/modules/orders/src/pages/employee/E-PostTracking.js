@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { InboxSearchComposer } from "@egovernments/digit-ui-react-components";
-import { EpostTrackingConfig } from "../../../../../../../../../micro-ui/web/micro-ui-internals/packages/modules/orders/src/configs/E-PostTrackingConfig";
-import { HomeService } from "../../../../../../../../../micro-ui/web/micro-ui-internals/packages/modules/home/src/hooks/services";
+import { EpostTrackingConfig } from "./../../configs/E-PostTrackingConfig";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import PrintAndSendDocumentsModal from "./PrintAndSendDocumentsModal";
 import UpdateEPostStatus from "./UpdateEPostStatus";
@@ -43,7 +42,7 @@ const EpostTrackingPage = () => {
     async function (tabConfig) {
       const updatedTabData = await Promise.all(
         tabConfig?.map(async (configItem, index) => {
-          const response = await HomeService.customApiService(configItem?.apiDetails?.serviceName, configItem?.apiDetails?.requestBody);
+          const response = await Digit.HomeService.customApiService(configItem?.apiDetails?.serviceName, configItem?.apiDetails?.requestBody);
           const totalCount = response?.EPostTracker?.length;
           return {
             key: index,
