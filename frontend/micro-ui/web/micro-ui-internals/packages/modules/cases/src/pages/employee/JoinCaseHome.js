@@ -237,7 +237,6 @@ const JoinCaseHome = ({ refreshInbox }) => {
   const userInfoType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo]);
   const token = window.localStorage.getItem("token");
   const isUserLoggedIn = Boolean(token);
-  const [eSignFIleId, setESignFileID] = useState("2aefb901-edc6-4a45-95f8-3ea383a513f5");
   const [pageModule, setPageModule] = useState("en");
   const { handleEsign, checkJoinACaseESignStatus } = Digit.Hooks.orders.useESign();
 
@@ -1284,7 +1283,7 @@ const JoinCaseHome = ({ refreshInbox }) => {
                         setIsDisabled(false);
                         // setIsSignedAdvocate(true);
                         saveStateToLocalStorage();
-                        handleEsign("Advocate", eSignFIleId, pageModule);
+                        handleEsign("Advocate", pageModule);
                       }}
                       className={"aadhar-sign-in"}
                       labelClassName={"aadhar-sign-in"}
@@ -1312,7 +1311,7 @@ const JoinCaseHome = ({ refreshInbox }) => {
                       onButtonClick={() => {
                         // setIsSignedParty(true);
                         saveStateToLocalStorage();
-                        handleEsign("Party", eSignFIleId, pageModule);
+                        handleEsign("Party", pageModule);
                       }}
                       className={"aadhar-sign-in"}
                       labelClassName={"aadhar-sign-in"}
