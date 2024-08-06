@@ -41,5 +41,6 @@ module.exports = function (app) {
     "/payment-calculator",
     "/case",
     "/analytics",
+    "/task",
   ].forEach((location) => app.use(location, createProxy));
 };
