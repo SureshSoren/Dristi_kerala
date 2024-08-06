@@ -53,7 +53,6 @@ const App = ({ path, stateCode, userType, tenants }) => {
         <PrivateRoute path={`${path}/makesubmissionbail`} component={() => <MakeSubmissionBail />} />
         {/* <PrivateRoute path={`${path}/make-submission`} component={() => <MakeSubmission />} /> */}
         <PrivateRoute path={`${path}/tracking`} component={() => <EpostTrackingPage />} />
-        {/* <PrivateRoute path={`${path}/transcription`} component= {()=> <Transcription />} /> */}
       </AppContainer>
     </Switch>
   );
