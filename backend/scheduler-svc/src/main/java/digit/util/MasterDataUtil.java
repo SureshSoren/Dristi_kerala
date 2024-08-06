@@ -28,12 +28,12 @@ public class MasterDataUtil {
     private Configuration config;
 
     @Cacheable(value = "mdms-cache", key = "#masterName")
-    public <T> List<T> getDataFromMDMS(Class<T> clazz, String masterName) {
+    public <T> List<T> getDataFromMDMS(Class<T> clazz, String masterName ,String module) {
         log.info("operation = getDataFromMDMS, result = IN_PROGRESS");
         RequestInfo requestInfo = new RequestInfo();
         Map<String, Map<String, JSONArray>> defaultHearingsData =
                 mdmsUtil.fetchMdmsData(requestInfo, config.getEgovStateTenantId(),
-                        serviceConstants.DEFAULT_COURT_MODULE_NAME,
+                        module,
                         Collections.singletonList(masterName));
         JSONArray jsonArray = defaultHearingsData.get("court").get(masterName);
         List<T> result = new ArrayList<>();

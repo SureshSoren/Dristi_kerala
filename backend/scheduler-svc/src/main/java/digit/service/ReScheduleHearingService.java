@@ -24,6 +24,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static digit.config.ServiceConstants.OPT_OUT_SELECTION_LIMIT;
+
 
 /**
  * Contains methods related to raised reschedule request, update request,search , bulk rescheduling
@@ -44,12 +46,14 @@ public class ReScheduleHearingService {
     private final ServiceConstants serviceConstants;
     private final MasterDataUtil helper;
     private final CaseUtil caseUtil;
-    private final Configuration configuration;
 
-    private final DateUtil dateUtil;
+    private final  ServiceConstants constants;
+
+
+
 
     @Autowired
-    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, MasterDataUtil helper, CaseUtil caseUtil, Configuration configuration, DateUtil dateUtil) {
+    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, MasterDataUtil helper, CaseUtil caseUtil, ServiceConstants constants) {
         this.config = config;
         this.repository = repository;
         this.validator = validator;
@@ -62,8 +66,8 @@ public class ReScheduleHearingService {
         this.serviceConstants = serviceConstants;
         this.helper = helper;
         this.caseUtil = caseUtil;
-        this.configuration = configuration;
-        this.dateUtil = dateUtil;
+
+        this.constants = constants;
     }
 
     /**
@@ -92,7 +96,16 @@ public class ReScheduleHearingService {
                 JsonNode representatives = caseUtil.getRepresentatives(cases);
                 Set<String> representativeIds = caseUtil.getIdsFromJsonNodeArray(representatives);
                 int noOfAttendees = representativeIds.size();
-                Integer numberOfSuggestedDays = Math.toIntExact(configuration.getOptOutLimit() * noOfAttendees + 1);
+
+
+                List<SchedulerConfig> dataFromMDMS = helper.getDataFromMDMS(SchedulerConfig.class, constants.SCHEDULER_CONFIG_MASTER_NAME, constants.SCHEDULER_CONFIG_MODULE_NAME);
+
+                List<SchedulerConfig> filteredApplications = dataFromMDMS.stream()
+                        .filter(application -> application.getIdentifier().equals(OPT_OUT_SELECTION_LIMIT))
+                        .toList();
+
+                int unit = filteredApplications.get(0).getUnit();
+                Integer numberOfSuggestedDays = Math.toIntExact((long) unit * noOfAttendees + 1);
 
                 litigantIds = caseUtil.getLitigantsFromRepresentatives(litigantIds, representatives);
 
@@ -193,10 +206,10 @@ public class ReScheduleHearingService {
 
         validator.validateBulkRescheduleRequest(request);
 
-        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);
+        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME,serviceConstants.DEFAULT_COURT_MODULE_NAME);
 
         double totalHrs = defaultSlots.stream().reduce(0.0, (total, slot) -> total + slot.getSlotDuration() / 60.0, Double::sum);
-        List<MdmsHearing> defaultHearings = helper.getDataFromMDMS(MdmsHearing.class, serviceConstants.DEFAULT_HEARING_MASTER_NAME);
+        List<MdmsHearing> defaultHearings = helper.getDataFromMDMS(MdmsHearing.class, serviceConstants.DEFAULT_HEARING_MASTER_NAME,serviceConstants.DEFAULT_COURT_MODULE_NAME);
         Map<String, MdmsHearing> hearingTypeMap = defaultHearings.stream().collect(Collectors.toMap(MdmsHearing::getHearingType, obj -> obj));
         BulkReschedulingOfHearings bulkRescheduling = request.getBulkRescheduling();
 

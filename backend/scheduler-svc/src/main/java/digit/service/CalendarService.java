@@ -77,7 +77,7 @@ public class CalendarService {
         HashMap<String, Double> dateMap = new HashMap<>();
 
         // retrieve type of hearings from master data
-        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);
+        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME,serviceConstants.DEFAULT_COURT_MODULE_NAME);
 
         // calculate bandwidth for judge from slot of court
         double totalHrs = defaultSlots.stream().reduce(0.0, (total, slot) -> total + slot.getSlotDuration() / 60.0, Double::sum);

@@ -4,8 +4,10 @@ package digit.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
+import digit.config.ServiceConstants;
 import digit.kafka.Producer;
 import digit.util.CaseUtil;
+import digit.util.MasterDataUtil;
 import digit.web.models.*;
 import digit.web.models.cases.CaseCriteria;
 import digit.web.models.cases.SearchCaseRequest;
@@ -15,29 +17,30 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static digit.config.ServiceConstants.OPT_OUT_SELECTION_LIMIT;
+
 @Slf4j
 @Service
 public class ScheduleHearingConsumerService {
 
     private final Configuration configuration;
-
     private final ObjectMapper mapper;
-
     private final CalendarService calendarService;
-
     private final Producer producer;
-
     private final HearingService hearingService;
-
     private final CaseUtil caseUtil;
+    private final ServiceConstants constants;
+    private final MasterDataUtil helper;
 
-    public ScheduleHearingConsumerService(Configuration configuration, ObjectMapper mapper, CalendarService calendarService, Producer producer, HearingService hearingService, CaseUtil caseUtil) {
+    public ScheduleHearingConsumerService(Configuration configuration, ObjectMapper mapper, CalendarService calendarService, Producer producer, HearingService hearingService, CaseUtil caseUtil, ServiceConstants constants, MasterDataUtil helper) {
         this.configuration = configuration;
         this.mapper = mapper;
         this.calendarService = calendarService;
         this.producer = producer;
         this.hearingService = hearingService;
         this.caseUtil = caseUtil;
+        this.constants = constants;
+        this.helper = helper;
     }
 
 
@@ -59,6 +62,14 @@ public class ScheduleHearingConsumerService {
                 JsonNode representatives = caseUtil.getRepresentatives(searchCaseRequest);
                 Set<String> representativeIds = caseUtil.getIdsFromJsonNodeArray(representatives);
                 int noOfAttendees = representativeIds.size();
+
+                List<SchedulerConfig> dataFromMDMS = helper.getDataFromMDMS(SchedulerConfig.class, constants.SCHEDULER_CONFIG_MASTER_NAME, constants.SCHEDULER_CONFIG_MODULE_NAME);
+
+                List<SchedulerConfig> filteredApplications = dataFromMDMS.stream()
+                        .filter(application -> application.getIdentifier().equals(OPT_OUT_SELECTION_LIMIT))
+                        .toList();
+
+                int unit = filteredApplications.get(0).getUnit();
                 Integer numberOfSuggestedDays = Math.toIntExact(configuration.getOptOutLimit() * noOfAttendees + 1);
 
                 List<AvailabilityDTO> availability = calendarService.getJudgeAvailability(JudgeAvailabilitySearchRequest

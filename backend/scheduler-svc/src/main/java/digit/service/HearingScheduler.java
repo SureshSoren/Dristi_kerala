@@ -84,9 +84,9 @@ public class HearingScheduler {
 //                    hearing.setDate(dateMap.get(hearing.getHearingBookingId()));
                 }
 
-                List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);
+                List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME,serviceConstants.DEFAULT_COURT_MODULE_NAME);
 
-                List<MdmsHearing> defaultHearings = helper.getDataFromMDMS(MdmsHearing.class, serviceConstants.DEFAULT_HEARING_MASTER_NAME);
+                List<MdmsHearing> defaultHearings = helper.getDataFromMDMS(MdmsHearing.class, serviceConstants.DEFAULT_HEARING_MASTER_NAME,serviceConstants.DEFAULT_COURT_MODULE_NAME);
                 Map<String, MdmsHearing> hearingTypeMap = defaultHearings.stream().collect(Collectors.toMap(
                         MdmsHearing::getHearingType,
                         obj -> obj
