@@ -33,4 +33,8 @@ public class ServiceConstants {
     public final String DEFAULT_SLOTTING_MASTER_NAME = "slots";
     public final String DEFAULT_HEARING_MASTER_NAME = "hearings";
 
+    public static final String PENDING_TASK_ENTITY_TYPE ="order-managelifecycle";
+    public static final String PENDING_TASK_NAME = "Create Order for rescheduling the hearing";
+    public static final String PENDING_TASK_STATUS = "RESCHEDULE_HEATING";
+
 }
