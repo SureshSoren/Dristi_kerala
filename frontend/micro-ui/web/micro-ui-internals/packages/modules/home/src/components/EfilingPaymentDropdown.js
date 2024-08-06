@@ -7,10 +7,10 @@ import CustomCaseInfoDiv from "@egovernments/digit-ui-module-dristi/src/componen
 import useSearchCaseService from "@egovernments/digit-ui-module-dristi/src/hooks/dristi/useSearchCaseService";
 import { useToast } from "@egovernments/digit-ui-module-dristi/src/components/Toast/useToast";
 import { DRISTIService } from "@egovernments/digit-ui-module-dristi/src/services";
-import { Urls } from "../hooks/services";
 import usePaymentProcess from "../hooks/usePaymentProcess";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
+import { Urls } from "@egovernments/digit-ui-module-dristi/src/hooks";
 
 const mockSubmitModalInfo = {
   header: "CS_HEADER_FOR_E_FILING_PAYMENT",
@@ -42,8 +42,10 @@ function EfilingPaymentBreakdown({ setShowModal, header, subHeader, submitModalI
   const location = useLocation();
   const history = useHistory();
   const onCancel = () => {
-    history.goBack();
-    setShowPaymentModal(false);
+    if (!paymentLoader) {
+      history.goBack();
+      setShowPaymentModal(false);
+    }
   };
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const params = location?.state.state.params;
@@ -137,21 +139,6 @@ function EfilingPaymentBreakdown({ setShowModal, header, subHeader, submitModalI
 
     return updatedCalculation;
   }, [calculationResponse?.Calculation]);
-  const submitInfoData = useMemo(() => {
-    return {
-      ...mockSubmitModalInfo,
-      caseInfo: [
-        {
-          key: "CS_CASE_NUMBER",
-          value: caseDetails?.filingNumber,
-          copyData: true,
-        },
-      ],
-      isArrow: false,
-      showTable: true,
-      showCopytext: true,
-    };
-  }, [caseDetails?.filingNumber]);
 
   const { fetchBill, openPaymentPortal, paymentLoader, showPaymentModal, setShowPaymentModal } = usePaymentProcess({
     tenantId,
@@ -277,105 +264,58 @@ function EfilingPaymentBreakdown({ setShowModal, header, subHeader, submitModalI
     return <Loader />;
   }
   return (
-    <div className=" user-registration">
-      <div className="e-filing-payment-breakdown">
-        <Banner
-          whichSvg={"tick"}
-          successful={true}
-          message={t(submitModalInfo?.header)}
-          headerStyles={{ fontSize: "32px" }}
-          style={{ minWidth: "100%" }}
-        ></Banner>
-        {submitInfoData?.subHeader && <CardLabel className={"e-filing-card-label"}>{t(submitInfoData?.subHeader)}</CardLabel>}
-        {submitInfoData?.showTable && (
-          <CustomCaseInfoDiv
-            t={t}
-            data={submitInfoData?.caseInfo}
-            tableDataClassName={"e-filing-table-data-style"}
-            tableValueClassName={"e-filing-table-value-style"}
-            column={1}
-          />
-        )}
-        <div className="button-field">
-          <Button
-            variation={"secondary"}
-            className={"secondary-button-selector"}
-            label={t("CS_GO_TO_HOME")}
-            labelClassName={"secondary-label-selector"}
-            style={{ minWidth: "30%" }}
-            onButtonClick={() => {
-              history.push(`/${window?.contextPath}/citizen/dristi/home`);
-            }}
-          />
-          <Button
-            variation={"secondary"}
-            className={"secondary-button-selector"}
-            label={t("CS_PRINT_CASE_FILE")}
-            labelClassName={"secondary-label-selector"}
-            style={{ minWidth: "30%" }}
-            onButtonClick={() => {}}
-          />
-          <Button
-            className={"tertiary-button-selector"}
-            label={t("CS_MAKE_PAYMENT")}
-            labelClassName={"tertiary-label-selector"}
-            style={{ minWidth: "30%" }}
-            onButtonClick={() => {
-              setShowPaymentModal(true);
-            }}
-          />
-        </div>
-        <Modal
-          headerBarEnd={<CloseBtn onClick={onCancel} />}
-          actionSaveLabel={t("CS_PAY_ONLINE")}
-          formId="modal-action"
-          actionSaveOnSubmit={() => onSubmitCase()}
-          headerBarMain={<Heading label={t("CS_PAY_TO_FILE_CASE")} />}
-        >
-          <div className="payment-due-wrapper" style={{ display: "flex", flexDirection: "column" }}>
-            <div className="payment-due-text" style={{ fontSize: "18px" }}>
-              {`${t("CS_DUE_PAYMENT")} `}
-              <span style={{ fontWeight: 700 }}>Rs {totalAmount}/-.</span>
-              {` ${t("CS_MANDATORY_STEP_TO_FILE_CASE")}`}
-            </div>
-            <div className="payment-calculator-wrapper" style={{ display: "flex", flexDirection: "column" }}>
-              {paymentCalculation.map((item) => (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    borderTop: item.isTotalFee && "1px solid #BBBBBD",
-                    fontSize: item.isTotalFee && "16px",
-                    fontWeight: item.isTotalFee && "700",
-                    paddingTop: item.isTotalFee && "12px",
-                  }}
-                >
-                  <span>{item.key}</span>
-                  <span>
-                    {item.currency} {parseFloat(item.value).toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div>
-              <InfoCard
-                variant={"default"}
-                label={t("CS_COMMON_NOTE")}
-                style={{ margin: "100px 0 0 0", backgroundColor: "#ECF3FD" }}
-                additionalElements={[
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <span>{t("CS_OFFLINE_PAYMENT_STEP_TEXT")}</span>
-                  </div>,
-                ]}
-                inline
-                textStyle={{}}
-                className={"adhaar-verification-info-card"}
-              />
-            </div>
+    <div className="e-filing-payment">
+      <Modal
+        headerBarEnd={<CloseBtn onClick={onCancel} />}
+        actionSaveLabel={t("CS_PAY_ONLINE")}
+        formId="modal-action"
+        actionSaveOnSubmit={() => onSubmitCase()}
+        isDisabled={paymentLoader}
+        headerBarMain={<Heading label={t("CS_PAY_TO_FILE_CASE")} />}
+      >
+        <div className="payment-due-wrapper" style={{ display: "flex", flexDirection: "column" }}>
+          <div className="payment-due-text" style={{ fontSize: "18px" }}>
+            {`${t("CS_DUE_PAYMENT")} `}
+            <span style={{ fontWeight: 700 }}>Rs {totalAmount}/-.</span>
+            {` ${t("CS_MANDATORY_STEP_TO_FILE_CASE")}`}
           </div>
-        </Modal>
-      </div>
+          <div className="payment-calculator-wrapper" style={{ display: "flex", flexDirection: "column" }}>
+            {paymentCalculation.map((item) => (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderTop: item.isTotalFee && "1px solid #BBBBBD",
+                  fontSize: item.isTotalFee && "16px",
+                  fontWeight: item.isTotalFee && "700",
+                  paddingTop: item.isTotalFee && "12px",
+                }}
+              >
+                <span>{item.key}</span>
+                <span>
+                  {item.currency} {parseFloat(item.value).toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div>
+            <InfoCard
+              variant={"default"}
+              label={t("CS_COMMON_NOTE")}
+              style={{ margin: "100px 0 0 0", backgroundColor: "#ECF3FD" }}
+              additionalElements={[
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span>{t("CS_OFFLINE_PAYMENT_STEP_TEXT")}</span>
+                </div>,
+              ]}
+              inline
+              textStyle={{}}
+              className={"adhaar-verification-info-card"}
+            />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
