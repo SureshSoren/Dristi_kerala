@@ -7,6 +7,7 @@ import CustomCaseInfoDiv from "../../../components/CustomCaseInfoDiv";
 import useSearchCaseService from "../../../hooks/dristi/useSearchCaseService";
 import { useToast } from "../../../components/Toast/useToast";
 import { DRISTIService } from "../../../services";
+import { Urls } from "../../../hooks";
 
 const mockSubmitModalInfo = {
   header: "CS_HEADER_FOR_E_FILING_PAYMENT",
@@ -172,6 +173,20 @@ function EFilingPayment({ t, submitModalInfo = mockSubmitModalInfo, path }) {
         setPaymentLoader(false);
         const billAfterPayment = await DRISTIService.callSearchBill({}, { tenantId, consumerCode: caseDetails?.filingNumber, service: "case" });
         if (billAfterPayment?.Bill?.[0]?.status === "PAID") {
+          await DRISTIService.customApiService(Urls.dristi.pendingTask, {
+            pendingTask: {
+              name: "Pending Payment",
+              entityType: "case",
+              referenceId: `MANUAL_${caseDetails?.filingNumber}`,
+              status: "PAYMENT_PENDING",
+              cnrNumber: null,
+              filingNumber: caseDetails?.filingNumber,
+              isCompleted: true,
+              stateSla: null,
+              additionalDetails: {},
+              tenantId,
+            },
+          });
           const fileStoreId = await DRISTIService.fetchBillFileStoreId({}, { billId: billAfterPayment?.Bill?.[0]?.id, tenantId: tenantId });
           fileStoreId &&
             history.push(`${path}/e-filing-payment-response`, {
