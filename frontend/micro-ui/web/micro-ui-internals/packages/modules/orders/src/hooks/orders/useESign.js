@@ -1,12 +1,14 @@
 import { useMemo, useCallback } from "react";
+import { getFilestoreId } from "../../../../dristi/src/Utils/fileStoreUtil";
 
 const useESign = () => {
+  const fileStoreId = getFilestoreId();
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const storedObj = useMemo(() => localStorage.getItem("signStatus"), []);
   const parsedObj = JSON.parse(storedObj) || [];
 
   const handleEsign = useCallback(
-    async (name, eSignFIleId, pageModule) => {
+    async (name, pageModule) => {
       try {
         const newSignStatuses = [...parsedObj, { name: name, isSigned: true }];
         localStorage.setItem("signStatus", JSON.stringify(newSignStatuses));
@@ -16,7 +18,7 @@ const useESign = () => {
             uidToken: "3456565",
             consent: "6564",
             authType: "6546",
-            fileStoreId: eSignFIleId,
+            fileStoreId: fileStoreId,
             tenantId: tenantId,
             pageModule: pageModule,
           },
@@ -87,6 +89,7 @@ const useESign = () => {
 
       localStorage.removeItem("name");
       localStorage.removeItem("isSignSuccess");
+      localStorage.removeItem("signStatus");
     }
   };
 

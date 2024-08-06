@@ -1,4 +1,4 @@
-export const getFirestoreId = () => {
+export const getFilestoreId = () => {
   const origin = window.location.origin;
   if (origin.includes("kerala-dev")) {
     return "2aefb901-edc6-4a45-95f8-3ea383a513f5";
