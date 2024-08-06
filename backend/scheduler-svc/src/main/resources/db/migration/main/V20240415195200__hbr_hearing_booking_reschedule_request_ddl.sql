@@ -3,6 +3,7 @@ CREATE TABLE hearing_booking_reschedule_request (
     hearing_booking_id          character varying(64),
     reschedule_request_id       character varying(64),
     requester_id                character varying(64),
+    status                      character varying(64),
     reason                      text,
     action_comment              text,
     created_by                  character varying(64),

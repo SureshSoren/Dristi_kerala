@@ -5,6 +5,7 @@ import digit.config.Configuration;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.util.CaseUtil;
+import digit.util.DateUtil;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
@@ -33,6 +34,7 @@ public class OptOutConsumerService {
     private final RescheduleRequestOptOutService optOutService;
 
     private final CaseUtil caseUtil;
+
 
     @Autowired
     public OptOutConsumerService(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, HearingService hearingService, RescheduleRequestOptOutService optOutService, CaseUtil caseUtil) {
@@ -73,7 +75,7 @@ public class OptOutConsumerService {
 
             List<Long> suggestedDates = reScheduleHearing.getSuggestedDates();
             List<Long> availableDates = reScheduleHearing.getAvailableDates();
-            Set<Long> suggestedDatesSet = optOuts.isEmpty() ? new HashSet<>(availableDates) : new HashSet<>(suggestedDates);
+            Set<Long> suggestedDatesSet = optOuts.isEmpty() ? new HashSet<>(suggestedDates) : new HashSet<>(availableDates);
 
             optoutDates.forEach(suggestedDatesSet::remove);
 
@@ -84,7 +86,8 @@ public class OptOutConsumerService {
                 // this is last opt out, need to close the request. open the pending task for judge
 
                 //unblock the calendar for judge (suggested days -available days)
-                reScheduleHearing.setStatus(INACTIVE);
+                ReScheduleHearingRequest request = ReScheduleHearingRequest.builder().requestInfo(requestInfo).reScheduleHearing(Collections.singletonList(reScheduleHearing)).build();
+                unblockJudgeCalendarForSuggestedDays(request);
 
             } else {
                 //update the request and reduce available dates
@@ -100,8 +103,40 @@ public class OptOutConsumerService {
             log.info("operation = checkAndScheduleHearingForOptOut, result = FAILURE, message = {}", e.getMessage());
 
         }
-
-
     }
 
+    public void unblockJudgeCalendarForSuggestedDays(ReScheduleHearingRequest request) {
+        try {
+            log.info("operation = unblockJudgeCalendarForSuggestedDays, result = IN_PROGRESS, request = {}", request.getReScheduleHearing());
+            ReScheduleHearing reScheduleHearing = request.getReScheduleHearing().get(0);
+            RequestInfo requestInfo = request.getRequestInfo();
+            List<Long> suggestedDays = reScheduleHearing.getSuggestedDates();
+            List<Long> availableDays = reScheduleHearing.getAvailableDates();
+            Set<Long> suggestedDaysSet = new HashSet<>(suggestedDays);
+            availableDays.forEach(suggestedDaysSet::remove);
+            List<ScheduleHearing> scheduleHearings = hearingService.search(HearingSearchRequest.builder()
+                    .criteria(ScheduleHearingSearchCriteria.builder()
+                            .rescheduleId(reScheduleHearing.getRescheduledRequestId())
+                            .tenantId(reScheduleHearing.getTenantId())
+                            .build())
+                    .build(), null, null);
+
+            List<ScheduleHearing> newHearings = new ArrayList<>();
+            for (ScheduleHearing scheduleHearing : scheduleHearings) {
+                Long hearingDate = scheduleHearing.getHearingDate();
+                if(suggestedDaysSet.contains(hearingDate)){
+                    scheduleHearing.setStatus(INACTIVE);
+                    newHearings.add(scheduleHearing);
+                }
+            }
+            hearingService.update(ScheduleHearingRequest.builder()
+                    .requestInfo(requestInfo)
+                    .hearing(newHearings)
+                    .build());
+            log.info("operation = unblockJudgeCalendarForSuggestedDays, result = SUCCESS");
+        } catch (Exception e) {
+            log.error("Error unblocking calendar: {}", e.getMessage());
+            log.info("operation = unblockJudgeCalendarForSuggestedDays, result = FAILURE, message = {}", e.getMessage());
+        }
+    }
 }

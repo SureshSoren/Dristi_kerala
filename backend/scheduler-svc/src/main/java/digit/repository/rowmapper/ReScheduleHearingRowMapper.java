@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 
 
 @Component
@@ -38,6 +39,8 @@ public class ReScheduleHearingRowMapper implements RowMapper<ReScheduleHearing> 
                     }))
                     .availableDates(resultSet.getString("available_days") == null ? null : objectMapper.readValue(resultSet.getString("available_days"), new TypeReference<>() {
                     }))
+                    .litigants(Collections.singleton(resultSet.getString("litigants")))
+                    .representatives(Collections.singleton(resultSet.getString("representatives")))
                     .auditDetails(AuditDetails.builder()
                             .createdBy(resultSet.getString("created_by"))
                             .createdTime(resultSet.getLong("created_time"))
