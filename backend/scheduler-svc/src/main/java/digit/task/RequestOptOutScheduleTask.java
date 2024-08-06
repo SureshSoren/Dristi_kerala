@@ -5,11 +5,10 @@ import digit.config.Configuration;
 import digit.kafka.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.repository.RescheduleRequestOptOutRepository;
-import digit.web.models.OptOut;
-import digit.web.models.OptOutSearchCriteria;
-import digit.web.models.ReScheduleHearing;
-import digit.web.models.ReScheduleHearingReqSearchCriteria;
+import digit.util.PendingTaskUtil;
+import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -36,12 +35,15 @@ public class RequestOptOutScheduleTask {
 
     private final Configuration config;
 
+    private final PendingTaskUtil pendingTaskUtil;
+
     @Autowired
-    public RequestOptOutScheduleTask(ReScheduleRequestRepository reScheduleRepository, RescheduleRequestOptOutRepository requestOptOutRepository, Producer producer, Configuration config) {
+    public RequestOptOutScheduleTask(ReScheduleRequestRepository reScheduleRepository, RescheduleRequestOptOutRepository requestOptOutRepository, Producer producer, Configuration config, PendingTaskUtil pendingTaskUtil) {
         this.reScheduleRepository = reScheduleRepository;
         this.requestOptOutRepository = requestOptOutRepository;
         this.producer = producer;
         this.config = config;
+        this.pendingTaskUtil = pendingTaskUtil;
     }
 
     @Scheduled(cron = "${drishti.cron.opt-out.due.date}", zone = "Asia/Kolkata")
@@ -69,6 +71,12 @@ public class RequestOptOutScheduleTask {
                 //todo: audit details
 
                 //open pending task for judge
+
+                PendingTask pendingTask = pendingTaskUtil.createPendingTask(reScheduleHearing);
+                PendingTaskRequest request = PendingTaskRequest.builder()
+                        .pendingTask(pendingTask)
+                        .requestInfo(new RequestInfo()).build();
+                pendingTaskUtil.callAnalytics(request);
 
                 //unblock judge calendar for suggested days - available days
             }
