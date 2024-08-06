@@ -1,6 +1,4 @@
-const axios = require('axios');
-const config = require('../config/config');
- 
+const config = require('../config/config'); 
  
 exports.getComplainantsDetails = async (cases) => {
     return cases.additionalDetails.complainantDetails.formdata.map((formData) => {
@@ -51,38 +49,41 @@ exports.getComplainantsDetails = async (cases) => {
 exports.getRespondentsDetails = async (cases) => {
     return cases.additionalDetails.respondentDetails.formdata.map((formData) => {
         const data = formData.data;
-        const addressDetail = data.addressDetails[0].addressDetails;
  
-        const address = JSON.stringify({
-            locality: addressDetail.locality,
-            city: addressDetail.city,
-            district: addressDetail.district,
-            state: addressDetail.state,
-            pincode: addressDetail.pincode
+        const addresses = data.addressDetails.map((addressDetail) => {
+            return {
+                locality: addressDetail.addressDetails.locality,
+                city: addressDetail.addressDetails.city,
+                district: addressDetail.addressDetails.district,
+                state: addressDetail.addressDetails.state,
+                pincode: addressDetail.addressDetails.pincode
+            };
         });
- 
+
         return {
             respondentFirstName: data.respondentFirstName,
             respondentLastName: data.respondentLastName,
             respondentType: data.respondentType.name,
             phone: data.mobileNumber || null,
             email: data.email || null,
-            address
+            address: addresses
         };
     });
 };
- 
+
 exports.getWitnessDetails = async (cases) => {
     return cases.additionalDetails.witnessDetails.formdata.map((formData) => {
         const data = formData.data;
         const addressDetail = data.addressDetails[0].addressDetails;
  
-        const address = JSON.stringify({
-            locality: addressDetail.locality,
-            city: addressDetail.city,
-            district: addressDetail.district,
-            state: addressDetail.state,
-            pincode: addressDetail.pincode
+        const addresses = data.addressDetails.map((addressDetail) => {
+            return {
+                locality: addressDetail.addressDetails.locality,
+                city: addressDetail.addressDetails.city,
+                district: addressDetail.addressDetails.district,
+                state: addressDetail.addressDetails.state,
+                pincode: addressDetail.addressDetails.pincode
+            };
         });
  
         const additionalDetails = JSON.stringify({
@@ -94,7 +95,7 @@ exports.getWitnessDetails = async (cases) => {
             witnessLastName: data.lastName,
             phone: data.phonenumbers.mobileNumber[0] || null,
             email: data.emails.textfieldValue || null,
-            address,
+            address: addresses,
             additionalDetails
         };
     });
@@ -103,83 +104,134 @@ exports.getWitnessDetails = async (cases) => {
 exports.getAdvocateDetails = async (cases) => {
     return cases.additionalDetails.advocateDetails.formdata.map((formData) => {
         const data = formData.data;
- 
+        
+        const vakalatnamaDocument = data.vakalatnamaFileUpload.document.find(doc => doc.fileName === 'UPLOAD_VAKALATNAMA');
+        
         return {
             advocateId: data.advocateId,
             advocateName: data.advocateName,
             barRegistrationNumber: data.barRegistrationNumber,
-            vakalatnamaFileStore: data.vakalatnamaFileUpload.document[0].fileStore,
+            vakalatnamaFileStore: vakalatnamaDocument ? vakalatnamaDocument.fileStore : null,
             isRepresenting: data.isAdvocateRepresenting.name
         };
     });
 };
 
-exports.enrichLitigantsWithAdvocates = (litigants, advocates) => { 
-    const advocateMap = new Map();     
-    advocates.forEach(advocate => { 
-        advocate.representing.forEach(party => { 
-            advocateMap.set(party.individualId, advocate.advocateName);
-         });
-     }); 
-     return litigants.map(litigant => { 
-        if (advocateMap.has(litigant.individualId)) { 
-            litigant.advocateName = advocateMap.get(litigant.individualId); 
-        } 
-        return litigant; 
+exports.getChequeDetailsList = (caseDetails) => {
+    const chequeDetailsList = caseDetails.chequeDetails.formdata.map(dataItem => {
+        const chequeDetailsData = dataItem.data || {};
+
+        const bouncedChequeDocument = chequeDetailsData.depositChequeFileUpload.document.find(doc => doc.fileName === 'CS_BOUNCED_CHEQUE');
+        const depositChequeDocument = chequeDetailsData.vakalatnamaFileUpload.document.find(doc => doc.fileName === 'CS_PROOF_DEPOSIT_CHEQUE');
+        const returnMemoDocument = chequeDetailsData.vakalatnamaFileUpload.document.find(doc => doc.fileName === 'CS_CHEQUE_RETURN_MEMO');
+
+        return {
+            signatoryName: chequeDetailsData.chequeSignatoryName || null,
+            bouncedChequeFileStore: bouncedChequeDocument ? bouncedChequeDocument.fileStore : null,
+            nameOnCheque: chequeDetailsData.name || null,
+            chequeNumber: chequeDetailsData.chequeNumber || null,
+            dateOfIssuance: chequeDetailsData.issuanceDate || null,
+            bankName: chequeDetailsData.bankName || null,
+            ifscCode: chequeDetailsData.ifsc || null,
+            chequeAmount: chequeDetailsData.chequeAmount || null,
+            dateOfDeposit: chequeDetailsData.depositDate || null,
+            depositChequeFileStore: depositChequeDocument ? depositChequeDocument.fileStore : null,
+            returnMemoFileStore: returnMemoDocument ? returnMemoDocument.fileStore : null,
+            chequeAdditionalDetails: chequeDetailsData.chequeAdditionalDetails?.text || null
+        };
     });
+
+    return chequeDetailsList;
 };
 
 exports.getDebtLiabilityDetails = (caseDetails) => {
-    const debtLiabilityData = caseDetails.debtLiabilityDetails.formdata[0]?.data || {};
- 
-    return {
-        natureOfDebt: debtLiabilityData.liabilityNature?.name || null,
-        totalAmountCoveredByCheque: debtLiabilityData.liabilityType?.showAmountCovered ? debtLiabilityData.liabilityAmountCovered || null : null,
-        proofOfLiabilityFileStore: debtLiabilityData.debtLiabilityFileUpload?.document[0]?.fileStore || null,
-        additionalDetails: debtLiabilityData.additionalDebtLiabilityDetails?.text || null
-    };
+
+    const debtLiabilityDetailsList = caseDetails.debtLiabilityDetails.formdata.map(dataItem => {
+        const debtLiabilityData = dataItem.data || {};
+    
+        const proofOfLiabilityDocument = debtLiabilityData.debtLiabilityFileUpload?.document.find(doc => doc.fileName === 'CS_PROOF_DEBT');
+
+        return {
+            natureOfDebt: debtLiabilityData.liabilityNature?.name || null,
+            totalAmountCoveredByCheque: debtLiabilityData.liabilityType?.showAmountCovered ? debtLiabilityData.liabilityAmountCovered || null : null,
+            proofOfLiabilityFileStore: proofOfLiabilityDocument ? proofOfLiabilityDocument.fileStore : null,
+            additionalDetails: debtLiabilityData.additionalDebtLiabilityDetails?.text || null
+        };
+    });
+
+    return debtLiabilityDetailsList;
 };
 
 exports.getDemandNoticeDetails = (caseDetails) => {
-    const demandNoticeData = caseDetails.demandNoticeDetails.formdata[0]?.data || {};
+    const demandNoticeDetailsList = caseDetails.demandNoticeDetails.formdata.map(dataItem => {
+        const demandNoticeData = dataItem.data || {};
  
-    return {
-        modeOfDispatch: demandNoticeData.modeOfDispatchType?.modeOfDispatchType?.name || null,
-        dateOfIssuance: demandNoticeData.dateOfIssuance || null,
-        dateOfDispatch: demandNoticeData.dateOfDispatch || null,
-        legalDemandNoticeFileStore: demandNoticeData.legalDemandNoticeFileUpload?.document[0]?.fileStore || null,
-        proofOfDispatchFileStore: demandNoticeData.proofOfDispatchFileUpload?.document[0]?.fileStore || null,
-        proofOfService: demandNoticeData.proofOfService?.code || null,
-        dateOfDeemedService: demandNoticeData.dateOfDeemedService || null,
-        dateOfAccrual: demandNoticeData.dateOfAccrual || null,
-        proofOfAcknowledgmentFileStore: demandNoticeData.proofOfAcknowledgmentFileUpload?.document[0]?.fileStore || null,
-        replyReceived: demandNoticeData.proofOfReply?.code || null,
-        dateOfReply: demandNoticeData.dateOfReply || null,
-        proofOfReplyFileStore: demandNoticeData.proofOfReplyFileUpload?.document[0]?.fileStore || null
-    };
+        PROOF_OF_DISPATCH_FILE_NAME
+        LEGAL_DEMAND_NOTICE
+        PROOF_LEGAL_DEMAND_NOTICE_FILE_NAME
+        CS_PROOF_TO_REPLY_DEMAND_NOTICE_FILE_NAME
+
+        const legalDemandNoticeDocument = demandNoticeData.legalDemandNoticeFileUpload?.document.find(doc => doc.fileName === 'LEGAL_DEMAND_NOTICE');
+        const proofOfServiceDocument = demandNoticeData.proofOfDispatchFileUpload?.document.find(doc => doc.fileName === 'PROOF_OF_DISPATCH_FILE_NAME');
+        const proofOfAcknowledgmentDocument = demandNoticeData.proofOfAcknowledgmentFileUpload?.document.find(doc => doc.fileName === 'PROOF_LEGAL_DEMAND_NOTICE_FILE_NAME');
+        const proofOfReplyDocument = demandNoticeData.proofOfReplyFileUpload?.document.find(doc => doc.fileName === 'CS_PROOF_TO_REPLY_DEMAND_NOTICE_FILE_NAME');
+
+        return {
+            modeOfDispatch: demandNoticeData.modeOfDispatchType?.modeOfDispatchType?.name || null,
+            dateOfIssuance: demandNoticeData.dateOfIssuance || null,
+            dateOfDispatch: demandNoticeData.dateOfDispatch || null,
+            legalDemandNoticeFileStore: legalDemandNoticeDocument ? legalDemandNoticeDocument.fileStore : null,
+            proofOfDispatchFileStore: proofOfServiceDocument ? proofOfServiceDocument.fileStore : null,
+            proofOfService: demandNoticeData.proofOfService?.code || null,
+            dateOfDeemedService: demandNoticeData.dateOfDeemedService || null,
+            dateOfAccrual: demandNoticeData.dateOfAccrual || null,
+            proofOfAcknowledgmentFileStore: proofOfAcknowledgmentDocument ? proofOfAcknowledgmentDocument.fileStore : null,
+            replyReceived: demandNoticeData.proofOfReply?.code || null,
+            dateOfReply: demandNoticeData.dateOfReply || null,
+            proofOfReplyFileStore: proofOfReplyDocument ? proofOfReplyDocument.fileStore : null,
+
+        };
+    });
+
+    return demandNoticeDetailsList;
 };
 
 exports.getDelayCondonationDetails = (caseDetails) => {
-    const delayData = caseDetails.delayApplications.formdata[0]?.data || {};
- 
-    return {
-        reasonForDelay: delayData.delayCondonationType?.name || null,
-        fileUploadFileStore: delayData.condonationFileUpload?.document?.[0]?.fileStore || null
-    };
+    const delayCondonationDetailsList = caseDetails.delayApplications.formdata.map(dataItem => {
+        const delayData = dataItem.data || {};
+    
+        const delayCondonationDocument = demandNoticeData.legalDemandNoticeFileUpload?.document.find(doc => doc.fileName === 'CS_DELAY_CONDONATION_APPLICATION');
+
+        return {
+            reasonForDelay: delayData.delayApplicationReason.reasonForDelay || null,
+            delayCondonationFileStore: delayCondonationDocument ? delayCondonationDocument.fileStore : null
+        };
+    });
+
+    return delayCondonationDetailsList;
 };
 
 exports.getPrayerSwornStatementDetails = (caseDetails) => {
-    const swornStatementData = caseDetails.prayerSwornStatement.formdata[0]?.data || {};
- 
-    return {
-        prayerAndSwornStatementType: swornStatementData.prayerAndSwornStatementType?.name || null,
-        whetherComplainantWillingToSettle: swornStatementData.infoBoxData?.data || null,
-        circumstancesUnderWhichComplainantWillingToSettle: swornStatementData.caseSettlementCondition?.text || null,
-        memorandumOfComplaint: swornStatementData.memorandumOfComplaint?.text || null,
-        prayerForRelief: swornStatementData.prayerForRelief?.text || null,
-        swornStatement: swornStatementData.swornStatement?.document?.[0]?.fileStore || null,
-        additionalDetails: swornStatementData.additionalDetails?.text || null,
-        additionalActsSectionsToCharge: swornStatementData.additionalActsSections?.text || null,
-        complainantWith: swornStatementData.SelectUploadDocWithName || null
-    };
+    const prayerSwornStatementDetailsList = caseDetails.prayerSwornStatement.formdata.map(dataItem => {
+        const swornStatementData = dataItem.data || {};
+
+        const swornStatementDocument = swornStatementData.swornStatement?.document.find(doc => doc.fileName === 'CS_SWORN_STATEMENT_HEADER');
+        const prayerForReliefDocument = swornStatementData.prayerForRelief?.document.find(doc => doc.fileName === 'ATTACHED_DOCUMENT');
+        const memorandumOfComplaintDocument = swornStatementData.memorandumOfComplaint?.document.find(doc => doc.fileName === 'ATTACHED_DOCUMENT');
+    
+        return {
+            prayerAndSwornStatementType: swornStatementData.prayerAndSwornStatementType?.name || null,
+            whetherComplainantWillingToSettle: swornStatementData.infoBoxData?.data || null,
+            circumstancesUnderWhichComplainantWillingToSettle: swornStatementData.caseSettlementCondition?.text || null,
+            memorandumOfComplaintText: swornStatementData.memorandumOfComplaint?.text || null,
+            memorandumOfComplaintFileStore: memorandumOfComplaintDocument ? memorandumOfComplaintDocument.fileStore : null,
+            prayerForReliefText: swornStatementData.prayerForRelief?.text || null,
+            prayerForReliefFileStore: prayerForReliefDocument ? prayerForReliefDocument.fileStore : null,
+            swornStatement: swornStatementDocument ? swornStatementDocument.fileStore : null,
+            additionalDetails: swornStatementData.additionalDetails?.text || null,
+            additionalActsSectionsToChargeWith: swornStatementData.additionalActsSections?.text || null
+        };
+    });
+
+    return prayerSwornStatementDetailsList;
 };
