@@ -42,7 +42,7 @@ public class RequestOptOutScheduleTask {
     private final PendingTaskUtil pendingTaskUtil;
 
     @Autowired
-    public RequestOptOutScheduleTask(ReScheduleRequestRepository reScheduleRepository, RescheduleRequestOptOutRepository requestOptOutRepository, Producer producer, Configuration config, PendingTaskUtil pendingTaskUtil) {
+    public RequestOptOutScheduleTask(ReScheduleRequestRepository reScheduleRepository, RescheduleRequestOptOutRepository requestOptOutRepository, Producer producer, Configuration config, OptOutConsumerService optOutConsumerService, PendingTaskUtil pendingTaskUtil) {
         this.reScheduleRepository = reScheduleRepository;
         this.requestOptOutRepository = requestOptOutRepository;
         this.producer = producer;
@@ -79,10 +79,10 @@ public class RequestOptOutScheduleTask {
                 //open pending task for judge
 
                 PendingTask pendingTask = pendingTaskUtil.createPendingTask(reScheduleHearing);
-                PendingTaskRequest request = PendingTaskRequest.builder()
+                PendingTaskRequest pendingTaskRequest = PendingTaskRequest.builder()
                         .pendingTask(pendingTask)
                         .requestInfo(new RequestInfo()).build();
-                pendingTaskUtil.callAnalytics(request);
+                pendingTaskUtil.callAnalytics(pendingTaskRequest);
 
                 //unblock judge calendar for suggested days - available days
 
