@@ -8,6 +8,7 @@ import net.minidev.json.JSONArray;
 import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.config.Properties;
 import org.pucar.dristi.kafka.Producer;
+import org.pucar.dristi.repository.OcrRepository;
 import org.pucar.dristi.util.FileStoreUtil;
 import org.pucar.dristi.util.MdmsFetcher;
 import org.pucar.dristi.util.Util;
@@ -32,19 +33,20 @@ public class Service {
     private ObjectMapper objectMapper;
     private FileStoreUtil fileStoreUtil;
     private Producer producer;
-
+    private final OcrRepository ocrRepository;
     private Map<String, List<String>> keyWordsByDocument;
 
     @Autowired
     public Service(Util utils, Properties properties, MdmsFetcher mdmsFetcher,
                    ObjectMapper objectMapper, FileStoreUtil fileStoreUtil,
-                   Producer producer) {
+                   Producer producer, OcrRepository ocrRepository) {
         this.utils = utils;
         this.properties = properties;
         this.mdmsFetcher = mdmsFetcher;
         this.objectMapper = objectMapper;
         this.fileStoreUtil = fileStoreUtil;
         this.producer = producer;
+        this.ocrRepository = ocrRepository;
     }
 
     @PostConstruct
@@ -118,5 +120,8 @@ public class Service {
 
         return processOcrResponse(ocrResponse, ocrRequest);
     }
-
+    public List<Ocr> getOcrByFilingNumber(String filingNumber)
+    {
+        return ocrRepository.findByFilingNumber(filingNumber);
+    }
 }

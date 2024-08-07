@@ -59,4 +59,11 @@ public class Controller {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/ocr/getdata")
+    public ResponseEntity<List<Ocr>> getOcrData(@RequestBody String filingNumber)
+    {
+     List<Ocr> response = service.getOcrByFilingNumber(filingNumber);
+     return ResponseEntity.ok(response);
+    }
+
 }
