@@ -5,10 +5,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
   // mode: 'development',
-  entry: {
-    main: "./src/index.js",
-    telemetry: "./public/scripts/telemetry/index.js",
-  },
+  entry: "./src/index.js",
   devtool: "none",
   module: {
     rules: [
