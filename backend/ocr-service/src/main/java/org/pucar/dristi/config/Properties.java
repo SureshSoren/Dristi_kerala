@@ -28,9 +28,12 @@ public class Properties {
 
     @Value("${egov.file.store.host}")
     private String fileStoreHost;
-    
+
     @Value("${egov.file.store.endpoint}")
     private String fileStoreEndpoint;
+
+    @Value("${egov.ocr.topic}")
+    private String ocrTopic;
 
     @Value("${state.level.tenant.id}")
     private String stateLevelTenantId;

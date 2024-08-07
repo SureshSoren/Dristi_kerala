@@ -7,19 +7,18 @@ import jakarta.annotation.PostConstruct;
 import net.minidev.json.JSONArray;
 import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.config.Properties;
+import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.util.FileStoreUtil;
 import org.pucar.dristi.util.MdmsFetcher;
 import org.pucar.dristi.util.Util;
-import org.pucar.dristi.web.model.DocumentType;
+import org.pucar.dristi.web.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -32,17 +31,20 @@ public class Service {
     private MdmsFetcher mdmsFetcher;
     private ObjectMapper objectMapper;
     private FileStoreUtil fileStoreUtil;
+    private Producer producer;
 
     private Map<String, List<String>> keyWordsByDocument;
 
     @Autowired
     public Service(Util utils, Properties properties, MdmsFetcher mdmsFetcher,
-                   ObjectMapper objectMapper, FileStoreUtil fileStoreUtil) {
+                   ObjectMapper objectMapper, FileStoreUtil fileStoreUtil,
+                   Producer producer) {
         this.utils = utils;
         this.properties = properties;
         this.mdmsFetcher = mdmsFetcher;
         this.objectMapper = objectMapper;
         this.fileStoreUtil = fileStoreUtil;
+        this.producer = producer;
     }
 
     @PostConstruct
@@ -63,16 +65,58 @@ public class Service {
         return this.keyWordsByDocument.keySet();
     }
 
-    public Map<String, Object> callOCR(Resource resource, List<String> wordCheckList, Integer distanceCutoff, String docType, Boolean extractData) {
+
+    private Ocr processOcrResponse(OcrResponse ocrResponse, OcrRequest ocrRequest) {
+        Ocr ocr = new Ocr();
+        ocr.setId(UUID.randomUUID())
+                .setTenantId(properties.getStateLevelTenantId())
+                .setFileStoreId(ocrRequest.getFileStoreId())
+                .setFilingNumber(ocrRequest.getFilingNumber())
+                .setDocumentType(ocrRequest.getDocumentType());
+        if (null != ocrResponse.getMessage()) {
+            ocr.setMessage(ocrResponse.getMessage());
+        } else if (null != ocrResponse.getKeywordCounts()) {
+            Map<String, Integer> keyWordCounts = ocrResponse.getKeywordCounts();
+            List<String> missingKeywords = new ArrayList<>();
+            for (String keyword : ocrRequest.getKeywords()) {
+                if (keyWordCounts.get(keyword) == 0) {
+                    missingKeywords.add(keyword);
+                }
+            }
+            if (missingKeywords.size() == ocrRequest.getKeywords().size()) {
+                ocr.setMessage("Not a valid " + ocrRequest.getDocumentType());
+            }
+            log.info(missingKeywords.toString());
+        }
+        try {
+            OcrPersist ocrPersist = new OcrPersist().setOcr(ocr);
+            String message = objectMapper.writeValueAsString(ocrPersist);
+            log.info(message);
+            producer.push(properties.getOcrTopic(), message);
+        } catch (Exception e) {
+            log.error("error in pushing to kafka");
+        }
+        return ocr;
+    }
+
+    public Ocr verifyFileStoreDocument(OcrRequest ocrRequest) {
+
+        Resource resource = fileStoreUtil.getFileFromStore(ocrRequest.getFileStoreId());
+        return callOCR(resource, ocrRequest);
+
+    }
+
+    public Ocr callOCR(Resource resource, OcrRequest ocrRequest) {
+
+        if (ocrRequest.getKeywords() == null) {
+            ocrRequest.setKeywords(this.keyWordsByDocument.get(ocrRequest.getDocumentType()));
+        }
         String url = properties.getOcrHost() + properties.getOcrEndPoint();
-        return utils.callOCR(url, resource, wordCheckList, distanceCutoff, docType, extractData).getBody();
+        log.info(ocrRequest.getKeywords().toString());
+        OcrResponse ocrResponse = utils.callOCR(url, resource, ocrRequest).getBody();
+        log.info(ocrResponse.toString());
+
+        return processOcrResponse(ocrResponse, ocrRequest);
     }
 
-    public Map<String, Object> verifyDocument(String fileStoreId, String documentType) {
-
-        Resource resource = fileStoreUtil.getFileFromStore(fileStoreId);
-        List<String> keywords = this.keyWordsByDocument.get(documentType);
-        log.info(keywords.toString());
-        return callOCR(resource, keywords, null, documentType, null);
-    }
 }
