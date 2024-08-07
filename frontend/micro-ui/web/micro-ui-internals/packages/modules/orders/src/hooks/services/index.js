@@ -34,4 +34,39 @@ export const ordersService = {
       data,
       params,
     }),
+  createHearings: (data, params) =>
+    Request({
+      url: Urls.orders.createHearings,
+      useCache: false,
+      userService: false,
+      data,
+      params,
+    }),
+  updateHearings: (data, params) =>
+    Request({
+      url: Urls.orders.updateHearings,
+      useCache: false,
+      userService: false,
+      data,
+      params,
+    }),
 };
+
+export const EpostService = {
+  EpostUpdate: (data, params)=> 
+    Request({
+      url: Urls.Epost.EpostUpdate,
+      useCache: true,
+      userService: true,
+      data,
+      params,
+    }),
+  customApiService: (url, data, params, useCache = false, userService = true) =>
+      Request({
+        url: url,
+        useCache: useCache,
+        userService,
+        data,
+        params,
+      }),
+}

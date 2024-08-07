@@ -154,22 +154,22 @@ export const DRISTIService = {
       params,
     });
   },
-    customApiService: (url, data, params, useCache = false, userService = true) =>
-        Request({
-            url: url,
-            useCache: useCache,
-            userService: true,
-            data,
-            params,
-        }),
-    addWitness: (data, params) =>
-        Request({
-            url: Urls.case.addWitness,
-            useCache: false,
-            userService: false,
-            data,
-            params,
-        }),
+  customApiService: (url, data, params, useCache = false, userService = true) =>
+    Request({
+      url: url,
+      useCache: useCache,
+      userService: true,
+      data,
+      params,
+    }),
+  addWitness: (data, params) =>
+    Request({
+      url: Urls.case.addWitness,
+      useCache: false,
+      userService: false,
+      data,
+      params,
+    }),
   createDemand: (data, params) =>
     Request({
       url: Urls.dristi.demandCreate,

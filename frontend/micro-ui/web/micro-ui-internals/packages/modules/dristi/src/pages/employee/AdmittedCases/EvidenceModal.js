@@ -13,11 +13,9 @@ import { DRISTIService } from "../../../services";
 import { SubmissionWorkflowAction, SubmissionWorkflowState } from "../../../Utils/submissionWorkflow";
 import { getAdvocates } from "../../citizen/FileCase/EfilingValidationUtils";
 import DocViewerWrapper from "../docViewerWrapper";
+import SelectCustomDocUpload from "../../../components/SelectCustomDocUpload";
 
 const stateSla = {
-  RE_SCHEDULE: 2,
-  CHECKOUT_REQUEST: 2,
-  SAVE_DRAFT: 2,
   DRAFT_IN_PROGRESS: 2,
 };
 
@@ -43,6 +41,8 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
   const isLitigent = useMemo(() => !userInfo?.roles?.some((role) => ["ADVOCATE_ROLE", "ADVOCATE_CLERK"].includes(role?.code)), [userInfo?.roles]);
   const userType = useMemo(() => (userInfo.type === "CITIZEN" ? "citizen" : "employee"), [userInfo.type]);
   const todayDate = new Date().getTime();
+  const [formData, setFormData] = useState({});
+
   const CloseBtn = (props) => {
     return (
       <div onClick={props?.onClick} style={{ height: "100%", display: "flex", alignItems: "center", paddingRight: "20px", cursor: "pointer" }}>
@@ -435,7 +435,7 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
   const getOrderTypes = (applicationType, type) => {
     switch (applicationType) {
       case "RE_SCHEDULE":
-        return type === "reject" ? "REJECTION_RESCHEDULE_REQUEST" : "APPROVAL_RESCHEDULE_REQUEST";
+        return type === "reject" ? "REJECTION_RESCHEDULE_REQUEST" : "INITIATING_RESCHEDULING_OF_HEARING_DATE";
       case "WITHDRAWAL":
         return type === "reject" ? "REJECT_VOLUNTARY_SUBMISSIONS" : "WITHDRAWAL";
       case "TRANSFER":
@@ -446,8 +446,6 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
         return type === "reject" ? "REJECT_VOLUNTARY_SUBMISSIONS" : "BAIL";
       case "SURETY":
         return type === "reject" ? "REJECT_VOLUNTARY_SUBMISSIONS" : "BAIL";
-      case "CHECKOUT_REQUEST":
-        return type === "reject" ? "REJECT_VOLUNTARY_SUBMISSIONS" : "APPROVAL_RESCHEDULE_REQUEST";
       case "EXTENSION_SUBMISSION_DEADLINE":
         return type === "reject" ? "REJECT_VOLUNTARY_SUBMISSIONS" : "EXTENSION_OF_DOCUMENT_SUBMISSION_DATE";
       default:
@@ -458,7 +456,7 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
   const getOrderActionName = (applicationType, type) => {
     switch (applicationType) {
       case "RE_SCHEDULE":
-        return type === "reject" ? "REJECTION_ORDER_RESCHEDULE_REQUEST" : "APPROVAL_ORDER_RESCHEDULE_REQUEST";
+        return type === "reject" ? "REJECTION_ORDER_RESCHEDULE_REQUEST" : "ORDER_FOR_INITIATING_RESCHEDULING_OF_HEARING_DATE";
       case "WITHDRAWAL":
         return type === "reject" ? "REJECT_ORDER_VOLUNTARY_SUBMISSIONS" : "ORDER_FOR_WITHDRAWAL";
       case "TRANSFER":
@@ -469,10 +467,8 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
         return type === "reject" ? "REJECT_ORDER_VOLUNTARY_SUBMISSIONS" : "ORDER_FOR_BAIL";
       case "SURETY":
         return type === "reject" ? "REJECT_ORDER_VOLUNTARY_SUBMISSIONS" : "ORDER_FOR_BAIL";
-      case "CHECKOUT_REQUEST":
-        return type === "reject" ? "REJECT_ORDER_VOLUNTARY_SUBMISSIONS" : "APPROVAL_ORDER_RESCHEDULE_REQUEST";
       case "EXTENSION_SUBMISSION_DEADLINE":
-        return type === "reject" ? "REJECT_ORDER_VOLUNTARY_SUBMISSIONS" : "APPROVAL_ORDER_RESCHEDULE_REQUEST";
+        return type === "reject" ? "REJECT_ORDER_VOLUNTARY_SUBMISSIONS" : "APPROVAL_ORDER_EXTENSION_SUBMISSION_DEADLINE";
       default:
         return type === "reject" ? "REJECT_ORDER_VOLUNTARY_SUBMISSIONS" : "APPROVE_ORDER_VOLUNTARY_SUBMISSIONS";
     }
@@ -480,16 +476,7 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
   const isMandatoryOrderCreation = useMemo(() => {
     const applicationType = documentSubmission?.[0]?.applicationList?.applicationType;
     const type = showConfirmationModal?.type;
-    const acceptedApplicationTypes = [
-      "RE_SCHEDULE",
-      "WITHDRAWAL",
-      "TRANSFER",
-      "SETTLEMENT",
-      "BAIL_BOND",
-      "SURETY",
-      "CHECKOUT_REQUEST",
-      "EXTENSION_SUBMISSION_DEADLINE",
-    ];
+    const acceptedApplicationTypes = ["RE_SCHEDULE", "WITHDRAWAL", "TRANSFER", "SETTLEMENT", "BAIL_BOND", "SURETY", "EXTENSION_SUBMISSION_DEADLINE"];
     if (type === "reject") {
       return false;
     } else {
@@ -530,7 +517,12 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
               documents: [{}],
             },
             documents: [],
-            additionalDetails: { formdata },
+            additionalDetails: {
+              formdata,
+            },
+            ...(orderType === "INITIATING_RESCHEDULING_OF_HEARING_DATE" && {
+              hearingNumber: documentSubmission?.[0]?.applicationList?.additionalDetails?.hearingId,
+            }),
           },
         };
         try {
@@ -552,9 +544,7 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
               tenantId,
             },
           });
-          history.push(
-            `/${window.contextPath}/employee/orders/generate-orders?filingNumber=${filingNumber}&applicationNumber=${documentSubmission?.[0]?.applicationList?.applicationNumber}&orderNumber=${res?.order?.orderNumber}`
-          );
+          history.push(`/${window.contextPath}/employee/orders/generate-orders?filingNumber=${filingNumber}&orderNumber=${res?.order?.orderNumber}`);
         } catch (error) {}
       } else {
         if (showConfirmationModal.type === "reject") {
@@ -611,6 +601,32 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
         counterUpdate();
       } catch (error) {}
     }
+  };
+
+  const documentUploaderConfig = {
+    key: "commentDoc",
+    populators: {
+      inputs: [
+        {
+          name: "commentDoc",
+          documentSubText: "",
+          isOptional: "",
+          infoTooltipMessage: "",
+          type: "DragDropComponent",
+          uploadGuidelines: t("UPLOAD_DOC_50"),
+          maxFileSize: 50,
+          maxFileErrorMessage: "CS_FILE_LIMIT_50_MB",
+          fileTypes: ["JPG", "PNG", "PDF"],
+          isMultipleUpload: false,
+        },
+      ],
+    },
+  };
+
+  const onDocumentUpload = async (fileData, filename, tenantId) => {
+    if (fileData?.fileStore) return fileData;
+    const fileUploadRes = await window?.Digit.UploadServices.Filestorage("DRISTI", fileData, tenantId);
+    return { file: fileUploadRes?.data, fileType: fileData.type, filename };
   };
 
   return (
@@ -710,36 +726,70 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
                 {actionSaveLabel === t("ADD_COMMENT") && showSubmit && (
                   <div className="comment-send">
                     <div className="comment-input-wrapper">
-                      <TextInput
-                        placeholder={"Type here..."}
-                        value={currentComment}
-                        onChange={(e) => {
-                          setCurrentComment(e.target.value);
-                        }}
-                      />
+                      <div style={{ display: "flex" }}>
+                        <TextInput
+                          placeholder={"Type here..."}
+                          value={currentComment}
+                          onChange={(e) => {
+                            setCurrentComment(e.target.value);
+                          }}
+                        />
+                        <div
+                          className="send-comment-btn"
+                          style={{ marginLeft: "10px" }}
+                          onClick={async () => {
+                            let newComment = {
+                              comment: currentComment,
+                              additionalDetails: {
+                                author: user,
+                                timestamp: new Date(Date.now()).toLocaleDateString("en-in", {
+                                  year: "2-digit",
+                                  month: "short",
+                                  day: "2-digit",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                }),
+                              },
+                            };
+                            if (formData) {
+                              if (formData?.commentDoc?.commentDoc?.length > 0) {
+                                const uploadedData = await onDocumentUpload(
+                                  formData?.commentDoc?.commentDoc[0],
+                                  formData?.commentDoc?.commentDoc[0].name,
+                                  tenantId
+                                );
+                                newComment = {
+                                  ...newComment,
+                                  chatDocument: uploadedData.file.files[0].fileStoreId,
+                                  chatDocumentName: uploadedData.filename,
+                                };
+                              }
+                            }
+                            setComments((prev) => [...prev, newComment]);
+                            setCurrentComment("");
+                            setFormData({});
+                            // handleSubmitComment(newComment);
+                          }}
+                        >
+                          <RightArrow />
+                        </div>
+                      </div>
                       <div
-                        className="send-comment-btn"
-                        onClick={() => {
-                          const newComment = {
-                            comment: currentComment,
-                            additionalDetails: {
-                              author: user,
-                              timestamp: new Date(Date.now()).toLocaleDateString("en-in", {
-                                year: "2-digit",
-                                month: "short",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                              }),
-                            },
-                          };
-                          setComments((prev) => [...prev, newComment]);
-                          setCurrentComment("");
-                          // handleSubmitComment(newComment);
+                        style={{
+                          display: "flex",
                         }}
                       >
-                        <RightArrow />
+                        <SelectCustomDocUpload
+                          t={t}
+                          formData={formData}
+                          config={documentUploaderConfig}
+                          onSelect={(e, p) => {
+                            setFormData({
+                              [documentUploaderConfig.key]: p,
+                            });
+                          }}
+                        />
                       </div>
                     </div>
                   </div>

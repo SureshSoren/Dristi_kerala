@@ -1,5 +1,5 @@
 import { Banner, CardLabel, CloseSvg, Loader, Modal } from "@egovernments/digit-ui-react-components";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Button from "../../../components/Button";
 import { InfoCard } from "@egovernments/digit-ui-components";
 import { Link, useHistory } from "react-router-dom/cjs/react-router-dom.min";
@@ -7,6 +7,8 @@ import CustomCaseInfoDiv from "../../../components/CustomCaseInfoDiv";
 import useSearchCaseService from "../../../hooks/dristi/useSearchCaseService";
 import { useToast } from "../../../components/Toast/useToast";
 import { DRISTIService } from "../../../services";
+import { Urls } from "../../../hooks";
+import usePaymentProcess from "../../../../../home/src/hooks/usePaymentProcess";
 
 const mockSubmitModalInfo = {
   header: "CS_HEADER_FOR_E_FILING_PAYMENT",
@@ -33,8 +35,7 @@ const Heading = (props) => {
   return <h1 className="heading-m">{props.label}</h1>;
 };
 
-function EFilingPayment({ t, submitModalInfo = mockSubmitModalInfo, path }) {
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = mockSubmitModalInfo, amount = 2000, path }) {
   const history = useHistory();
   const onCancel = () => {
     setShowPaymentModal(false);
@@ -42,7 +43,7 @@ function EFilingPayment({ t, submitModalInfo = mockSubmitModalInfo, path }) {
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const { caseId } = window?.Digit.Hooks.useQueryParams();
   const toast = useToast();
-  const [paymentLoader, setPaymentLoader] = useState(false);
+  const scenario = "EfillingCase";
 
   const { data: caseData, isLoading } = useSearchCaseService(
     {
@@ -143,36 +144,58 @@ function EFilingPayment({ t, submitModalInfo = mockSubmitModalInfo, path }) {
     };
   }, [caseDetails?.filingNumber]);
 
-  const handleButtonClick = (url, data, header) => {
-    const popup = window.open("", "popupWindow", "width=1000,height=1000,scrollbars=yes");
-    if (popup) {
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = url;
-
-      const inputDataField = document.createElement("input");
-      inputDataField.type = "hidden";
-      inputDataField.name = "input_data";
-      inputDataField.value = data;
-      form.appendChild(inputDataField);
-
-      const inputHeadersField = document.createElement("input");
-      inputHeadersField.type = "hidden";
-      inputHeadersField.name = "input_headers";
-      inputHeadersField.value = header;
-      form.appendChild(inputHeadersField);
-
-      popup.document.body.appendChild(form);
-      form.submit();
-      setPaymentLoader(true);
-      popup.document.body.removeChild(form);
-    }
-    const checkPopupClosed = setInterval(async () => {
-      if (popup.closed) {
-        setPaymentLoader(false);
-        const billAfterPayment = await DRISTIService.callSearchBill({}, { tenantId, consumerCode: caseDetails?.filingNumber, service: "case" });
-        if (billAfterPayment?.Bill?.[0]?.status === "PAID") {
-          const fileStoreId = await DRISTIService.fetchBillFileStoreId({}, { billId: billAfterPayment?.Bill?.[0]?.id, tenantId: tenantId });
+  const { fetchBill, openPaymentPortal, paymentLoader, showPaymentModal, setShowPaymentModal } = usePaymentProcess({
+    tenantId,
+    consumerCode: caseDetails?.filingNumber,
+    service: "case",
+    path,
+    caseDetails,
+    totalAmount: chequeDetails?.totalAmount,
+    mockSubmitModalInfo,
+    scenario,
+  });
+  const onSubmitCase = async () => {
+    try {
+      if (billResponse?.Bill?.length === 0) {
+        await DRISTIService.createDemand({
+          Demands: [
+            {
+              tenantId,
+              consumerCode: caseDetails?.filingNumber,
+              consumerType: "case",
+              businessService: "case",
+              taxPeriodFrom: Date.now().toString(),
+              taxPeriodTo: Date.now().toString(),
+              demandDetails: [
+                {
+                  taxHeadMasterCode: "CASE_ADVANCE_CARRYFORWARD",
+                  taxAmount: 4,
+                  collectionAmount: 0,
+                },
+              ],
+            },
+          ],
+        });
+      }
+      const bill = await fetchBill(caseDetails?.filingNumber, tenantId, "case");
+      if (bill?.Bill?.length) {
+        const paymentStatus = await openPaymentPortal(bill);
+        if (paymentStatus) {
+          await DRISTIService.customApiService(Urls.dristi.pendingTask, {
+            pendingTask: {
+              name: "Pending Payment",
+              entityType: "case",
+              referenceId: `MANUAL_${caseDetails?.filingNumber}`,
+              status: "PAYMENT_PENDING",
+              cnrNumber: null,
+              filingNumber: caseDetails?.filingNumber,
+              isCompleted: true,
+              stateSla: null,
+              additionalDetails: {},
+              tenantId,
+            },
+          });
+          const fileStoreId = await DRISTIService.fetchBillFileStoreId({}, { billId: bill?.Bill?.[0]?.id, tenantId });
           fileStoreId &&
             history.push(`${path}/e-filing-payment-response`, {
               state: {
@@ -234,76 +257,10 @@ function EFilingPayment({ t, submitModalInfo = mockSubmitModalInfo, path }) {
             },
           });
         }
-        clearInterval(checkPopupClosed);
-      }
-    }, 1000);
-    setShowPaymentModal(false);
-  };
-  const onSubmitCase = async () => {
-    try {
-      if (billResponse?.Bill?.length === 0) {
-        await DRISTIService.createDemand({
-          Demands: [
-            {
-              tenantId,
-              consumerCode: caseDetails?.filingNumber,
-              consumerType: "case",
-              businessService: "case",
-              taxPeriodFrom: Date.now().toString(),
-              taxPeriodTo: Date.now().toString(),
-              demandDetails: [
-                {
-                  taxHeadMasterCode: "CASE_ADVANCE_CARRYFORWARD",
-                  taxAmount: 4,
-                  collectionAmount: 0,
-                },
-              ],
-            },
-          ],
-        });
-      }
-      const bill = await DRISTIService.callFetchBill({}, { consumerCode: caseDetails?.filingNumber, tenantId, businessService: "case" });
-
-      if (bill?.Bill?.length) {
-        const gateway = await DRISTIService.callETreasury(
-          {
-            ChallanData: {
-              ChallanDetails: {
-                FROM_DATE: "26/02/2020",
-                TO_DATE: "26/02/2020",
-                PAYMENT_MODE: "E",
-                NO_OF_HEADS: "1",
-                HEADS_DET: [
-                  {
-                    AMOUNT: "4",
-                    HEADID: "00374",
-                  },
-                ],
-                CHALLAN_AMOUNT: "4",
-                PARTY_NAME: caseDetails?.additionalDetails?.payerName,
-                DEPARTMENT_ID: bill?.Bill?.[0]?.billDetails?.[0]?.id,
-                TSB_RECEIPTS: "N",
-              },
-              billId: bill?.Bill?.[0]?.billDetails?.[0]?.billId,
-              serviceNumber: caseDetails?.filingNumber,
-              businessService: "case",
-              totalDue: 4.0,
-              mobileNumber: "9876543210",
-              paidBy: "COMMON_OWNER",
-              tenantId: tenantId,
-            },
-          },
-          {}
-        );
-
-        if (gateway) {
-          handleButtonClick(gateway?.payload?.url, gateway?.payload?.data, gateway?.payload?.headers);
-        } else {
-          handleError("Error calling e-Treasury.");
-        }
       }
     } catch (error) {
-      handleError(`Error in onSubmitCase: ${error.message}`);
+      toast.error(t("CS_PAYMENT_ERROR"));
+      console.error(error);
     }
   };
 

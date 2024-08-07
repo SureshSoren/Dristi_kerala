@@ -1,12 +1,14 @@
 import { useMemo, useCallback } from "react";
+import { getFilestoreId } from "../../../../dristi/src/Utils/fileStoreUtil";
 
 const useESign = () => {
+  const fileStoreId = getFilestoreId();
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const storedObj = useMemo(() => localStorage.getItem("signStatus"), []);
   const parsedObj = JSON.parse(storedObj) || [];
 
   const handleEsign = useCallback(
-    async (name, eSignFIleId, pageModule) => {
+    async (name, pageModule) => {
       try {
         const newSignStatuses = [...parsedObj, { name: name, isSigned: true }];
         localStorage.setItem("signStatus", JSON.stringify(newSignStatuses));
@@ -16,7 +18,7 @@ const useESign = () => {
             uidToken: "3456565",
             consent: "6564",
             authType: "6546",
-            fileStoreId: eSignFIleId,
+            fileStoreId: fileStoreId,
             tenantId: tenantId,
             pageModule: pageModule,
           },
@@ -85,12 +87,46 @@ const useESign = () => {
         setIsSigned(true);
       }
 
+      localStorage.removeItem("signStatus");
+      localStorage.removeItem("name");
+      localStorage.removeItem("isSignSuccess");
+      localStorage.removeItem("signStatus");
+    }
+  };
+
+  const checkJoinACaseESignStatus = (setIsSignedAdvocate, setIsSignedParty) => {
+    const isSignSuccess = localStorage.getItem("isSignSuccess");
+    const storedESignObj = localStorage.getItem("signStatus");
+    const parsedESignObj = JSON.parse(storedESignObj);
+
+    if (isSignSuccess) {
+      if (isSignSuccess === "success") {
+        const joinCaseData = JSON.parse(localStorage.getItem("appState"));
+        parsedESignObj?.forEach((sign) => {
+          if (sign?.name === "Advocate" && sign?.isSigned) {
+            setIsSignedAdvocate(true);
+            if (joinCaseData) {
+              joinCaseData.isSignedAdvocate = true;
+            }
+          } else if (sign?.name === "Party" && sign?.isSigned) {
+            setIsSignedParty(true);
+            if (joinCaseData) {
+              joinCaseData.isSignedParty = true;
+            }
+          }
+        });
+        if (joinCaseData) {
+          localStorage.setItem("appState", JSON.stringify(joinCaseData));
+        }
+      }
+
+      localStorage.removeItem("signStatus");
       localStorage.removeItem("name");
       localStorage.removeItem("isSignSuccess");
     }
   };
 
-  return { handleEsign, checkSignStatus };
+  return { handleEsign, checkSignStatus, checkJoinACaseESignStatus };
 };
 
 export default useESign;

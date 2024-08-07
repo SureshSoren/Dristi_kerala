@@ -110,6 +110,11 @@ export const paymentInboxConfig = {
           },
 
           {
+            label: "Amount Due",
+            jsonPath: "amountDue",
+            additionalCustomization: true,
+          },
+          {
             label: "Action",
             jsonPath: "id",
             additionalCustomization: true,
