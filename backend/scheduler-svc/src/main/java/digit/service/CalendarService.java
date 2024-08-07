@@ -1,6 +1,7 @@
 package digit.service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.JudgeCalendarEnrichment;
@@ -14,6 +15,9 @@ import digit.web.models.*;
 import digit.web.models.enums.PeriodType;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -115,7 +119,7 @@ public class CalendarService {
                 if (map.containsKey("date")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     String date = String.valueOf(map.get("date"));
-                    dateMap.put(String.valueOf(LocalDate.parse(date, formatter).toEpochDay()), -1.0);
+                    dateMap.put(dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter)).toString(), -1.0);
                     lastDateInDefaultCalendar = LocalDate.parse(date, formatter).toEpochDay();
                 }
 
