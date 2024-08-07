@@ -1,4 +1,4 @@
-package digit.web.models;
+package digit.web.models.hearing;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
@@ -13,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 @Getter
 @Setter
 @Builder
-public class HearingSearchRequest {
+public class HearingListSearchRequest {
 
     @JsonProperty("RequestInfo")
     @Valid
@@ -21,6 +21,10 @@ public class HearingSearchRequest {
 
     @JsonProperty("criteria")
     @Valid
-    private ScheduleHearingSearchCriteria criteria;
+    private HearingSearchCriteria criteria;
+
+    @JsonProperty("pagination")
+    @Valid
+    private Pagination pagination;
 
 }

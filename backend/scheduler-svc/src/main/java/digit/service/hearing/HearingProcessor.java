@@ -11,6 +11,7 @@ import digit.web.models.ScheduleHearing;
 import digit.web.models.ScheduleHearingRequest;
 import digit.web.models.hearing.Hearing;
 import digit.web.models.hearing.HearingRequest;
+import digit.web.models.hearing.HearingUpdateBulkRequest;
 import digit.web.models.hearing.PresidedBy;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,11 @@ public class HearingProcessor {
 
         hearingRequest.setHearing(hearing);
 
-        hearingUtil.callHearing(hearingRequest);
+        HearingUpdateBulkRequest updateHearingRequest = HearingUpdateBulkRequest.builder()
+                .requestInfo(requestInfo)
+                .hearings(Collections.singletonList(hearing))
+                .build();
+        hearingUtil.callHearing(updateHearingRequest);
     }
 
     private Pair<Long, Long> getStartTimeAndEndTime(Long epochTime) {

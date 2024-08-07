@@ -62,7 +62,6 @@ public class HearingService {
 
         hearingEnrichment.enrichScheduleHearing(schedulingRequests, defaultSlots, hearingTypeMap);
 
-        producer.push(config.getScheduleHearingTopic(), schedulingRequests.getHearing());
 
         return schedulingRequests.getHearing();
     }
