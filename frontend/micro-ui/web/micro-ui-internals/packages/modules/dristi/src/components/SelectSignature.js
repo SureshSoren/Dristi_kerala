@@ -3,6 +3,7 @@ import SignatureCard from "./SignatureCard";
 import { DRISTIService } from "../services";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import isEqual from "lodash/isEqual";
+import { getFilestoreId } from "../Utils/fileStoreUtil";
 
 function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
   const inputs = useMemo(
@@ -53,6 +54,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
       localStorage.removeItem("formdata");
     }
   }, [isSignSuccess, formData]);
+  const filestoreId = getFilestoreId();
   const handleAadharClick = async (data, name) => {
     try {
       localStorage.setItem("signStatus", JSON.stringify({ [config.key]: { [name]: [true] } }));
@@ -62,7 +64,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
           uidToken: "3456565",
           consent: "6564",
           authType: "6546",
-          fileStoreId: process.env.REACT_APP_ESIGN_FILESTORE_ID,
+          fileStoreId: filestoreId,
           tenantId: "kl",
           pageModule: "ci",
         },

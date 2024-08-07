@@ -173,7 +173,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
         setPaymentLoader(false);
         const billAfterPayment = await DRISTIService.callSearchBill({}, { tenantId, consumerCode: caseDetails?.filingNumber, service: "case" });
         if (billAfterPayment?.Bill?.[0]?.status === "PAID") {
-          const fileStoreId = await DRISTIService.fetchBillFileStoreId({}, { billId: billAfterPayment?.Bill?.[0]?.id });
+          const fileStoreId = await DRISTIService.fetchBillFileStoreId({}, { billId: billAfterPayment?.Bill?.[0]?.id, tenantId: tenantId });
           fileStoreId &&
             history.push(`${path}/e-filing-payment-response`, {
               state: {
@@ -291,6 +291,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
               totalDue: 4.0,
               mobileNumber: "9876543210",
               paidBy: "COMMON_OWNER",
+              tenantId: tenantId,
             },
           },
           {}
@@ -396,7 +397,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
                 <InfoCard
                   variant={"default"}
                   label={t("CS_COMMON_NOTE")}
-                  style={{ margin: "50px 0 0 0", backgroundColor: "#ECF3FD" }}
+                  style={{ margin: "100px 0 0 0", backgroundColor: "#ECF3FD" }}
                   additionalElements={[
                     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                       <span>{t("CS_OFFLINE_PAYMENT_STEP_TEXT")}</span>
