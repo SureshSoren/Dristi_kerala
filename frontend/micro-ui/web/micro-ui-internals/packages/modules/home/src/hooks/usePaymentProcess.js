@@ -89,7 +89,9 @@ const usePaymentProcess = ({ tenantId, consumerCode, service, path, caseDetails,
           resolve(billAfterPayment?.Bill?.[0]?.status === "PAID");
         }
       }, 1000);
-      setShowPaymentModal(false);
+      if (scenario !== "applicationSubmission") {
+        setShowPaymentModal(false);
+      }
     });
   };
   const handleError = (message) => {
