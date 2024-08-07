@@ -45,12 +45,12 @@ public class Controller {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/ocr/documentTypes")
+    @GetMapping("/documentTypes")
     public Set<String> getDocumentTypes() {
         return service.getDocumentTypes();
     }
 
-    @PostMapping("/ocr/verify")
+    @PostMapping("/verify")
     public ResponseEntity<Ocr> verifyFileStoreDocument(@RequestBody OcrRequest ocrRequest) {
 
         logger.info("Received request to verify image {}, for documentType: {}", ocrRequest.getFileStoreId(), ocrRequest.getDocumentType());
@@ -59,11 +59,10 @@ public class Controller {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/ocr/getdata")
-    public ResponseEntity<List<Ocr>> getOcrData(@RequestBody String filingNumber)
-    {
-     List<Ocr> response = service.getOcrByFilingNumber(filingNumber);
-     return ResponseEntity.ok(response);
+    @GetMapping("/data")
+    public ResponseEntity<List<Ocr>> getOcrData(@RequestParam String filingNumber) {
+        List<Ocr> response = service.getOcrByFilingNumber(filingNumber);
+        return ResponseEntity.ok(response);
     }
 
 }

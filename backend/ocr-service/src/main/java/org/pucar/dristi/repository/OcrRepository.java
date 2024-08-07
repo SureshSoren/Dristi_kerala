@@ -14,9 +14,10 @@ import java.util.List;
 @Repository
 public class OcrRepository {
 
-private  final OcrQueryBuilder ocrQueryBuilder;
+    private final OcrQueryBuilder ocrQueryBuilder;
     private final JdbcTemplate jdbcTemplate;
     private final OcrRowMapper ocrRowMapper;
+
     @Autowired
     public OcrRepository(OcrQueryBuilder ocrQueryBuilder, JdbcTemplate jdbcTemplate, OcrRowMapper ocrRowMapper) {
         this.ocrQueryBuilder = ocrQueryBuilder;
@@ -27,6 +28,6 @@ private  final OcrQueryBuilder ocrQueryBuilder;
     public List<Ocr> findByFilingNumber(String filingNumber) {
 
         String query = ocrQueryBuilder.getOcrSearchByFilingNumberQuery();
-        return jdbcTemplate.query(query, new Object[]{filingNumber}, ocrRowMapper);
+        return jdbcTemplate.query(query, new String[]{filingNumber}, ocrRowMapper);
     }
 }

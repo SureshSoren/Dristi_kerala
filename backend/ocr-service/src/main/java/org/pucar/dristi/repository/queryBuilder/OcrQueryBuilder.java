@@ -10,5 +10,5 @@ import org.springframework.stereotype.Component;
 public class OcrQueryBuilder {
     @Getter
     @Setter
-    private  String ocrSearchByFilingNumberQuery="SELECT * FROM ocr WHERE filingNumber = ?";
+    private String ocrSearchByFilingNumberQuery = "SELECT * FROM dristi_ocr WHERE filingnumber = ?";
 }
