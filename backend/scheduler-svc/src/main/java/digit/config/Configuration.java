@@ -155,9 +155,13 @@ public class Configuration {
     @Value("${drishti.analytics.endpoint}")
     private String analyticsEndpoint;
 
+    //Hearing config
     @Value("${dristhi.hearing.host}")
     private String HearingHost;
 
     @Value("${drishti.hearingupdate.endpoint}")
     private String HearingUpdateEndPoint;
+
+    @Value("${drishti.hearing.search.endpoint}")
+    private String hearingSearchEndPoint;
 }
