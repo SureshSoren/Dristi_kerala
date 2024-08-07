@@ -1,8 +1,6 @@
 name: OCR-service Image Build workflow
 on:
   push: 
-    branches:
-      - develop
     paths:
       - 'backend/ocr-service/**'
   pull_request:
