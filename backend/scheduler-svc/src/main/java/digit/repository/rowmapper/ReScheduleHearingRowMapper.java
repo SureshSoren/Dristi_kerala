@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 
 
 @Component
@@ -33,12 +34,13 @@ public class ReScheduleHearingRowMapper implements RowMapper<ReScheduleHearing> 
                     .caseId(resultSet.getString("case_id"))
                     .requesterId(resultSet.getString("requester_id"))
                     .reason(resultSet.getString("reason"))
-//                    .status(resultSet.getString("status")==null?null: Status.valueOf(resultSet.getString("status")))
-                    .actionComment(resultSet.getString("action_comment"))
+                    .status(resultSet.getString("status"))
                     .suggestedDates(resultSet.getString("suggested_days") == null ? null : objectMapper.readValue(resultSet.getString("suggested_days"), new TypeReference<>() {
                     }))
                     .availableDates(resultSet.getString("available_days") == null ? null : objectMapper.readValue(resultSet.getString("available_days"), new TypeReference<>() {
                     }))
+                    .litigants(Collections.singleton(resultSet.getString("litigants")))
+                    .representatives(Collections.singleton(resultSet.getString("representatives")))
                     .auditDetails(AuditDetails.builder()
                             .createdBy(resultSet.getString("created_by"))
                             .createdTime(resultSet.getLong("created_time"))

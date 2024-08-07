@@ -21,7 +21,7 @@ public class ReScheduleHearingQueryBuilder {
     @Autowired
     private QueryBuilderHelper helper;
 
-    private final String BASE_APPLICATION_QUERY = "SELECT hbr.reschedule_request_id, hbr.hearing_booking_id, hbr.tenant_id, hbr.judge_id, hbr.case_id,hbr.requester_id,hbr.reason,hbr.status,hbr.action_comment,hbr.documents, hbr.created_by,hbr.last_modified_by,hbr.created_time,hbr.last_modified_time, hbr.row_version, hbr.suggested_days , hbr.available_days  ";
+    private final String BASE_APPLICATION_QUERY = "SELECT hbr.reschedule_request_id, hbr.hearing_booking_id, hbr.tenant_id, hbr.judge_id, hbr.case_id,hbr.requester_id,hbr.reason,hbr.status,hbr.action_comment, hbr.created_by,hbr.last_modified_by,hbr.created_time,hbr.last_modified_time, hbr.row_version, hbr.suggested_days , hbr.available_days, hbr.litigants, hbr.representatives  ";
 
     private static final String FROM_TABLES = " FROM hearing_booking_reschedule_request hbr ";
 
@@ -68,11 +68,11 @@ public class ReScheduleHearingQueryBuilder {
             query.append(" hbr.requester_id = ? ");
             preparedStmtList.add(searchCriteria.getRequesterId());
         }
-//        if (!ObjectUtils.isEmpty(searchCriteria.getStatus())) {
-//            helper.addClauseIfRequired(query, preparedStmtList);
-//            query.append(" hbr.status = ? ");
-//            preparedStmtList.add(searchCriteria.getStatus().toString());
-//        }
+        if (!ObjectUtils.isEmpty(searchCriteria.getStatus())) {
+            helper.addClauseIfRequired(query, preparedStmtList);
+            query.append(" hbr.status = ? ");
+            preparedStmtList.add(searchCriteria.getStatus().toString());
+        }
         if (!ObjectUtils.isEmpty(searchCriteria.getDueDate())) {
             helper.addClauseIfRequired(query, preparedStmtList);
             query.append(" hbr.last_modified_time < ?  ");

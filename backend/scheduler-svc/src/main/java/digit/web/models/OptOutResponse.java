@@ -23,5 +23,5 @@ public class OptOutResponse {
 
     @JsonProperty("OptOut")
     @Valid
-    private List<OptOut> optOuts = null;
+    private OptOut optOut = null;
 }

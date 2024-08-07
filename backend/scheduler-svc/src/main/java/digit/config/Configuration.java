@@ -148,4 +148,16 @@ public class Configuration {
 
     @Value("${drishti.opt-out.selection.limit}")
     private Long optOutLimit;
+
+    @Value("${drishti.analytics.host}")
+    private String analyticsHost;
+
+    @Value("${drishti.analytics.endpoint}")
+    private String analyticsEndpoint;
+
+    @Value("${dristhi.hearing.host}")
+    private String HearingHost;
+
+    @Value("${drishti.hearingupdate.endpoint}")
+    private String HearingUpdateEndPoint;
 }

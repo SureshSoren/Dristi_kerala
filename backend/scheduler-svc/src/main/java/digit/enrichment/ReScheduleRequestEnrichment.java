@@ -16,6 +16,8 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
+import static digit.config.ServiceConstants.ACTIVE;
+
 @Component
 @Slf4j
 public class ReScheduleRequestEnrichment {
@@ -42,17 +44,13 @@ public class ReScheduleRequestEnrichment {
 //            element.setRescheduledRequestId(idList.get(index++));
             element.setRowVersion(1);
             element.setAuditDetails(auditDetails);
+            element.setStatus(ACTIVE);
         }
     }
 
     private AuditDetails getAuditDetailsReScheduleHearing(RequestInfo requestInfo) {
 
-        return AuditDetails.builder()
-                .createdBy(requestInfo.getUserInfo().getUuid())
-                .createdTime(System.currentTimeMillis())
-                .lastModifiedBy(requestInfo.getUserInfo().getUuid())
-                .lastModifiedTime(System.currentTimeMillis())
-                .build();
+        return AuditDetails.builder().createdBy(requestInfo.getUserInfo().getUuid()).createdTime(System.currentTimeMillis()).lastModifiedBy(requestInfo.getUserInfo().getUuid()).lastModifiedTime(System.currentTimeMillis()).build();
 
     }
 
