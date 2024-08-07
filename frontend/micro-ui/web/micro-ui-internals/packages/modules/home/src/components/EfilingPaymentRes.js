@@ -4,7 +4,7 @@ import Button from "@egovernments/digit-ui-module-dristi/src/components/Button";
 import { useHistory, useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import CustomCopyTextDiv from "@egovernments/digit-ui-module-dristi/src/components/CustomCopyTextDiv";
 import SelectCustomNote from "@egovernments/digit-ui-module-dristi/src/components/SelectCustomNote";
-import { Urls } from "../hooks/services";
+import { Urls } from "@egovernments/digit-ui-module-dristi/src/hooks";
 import { useTranslation } from "react-i18next";
 
 const customNoteConfig = {
