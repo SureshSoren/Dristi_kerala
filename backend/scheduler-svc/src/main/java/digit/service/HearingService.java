@@ -4,10 +4,9 @@ package digit.service;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.HearingEnrichment;
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.repository.HearingRepository;
 import digit.util.MasterDataUtil;
-import digit.validator.HearingValidator;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class HearingService {
 
-    private final HearingValidator hearingValidator;
 
     private final HearingEnrichment hearingEnrichment;
 
@@ -40,8 +38,7 @@ public class HearingService {
     private final MasterDataUtil helper;
 
     @Autowired
-    public HearingService(HearingValidator hearingValidator, HearingEnrichment hearingEnrichment, Producer producer, Configuration config, HearingRepository hearingRepository, ServiceConstants serviceConstants, MasterDataUtil helper) {
-        this.hearingValidator = hearingValidator;
+    public HearingService( HearingEnrichment hearingEnrichment, Producer producer, Configuration config, HearingRepository hearingRepository, ServiceConstants serviceConstants, MasterDataUtil helper) {
         this.hearingEnrichment = hearingEnrichment;
         this.producer = producer;
         this.config = config;

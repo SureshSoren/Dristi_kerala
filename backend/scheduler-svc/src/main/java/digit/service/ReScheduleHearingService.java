@@ -5,10 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.ReScheduleRequestEnrichment;
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.util.CaseUtil;
-import digit.util.DateUtil;
 import digit.util.MasterDataUtil;
 import digit.validator.ReScheduleRequestValidator;
 import digit.web.models.*;
@@ -36,38 +35,34 @@ public class ReScheduleHearingService {
 
     private final Configuration config;
     private final ReScheduleRequestRepository repository;
-    private final ReScheduleRequestValidator validator;
     private final ReScheduleRequestEnrichment enrichment;
     private final Producer producer;
-    private final WorkflowService workflowService;
     private final HearingService hearingService;
     private final CalendarService calendarService;
-    private final HearingScheduler hearingScheduler;
     private final ServiceConstants serviceConstants;
     private final MasterDataUtil helper;
     private final CaseUtil caseUtil;
 
     private final  ServiceConstants constants;
+    private final ReScheduleRequestValidator validator;
 
 
 
 
     @Autowired
-    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, WorkflowService workflowService, HearingService hearingService, CalendarService calendarService, HearingScheduler hearingScheduler, ServiceConstants serviceConstants, MasterDataUtil helper, CaseUtil caseUtil, ServiceConstants constants) {
+    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestEnrichment enrichment, Producer producer, HearingService hearingService, CalendarService calendarService, ServiceConstants serviceConstants, MasterDataUtil helper, CaseUtil caseUtil, ServiceConstants constants, ReScheduleRequestValidator validator) {
+
         this.config = config;
         this.repository = repository;
-        this.validator = validator;
         this.enrichment = enrichment;
         this.producer = producer;
-        this.workflowService = workflowService;
         this.hearingService = hearingService;
         this.calendarService = calendarService;
-        this.hearingScheduler = hearingScheduler;
         this.serviceConstants = serviceConstants;
         this.helper = helper;
         this.caseUtil = caseUtil;
-
         this.constants = constants;
+        this.validator = validator;
     }
 
     /**
@@ -165,29 +160,7 @@ public class ReScheduleHearingService {
 
     }
 
-    /**
-     * @param reScheduleHearingsRequest
-     * @return
-     */
-    public List<ReScheduleHearing> update(ReScheduleHearingRequest reScheduleHearingsRequest) {
-        log.info("operation = update, result = IN_PROGRESS,  RescheduledRequest = {}", reScheduleHearingsRequest.getReScheduleHearing());
 
-        List<ReScheduleHearing> existingReScheduleHearingsReq = validator.validateExistingApplication(reScheduleHearingsRequest);
-
-        enrichment.enrichRequestOnUpdate(reScheduleHearingsRequest, existingReScheduleHearingsReq);
-
-        workflowService.updateWorkflowStatus(reScheduleHearingsRequest);
-
-        // here if its approved we need to calculate date
-        // then schedule dummy hearings for judge to block the calendar
-        hearingScheduler.scheduleHearingForApprovalStatus(reScheduleHearingsRequest);
-
-        producer.push(config.getUpdateRescheduleRequestTopic(), reScheduleHearingsRequest.getReScheduleHearing());
-        log.info("operation = create, result = SUCCESS, ReScheduleHearing={}", existingReScheduleHearingsReq);
-
-        return reScheduleHearingsRequest.getReScheduleHearing();
-
-    }
 
     /**
      * @param request

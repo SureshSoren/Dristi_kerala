@@ -3,10 +3,10 @@ package digit.task;
 
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.repository.RescheduleRequestOptOutRepository;
-import digit.service.OptOutConsumerService;
+import digit.service.hearing.OptOutProcessor;
 import digit.util.DateUtil;
 import digit.util.MasterDataUtil;
 import digit.util.PendingTaskUtil;
@@ -38,12 +38,12 @@ public class RequestOptOutScheduleTask {
     private final Configuration config;
     private final MasterDataUtil mdmsUtil;
     private final ServiceConstants constants;
-    private final OptOutConsumerService optOutConsumerService;
+    private final OptOutProcessor optOutProcessor;
     private final DateUtil dateUtil;
     private final PendingTaskUtil pendingTaskUtil;
 
     @Autowired
-    public RequestOptOutScheduleTask(ReScheduleRequestRepository reScheduleRepository, RescheduleRequestOptOutRepository requestOptOutRepository, Producer producer, Configuration config, MasterDataUtil mdmsUtil, ServiceConstants constants, DateUtil dateUtil, PendingTaskUtil pendingTaskUtil, OptOutConsumerService optOutConsumerService) {
+    public RequestOptOutScheduleTask(ReScheduleRequestRepository reScheduleRepository, RescheduleRequestOptOutRepository requestOptOutRepository, Producer producer, Configuration config, MasterDataUtil mdmsUtil, ServiceConstants constants, DateUtil dateUtil, PendingTaskUtil pendingTaskUtil, OptOutProcessor optOutProcessor) {
         this.reScheduleRepository = reScheduleRepository;
         this.requestOptOutRepository = requestOptOutRepository;
         this.producer = producer;
@@ -51,7 +51,7 @@ public class RequestOptOutScheduleTask {
         this.mdmsUtil = mdmsUtil;
         this.constants = constants;
         this.dateUtil = dateUtil;
-        this.optOutConsumerService = optOutConsumerService;
+        this.optOutProcessor = optOutProcessor;
         this.pendingTaskUtil = pendingTaskUtil;
     }
 
@@ -101,7 +101,7 @@ public class RequestOptOutScheduleTask {
 
                 //unblock judge calendar for suggested days - available days
                 ReScheduleHearingRequest reScheduleHearingRequest = ReScheduleHearingRequest.builder().reScheduleHearing(Collections.singletonList(reScheduleHearing)).build();
-                optOutConsumerService.unblockJudgeCalendarForSuggestedDays(reScheduleHearingRequest);
+                optOutProcessor.unblockJudgeCalendarForSuggestedDays(reScheduleHearingRequest);
             }
             producer.push(config.getUpdateRescheduleRequestTopic(), reScheduleHearings);
             log.info("operation= updateAvailableDatesFromOptOuts, result=SUCCESS");

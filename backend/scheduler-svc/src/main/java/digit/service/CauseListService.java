@@ -3,7 +3,7 @@ package digit.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.repository.CauseListRepository;
 import digit.repository.HearingRepository;
 import digit.util.MdmsUtil;

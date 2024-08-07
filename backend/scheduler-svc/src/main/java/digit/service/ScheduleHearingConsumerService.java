@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.util.CaseUtil;
 import digit.util.MasterDataUtil;
 import digit.web.models.*;

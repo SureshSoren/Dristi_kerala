@@ -1,7 +1,7 @@
 package digit.service.hearing;
 
 
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.mapper.CustomMapper;
 import digit.service.HearingService;
 import digit.util.DateUtil;
@@ -26,15 +26,12 @@ public class HearingProcessor {
 
     private final HearingService hearingService;
 
-    private final Producer producer;
-
     private final DateUtil dateUtil;
 
     @Autowired
-    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, Producer producer, DateUtil dateUtil) {
+    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, DateUtil dateUtil) {
         this.customMapper = customMapper;
         this.hearingService = hearingService;
-        this.producer = producer;
         this.dateUtil = dateUtil;
     }
 
@@ -71,7 +68,9 @@ public class HearingProcessor {
 
         hearingRequest.setHearing(hearing);
 
-        producer.push("update-topic", hearingRequest);
+        // here we need to integrate this end point
+        // we already have hearing here just hit the end point
+
     }
 
     private Pair<Long, Long> getStartTimeAndEndTime(Long epochTime) {

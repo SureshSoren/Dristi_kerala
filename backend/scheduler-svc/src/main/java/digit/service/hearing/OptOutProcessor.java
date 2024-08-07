@@ -1,11 +1,11 @@
-package digit.service;
+package digit.service.hearing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.repository.ReScheduleRequestRepository;
-import digit.util.CaseUtil;
-import digit.util.DateUtil;
+import digit.service.HearingService;
+import digit.service.RescheduleRequestOptOutService;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
@@ -19,32 +19,26 @@ import static digit.config.ServiceConstants.INACTIVE;
 
 @Service
 @Slf4j
-public class OptOutConsumerService {
+public class OptOutProcessor {
 
     private final Producer producer;
-
     private final ReScheduleRequestRepository repository;
-
     private final Configuration configuration;
-
     private final ObjectMapper mapper;
-
     private final HearingService hearingService;
-
     private final RescheduleRequestOptOutService optOutService;
 
-    private final CaseUtil caseUtil;
 
 
     @Autowired
-    public OptOutConsumerService(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, HearingService hearingService, RescheduleRequestOptOutService optOutService, CaseUtil caseUtil) {
+    public OptOutProcessor(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, HearingService hearingService, RescheduleRequestOptOutService optOutService) {
         this.producer = producer;
         this.repository = repository;
         this.configuration = configuration;
         this.mapper = mapper;
         this.hearingService = hearingService;
         this.optOutService = optOutService;
-        this.caseUtil = caseUtil;
+
     }
 
 
