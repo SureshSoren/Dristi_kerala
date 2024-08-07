@@ -6,6 +6,7 @@ import { OrderName } from "../components/OrderName";
 import { OwnerColumn } from "../components/OwnerColumn";
 import { RenderInstance } from "../components/RenderInstance";
 import OverlayDropdown from "../components/OverlayDropdown";
+import CustomChip from "../components/CustomChip";
 
 const businessServiceMap = {
   "muster roll": "MR",
@@ -670,7 +671,8 @@ export const UICustomizations = {
         case "Hearing Type":
         case "Source":
         case "Status":
-          return t(value);
+          //Need to change the shade as per the value
+          return <CustomChip text={t(value)} shade={value === "PUBLISHED" ? "green" : "orange"} />;
         case "Actions":
           return (
             <OverlayDropdown style={{ position: "relative" }} column={column} row={row} master="commonUiConfig" module="SearchIndividualConfig" />
