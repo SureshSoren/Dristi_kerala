@@ -1,8 +1,6 @@
 name: OCR-service Image Build workflow
 on:
   push: 
-    paths:
-      - 'backend/ocr-service/**'
   pull_request:
     types:
       - closed
@@ -30,7 +28,7 @@ jobs:
 
       - name: Build and Push Docker image for Ocr-Service
         run: |
-          docker build --build-arg WORK_DIR="backend/advocate" -t pucarsolutionsdev.azurecr.io/pucar_ocr_svc:v1.0.0-${{ github.sha }} -f build/maven/Dockerfile .
+          docker build --build-arg WORK_DIR="backend/ocr-service" -t pucarsolutionsdev.azurecr.io/pucar_ocr_svc:v1.0.0-${{ github.sha }} -f build/maven/Dockerfile .
           docker push pucarsolutionsdev.azurecr.io/pucar_ocr_svc:v1.0.0-${{ github.sha }}
 
       - name: Build and Push Docker image for Ocr-Service_DB
