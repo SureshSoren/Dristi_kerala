@@ -35,7 +35,7 @@ public class MasterDataUtil {
                 mdmsUtil.fetchMdmsData(requestInfo, config.getEgovStateTenantId(),
                         module,
                         Collections.singletonList(masterName));
-        JSONArray jsonArray = defaultHearingsData.get("court").get(masterName);
+        JSONArray jsonArray = defaultHearingsData.get(module).get(masterName);
         List<T> result = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         for (Object obj : jsonArray) {

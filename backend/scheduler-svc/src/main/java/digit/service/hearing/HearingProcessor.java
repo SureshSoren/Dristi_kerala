@@ -5,6 +5,7 @@ import digit.kafka.producer.Producer;
 import digit.mapper.CustomMapper;
 import digit.service.HearingService;
 import digit.util.DateUtil;
+import digit.util.HearingUtil;
 import digit.web.models.Pair;
 import digit.web.models.ScheduleHearing;
 import digit.web.models.ScheduleHearingRequest;
@@ -28,11 +29,14 @@ public class HearingProcessor {
 
     private final DateUtil dateUtil;
 
+    private final HearingUtil hearingUtil;
+
     @Autowired
-    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, DateUtil dateUtil) {
+    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, Producer producer, DateUtil dateUtil, HearingUtil hearingUtil) {
         this.customMapper = customMapper;
         this.hearingService = hearingService;
         this.dateUtil = dateUtil;
+        this.hearingUtil = hearingUtil;
     }
 
 
@@ -49,6 +53,8 @@ public class HearingProcessor {
 
         scheduleHearing.setStartTime(startTimeAndEndTime.getKey());
         scheduleHearing.setEndTime(startTimeAndEndTime.getValue());
+        scheduleHearing.setHearingDate(startTimeAndEndTime.getKey());
+
 
         // currently one judge only
         scheduleHearing.setJudgeId(presidedBy.getJudgeID().get(0));
@@ -68,9 +74,7 @@ public class HearingProcessor {
 
         hearingRequest.setHearing(hearing);
 
-        // here we need to integrate this end point
-        // we already have hearing here just hit the end point
-
+        hearingUtil.callHearing(hearingRequest);
     }
 
     private Pair<Long, Long> getStartTimeAndEndTime(Long epochTime) {

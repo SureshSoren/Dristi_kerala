@@ -36,8 +36,8 @@ public class ServiceConstants {
     public final String DEFAULT_COURT_MODULE_NAME = "court";
     public final String DEFAULT_SLOTTING_MASTER_NAME = "slots";
     public final String DEFAULT_HEARING_MASTER_NAME = "hearings";
-    public final String SCHEDULER_CONFIG_MASTER_NAME = "SCHEDULER-CONFIG";
-    public final String SCHEDULER_CONFIG_MODULE_NAME = "config";
+    public final String SCHEDULER_CONFIG_MASTER_NAME = "config";
+    public final String SCHEDULER_CONFIG_MODULE_NAME = "SCHEDULER-CONFIG";
 
     public static final String PENDING_TASK_ENTITY_TYPE ="order-managelifecycle";
     public static final String PENDING_TASK_NAME = "Create Order for rescheduling the hearing";
