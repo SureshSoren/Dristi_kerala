@@ -17,6 +17,7 @@ import useEvidenceDetails from "./dristi/useEvidenceDetails.js";
 import useBillSearch from "./dristi/useBillSearch";
 import useCreateDemand from "./dristi/useCreateDemand";
 import useApplicationDetails from "./dristi/useApplicationDetails.js";
+import useJudgeAvailabilityDates from "./dristi/useJudgeAvailabilityDates.js";
 
 export const Urls = {
   Authenticate: "/user/oauth/token",
@@ -49,6 +50,7 @@ export const Urls = {
     searchBill: "/billing-service/bill/v2/_search",
     eTreasury: "/etreasury/payment/v1/_processChallan",
     demandCreate: "/billing-service/demand/_create",
+    judgeAvailabilityDates: "/scheduler/judge/v1/_availability",
   },
   case: {
     addWitness: "/case/case/v1/add/witness",
@@ -74,6 +76,7 @@ const dristi = {
   useToast,
   useBillSearch,
   useCreateDemand,
+  useJudgeAvailabilityDates,
 };
 
 const Hooks = {

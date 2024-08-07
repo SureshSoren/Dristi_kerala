@@ -32,20 +32,19 @@ function ScheduleAdmission({
   isSubmitBarDisabled = false,
   caseAdmittedSubmit = () => {},
 }) {
-  const getNextNDates = (n) => {
-    const today = new Date();
-    const datesArray = [];
+  // const getNextNDates = (n) => {
+  //   const today = new Date();
+  //   const datesArray = [];
 
-    for (let i = 1; i <= n; i++) {
-      const nextDate = new Date(today);
-      nextDate.setDate(today.getDate() + i);
-      datesArray.push(formatDateInMonth(nextDate));
-    }
+  //   for (let i = 1; i <= n; i++) {
+  //     const nextDate = new Date(today);
+  //     nextDate.setDate(today.getDate() + i);
+  //     datesArray.push(formatDateInMonth(nextDate));
+  //   }
 
-    return datesArray;
-  };
-
-  const nextFourDates = getNextNDates(5);
+  //   return datesArray;
+  // };
+  const [nextFiveDates, setNextFiveDates] = useState([]);
   const [showErrorToast, setShowErrorToast] = useState(false);
   const closeToast = () => {
     setShowErrorToast(false);
@@ -144,6 +143,55 @@ function ScheduleAdmission({
     options: hearingTypeOptions,
   };
 
+  function dateToEpoch(date) {
+    return Math.floor(new Date(date).getTime());
+  }
+
+  function epochToDate(epochTime) {
+    return new Date(epochTime * 1000);
+  }
+
+  const { data: dateResponse } = window?.Digit.Hooks.dristi.useJudgeAvailabilityDates(
+    {
+      SearchCriteria: {
+        tenantId: Digit.ULBService.getCurrentTenantId(),
+        fromDate: dateToEpoch(new Date(new Date().setDate(new Date().getDate() + 1))),
+      },
+    },
+    {},
+    "",
+    true
+  );
+
+  const convertAvailableDatesToDateObjects = (availableDates) => {
+    return availableDates.map((dateInfo) => ({
+      ...dateInfo,
+      date: new Date(dateInfo.date / 1),
+    }));
+  };
+
+  const getNextNDates = (n, availableDates) => {
+    const datesArray = [];
+
+    for (let i = 0; i < n; i++) {
+      if (i < availableDates.length) {
+        const dateObject = availableDates[i].date;
+        datesArray.push(formatDateInMonth(dateObject));
+      } else {
+        break;
+      }
+    }
+    return datesArray;
+  };
+
+  useEffect(() => {
+    if (dateResponse?.AvailableDates) {
+      const availableDatesWithDateObjects = convertAvailableDatesToDateObjects(dateResponse.AvailableDates);
+      const nextDates = getNextNDates(5, availableDatesWithDateObjects);
+      setNextFiveDates(nextDates);
+    }
+  }, [dateResponse]);
+
   return (
     <div className="schedule-admission-main">
       {selectedChip && <CustomCaseInfoDiv t={t} data={submitModalInfo?.shortCaseInfo} style={{ marginTop: "24px" }} />}
@@ -175,7 +223,7 @@ function ScheduleAdmission({
         <div>
           <CardText>{t("CS_SELECT_DATE")}</CardText>
           <CustomChooseDate
-            data={nextFourDates}
+            data={nextFiveDates}
             selectedChip={selectedChip}
             handleClick={handleClickDate}
             scheduleHearingParams={scheduleHearingParams}
