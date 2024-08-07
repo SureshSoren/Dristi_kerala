@@ -92,7 +92,7 @@ public class RescheduleRequestOptOutValidator {
 
         Set<Long> optOutDates = new HashSet<>(optOut.getOptoutDates());//
 
-        rescheduleReq.getAvailableDates().forEach(optOutDates::remove);
+        rescheduleReq.getSuggestedDates().forEach(optOutDates::remove);
 
         if (!optOutDates.isEmpty()) {
             throw new CustomException("DK_OO_APP_ERR", "opt out dates must be from suggested days");

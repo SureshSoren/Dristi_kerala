@@ -115,8 +115,8 @@ public class CalendarService {
                 if (map.containsKey("date")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     String date = String.valueOf(map.get("date"));
-                    dateMap.put(String.valueOf(LocalDate.parse(date, formatter).toEpochDay()), -1.0);
-                    lastDateInDefaultCalendar = LocalDate.parse(date, formatter).toEpochDay();
+                    dateMap.put(dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter)).toString(), -1.0);;
+                    lastDateInDefaultCalendar = dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter));
                 }
 
             }

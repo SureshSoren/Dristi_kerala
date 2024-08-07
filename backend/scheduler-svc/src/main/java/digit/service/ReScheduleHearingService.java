@@ -148,8 +148,8 @@ public class ReScheduleHearingService {
                     udpateHearingList.add(scheduleHearing);
 
                 }
-                hearingService.schedule(ScheduleHearingRequest.builder().requestInfo(requestInfo).hearing(udpateHearingList).build());
-
+                List<ScheduleHearing> schedule = hearingService.schedule(ScheduleHearingRequest.builder().requestInfo(requestInfo).hearing(udpateHearingList).build());
+                producer.push(config.getScheduleHearingTopic(), schedule);
             }
 
         } catch (Exception e) {
@@ -262,7 +262,6 @@ public class ReScheduleHearingService {
 
             List<Hearing> hearingList = hearingUtil.fetchHearing(searchRequest);
             Map<String, ScheduleHearing> scheduleHearingMap = rescheduleHearings.stream().collect(Collectors.toMap(ScheduleHearing::getHearingBookingId, obj -> obj));
-            List<ReScheduleHearing> bulkRescheduled = new ArrayList<>();
             for (Hearing hearing : hearingList) {
                 if (scheduleHearingMap.containsKey(hearing.getHearingId())) {
                     ScheduleHearing scheduleHearing = scheduleHearingMap.get(hearing.getHearingId());

@@ -104,8 +104,7 @@ public class RequestOptOutScheduleTask {
 
                 //unblock judge calendar for suggested days - available days
 
-                ReScheduleHearingRequest reScheduleHearingRequest = ReScheduleHearingRequest.builder().reScheduleHearing(Collections.singletonList(reScheduleHearing)).build();
-                optOutProcessor.unblockJudgeCalendarForSuggestedDays(reScheduleHearingRequest);
+                optOutProcessor.unblockJudgeCalendarForSuggestedDays(reScheduleHearing);
             }
             producer.push(config.getUpdateRescheduleRequestTopic(), reScheduleHearings);
             log.info("operation= updateAvailableDatesFromOptOuts, result=SUCCESS");

@@ -61,8 +61,7 @@ public class HearingService {
         ));
 
         hearingEnrichment.enrichScheduleHearing(schedulingRequests, defaultSlots, hearingTypeMap);
-
-
+        log.info("operation = schedule, result = SUCCESS, ScheduleHearingRequest={}, Hearing={}", schedulingRequests, schedulingRequests.getHearing());
         return schedulingRequests.getHearing();
     }
 

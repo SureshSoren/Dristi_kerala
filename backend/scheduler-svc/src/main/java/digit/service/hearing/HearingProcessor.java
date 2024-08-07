@@ -1,6 +1,7 @@
 package digit.service.hearing;
 
 
+import digit.config.Configuration;
 import digit.kafka.producer.Producer;
 import digit.mapper.CustomMapper;
 import digit.service.HearingService;
@@ -25,19 +26,21 @@ import java.util.List;
 public class HearingProcessor {
 
     private final CustomMapper customMapper;
-
     private final HearingService hearingService;
-
     private final DateUtil dateUtil;
-
     private final HearingUtil hearingUtil;
+    private final Producer producer;
+    private final Configuration config;
+
 
     @Autowired
-    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, Producer producer, DateUtil dateUtil, HearingUtil hearingUtil) {
+    public HearingProcessor(CustomMapper customMapper, HearingService hearingService, Producer producer, DateUtil dateUtil, HearingUtil hearingUtil, Configuration config) {
         this.customMapper = customMapper;
         this.hearingService = hearingService;
         this.dateUtil = dateUtil;
         this.hearingUtil = hearingUtil;
+        this.producer = producer;
+        this.config = config;
     }
 
 
@@ -46,12 +49,13 @@ public class HearingProcessor {
         Hearing hearing = hearingRequest.getHearing();
         RequestInfo requestInfo = hearingRequest.getRequestInfo();
         PresidedBy presidedBy = hearing.getPresidedBy();
+        List<String> filling = hearing.getFilingNumber();
 
         Pair<Long, Long> startTimeAndEndTime = getStartTimeAndEndTime(hearing.getStartTime());
 
 
         ScheduleHearing scheduleHearing = customMapper.hearingToScheduleHearingConversion(hearing);
-
+        scheduleHearing.setCaseId(filling.get(0));
         scheduleHearing.setStartTime(startTimeAndEndTime.getKey());
         scheduleHearing.setEndTime(startTimeAndEndTime.getValue());
         scheduleHearing.setHearingDate(startTimeAndEndTime.getKey());
@@ -62,10 +66,7 @@ public class HearingProcessor {
         scheduleHearing.setCourtId(presidedBy.getCourtID());
         scheduleHearing.setStatus("SCHEDULED");
 
-        ScheduleHearingRequest request = ScheduleHearingRequest.builder()
-                .hearing(Collections.singletonList(scheduleHearing))
-                .requestInfo(requestInfo)
-                .build();
+        ScheduleHearingRequest request = ScheduleHearingRequest.builder().hearing(Collections.singletonList(scheduleHearing)).requestInfo(requestInfo).build();
 
         List<ScheduleHearing> scheduledHearings = hearingService.schedule(request);   // BLOCKED THE JUDGE CALENDAR
         ScheduleHearing scheduledHearing = scheduledHearings.get(0);
@@ -80,14 +81,17 @@ public class HearingProcessor {
                 .hearings(Collections.singletonList(hearing))
                 .build();
         hearingUtil.callHearing(updateHearingRequest);
+
+        producer.push(config.getScheduleHearingTopic(), scheduledHearings);
+
     }
 
     private Pair<Long, Long> getStartTimeAndEndTime(Long epochTime) {
 
         LocalDate startOfDay = dateUtil.getLocalDateFromEpoch(epochTime);
-        LocalDate nextday = startOfDay.plusDays(1);
+        LocalDate nextDay = startOfDay.plusDays(1);
         long startEpochMillis = dateUtil.getEPochFromLocalDate(startOfDay);
-        long endEpochMillis = dateUtil.getEPochFromLocalDate(nextday);
+        long endEpochMillis = dateUtil.getEPochFromLocalDate(nextDay);
 
         return new Pair<>(startEpochMillis, endEpochMillis);
     }
