@@ -1,14 +1,8 @@
 name: Digit-UI Image Build workflow
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
-      - digit-ui-qa
-    paths:
-      - 'frontend/micro-ui/**'
-  workflow_dispatch:
-  workflow_call:
+      - sdc-ui
 
 jobs:
   docker_image-build:
@@ -24,16 +18,11 @@ jobs:
       - name: Login to Azure Container Registry
         run: docker login -u pucarsolutionsdev -p ${{ secrets.ACR_PASSWORD }} pucarsolutionsdev.azurecr.io
 
-      - name: Get Merge commit of PR
-        run: |
-          PR_NUMBER=$(curl -s "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" | jq -r '.[0].number')
-          Merge_Commit=$(curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" | jq -r '.merge_commit_sha')
-          echo "Merge_Commit=$Merge_Commit" >> $GITHUB_ENV
 
       - name: Build and Push Docker image for digit-ui
         run: |
-          docker build  -t pucarsolutionsdev.azurecr.io/digit-ui:v1.0.0-${{ env.Merge_Commit }} -f  web/docker/Dockerfile .
-          docker push pucarsolutionsdev.azurecr.io/digit-ui:v1.0.0-${{ env.Merge_Commit }}
+          docker build  -t pucarsolutionsdev.azurecr.io/digit-ui:v1.0.0-SDC -f  web/docker/Dockerfile .
+          docker push pucarsolutionsdev.azurecr.io/digit-ui:v1.0.0-SDC
         working-directory: frontend/micro-ui
 
 
