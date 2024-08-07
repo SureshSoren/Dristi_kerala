@@ -6,7 +6,7 @@ exports.generateCasePdf = async (req, res, next) => {
     try {
         const cases = req.body.cases;
  
-        const litigants = await caseService.getComplainantsDetails(cases);
+        const complainants = await caseService.getComplainantsDetails(cases);
         const respondents = await caseService.getRespondentsDetails(cases);
         const witnesses = await caseService.getWitnessDetails(cases);
         const advocates = await caseService.getAdvocateDetails(cases);
@@ -18,15 +18,13 @@ exports.generateCasePdf = async (req, res, next) => {
  
         const prayerSwornStatementDetails = await caseService.getPrayerSwornStatementDetails(cases);
  
-        const requestInfo = req.body.requestInfo;
-        const crypto = require("crypto");
-        let uuid = crypto.randomUUID();
+        const requestInfo = req.body.RequestInfo;
  
         const pdfRequest = {
-            requestInfo: requestInfo,
+            RequestInfo: requestInfo,
             caseDetails: {
-                id: uuid,
-                litigants: litigants,
+                id: Date.now(),
+                complainants: complainants,
                 respondents: respondents,
                 witnesses: witnesses,
                 advocates: advocates,
@@ -37,7 +35,8 @@ exports.generateCasePdf = async (req, res, next) => {
                 prayerSwornStatementDetails: prayerSwornStatementDetails
             }
         };
- 
+
+        console.log("Pdf Request: {}", pdfRequest);
         const pdf = await pdfService.generatePDF(pdfRequest);
         const finalPdf = await fileService.appendFilesToPDF(pdf, pdfRequest.caseDetails);
  
