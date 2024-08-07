@@ -4,7 +4,7 @@ package digit.service;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.JudgeCalendarEnrichment;
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.repository.CalendarRepository;
 import digit.util.DateUtil;
 import digit.util.MasterDataUtil;
@@ -77,7 +77,7 @@ public class CalendarService {
         HashMap<String, Double> dateMap = new HashMap<>();
 
         // retrieve type of hearings from master data
-        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);
+        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME,serviceConstants.DEFAULT_COURT_MODULE_NAME);
 
         // calculate bandwidth for judge from slot of court
         double totalHrs = defaultSlots.stream().reduce(0.0, (total, slot) -> total + slot.getSlotDuration() / 60.0, Double::sum);
@@ -115,8 +115,8 @@ public class CalendarService {
                 if (map.containsKey("date")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     String date = String.valueOf(map.get("date"));
-                    dateMap.put(String.valueOf(LocalDate.parse(date, formatter).toEpochDay()), -1.0);
-                    lastDateInDefaultCalendar = LocalDate.parse(date, formatter).toEpochDay();
+                    dateMap.put(dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter)).toString(), -1.0);;
+                    lastDateInDefaultCalendar = dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter));
                 }
 
             }

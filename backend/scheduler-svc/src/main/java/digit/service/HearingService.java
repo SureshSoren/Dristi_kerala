@@ -4,10 +4,9 @@ package digit.service;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.HearingEnrichment;
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.repository.HearingRepository;
 import digit.util.MasterDataUtil;
-import digit.validator.HearingValidator;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class HearingService {
 
-    private final HearingValidator hearingValidator;
 
     private final HearingEnrichment hearingEnrichment;
 
@@ -40,8 +38,7 @@ public class HearingService {
     private final MasterDataUtil helper;
 
     @Autowired
-    public HearingService(HearingValidator hearingValidator, HearingEnrichment hearingEnrichment, Producer producer, Configuration config, HearingRepository hearingRepository, ServiceConstants serviceConstants, MasterDataUtil helper) {
-        this.hearingValidator = hearingValidator;
+    public HearingService( HearingEnrichment hearingEnrichment, Producer producer, Configuration config, HearingRepository hearingRepository, ServiceConstants serviceConstants, MasterDataUtil helper) {
         this.hearingEnrichment = hearingEnrichment;
         this.producer = producer;
         this.config = config;
@@ -54,9 +51,9 @@ public class HearingService {
     public List<ScheduleHearing> schedule(ScheduleHearingRequest schedulingRequests) {
         log.info("operation = schedule, result = IN_PROGRESS, ScheduleHearingRequest={}, Hearing={}", schedulingRequests, schedulingRequests.getHearing());
 
-        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME);
+        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME,serviceConstants.DEFAULT_COURT_MODULE_NAME);
 
-        List<MdmsHearing> defaultHearings = helper.getDataFromMDMS(MdmsHearing.class, serviceConstants.DEFAULT_HEARING_MASTER_NAME);
+        List<MdmsHearing> defaultHearings = helper.getDataFromMDMS(MdmsHearing.class, serviceConstants.DEFAULT_HEARING_MASTER_NAME,serviceConstants.DEFAULT_COURT_MODULE_NAME);
 
         Map<String, MdmsHearing> hearingTypeMap = defaultHearings.stream().collect(Collectors.toMap(
                 MdmsHearing::getHearingType,
@@ -64,9 +61,7 @@ public class HearingService {
         ));
 
         hearingEnrichment.enrichScheduleHearing(schedulingRequests, defaultSlots, hearingTypeMap);
-
-        producer.push(config.getScheduleHearingTopic(), schedulingRequests.getHearing());
-
+        log.info("operation = schedule, result = SUCCESS, ScheduleHearingRequest={}, Hearing={}", schedulingRequests, schedulingRequests.getHearing());
         return schedulingRequests.getHearing();
     }
 

@@ -38,15 +38,6 @@ public class ReScheduleHearingController {
         return ResponseEntity.accepted().body(response);
     }
 
-    @RequestMapping(value = "/hearing/v1/reschedule/_update", method = RequestMethod.POST)
-    public ResponseEntity<ReScheduleHearingResponse> updateReScheduleHearing(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody ReScheduleHearingRequest request) {
-        log.info("api = /hearing/v1/reschedule/_update, result = IN_PROGRESS");
-        List<ReScheduleHearing> scheduledHearings = reScheduleHearingService.update(request);
-        ReScheduleHearingResponse response = ReScheduleHearingResponse.builder().ResponseInfo(ResponseInfoFactory.createResponseInfo(request.getRequestInfo(), true))
-                .reScheduleHearings(scheduledHearings).build();
-        log.info("api = /hearing/v1/reschedule/_update, result = SUCCESS");
-        return ResponseEntity.accepted().body(response);
-    }
 
     @RequestMapping(value = "/hearing/v1/reschedule/_search", method = RequestMethod.POST)
     public ResponseEntity<ReScheduleHearingResponse> searchRescheduleHearing(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody ReScheduleHearingReqSearchRequest request, @NotNull @Min(0) @Max(1000) @ApiParam(value = "Pagination - limit records in response", required = true) @Valid @RequestParam(value = "limit", required = true) Integer limit, @NotNull @Min(1) @ApiParam(value = "Pagination - offset for which response is returned", required = true) @Valid @RequestParam(value = "offset", required = true) Integer offset) {
