@@ -469,29 +469,30 @@ const SubmissionsCreate = ({ path }) => {
       return null;
     }
   };
-
+  console.log("gjk");
   const updateSubmission = async (action) => {
     try {
       const localStorageID = localStorage.getItem("fileStoreId");
-      const documents =
+      const documents = Array.isArray(applicationDetails?.documents) ? applicationDetails.documents : [];
+      const documentsFile =
         signedDoucumentUploadedID !== "" || localStorageID
-          ? [
-              {
-                signaturedDocument: {
-                  fileStoreId: signedDoucumentUploadedID || localStorageID,
-                },
-              },
-            ]
-          : [{}];
+          ? {
+              documentType: "Signed",
+              fileStoreId: signedDoucumentUploadedID || localStorageID,
+            }
+          : null;
+
       localStorage.removeItem("fileStoreId");
       const reqBody = {
         application: {
           ...applicationDetails,
-          workflow: { ...applicationDetails?.workflow, documents, action },
+          documents: documentsFile ? [...documents, documentsFile] : documents,
+          workflow: { ...applicationDetails?.workflow, documents: [{}], action },
           tenantId,
         },
         tenantId,
       };
+
       await submissionService.updateApplication(reqBody, { tenantId });
       await createPendingTask({ name: t("ESIGN_THE_SUBMISSION"), status: "ESIGN_THE_SUBMISSION", isCompleted: true });
       await createPendingTask({
