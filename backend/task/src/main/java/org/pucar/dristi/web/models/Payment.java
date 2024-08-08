@@ -3,6 +3,7 @@ package org.pucar.dristi.web.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
+import org.egov.tracer.model.AuditDetails;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
