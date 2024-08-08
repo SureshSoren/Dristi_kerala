@@ -10,7 +10,6 @@ import PaymentStatus from "../../components/PaymentStatus";
 import EpostTrackingPage from "./E-PostTracking";
 import PaymentForSummonModal from "./PaymentForSummonModal";
 import MakeSubmissionBail from "./MakeSubmissionBail";
-import Transcription from "./transcription";
 // import MakeSubmission from "./MakeSubmission";
 import ReviewSummonsNoticeAndWarrant from "./ReviewSummonsNoticeAndWarrant";
 const bredCrumbStyle = { maxWidth: "min-content" };
@@ -54,7 +53,6 @@ const App = ({ path, stateCode, userType, tenants }) => {
         <PrivateRoute path={`${path}/makesubmissionbail`} component={() => <MakeSubmissionBail />} />
         {/* <PrivateRoute path={`${path}/make-submission`} component={() => <MakeSubmission />} /> */}
         <PrivateRoute path={`${path}/tracking`} component={() => <EpostTrackingPage />} />
-        <PrivateRoute path={`${path}/transcription`} component={() => <Transcription />} />
       </AppContainer>
     </Switch>
   );
