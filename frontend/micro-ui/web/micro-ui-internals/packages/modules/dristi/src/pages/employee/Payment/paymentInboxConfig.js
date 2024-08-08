@@ -108,12 +108,6 @@ export const paymentInboxConfig = {
             label: "Stage",
             jsonPath: "substage",
           },
-
-          {
-            label: "Amount Due",
-            jsonPath: "amountDue",
-            additionalCustomization: true,
-          },
           {
             label: "Action",
             jsonPath: "id",
