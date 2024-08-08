@@ -566,9 +566,9 @@ const SubmissionsCreate = ({ path }) => {
         : "async-order-submission-managelifecycle";
 
     taxHeadMasterCode =
-      orderDetails?.additionalDetails?.formData?.isResponseRequired?.code === "Yes"
+      orderDetails?.additionalDetails?.formdata?.isResponseRequired?.code === "Yes"
         ? "ASYNC_SUBMISSION_RESPONSE_ADVANCE_CARRYFORWARD"
-        : "ASYNC_VOLUNTARY_SUNMISSION_ADVANCE_CARRYFORWARD";
+        : "ASYNC_ORDER_SUBMISSION_ADVANCE_CARRYFORWARD";
   }
 
   const { fetchBill, openPaymentPortal, paymentLoader, showPaymentModal, setShowPaymentModal, billPaymentStatus } = usePaymentProcess({
