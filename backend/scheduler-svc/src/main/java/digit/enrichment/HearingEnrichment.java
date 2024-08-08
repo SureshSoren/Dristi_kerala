@@ -105,8 +105,6 @@ public class HearingEnrichment {
                 hearing.setEndTime(dateUtil.getEpochFromLocalDateTime(LocalDateTime.of(date, currentEndTime)));
 
                 if (canScheduleHearings(hearing, scheduledHearings, slots)) {
-//                    hearing.setStartTime(LocalDateTime.of(hearing.getDate(), currentStartTime));
-//                    hearing.setEndTime(LocalDateTime.of(hearing.getDate(), currentEndTime));
                     // Hearing scheduled successfully
                     flag = false;
                     break;

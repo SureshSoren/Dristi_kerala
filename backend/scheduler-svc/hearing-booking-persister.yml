@@ -52,7 +52,7 @@ serviceMaps:
       fromTopic: update-schedule-hearing
       isTransaction: true
       queryMaps:
-        - query: UPDATE hearing_booking SET court_id =?,judge_id=?,case_id =?,hearing_date =?,hearing_type=?,title =?,description =?,status =?,start_time =?,end_time =?,created_by =?,last_modified_by =?,created_time =?, last_modified_time =? ,row_version =?, tenant_id =? ,reschedule_request_id =? WHERE hearing_booking_id=?;
+        - query: UPDATE hearing_booking SET court_id =?,judge_id=?,case_id =?,hearing_date =?,hearing_type=?,title =?,description =?,status =?,start_time =?,end_time =?,created_by =?,last_modified_by =?,created_time =?, last_modified_time =? ,row_version =row_version+1, tenant_id =? ,reschedule_request_id =? WHERE hearing_booking_id=?;
           basePath: $.*
           jsonMaps:
             - jsonPath: $.*.courtId
@@ -82,8 +82,6 @@ serviceMaps:
             - jsonPath: $.*.auditDetails.createdTime
 
             - jsonPath: $.*.auditDetails.lastModifiedTime
-
-            - jsonPath: $.*.rowVersion
 
             - jsonPath: $.*.tenantId
 

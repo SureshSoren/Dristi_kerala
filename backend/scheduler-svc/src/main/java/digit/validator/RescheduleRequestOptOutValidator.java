@@ -5,6 +5,7 @@ import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.repository.RescheduleRequestOptOutRepository;
 import digit.service.ReScheduleHearingService;
+import digit.util.MasterDataUtil;
 import digit.web.models.*;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static digit.config.ServiceConstants.OPT_OUT_SELECTION_LIMIT;
 
 @Component
 public class RescheduleRequestOptOutValidator {
@@ -23,12 +26,18 @@ public class RescheduleRequestOptOutValidator {
     private final Configuration config;
 
 
+    private final MasterDataUtil mdmsUtil;
+    private final ServiceConstants constants;
+
+
     @Autowired
-    public RescheduleRequestOptOutValidator(RescheduleRequestOptOutRepository repository, ReScheduleHearingService reScheduleHearingService, Configuration config) {
+    public RescheduleRequestOptOutValidator(RescheduleRequestOptOutRepository repository, ReScheduleHearingService reScheduleHearingService, Configuration config, MasterDataUtil mdmsUtil, ServiceConstants constants) {
         this.repository = repository;
         this.reScheduleHearingService = reScheduleHearingService;
         this.config = config;
 
+        this.mdmsUtil = mdmsUtil;
+        this.constants = constants;
     }
 
 
@@ -60,9 +69,17 @@ public class RescheduleRequestOptOutValidator {
             throw new CustomException("DK_OO_INVALID_REQUESTER_ID", "User is not authorised for opt out");
         }
 
+        List<SchedulerConfig> dataFromMDMS = mdmsUtil.getDataFromMDMS(SchedulerConfig.class, constants.SCHEDULER_CONFIG_MASTER_NAME, constants.SCHEDULER_CONFIG_MODULE_NAME);
+
+        List<SchedulerConfig> filteredApplications = dataFromMDMS.stream()
+                .filter(application -> application.getIdentifier().equals(OPT_OUT_SELECTION_LIMIT))
+                .toList();
+
+        int unit = filteredApplications.get(0).getUnit();
+
         //number of opt out validation
-        if (optOut.getOptoutDates().size() > config.getOptOutLimit()) {
-            throw new CustomException("DK_OO_SELECTION_LIMIT_ERR", "you are eligible to opt out " + config.getOptOutLimit() + " only");
+        if (optOut.getOptoutDates().size() > unit) {
+            throw new CustomException("DK_OO_SELECTION_LIMIT_ERR", "you are eligible to opt out " + unit + " only");
         }
 
         //already opt out check
@@ -75,7 +92,7 @@ public class RescheduleRequestOptOutValidator {
 
         Set<Long> optOutDates = new HashSet<>(optOut.getOptoutDates());//
 
-        rescheduleReq.getAvailableDates().forEach(optOutDates::remove);
+        rescheduleReq.getSuggestedDates().forEach(optOutDates::remove);
 
         if (!optOutDates.isEmpty()) {
             throw new CustomException("DK_OO_APP_ERR", "opt out dates must be from suggested days");

@@ -1,17 +1,17 @@
 package digit.validator;
 
-
 import digit.web.models.JudgeCalendarRule;
 import digit.web.models.SearchCriteria;
 import org.apache.commons.lang3.ObjectUtils;
 import org.egov.tracer.model.CustomException;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Component
 public class JudgeCalendarValidator {
+
+
     public void validateUpdateJudgeCalendar(List<JudgeCalendarRule> judgeCalendarRule) {
 
 //        judgeCalendarRule.forEach(application -> {
@@ -31,7 +31,6 @@ public class JudgeCalendarValidator {
 //                throw new CustomException("DK_SH_APP_ERR", "Rule Type is mandatory for updating judge calendar");
 //        });
     }
-
 
     public <T extends SearchCriteria> void validateSearchRequest(T criteria) {
         if (ObjectUtils.isEmpty(criteria.getTenantId()))

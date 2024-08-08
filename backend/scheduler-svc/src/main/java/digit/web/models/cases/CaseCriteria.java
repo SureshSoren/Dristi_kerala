@@ -14,4 +14,10 @@ public class CaseCriteria {
 
     @JsonProperty("caseId")
     private String caseId;
+
+    @JsonProperty("filingNumber")
+    private String filingNumber;
+
+    @JsonProperty("tenantId")
+    private String tenantId;
 }
