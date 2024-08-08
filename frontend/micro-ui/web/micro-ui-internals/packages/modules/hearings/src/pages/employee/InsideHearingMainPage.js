@@ -236,7 +236,6 @@ const InsideHearingMainPage = () => {
 
   useEffect(() => {
     initWebSocket();
-    createRoom();
   }, []);
 
   const joinRoom = () => {
@@ -285,13 +284,10 @@ const InsideHearingMainPage = () => {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("onmessage data", data);
       if (data.type === "joined_room" || data.type === "refresh_transcription") {
-        console.log("recieved", data);
         handleRoomJoined(data);
         roomIdLet = data.room_id;
       } else {
-        console.log(roomId, audioUrl, "sam", clientId);
         updateTranscription(data);
       }
     };
@@ -300,26 +296,11 @@ const InsideHearingMainPage = () => {
   };
 
   const handleRoomJoined = (data) => {
-    console.log(data, "joined Data");
     setClientId(data.client_id);
     setRoomId(data.room_id);
-    // roomIdInputRef.current.value = data.room_id;
     setTranscriptionUrl(data.transcript_url);
     setAudioUrl(data.audio_url);
   };
-
-  // useEffect(() => {
-  //   console.log("roomId effect", roomId);
-  //   if (websocket && roomId) {
-  //     // console.log(roomId, roomIdInputRef?.current.value, "roomId");
-  //     const message = {
-  //       type: "config",
-  //       room_id: roomId,
-  //     };
-  //     websocket.send(JSON.stringify(message));
-  //     // sendAudioConfig(newContext);
-  //   }
-  // }, [roomId]);
 
   const updateTranscription = (transcriptData) => {
     if (transcriptData.words && transcriptData.words.length > 0) {
@@ -333,7 +314,6 @@ const InsideHearingMainPage = () => {
           return `<span style="color: ${color}">${wordData.word} </span>`;
         })
         .join("");
-      console.log("sam", newTranscription);
       setTranscription((prev) => prev + newTranscription + " ");
     } else {
       setTranscription((prev) => prev + transcriptData.text + " ");
@@ -545,40 +525,83 @@ const InsideHearingMainPage = () => {
                   onChange={handleChange}
                   disabled={activeTab === "Witness Deposition" && isDepositionSaved}
                 />
-                <input type="radio" id="micInput" name="inputSource" value="mic" defaultChecked ref={inputSourceRef} />
+                <input type="radio" id="micInput" name="inputSource" value="mic" defaultChecked ref={inputSourceRef} style={{ display: "none" }} />
+
                 {!isConnected && (
-                  <button
-                    onClick={() => {
-                      initWebSocket("login");
-                      createRoom();
-                      setIsConnected(true);
-                    }}
-                  >
-                    Connect
-                  </button>
+                  <div style={{ textAlign: "right" }}>
+                    <button
+                      onClick={() => {
+                        initWebSocket("login");
+                        createRoom();
+                        setIsConnected(true);
+                      }}
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_4370_85284)">
+                          <path
+                            d="M12 2C10.34 2 9 3.34 9 5V7H15V5C15 3.34 13.66 2 12 2ZM5 8C3.34 8 2 9.34 2 11V13C2 14.66 3.34 16 5 16H7V8H5ZM19 8H17V16H19C20.66 16 22 14.66 22 13V11C22 9.34 20.66 8 19 8ZM11 18H13V20H11V18Z"
+                            fill="#3D3C3C"
+                          />
+                          <path d="M7 8L17 8" stroke="#3D3C3C" stroke-width="2" stroke-linecap="round" />
+                          <path d="M12 16L12 20" stroke="#3D3C3C" stroke-width="2" stroke-linecap="round" />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_4370_85284">
+                            <rect width="24" height="24" fill="white" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    </button>
+                  </div>
                 )}
                 {isConnected && !isRecording && (
-                  <button
-                    onClick={() => {
-                      startRecording();
-                    }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clip-path="url(#clip0_4370_85283)">
-                        <path
-                          d="M7 24H9V22H7V24ZM12 13C13.66 13 14.99 11.66 14.99 10L15 4C15 2.34 13.66 1 12 1C10.34 1 9 2.34 9 4V10C9 11.66 10.34 13 12 13ZM11 24H13V22H11V24ZM15 24H17V22H15V24ZM19 10H17.3C17.3 13 14.76 15.1 12 15.1C9.24 15.1 6.7 13 6.7 10H5C5 13.41 7.72 16.23 11 16.72V20H13V16.72C16.28 16.23 19 13.41 19 10Z"
-                          fill="#3D3C3C"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_4370_85283">
-                          <rect width="24" height="24" fill="white" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                  </button>
+                  <div style={{ textAlign: "right" }}>
+                    <button
+                      onClick={() => {
+                        startRecording();
+                      }}
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_4370_85283)">
+                          <path
+                            d="M12 13C13.66 13 14.99 11.66 14.99 10L15 4C15 2.34 13.66 1 12 1C10.34 1 9 2.34 9 4V10C9 11.66 10.34 13 12 13ZM19 10H17.3C17.3 13 14.76 15.1 12 15.1C9.24 15.1 6.7 13 6.7 10H5C5 13.41 7.72 16.23 11 16.72V20H13V16.72C16.28 16.23 19 13.41 19 10Z"
+                            fill="#3D3C3C"
+                          />
+                          {/* <path d="M5 5L19 19" stroke="#3D3C3C" stroke-width="2" stroke-linecap="round" /> */}
+                          <path d="M19 5L5 19" stroke="#3D3C3C" stroke-width="2" stroke-linecap="round" />
+                          <path
+                            d="M7 24H9V22H7V24ZM11 24H13V22H11V24ZM15 24H17V22H15V24ZM12 20V16.72C8.72 16.23 6 13.41 6 10H7.7C7.7 13 10.24 15.1 12 15.1C13.76 15.1 16.3 13 16.3 10H18C18 13.41 15.28 16.23 12 16.72V20H12Z"
+                            fill="#3D3C3C"
+                          />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_4370_85283">
+                            <rect width="24" height="24" fill="white" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    </button>
+                  </div>
                 )}
-                {isConnected && isRecording && <button onClick={stopRecording}>stop recording</button>}
+                {isConnected && isRecording && (
+                  <div style={{ textAlign: "right" }}>
+                    <button onClick={stopRecording}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_4370_85283)">
+                          <path
+                            d="M7 24H9V22H7V24ZM12 13C13.66 13 14.99 11.66 14.99 10L15 4C15 2.34 13.66 1 12 1C10.34 1 9 2.34 9 4V10C9 11.66 10.34 13 12 13ZM11 24H13V22H11V24ZM15 24H17V22H15V24ZM19 10H17.3C17.3 13 14.76 15.1 12 15.1C9.24 15.1 6.7 13 6.7 10H5C5 13.41 7.72 16.23 11 16.72V20H13V16.72C16.28 16.23 19 13.41 19 10Z"
+                            fill="#3D3C3C"
+                          />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_4370_85283">
+                            <rect width="24" height="24" fill="white" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </React.Fragment>
             ) : (
               <>
