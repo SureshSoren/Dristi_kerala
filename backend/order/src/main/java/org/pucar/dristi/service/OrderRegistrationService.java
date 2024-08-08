@@ -8,6 +8,7 @@ import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.enrichment.OrderRegistrationEnrichment;
 import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.repository.OrderRepository;
+import org.pucar.dristi.util.CaseUtil;
 import org.pucar.dristi.util.WorkflowUtil;
 import org.pucar.dristi.validators.OrderRegistrationValidator;
 import org.pucar.dristi.web.models.*;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.pucar.dristi.config.ServiceConstants.*;
@@ -36,14 +38,17 @@ public class OrderRegistrationService {
 
     private Producer producer;
 
+    private CaseUtil caseUtil;
+
     @Autowired
-    public OrderRegistrationService(OrderRegistrationValidator validator, Producer producer, Configuration config, WorkflowUtil workflowUtil, OrderRepository orderRepository, OrderRegistrationEnrichment enrichmentUtil) {
+    public OrderRegistrationService(OrderRegistrationValidator validator, Producer producer, Configuration config, WorkflowUtil workflowUtil, OrderRepository orderRepository, OrderRegistrationEnrichment enrichmentUtil, CaseUtil caseUtil) {
         this.validator = validator;
         this.producer = producer;
         this.config = config;
         this.workflowUtil = workflowUtil;
         this.orderRepository = orderRepository;
         this.enrichmentUtil = enrichmentUtil;
+        this.caseUtil = caseUtil;
     }
 
     public Order createOrder(OrderRequest body) {
@@ -71,7 +76,18 @@ public class OrderRegistrationService {
         try {
             // Fetch applications from database according to the given search criteria
             List<Order> orderList = orderRepository.getOrders(request.getCriteria(), request.getPagination());
-
+            CaseExistsResponse response = caseUtil.fetchCaseDetails(request);
+            List<CaseExists> caseExistsList = response.getCriteria();
+            HashMap<String, CaseExists> caseExistsHashMap = new HashMap<>();
+            for(CaseExists caseExists : caseExistsList){
+                caseExistsHashMap.put(caseExists.getFilingNumber(), caseExists);
+            }
+            for(Order order: orderList){
+                if(caseExistsHashMap.containsKey(order.getFilingNumber())){
+                    order.setCaseId(caseExistsHashMap.get(order.getFilingNumber()).getCaseId());
+                    order.setCaseTitle(caseExistsHashMap.get(order.getFilingNumber()).getCaseTitle());
+                }
+            }
             // If no applications are found matching the given criteria, return an empty list
             if (CollectionUtils.isEmpty(orderList))
                 return new ArrayList<>();

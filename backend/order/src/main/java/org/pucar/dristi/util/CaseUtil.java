@@ -7,6 +7,7 @@ import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.web.models.CaseExists;
 import org.pucar.dristi.web.models.CaseExistsRequest;
 import org.pucar.dristi.web.models.CaseExistsResponse;
+import org.pucar.dristi.web.models.OrderSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -58,5 +59,32 @@ public class CaseUtil {
 		if(caseResponse.getCriteria().isEmpty())
 			return false;
 		return caseResponse.getCriteria().get(0).getExists();
+	}
+
+	public CaseExistsResponse fetchCaseDetails(OrderSearchRequest request){
+		StringBuilder uri = new StringBuilder();
+		uri.append(configs.getCaseHost()).append(configs.getCasePath());
+
+		CaseExistsRequest caseExistsRequest = new CaseExistsRequest();
+		caseExistsRequest.setRequestInfo(request.getRequestInfo());
+		CaseExists caseCriteria = new CaseExists();
+		caseCriteria.setCnrNumber(request.getCriteria().getCnrNumber());
+		caseCriteria.setFilingNumber(request.getCriteria().getFilingNumber());
+		List<CaseExists> criteriaList = new ArrayList<>();
+		criteriaList.add(caseCriteria);
+		caseExistsRequest.setCriteria(criteriaList);
+
+		Object response = new HashMap<>();
+		CaseExistsResponse caseResponse = new CaseExistsResponse();
+		try {
+			response = restTemplate.postForObject(uri.toString(), caseExistsRequest, Map.class);
+			caseResponse = mapper.convertValue(response, CaseExistsResponse.class);
+		} catch (Exception e) {
+			log.error("ERROR_WHILE_FETCHING_FROM_CASE :: {}", e.toString());
+		}
+
+		if(caseResponse.getCriteria().isEmpty())
+			return null;
+		return caseResponse;
 	}
 }

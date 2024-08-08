@@ -30,4 +30,9 @@ public class CaseExists {
     @JsonProperty("exists")
     private Boolean exists = null;
 
+    @JsonProperty("caseTitle")
+    private String caseTitle = null;
+
+    @JsonProperty("caseId")
+    private String caseId = null;
 }
