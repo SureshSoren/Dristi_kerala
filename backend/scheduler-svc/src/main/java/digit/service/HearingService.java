@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static digit.config.ServiceConstants.SCHEDULE;
+
 
 /**
  * Contains methods related to schedule hearing , update hearing , search hearing , bulk update and available dates
@@ -155,6 +157,7 @@ public class HearingService {
         scheduleHearing.setHearingDate(hearing.getHearingDate());
         scheduleHearing.setStartTime(hearing.getStartTime());
         scheduleHearing.setEndTime(hearing.getEndTime());
+        scheduleHearing.setStatus(SCHEDULE);
         List<ScheduleHearing> schedule = schedule(ScheduleHearingRequest.builder().requestInfo(request.getRequestInfo())
                 .hearing(Collections.singletonList(scheduleHearing)).build());
         producer.push(config.getScheduleHearingUpdateTopic(), schedule);
