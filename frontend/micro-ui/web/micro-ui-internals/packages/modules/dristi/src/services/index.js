@@ -235,4 +235,20 @@ export const DRISTIService = {
       data,
       params,
     }),
+  sendDocuemntForOCR: (data, params) =>
+    Request({
+      url: Urls.dristi.sendOCR,
+      useCache: false,
+      userService: true,
+      data,
+      params,
+    }),
+  getOCRData: (data, params) =>
+    Request({
+      url: Urls.dristi.receiveOCR,
+      useCache: false,
+      userService: true,
+      data,
+      params,
+    }),
 };

@@ -16,6 +16,8 @@ import ImageModal from "./ImageModal";
 import useSearchCaseService from "../hooks/dristi/useSearchCaseService";
 import { CaseWorkflowState } from "../Utils/caseWorkflow";
 import ReactTooltip from "react-tooltip";
+import { efilingDocumentTypeAndKeyMapping, ocrErrorLocations } from "../pages/citizen/FileCase/Config/efilingDocumentKeyAndTypeMapping";
+import { isEqual } from "lodash";
 
 const extractValue = (data, key) => {
   if (!key.includes(".")) {
@@ -46,8 +48,32 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
   const [showImageModal, setShowImageModal] = useState({ openModal: false, imageInfo: {} });
   const popupAnchor = useRef();
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
+  const [formDataLoad, setFormDataLoad] = useState(true);
 
-  const { data: caseData } = useSearchCaseService(
+  const { isLoading: isOCRDataLoading, data: ocrData } = Digit.Hooks.dristi.useGetOCRData(
+    {},
+    {
+      filingNumber: caseId,
+    },
+    Boolean(caseId)
+  );
+
+  const ocrDataList = useMemo(() => {
+    return [
+      {
+        fileStoreId: "c4c1a3a2-4c99-4219-aebb-abe4f25de6ba",
+        documentType: "AFFIDAVIT",
+        message: "Invalid documents",
+      },
+      {
+        fileStoreId: "c4c1a3a2-4c99-4219-aebb-abe4f25de6ba",
+        documentType: "LEGAL_NOTICE",
+        message: "LEGAL_NOTICE Invalid documents",
+      },
+    ];
+  }, [ocrData]);
+
+  const { isLoading, data: caseData } = useSearchCaseService(
     {
       criteria: [
         {
@@ -122,7 +148,9 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
           return res;
         }, {}),
       });
-    } else onSelect(configkey, { ...formData[configkey], [input]: value });
+    } else {
+      if (!isEqual(formData[configkey]?.[input], value)) onSelect(configkey, { ...formData[configkey], [input]: value });
+    }
   }
 
   const Icon = ({ icon }) => {
@@ -217,10 +245,10 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
     setValue("scrutinyMessage", null, "popupInfo");
   };
 
-  const handleAddError = () => {
-    const trimmedError = scrutinyError.trim();
+  const handleAddError = (popupInfoData, message) => {
+    const trimmedError = message ? message : scrutinyError.trim();
 
-    const { name, configKey, index, fieldName, inputlist, fileName } = popupInfo;
+    const { name, configKey, index, fieldName, inputlist, fileName } = popupInfoData ? popupInfoData : popupInfo;
     let fieldObj = { [fieldName]: { FSOError: trimmedError } };
     inputlist.forEach((key) => {
       fieldObj[key] = { FSOError: trimmedError, fileName };
@@ -232,18 +260,41 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
             scrutinyMessage: "",
             form: inputs.find((item) => item.name === name)?.data?.map(() => ({})),
           };
-    if (index == null) {
-      currentMessage.scrutinyMessage = { FSOError: trimmedError, fileName };
-    } else {
-      currentMessage.form[index] = {
-        ...(currentMessage?.form?.[index] || {}),
-        ...fieldObj,
-      };
+
+    if (currentMessage?.form) {
+      if (index == null) {
+        currentMessage.scrutinyMessage = { FSOError: trimmedError, fileName };
+      } else {
+        currentMessage.form[index] = {
+          ...(currentMessage?.form?.[index] || {}),
+          ...fieldObj,
+        };
+      }
+      setValue(config.key, currentMessage, name);
+      setValue("scrutinyMessage", { popupInfo: null, imagePopupInfo: null }, ["popupInfo", "imagePopupInfo"]);
+      setScrutinyError("");
     }
-    setValue(config.key, currentMessage, name);
-    setValue("scrutinyMessage", { popupInfo: null, imagePopupInfo: null }, ["popupInfo", "imagePopupInfo"]);
-    setScrutinyError("");
   };
+
+  const updateObject = (formData, update, message) => {
+    if (update?.configKey in formData) {
+      handleAddError(update, message);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      "litigentDetails" in formData &&
+      "additionalDetails" in formData &&
+      "caseSpecificDetails" in formData &&
+      "scrutinyMessage" in formData &&
+      formDataLoad
+    ) {
+      setFormDataLoad(false);
+      ocrDataList?.forEach((data) => updateObject(formData, ocrErrorLocations[efilingDocumentTypeAndKeyMapping[data.documentType]], data.message));
+    }
+  }, [ocrDataList, formData, formDataLoad]);
+
   let showFlagIcon = isScrutiny ? true : false;
   return (
     <div className="accordion-wrapper" onClick={() => {}}>
