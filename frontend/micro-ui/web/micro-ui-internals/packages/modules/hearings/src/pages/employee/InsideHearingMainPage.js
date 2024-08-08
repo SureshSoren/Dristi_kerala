@@ -521,7 +521,7 @@ const InsideHearingMainPage = () => {
                 <TextArea
                   ref={textAreaRef}
                   style={{ width: "100%", minHeight: "40vh" }}
-                  value={!isRecording ? transcriptText : editableTranscription}
+                  value={activeTab === "Witness Deposition" ? witnessDepositionText : !isRecording ? transcriptText : editableTranscription}
                   onChange={handleChange}
                   disabled={activeTab === "Witness Deposition" && isDepositionSaved}
                 />
