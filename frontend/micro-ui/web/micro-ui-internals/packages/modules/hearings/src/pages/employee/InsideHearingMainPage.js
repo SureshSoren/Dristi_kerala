@@ -535,6 +535,7 @@ const InsideHearingMainPage = () => {
                         createRoom();
                         setIsConnected(true);
                       }}
+                      title="Connect"
                     >
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g clip-path="url(#clip0_4370_85284)">
@@ -556,11 +557,7 @@ const InsideHearingMainPage = () => {
                 )}
                 {isConnected && !isRecording && (
                   <div style={{ textAlign: "right" }}>
-                    <button
-                      onClick={() => {
-                        startRecording();
-                      }}
-                    >
+                    <button onClick={startRecording} title="Start Recording">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g clip-path="url(#clip0_4370_85283)">
                           <path
@@ -585,7 +582,7 @@ const InsideHearingMainPage = () => {
                 )}
                 {isConnected && isRecording && (
                   <div style={{ textAlign: "right" }}>
-                    <button onClick={stopRecording}>
+                    <button onClick={stopRecording} title="Stop Recording">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g clip-path="url(#clip0_4370_85283)">
                           <path
