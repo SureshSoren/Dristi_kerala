@@ -5,13 +5,17 @@ import { ordersService } from "./services";
 import { EpostService } from "./services";
 import useSearchOrdersService from "./orders/useSearchOrdersService";
 import useESign from "./orders/useESign";
+
+import { useGetPendingTask } from "./orders/useGetPendingTask";
 import useUpdateEpost from "./Epost/UpdateEpost";
 import useDocumentUpload from "./orders/useDocumentUpload";
 
 const orders = {
   useIndividualView,
-  useSearchOrdersService,
-  useESign,
+    useSearchOrdersService,
+    useESign,
+  
+  useGetPendingTask,
   useDocumentUpload,
 };
 
