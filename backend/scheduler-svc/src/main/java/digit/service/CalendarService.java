@@ -77,7 +77,7 @@ public class CalendarService {
         HashMap<String, Double> dateMap = new HashMap<>();
 
         // retrieve type of hearings from master data
-        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME,serviceConstants.DEFAULT_COURT_MODULE_NAME);
+        List<MdmsSlot> defaultSlots = helper.getDataFromMDMS(MdmsSlot.class, serviceConstants.DEFAULT_SLOTTING_MASTER_NAME, serviceConstants.DEFAULT_COURT_MODULE_NAME);
 
         // calculate bandwidth for judge from slot of court
         double totalHrs = defaultSlots.stream().reduce(0.0, (total, slot) -> total + slot.getSlotDuration() / 60.0, Double::sum);
@@ -115,7 +115,8 @@ public class CalendarService {
                 if (map.containsKey("date")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     String date = String.valueOf(map.get("date"));
-                    dateMap.put(dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter)).toString(), -1.0);;
+                    dateMap.put(dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter)).toString(), -1.0);
+                    ;
                     lastDateInDefaultCalendar = dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter));
                 }
 
@@ -124,7 +125,7 @@ public class CalendarService {
         }
 
         // calculating date after 6 month from provided date
-        long dateAfterSixMonths =dateUtil.getEPochFromLocalDate(dateUtil.getLocalDateFromEpoch(criteria.getFromDate()) .plusDays(30 * 6));// configurable?
+        long dateAfterSixMonths = (long) dateUtil.getEPochFromLocalDate(dateUtil.getLocalDateFromEpoch(criteria.getFromDate()).plusDays(30 * 6));// configurable?
 
 
         //last date which is store in default calendar
