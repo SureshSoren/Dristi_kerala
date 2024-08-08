@@ -1,13 +1,18 @@
 package org.pucar.dristi.web.controller;
 
 import org.pucar.dristi.service.Service;
+import org.pucar.dristi.web.model.DocumentTypesRequest;
 import org.pucar.dristi.web.model.Ocr;
 import org.pucar.dristi.web.model.OcrRequest;
+import org.pucar.dristi.web.model.OcrSearchRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -45,8 +50,8 @@ public class Controller {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/documentTypes")
-    public Set<String> getDocumentTypes() {
+    @PostMapping("/documentTypes")
+    public Set<String> getDocumentTypes(@RequestBody DocumentTypesRequest documentTypesRequest) {
         return service.getDocumentTypes();
     }
 
@@ -59,9 +64,9 @@ public class Controller {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/data")
-    public ResponseEntity<List<Ocr>> getOcrData(@RequestParam String filingNumber) {
-        List<Ocr> response = service.getOcrByFilingNumber(filingNumber);
+    @PostMapping("/data")
+    public ResponseEntity<List<Ocr>> getOcrData(@RequestBody OcrSearchRequest ocrSearchRequest) {
+        List<Ocr> response = service.getOcrByFilingNumber(ocrSearchRequest.getFilingNumber());
         return ResponseEntity.ok(response);
     }
 
