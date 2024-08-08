@@ -29,6 +29,7 @@ public class HearingRowMapper implements RowMapper<ScheduleHearing> {
                 .hearingDate(resultSet.getLong("hearing_date"))
                 .startTime(Long.parseLong(resultSet.getString("start_time")))
                 .endTime(Long.parseLong(resultSet.getString("end_time")))
+                .rescheduleRequestId(resultSet.getString("reschedule_request_id"))
                 .auditDetails(AuditDetails.builder()
                         .createdBy(resultSet.getString("created_by"))
                         .createdTime(resultSet.getLong("created_time"))
