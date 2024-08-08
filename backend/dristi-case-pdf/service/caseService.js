@@ -8,53 +8,56 @@ const getDocumentFileStore = (documents, fileName) => {
 exports.getComplainantsDetails = async (cases) => {
     return cases.additionalDetails.complainantDetails.formdata.map((formData) => {
         const data = formData.data;
-        const complainantType = data.complainantType;
+        const complainantType = data.complainantType || '';
         const firstName = data.firstName || '';
         const middleName = data.middleName || '';
         const lastName = data.lastName || '';
-        const phoneNumber = data.complainantVerification && data.complainantVerification.mobileNumber || null;
+        const phoneNumber = (data.complainantVerification && data.complainantVerification.mobileNumber) || '';
 
         if (complainantType.code === 'REPRESENTATIVE') {
-            const companyDetails = data.addressCompanyDetails;
+            const companyDetails = data.addressCompanyDetails || {};
             const companyAddress = {
-                locality: companyDetails.locality,
-                city: companyDetails.city,
-                district: companyDetails.district,
-                state: companyDetails.state,
-                pincode: companyDetails.pincode
+                locality: companyDetails.locality || '',
+                city: companyDetails.city || '',
+                district: companyDetails.district || '',
+                state: companyDetails.state || '',
+                pincode: companyDetails.pincode || ''
             };
 
             return {
-                complainantType: complainantType.name,
-                name: '${firstName} ${middleName} ${lastName}',
+                complainantType: complainantType.name || '',
+                representativeName: `${firstName} ${middleName} ${lastName}`,
+                name: '',
                 phoneNumber,
-                companyName: data.companyName,
-                companyDetailsFileStore: getDocumentFileStore(data.companyDetailsUpload, 'Company documents'),
+                companyName: data.companyName || '',
+                companyDetailsFileStore: getDocumentFileStore(data.companyDetailsUpload, 'Company documents') || '',
                 companyAddress: companyAddress,
-                address: null
+                address: ''
             };
         } else {
             const addressDetails = data.complainantVerification && data.complainantVerification.individualDetails && data.complainantVerification.individualDetails.addressDetails || {};
             const address = {
-                locality: addressDetails.locality,
-                city: addressDetails.city,
-                district: addressDetails.district,
-                state: addressDetails.state,
-                pincode: addressDetails.pincode
+                locality: addressDetails.locality || '',
+                city: addressDetails.city || '',
+                district: addressDetails.district || '',
+                state: addressDetails.state || '',
+                pincode: addressDetails.pincode || ''
             };
 
             return {
-                complainantType: complainantType.name,
+                complainantType: complainantType.name || '',
                 name: `${firstName} ${middleName} ${lastName}`,
+                representativeName: '',
                 phoneNumber,
-                address: JSON.stringify(address),
-                companyName: null,
-                companyAddress: null,
-                companyDetailsFileStore: null
+                address: address,
+                companyName: '',
+                companyAddress: '',
+                companyDetailsFileStore: ''
             };
         }
     });
 };
+
 
 exports.getRespondentsDetails = async (cases) => {
     return cases.additionalDetails.respondentDetails.formdata.map((formData) => {

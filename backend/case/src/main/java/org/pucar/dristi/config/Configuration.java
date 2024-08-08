@@ -181,4 +181,10 @@ public class Configuration {
     @Value("${egov.localization.statelevel}")
     private Boolean isLocalizationStateLevel;
 
+    //Dristi Case Pdf Service
+    @Value("${egov.dristi.case.pdf.host}")
+    private String dristiCasePdfHost;
+
+    @Value("${egov.dristi.case.pdf.path}")
+    private String dristiCasePdfPath;
 }
