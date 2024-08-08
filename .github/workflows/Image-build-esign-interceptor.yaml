@@ -5,8 +5,6 @@ on:
       - develop
     paths:
       - 'backend/esign-interceptor/**'
-    types:
-      - merged
   pull_request:
     branches:
       - develop
