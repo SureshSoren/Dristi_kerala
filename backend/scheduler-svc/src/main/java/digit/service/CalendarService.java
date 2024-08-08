@@ -125,7 +125,7 @@ public class CalendarService {
         }
 
         // calculating date after 6 month from provided date
-        long dateAfterSixMonths = (long) dateUtil.getEPochFromLocalDate(dateUtil.getLocalDateFromEpoch(criteria.getFromDate()).plusDays(30 * 6));// configurable?
+        Long dateAfterSixMonths =  dateUtil.getEPochFromLocalDate(dateUtil.getLocalDateFromEpoch(criteria.getFromDate()).plusDays(30 * 6));// configurable?
 
 
         //last date which is store in default calendar
