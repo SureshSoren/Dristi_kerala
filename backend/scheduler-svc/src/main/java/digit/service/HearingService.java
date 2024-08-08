@@ -4,9 +4,9 @@ package digit.service;
 import digit.config.Configuration;
 import digit.config.ServiceConstants;
 import digit.enrichment.HearingEnrichment;
-import digit.util.MasterDataUtil;
 import digit.kafka.Producer;
 import digit.repository.HearingRepository;
+import digit.util.MasterDataUtil;
 import digit.validator.HearingValidator;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +51,6 @@ public class HearingService {
     }
 
 
-
     public List<ScheduleHearing> schedule(ScheduleHearingRequest schedulingRequests) {
         log.info("operation = schedule, result = IN_PROGRESS, ScheduleHearingRequest={}, Hearing={}", schedulingRequests, schedulingRequests.getHearing());
 
@@ -73,6 +72,7 @@ public class HearingService {
 
     /**
      * This function update the hearing
+     *
      * @param scheduleHearingRequest request object with request info and list of schedule hearing object
      * @return updated hearings with audit details
      */
@@ -94,11 +94,12 @@ public class HearingService {
 
     /**
      * This function use to search in the hearing table with different search parameter
+     *
      * @param request request object with request info and search criteria for hearings
      * @return list of schedule hearing object
      */
 
-    public List<ScheduleHearing> search(HearingSearchRequest request, Integer limit,Integer offset) {
+    public List<ScheduleHearing> search(HearingSearchRequest request, Integer limit, Integer offset) {
 
         return hearingRepository.getHearings(request.getCriteria(), limit, offset);
 
@@ -106,6 +107,7 @@ public class HearingService {
 
     /**
      * This function provide the available date for judge and their occupied bandwidth after a start date ( fromDate )
+     *
      * @param scheduleHearingSearchCriteria criteria and request info object
      * @return list of availability dto
      */
@@ -117,15 +119,18 @@ public class HearingService {
 
     /**
      * This function enrich the audit details as well as timing for hearing in updated date
-     * @param request request object with request info and list of schedule hearings
-     * @param defaultSlot default slots for court
+     *
+     * @param request        request object with request info and list of schedule hearings
+     * @param defaultSlot    default slots for court
      * @param hearingTypeMap default hearings and their timing
      */
 
-    public void updateBulk(ScheduleHearingRequest request, List<MdmsSlot> defaultSlot, Map<String, MdmsHearing> hearingTypeMap) {
+    public List<ScheduleHearing> updateBulk(ScheduleHearingRequest request, List<MdmsSlot> defaultSlot, Map<String, MdmsHearing> hearingTypeMap) {
 
         hearingEnrichment.enrichBulkReschedule(request, defaultSlot, hearingTypeMap);
 
         producer.push(config.getScheduleHearingUpdateTopic(), request.getHearing());
+
+        return request.getHearing();
     }
 }

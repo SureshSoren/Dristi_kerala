@@ -10,7 +10,6 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup,
   const { uploadDocuments } = Digit.Hooks.orders.useDocumentUpload();
   const [formData, setFormData] = useState({}); // storing the file upload data
   const [fileStoreId, setFileStoreId] = useState("c162c182-103f-463e-99b6-18654ed7a5b1"); // have to set the uploaded fileStoreID
-  const [eSignFIleId, setESignFileID] = useState("2aefb901-edc6-4a45-95f8-3ea383a513f5");
   const [pageModule, setPageModule] = useState("en");
   const [openUploadSignatureModal, setOpenUploadSignatureModal] = useState(false);
 
@@ -113,7 +112,7 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup,
                 onClick={() => {
                   // setOpenAadharModal(true);
                   // setIsSigned(true);
-                  handleEsign(name, eSignFIleId, pageModule);
+                  handleEsign(name, pageModule);
                 }}
                 className={"aadhar-sign-in"}
                 labelClassName={"submission-aadhar-sign-in"}

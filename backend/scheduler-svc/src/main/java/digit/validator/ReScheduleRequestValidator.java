@@ -6,6 +6,7 @@ import digit.config.Configuration;
 import digit.repository.ReScheduleRequestRepository;
 import digit.service.HearingService;
 import digit.util.CaseUtil;
+import digit.util.DateUtil;
 import digit.web.models.*;
 import digit.web.models.cases.CaseCriteria;
 import digit.web.models.cases.SearchCaseRequest;
@@ -16,6 +17,7 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,14 +36,17 @@ public class ReScheduleRequestValidator {
 
     private final CaseUtil caseUtil;
 
+    private final DateUtil dateUtil;
+
 
     @Autowired
-    public ReScheduleRequestValidator(HearingService hearingService, ReScheduleRequestRepository repository, Configuration config, CaseUtil caseUtil) {
+    public ReScheduleRequestValidator(HearingService hearingService, ReScheduleRequestRepository repository, Configuration config, CaseUtil caseUtil, DateUtil dateUtil) {
         this.hearingService = hearingService;
         this.repository = repository;
         this.config = config;
 
         this.caseUtil = caseUtil;
+        this.dateUtil = dateUtil;
     }
 
 
@@ -167,29 +172,37 @@ public class ReScheduleRequestValidator {
     }
 
     public void validateBulkRescheduleRequest(BulkReScheduleHearingRequest request) {
+
         log.info("operation = validateBulkRescheduleRequest, result = IN_PROGRESS");
         BulkReschedulingOfHearings bulkRescheduling = request.getBulkRescheduling();
 
-
         LocalDateTime currentDateTime = LocalDateTime.now();
 
-        if (ObjectUtils.isEmpty(bulkRescheduling.getJudgeId())) {
-            throw new CustomException("DK_SH_APP_ERR", "judge id must not be null");
+        Long startTime = bulkRescheduling.getStartTime();
+        Long endTime = bulkRescheduling.getEndTime();
+        if (startTime != null && endTime != null) {
+
+            LocalDateTime startLocalDateTime = dateUtil.getLocalDateTimeFromEpoch(startTime);
+            if (startLocalDateTime.isBefore(currentDateTime)) {
+                throw new CustomException("DK_SH_APP_ERR", "Can not reschedule for past date hearings");
+            }
+
+
+            LocalDateTime endLocalDateTime = dateUtil.getLocalDateTimeFromEpoch(endTime);
+
+            if (endLocalDateTime.isBefore(startLocalDateTime)) {
+                throw new CustomException("DK_SH_APP_ERR", "end time is before start time");
+            }
+
         }
-//        Long startTime = bulkRescheduling.getStartTime();
-//        if (startTime.isBefore(currentDateTime)) {
-//            throw new CustomException("DK_SH_APP_ERR", "Can not reschedule for past date hearings");
-//        }
-//
-//        Long endTime = bulkRescheduling.getEndTime();
-//        if (endTime.isBefore(startTime)) {
-//            throw new CustomException("DK_SH_APP_ERR", "end time is before start time");
-//        }
+
 
         Long scheduleAfter = bulkRescheduling.getScheduleAfter();
-//        if (scheduleAfter.isBefore(LocalDate.now())) {
-//            throw new CustomException("DK_SH_APP_ERR", "can not reschedule for past dates");
-//        }
+
+        LocalDate scheduleAfterDate = dateUtil.getLocalDateFromEpoch(scheduleAfter);
+        if (scheduleAfterDate.isBefore(LocalDate.now())) {
+            throw new CustomException("DK_SH_APP_ERR", "can not reschedule for past dates");
+        }
         log.info("operation = validateBulkRescheduleRequest, result = SUCCESS");
 
     }

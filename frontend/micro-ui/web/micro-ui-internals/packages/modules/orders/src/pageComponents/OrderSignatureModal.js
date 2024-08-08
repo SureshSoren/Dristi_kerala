@@ -26,7 +26,6 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
   const [openUploadSignatureModal, setOpenUploadSignatureModal] = useState(false);
   const UploadSignatureModal = window?.Digit?.ComponentRegistryService?.getComponent("UploadSignatureModal");
   const [fileStoreId, setFileStoreId] = useState("c162c182-103f-463e-99b6-18654ed7a5b1"); // have to set the uploaded fileStoreID
-  const [eSignFIleId, setESignFileID] = useState("2aefb901-edc6-4a45-95f8-3ea383a513f5");
   const [pageModule, setPageModule] = useState("en");
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const uri = `${window.location.origin}${Urls.FileFetchById}?tenantId=${tenantId}&fileStoreId=${fileStoreId}`;
@@ -117,7 +116,7 @@ function OrderSignatureModal({ t, order, handleIssueOrder, handleGoBackSignature
                 onButtonClick={() => {
                   // setOpenAadharModal(true);
                   // setIsSigned(true);
-                  handleEsign(name, eSignFIleId, pageModule);
+                  handleEsign(name, pageModule);
                 }}
                 className={"aadhar-sign-in"}
                 labelClassName={"aadhar-sign-in"}

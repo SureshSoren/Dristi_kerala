@@ -68,6 +68,20 @@ public class CaseUtil {
 
     }
 
+    public JsonNode getLitigants(JsonNode caseList) {
+
+        log.info("operation = getLitigants, result = IN_PROGRESS");
+
+        if (caseList != null && caseList.isArray() && !caseList.isEmpty()) {
+            log.info("operation = getLitigants, result = SUCCESS");
+            return caseList.get(0).get("litigants");
+        } else {
+            log.error("operation = getLitigants, result = FAILURE");
+            throw new CustomException("DK_RR_CASE_ERR", "case not found");
+        }
+
+    }
+
     public JsonNode getRepresentatives(SearchCaseRequest searchCaseRequest) {
 
         log.info("operation = getRepresentatives, result = IN_PROGRESS");
@@ -75,6 +89,19 @@ public class CaseUtil {
         if (caseList != null && caseList.isArray() && !caseList.isEmpty()) {
             log.info("operation = getRepresentatives, result = SUCCESS");
             return caseList.get(0).get("representatives");
+        } else {
+            log.error("operation = getRepresentatives, result = FAILURE");
+            throw new CustomException("DK_RR_CASE_ERR", "case not found");
+        }
+    }
+
+    public JsonNode getRepresentatives(JsonNode caseRes) {
+
+        log.info("operation = getRepresentatives, result = IN_PROGRESS");
+
+        if (caseRes != null && caseRes.isArray() && !caseRes.isEmpty()) {
+            log.info("operation = getRepresentatives, result = SUCCESS");
+            return caseRes.get(0).get("representatives");
         } else {
             log.error("operation = getRepresentatives, result = FAILURE");
             throw new CustomException("DK_RR_CASE_ERR", "case not found");

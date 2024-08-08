@@ -16,11 +16,11 @@ import digit.web.models.cases.CaseCriteria;
 import digit.web.models.cases.SearchCaseRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,24 +75,21 @@ public class ReScheduleHearingService {
         log.info("operation = create, result = IN_PROGRESS,  RescheduledRequest = {}", reScheduleHearingsRequest.getReScheduleHearing());
 
         List<ReScheduleHearing> reScheduleHearing = reScheduleHearingsRequest.getReScheduleHearing();
-
+        RequestInfo requestInfo = reScheduleHearingsRequest.getRequestInfo();
 
         enrichment.enrichRescheduleRequest(reScheduleHearingsRequest);
 
         try {
 
+            String tenantId = reScheduleHearing.get(0).getTenantId();
 
-            RequestInfo requestInfo = reScheduleHearingsRequest.getRequestInfo();
-
-            List<ReScheduleHearing> hearingDetails = reScheduleHearingsRequest.getReScheduleHearing();
-            String tenantId = hearingDetails.get(0).getTenantId();
-
-            for (ReScheduleHearing hearingDetail : hearingDetails) {
+            for (ReScheduleHearing hearingDetail : reScheduleHearing) {
 
                 SearchCaseRequest searchCaseRequest = SearchCaseRequest.builder().RequestInfo(requestInfo).tenantId("kl").criteria(Collections.singletonList(CaseCriteria.builder().caseId(hearingDetail.getCaseId()).build())).build();
-                JsonNode litigants = caseUtil.getLitigants(searchCaseRequest);
+                JsonNode cases = caseUtil.getCases(searchCaseRequest);
+                JsonNode litigants = caseUtil.getLitigants(cases);
                 Set<String> litigantIds = caseUtil.getIndividualIds(litigants);
-                JsonNode representatives = caseUtil.getRepresentatives(searchCaseRequest);
+                JsonNode representatives = caseUtil.getRepresentatives(cases);
                 Set<String> representativeIds = caseUtil.getIdsFromJsonNodeArray(representatives);
                 int noOfAttendees = representativeIds.size();
                 Integer numberOfSuggestedDays = Math.toIntExact(configuration.getOptOutLimit() * noOfAttendees + 1);
@@ -102,37 +99,21 @@ public class ReScheduleHearingService {
                 hearingDetail.setRepresentatives(representativeIds);
                 hearingDetail.setLitigants(litigantIds);
 
-                List<AvailabilityDTO> availability = calendarService.getJudgeAvailability(JudgeAvailabilitySearchRequest
-                        .builder()
-                        .requestInfo(requestInfo)
-                        .criteria(JudgeAvailabilitySearchCriteria.builder()
-                                .judgeId(hearingDetail.getJudgeId())
-                                .fromDate(hearingDetail.getAvailableAfter())
-                                .courtId("0001")  //TODO: need to configure somewhere
-                                .numberOfSuggestedDays(numberOfSuggestedDays) //TODO: later we change this to no of attendees
-                                .tenantId(tenantId)
-                                .build()).build());
+                List<AvailabilityDTO> availability = calendarService.getJudgeAvailability(JudgeAvailabilitySearchRequest.builder().requestInfo(requestInfo).criteria(JudgeAvailabilitySearchCriteria.builder().judgeId(hearingDetail.getJudgeId()).fromDate(hearingDetail.getAvailableAfter()).courtId("0001")  //TODO: need to configure somewhere
+                        .numberOfSuggestedDays(numberOfSuggestedDays).tenantId(tenantId).build()).build());
 
                 // update here all the suggestedDay in reschedule hearing day
-                List<Long> suggestedDays = availability.stream().map(
-                                (suggestedDate) -> Long.valueOf(suggestedDate.getDate()))
-                        .toList();
+                List<Long> suggestedDays = availability.stream().map((suggestedDate) -> Long.valueOf(suggestedDate.getDate())).toList();
                 hearingDetail.setSuggestedDates(suggestedDays);
-                hearingDetail.setRowVersion(hearingDetail.getRowVersion() + 1);
 
 
-                List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder()
-                        .requestInfo(requestInfo)
-                        .criteria(ScheduleHearingSearchCriteria.builder()
-                                .hearingIds(Collections.singletonList(hearingDetail.getHearingBookingId()))
-                                .build()).build(), null, null);
+                List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().requestInfo(requestInfo).criteria(ScheduleHearingSearchCriteria.builder().hearingIds(Collections.singletonList(hearingDetail.getHearingBookingId())).build()).build(), null, null);
                 ScheduleHearing hearing = hearings.get(0);
                 hearing.setStatus("RESCHEDULE");
 
 
                 //reschedule hearing to unblock the calendar
-                hearingService.update(ScheduleHearingRequest.builder()
-                        .requestInfo(requestInfo).hearing(hearings).build());
+                hearingService.update(ScheduleHearingRequest.builder().requestInfo(requestInfo).hearing(hearings).build());
 
 
                 List<ScheduleHearing> udpateHearingList = new ArrayList<>();
@@ -144,6 +125,7 @@ public class ReScheduleHearingService {
 
 
                     long blockedDate = Long.parseLong(availabilityDTO.getDate());
+                    scheduleHearing.setHearingDate(blockedDate);
                     scheduleHearing.setStartTime(blockedDate);
                     scheduleHearing.setEndTime(blockedDate);
                     scheduleHearing.setRescheduleRequestId(hearingDetail.getRescheduledRequestId());
@@ -152,11 +134,9 @@ public class ReScheduleHearingService {
                     udpateHearingList.add(scheduleHearing);
 
                 }
-                hearingService.schedule(ScheduleHearingRequest.builder()
-                        .requestInfo(requestInfo).hearing(udpateHearingList).build());
+                hearingService.schedule(ScheduleHearingRequest.builder().requestInfo(requestInfo).hearing(udpateHearingList).build());
 
             }
-            log.info("operation = updateRequestForBlockCalendar, result = SUCCESS");
 
         } catch (Exception e) {
 
@@ -217,69 +197,79 @@ public class ReScheduleHearingService {
 
         double totalHrs = defaultSlots.stream().reduce(0.0, (total, slot) -> total + slot.getSlotDuration() / 60.0, Double::sum);
         List<MdmsHearing> defaultHearings = helper.getDataFromMDMS(MdmsHearing.class, serviceConstants.DEFAULT_HEARING_MASTER_NAME);
-        Map<String, MdmsHearing> hearingTypeMap = defaultHearings.stream().collect(Collectors.toMap(
-                MdmsHearing::getHearingType,
-                obj -> obj
-        ));
+        Map<String, MdmsHearing> hearingTypeMap = defaultHearings.stream().collect(Collectors.toMap(MdmsHearing::getHearingType, obj -> obj));
         BulkReschedulingOfHearings bulkRescheduling = request.getBulkRescheduling();
 
-        String tenantId = request.getRequestInfo().getUserInfo().getTenantId();
+        String tenantId = bulkRescheduling.getTenantId();
         String judgeId = bulkRescheduling.getJudgeId();
         Long endTime = bulkRescheduling.getEndTime();
         Long startTime = bulkRescheduling.getStartTime();
         Long fromDate = bulkRescheduling.getScheduleAfter();
 
-        ScheduleHearingSearchCriteria criteria = ScheduleHearingSearchCriteria.builder().judgeId(judgeId).startDateTime(startTime).endDateTime(endTime).tenantId(tenantId).build();
-//                .status(Arrays.asList(Status.SCHEDULED.toString(), Status.BLOCKED.toString())).build();
+        List<String> hearingIds = bulkRescheduling.getHearingIds();
+
+        ScheduleHearingSearchCriteria criteria;
+
+        if (startTime != null && endTime != null) {
+
+            criteria = ScheduleHearingSearchCriteria.builder().judgeId(judgeId).startDateTime(startTime).endDateTime(endTime).tenantId(tenantId).status(Arrays.asList("SCHEDULE", "BLOCKED")).build();
+
+        } else if (!hearingIds.isEmpty()) {
+
+            criteria = ScheduleHearingSearchCriteria.builder().judgeId(judgeId).hearingIds(hearingIds).tenantId(tenantId).build();
+
+        } else {
+            throw new CustomException("DK_BULK_INVALID_REQUEST", "Request is not valid");
+        }
+
 
         List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().requestInfo(request.getRequestInfo()).criteria(criteria).build(), null, null);
 
         if (CollectionUtils.isEmpty(hearings)) {
             return new ArrayList<>();
         }
-
-        List<ReScheduleHearing> reScheduleHearings = createReschedulingRequest(hearings, request.getRequestInfo().getUserInfo().getUuid());
-        // create rescheduling req in db
-        create(ReScheduleHearingRequest.builder().reScheduleHearing(reScheduleHearings).requestInfo(request.getRequestInfo()).build());
-
         //get available date
-        List<AvailabilityDTO> availability = calendarService.getJudgeAvailability(
-                JudgeAvailabilitySearchRequest.builder().requestInfo(request.getRequestInfo())
-                        .criteria(JudgeAvailabilitySearchCriteria.builder()
-                                .judgeId(judgeId)
-                                .fromDate(fromDate)
-                                .courtId("0001")
-                                .numberOfSuggestedDays(hearings.size() + 10)
-                                .tenantId(tenantId)// need to configure some where
-                                .build()).build()
-        );
+        List<AvailabilityDTO> availability = calendarService
+                .getJudgeAvailability(JudgeAvailabilitySearchRequest
+                        .builder().requestInfo(request.getRequestInfo())
+                        .criteria(JudgeAvailabilitySearchCriteria
+                                .builder()
+                                .judgeId(judgeId).fromDate(fromDate).courtId("0001")   // need to configure some where
+                                .numberOfSuggestedDays(hearings.size() + 10).tenantId(tenantId)
+                                .build()).build());
 
         // assign slots and push for schedule hearing
         int index = 0;
         Double requiredSlot = null;
-//        for (ScheduleHearing hearing : hearings) {
-//            String eventType = hearing.getEventType().toString();
-//
-//            MdmsHearing hearingType = hearingTypeMap.get(eventType);
-//            requiredSlot = hearingType.getHearingTime() / 60.00;
-//
-//            Double occupiedBandwidth = availability.get(index).getOccupiedBandwidth();
-////            if (totalHrs - occupiedBandwidth > requiredSlot) {  // need to configure
-////                hearing.setDate(LocalDate.parse(availability.get(index).getDate()));
-////                availability.get(index).setOccupiedBandwidth(occupiedBandwidth + requiredSlot);  // need to configure
-////            } else {
-////                hearing.setDate(LocalDate.parse(availability.get(++index).getDate()));
-////                availability.get(index).setOccupiedBandwidth(availability.get(index).getOccupiedBandwidth() + requiredSlot);  // need to configure
-////            }
-//        }
+        for (ScheduleHearing hearing : hearings) {
+            String eventType = hearing.getHearingType();
+
+            MdmsHearing hearingType = hearingTypeMap.get(eventType);
+            requiredSlot = hearingType.getHearingTime() / 60.00;
+
+            Double occupiedBandwidth = availability.get(index).getOccupiedBandwidth();
+            if (totalHrs - occupiedBandwidth > requiredSlot) {  // need to configure
+                hearing.setHearingDate(Long.parseLong(availability.get(index).getDate()));
+                availability.get(index).setOccupiedBandwidth(occupiedBandwidth + requiredSlot);  // need to configure
+            } else {
+                hearing.setHearingDate(Long.parseLong(availability.get(++index).getDate()));
+                availability.get(index).setOccupiedBandwidth(availability.get(index).getOccupiedBandwidth() + requiredSlot);  // need to configure
+            }
+        }
         // try to make it async
         // updated hearing in hearing table
-        hearingService.updateBulk(ScheduleHearingRequest.builder()
-                .hearing(hearings).requestInfo(request.getRequestInfo()).build(), defaultSlots, hearingTypeMap);
+        List<ScheduleHearing> rescheduleHearings = hearingService.updateBulk(ScheduleHearingRequest.builder().hearing(hearings).requestInfo(request.getRequestInfo()).build(), defaultSlots, hearingTypeMap);
 
-        log.info("operation = bulkReschedule, result = SUCCESS, ReScheduleHearing={}", reScheduleHearings);
 
-        return reScheduleHearings;
+//        update hearing of dpg as well
+
+        // fetch dpg hearing with hearingids assign startTime and end time then hit their update api
+
+
+        // one edge case is here , for opt out if that date or in that duration suggested days are there then what need to done
+
+        return null;
+
     }
 
     /**
@@ -294,15 +284,7 @@ public class ReScheduleHearingService {
         Workflow workflow = Workflow.builder().action("AUTO_SCHEDULE").assignees(new ArrayList<>()).comment("bulk reschedule by :" + requesterId).build();
         for (ScheduleHearing hearing : hearings) {
 
-            ReScheduleHearing reScheduleHearingReq = ReScheduleHearing.builder()
-                    .hearingBookingId(hearing.getHearingBookingId())
-                    .judgeId(hearing.getJudgeId())
-                    .caseId(hearing.getCaseId())
-                    .tenantId(hearing.getTenantId())
-                    .requesterId(requesterId)
-                    .actionComment("AUTO SCHEDULE BY JUDGE")
-                    .reason("reschedule by judge")
-                    .build();
+            ReScheduleHearing reScheduleHearingReq = ReScheduleHearing.builder().hearingBookingId(hearing.getHearingBookingId()).judgeId(hearing.getJudgeId()).caseId(hearing.getCaseId()).tenantId(hearing.getTenantId()).requesterId(requesterId).reason("reschedule by judge").build();
 
             resultList.add(reScheduleHearingReq);
 

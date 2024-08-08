@@ -54,6 +54,7 @@ import CustomCalendar from "./components/CustomCalendar";
 import UploadSignatureModal from "./components/UploadSignatureModal";
 import CommentComponent from "./components/CommentComponent";
 import { RightArrow } from "./icons/svgIndex";
+import useBillSearch from "./hooks/dristi/useBillSearch";
 
 export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   const { path } = useRouteMatch();
@@ -69,11 +70,20 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   Digit.SessionStorage.set("DRISTI_TENANTS", tenants);
   const urlParams = new URLSearchParams(window.location.search);
   const result = urlParams.get("result");
-  console.log(result, "result");
+  const fileStoreId = urlParams.get("filestoreId");
+  console.log(result, fileStoreId, "result");
   if (userType === "citizen" && userInfo?.type !== "EMPLOYEE") {
     return (
       <ToastProvider>
-        <CitizenApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} tenantId={tenantID} result={result} />
+        <CitizenApp
+          path={path}
+          stateCode={stateCode}
+          userType={userType}
+          tenants={tenants}
+          tenantId={tenantID}
+          result={result}
+          fileStoreId={fileStoreId}
+        />
       </ToastProvider>
     );
   }
@@ -82,7 +92,7 @@ export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   }
   return (
     <ToastProvider>
-      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} result={result}></EmployeeApp>
+      <EmployeeApp path={path} stateCode={stateCode} userType={userType} tenants={tenants} result={result} fileStoreId={fileStoreId}></EmployeeApp>
     </ToastProvider>
   );
 };
@@ -135,6 +145,7 @@ const componentsToRegister = {
   CustomChooseDate,
   CustomCalendar,
   RightArrow,
+  useBillSearch,
 };
 
 const overrideHooks = () => {

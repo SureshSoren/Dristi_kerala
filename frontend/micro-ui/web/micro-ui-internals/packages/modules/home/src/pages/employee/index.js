@@ -43,7 +43,7 @@ const App = ({ path, stateCode, userType, tenants }) => {
       <AppContainer className="ground-container">
         <PrivateRoute path={`${path}/hearings-response`} component={() => <HearingsResponse></HearingsResponse>} />
         <PrivateRoute path={`${path}/inside-hearing`} component={() => <InsideHearingMainPage />} />
-        <PrivateRoute path={`${path}/e-filing-payment-response`} component={() => <EFilingPaymentRes></EFilingPaymentRes>} />
+        <PrivateRoute path={`${path}/home-pending-task/e-filing-payment-response`} component={() => <EFilingPaymentRes></EFilingPaymentRes>} />
         <PrivateRoute path={`${path}/home-pending-task`} component={() => <HomeView></HomeView>} />
         <PrivateRoute
           path={`${path}/home-pending-task/e-filing-payment-breakdown`}

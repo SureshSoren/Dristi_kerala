@@ -10,4 +10,7 @@ export const Urls = {
     updateHearings: "/hearing/v1/update",
   },
   FileFetchById: "/filestore/v1/files/id",
+  Epost: {
+    EpostUpdate: "/epost-tracker/epost/v1/_updateEPost"
+  }
 };

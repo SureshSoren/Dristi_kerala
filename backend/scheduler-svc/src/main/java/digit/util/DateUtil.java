@@ -43,4 +43,11 @@ public class DateUtil {
     public Long getEpochFromLocalDateTime(LocalDateTime dateTime) {
         return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
+
+    public Long getStartOfTheDayForEpoch(Long date) {
+        LocalDate localDate = getLocalDateFromEpoch(date);
+
+        return getEPochFromLocalDate(localDate);
+
+    }
 }
