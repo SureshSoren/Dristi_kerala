@@ -469,7 +469,7 @@ const SubmissionsCreate = ({ path }) => {
       return null;
     }
   };
-  console.log("gjk");
+  
   const updateSubmission = async (action) => {
     try {
       const localStorageID = localStorage.getItem("fileStoreId");
