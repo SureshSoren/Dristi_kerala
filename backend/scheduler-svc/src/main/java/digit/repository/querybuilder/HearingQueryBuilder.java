@@ -10,6 +10,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
+import static digit.config.ServiceConstants.BLOCKED;
+import static digit.config.ServiceConstants.SCHEDULE;
+
 
 @Component
 @Slf4j
@@ -40,12 +43,11 @@ public class HearingQueryBuilder {
         query.append("FROM hearing_booking hb ");
 
         getWhereFields(scheduleHearingSearchCriteria, query, preparedStmtList, null, null);
-        // add status block
-//        queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-//        query.append(" ( hb.status = ? ");
-//        preparedStmtList.add(Status.BLOCKED.toString());
-//        query.append(" OR hb.status = ? )");
-//        preparedStmtList.add(Status.SCHEDULED.toString());
+        queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
+        query.append(" ( hb.status = ? ");
+        preparedStmtList.add(BLOCKED);
+        query.append(" OR hb.status = ? )");
+        preparedStmtList.add(SCHEDULE);
 
 
         query.append("GROUP BY hb.hearing_date) AS meeting_hours ");

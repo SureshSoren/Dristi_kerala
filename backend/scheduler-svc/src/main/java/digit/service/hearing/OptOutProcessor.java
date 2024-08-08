@@ -124,7 +124,7 @@ public class OptOutProcessor {
 //                    .requestInfo(requestInfo)
 //                    .hearing(newHearings)
 //                    .build());
-            producer.push(configuration.getScheduleHearingUpdateTopic(),Collections.singletonList(reScheduleHearing) );
+            producer.push(configuration.getScheduleHearingUpdateTopic(),Collections.singletonList(newHearings) );
             log.info("operation = unblockJudgeCalendarForSuggestedDays, result = SUCCESS");
         } catch (Exception e) {
             log.error("Error unblocking calendar: {}", e.getMessage());

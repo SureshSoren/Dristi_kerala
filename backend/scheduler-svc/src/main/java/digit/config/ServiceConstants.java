@@ -30,7 +30,8 @@ public class ServiceConstants {
 
     public static final String INACTIVE = "INACTIVE";
     public static final String ACTIVE = "ACTIVE";
-
+    public static final String BLOCKED = "BLOCKED";
+    public static final String SCHEDULE = "SCHEDULED";
     public final String DEFAULT_JUDGE_CALENDAR_MODULE_NAME = "schedule-hearing";
     public final String DEFAULT_JUDGE_CALENDAR_MASTER_NAME = "COURT000334";
     public final String DEFAULT_COURT_MODULE_NAME = "court";
