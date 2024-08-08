@@ -45,7 +45,7 @@ public class EPostRepository {
         return jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
     }
 
-    private Integer getTotalCountQuery(EPostTrackerSearchCriteria searchCriteria) {
+    public Integer getTotalCountQuery(EPostTrackerSearchCriteria searchCriteria) {
         List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getEPostTrackerSearchQuery(searchCriteria, preparedStmtList);
         String countQuery = queryBuilder.getTotalCountQuery(query);
