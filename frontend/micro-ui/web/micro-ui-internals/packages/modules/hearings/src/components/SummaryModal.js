@@ -1,8 +1,9 @@
 import { TextArea } from "@egovernments/digit-ui-components";
 import { CardText, Modal } from "@egovernments/digit-ui-react-components";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useGetHearings from "../hooks/hearings/useGetHearings";
+import { useHistory } from "react-router-dom";
 
 const Heading = (props) => {
   return (
@@ -71,9 +72,15 @@ const CloseBtn = (props) => {
   );
 };
 
-const SummaryModal = ({ handleConfirmationModal, hearingId, onSaveSummary, onCancel, transcript, setTranscript }) => {
+const SummaryModal = ({ handleConfirmationModal, hearingId, hearing, onSaveSummary, onCancel, transcript, setTranscript, isEndHearing }) => {
   const { t } = useTranslation();
+  const [caseDetails, setCaseDetails] = useState();
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
+  const OrderWorkflowAction = Digit.ComponentRegistryService.getComponent("OrderWorkflowActionEnum") || {};
+  const ordersService = Digit.ComponentRegistryService.getComponent("OrdersService") || {};
+  const history = useHistory();
+  const userInfo = Digit.UserService.getUser()?.info;
+  const userType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo]);
 
   const reqBody = {
     hearing: { tenantId },
@@ -92,6 +99,75 @@ const SummaryModal = ({ handleConfirmationModal, hearingId, onSaveSummary, onCan
       setTranscript(hearingData.transcript[0]);
     }
   }, [latestText, setTranscript]);
+
+  const onGenerateOrder = () => {
+    const requestBody = {
+      order: {
+        createdDate: new Date().getTime(),
+        tenantId: Digit.ULBService.getCurrentTenantId(),
+        filingNumber: caseDetails?.filingNumber,
+        cnrNumber: caseDetails?.cnrNumber,
+        statuteSection: {
+          tenantId: Digit.ULBService.getCurrentTenantId(),
+        },
+        orderType: "OTHERS",
+        status: "",
+        isActive: true,
+        workflow: {
+          action: OrderWorkflowAction.SAVE_DRAFT,
+          comments: "Creating order",
+          assignes: null,
+          rating: null,
+          documents: [{}],
+        },
+        documents: [],
+        additionalDetails: {
+          formdata: {
+            orderType: {
+              type: "OTHERS",
+              isactive: true,
+              code: "OTHERS",
+              name: "ORDER_TYPE_OTHERS",
+            },
+            transcriptSummary: transcript,
+          },
+        },
+      },
+    };
+    ordersService
+      .createOrder(requestBody, { tenantId: Digit.ULBService.getCurrentTenantId() })
+      .then((res) => {
+        history.push(
+          `/${window.contextPath}/${userType}/orders/generate-orders?filingNumber=${caseDetails?.filingNumber}&orderNumber=${res.order.orderNumber}`
+        );
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
+  useEffect(() => {
+    getCaseDetails();
+  }, []);
+
+  const getCaseDetails = async () => {
+    try {
+      const response = await window?.Digit?.DRISTIService.searchCaseService(
+        {
+          criteria: [
+            {
+              filingNumber: hearing?.filingNumber[0],
+            },
+          ],
+          tenantId,
+        },
+        {}
+      );
+      setCaseDetails(response?.criteria[0]?.responseList[0]);
+    } catch (error) {
+      console.log("error fetching case details", error);
+    }
+  };
 
   return (
     <div>
@@ -128,10 +204,10 @@ const SummaryModal = ({ handleConfirmationModal, hearingId, onSaveSummary, onCan
         }}
         headerBarMain={<Heading label={t("Confirm Hearing Transcript/ Summary")} />}
         headerBarEnd={<CloseBtn onClick={handleConfirmationModal} />}
-        actionSaveLabel={<BackBtn text={t("Set Next Hearing Date")} />}
+        actionSaveLabel={<BackBtn text={hearing?.hearingType === "JUDGEMENT" && isEndHearing ? "Generate Order" : t("Set Next Hearing Date")} />}
         actionCancelLabel={t("Back")}
         actionSaveOnSubmit={() => {
-          onSaveSummary(transcript);
+          hearing?.hearingType === "JUDGEMENT" && isEndHearing ? onGenerateOrder() : onSaveSummary(transcript);
         }} // pass the handler of next modal
         actionCancelOnSubmit={() => {
           onCancel();

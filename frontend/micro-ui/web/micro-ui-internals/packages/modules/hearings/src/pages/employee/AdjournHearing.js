@@ -156,6 +156,7 @@ const AdjournHearing = ({ hearing, updateTranscript }) => {
           transcript={transcript}
           setTranscript={setTranscript}
           handleConfirmationModal={handleConfirmationModal}
+          hearing={hearing}
           hearingId={hearingId}
           onSaveSummary={(updatedTranscriptText) => {
             adjournHearing(updatedTranscriptText).then(() => {

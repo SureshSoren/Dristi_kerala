@@ -123,6 +123,8 @@ const EndHearing = ({ handleEndHearingModal, hearingId, updateTranscript, hearin
           setTranscript={setTranscript}
           handleConfirmationModal={handleConfirmationModal}
           hearingId={hearingId}
+          hearing={hearing}
+          isEndHearing={true}
           onSaveSummary={(updatedTranscriptText) => {
             endHearing(updatedTranscriptText).then(() => {
               setStepper((stepper) => stepper + 1);

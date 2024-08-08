@@ -147,10 +147,6 @@ function ScheduleAdmission({
     return Math.floor(new Date(date).getTime());
   }
 
-  function epochToDate(epochTime) {
-    return new Date(epochTime * 1000);
-  }
-
   const { data: dateResponse } = window?.Digit.Hooks.dristi.useJudgeAvailabilityDates(
     {
       SearchCriteria: {
