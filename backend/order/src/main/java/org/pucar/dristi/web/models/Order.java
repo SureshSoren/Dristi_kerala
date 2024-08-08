@@ -51,6 +51,12 @@ public class Order {
     @Valid
     private String hearingNumber = null;
 
+    @JsonProperty("caseTitle")
+    private String caseTitle = null;
+
+    @JsonProperty("caseId")
+    private String caseId = null;
+
     @JsonProperty("orderNumber")
     @Size(min = 24, max = 256)
     private String orderNumber = null;

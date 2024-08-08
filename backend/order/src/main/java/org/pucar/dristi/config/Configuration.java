@@ -45,6 +45,9 @@ public class Configuration {
     @Value("${egov.case.path}")
     private String casePath;
 
+    @Value("${egov.case.search.path}")
+    private String caseSearchPath;
+
     //Workflow Config
     @Value("${egov.workflow.host}")
     private String wfHost;

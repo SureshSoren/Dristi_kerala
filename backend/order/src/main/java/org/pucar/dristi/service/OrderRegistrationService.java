@@ -8,6 +8,7 @@ import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.enrichment.OrderRegistrationEnrichment;
 import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.repository.OrderRepository;
+import org.pucar.dristi.util.CaseUtil;
 import org.pucar.dristi.util.WorkflowUtil;
 import org.pucar.dristi.validators.OrderRegistrationValidator;
 import org.pucar.dristi.web.models.*;
@@ -36,14 +37,17 @@ public class OrderRegistrationService {
 
     private Producer producer;
 
+    private final CaseUtil caseUtil;
+
     @Autowired
-    public OrderRegistrationService(OrderRegistrationValidator validator, Producer producer, Configuration config, WorkflowUtil workflowUtil, OrderRepository orderRepository, OrderRegistrationEnrichment enrichmentUtil) {
+    public OrderRegistrationService(OrderRegistrationValidator validator, Producer producer, Configuration config, WorkflowUtil workflowUtil, OrderRepository orderRepository, OrderRegistrationEnrichment enrichmentUtil, CaseUtil caseUtil) {
         this.validator = validator;
         this.producer = producer;
         this.config = config;
         this.workflowUtil = workflowUtil;
         this.orderRepository = orderRepository;
         this.enrichmentUtil = enrichmentUtil;
+        this.caseUtil = caseUtil;
     }
 
     public Order createOrder(OrderRequest body) {
@@ -71,6 +75,17 @@ public class OrderRegistrationService {
         try {
             // Fetch applications from database according to the given search criteria
             List<Order> orderList = orderRepository.getOrders(request.getCriteria(), request.getPagination());
+            CaseListResponse caseListResponse =  caseUtil.fetchCaseList(request);
+            if (caseListResponse.getCriteria() != null) {
+                orderList.forEach(order -> {
+                    caseListResponse.getCriteria().forEach(criteria -> {
+                        if (!criteria.getResponseList().isEmpty()) {
+                            order.setCaseId(criteria.getResponseList().get(0).getId().toString());
+                            order.setCaseTitle(criteria.getResponseList().get(0).getCaseTitle());
+                        }
+                    });
+                });
+            }
 
             // If no applications are found matching the given criteria, return an empty list
             if (CollectionUtils.isEmpty(orderList))

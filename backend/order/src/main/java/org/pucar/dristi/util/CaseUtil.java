@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
 import org.pucar.dristi.config.Configuration;
-import org.pucar.dristi.web.models.CaseExists;
-import org.pucar.dristi.web.models.CaseExistsRequest;
-import org.pucar.dristi.web.models.CaseExistsResponse;
+import org.pucar.dristi.web.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -58,5 +56,29 @@ public class CaseUtil {
 		if(caseResponse.getCriteria().isEmpty())
 			return false;
 		return caseResponse.getCriteria().get(0).getExists();
+	}
+
+	public CaseListResponse fetchCaseList(OrderSearchRequest request) {
+		StringBuilder uri = new StringBuilder();
+		uri.append(configs.getCaseHost()).append(configs.getCaseSearchPath());
+		CaseSearchRequest caseSearchRequest = new CaseSearchRequest();
+		caseSearchRequest.setRequestInfo(request.getRequestInfo());
+		CaseCriteria caseCriteria = new CaseCriteria();
+		caseCriteria.setCnrNumber(request.getCriteria().getCnrNumber());
+		caseCriteria.setFilingNumber(request.getCriteria().getFilingNumber());
+		List<CaseCriteria> criteriaList = new ArrayList<>();
+		criteriaList.add(caseCriteria);
+		caseSearchRequest.setCriteria(criteriaList);
+		CaseListResponse caseListResponse = new CaseListResponse();
+		try {
+			Object response = restTemplate.postForObject(uri.toString(), caseSearchRequest, Map.class);
+			caseListResponse = mapper.convertValue(response, CaseListResponse.class);
+		} catch (Exception e) {
+			log.error("ERROR_WHILE_FETCHING_FROM_CASE :: {}", e.toString());
+		}
+		if (caseListResponse.getCriteria().isEmpty()) {
+			return null;
+		}
+		return caseListResponse;
 	}
 }
