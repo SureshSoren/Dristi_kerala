@@ -1,16 +1,28 @@
 const axios = require('axios');
 const { PDFDocument } = require('pdf-lib');
+const imageToPdf = require('image-to-pdf');
 
 async function fetchDocument(fileStoreId) {
     const url = `https://dristi-kerala-dev.pucar.org/filestore/v1/files/id?tenantId=kl&fileStoreId=${fileStoreId}`;
-    const response = await axios.get(url, { responseType: 'arraybuffer' });
+    
+    try {
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
 
-    if (response.headers['content-type'] === 'application/pdf') {
-        console.log(response.headers); 
-        return response.data;
-    } else {
-        const imagePdf = await imageToPdf(response.data);
-        return imagePdf;
+        const contentType = response.headers['content-type'];
+
+        if (contentType === 'application/pdf') {
+            console.log('PDF file detected');
+            return response.data;
+        } else if (contentType.startsWith('image/')) {
+            console.log('Image file detected');
+            const imagePdf = await imageToPdf(response.data);
+            return imagePdf;
+        } else {
+            throw new Error(`Unsupported content type: ${contentType}`);
+        }
+    } catch (error) {
+        console.error('Error fetching document:', error.message);
+        throw error;
     }
 }
 
