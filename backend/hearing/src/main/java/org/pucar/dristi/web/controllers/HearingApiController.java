@@ -103,8 +103,8 @@ public class HearingApiController {
     }
 
     @PostMapping("/witnessDeposition/v1/downloadPdf")
-    public ResponseEntity<Object> witnessDepositionV1DownloadPdf(@Valid @RequestBody PdfRequest pdfRequest) {
-        MultipartFile pdfResponse = witnessDepositionPdfService.getWitnessDepositionPdf(pdfRequest);
+    public ResponseEntity<Object> witnessDepositionV1DownloadPdf(@Valid @RequestBody HearingSearchRequest searchRequest) {
+        MultipartFile pdfResponse = witnessDepositionPdfService.getWitnessDepositionPdf(searchRequest);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"witness_deposition_pdf.pdf\"")
                 .contentType(MediaType.APPLICATION_PDF)

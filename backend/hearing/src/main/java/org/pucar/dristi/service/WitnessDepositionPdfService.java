@@ -36,19 +36,19 @@ public class WitnessDepositionPdfService {
         this.pdfRequestUtil = pdfRequestUtil;
     }
 
-    public MultipartFile getWitnessDepositionPdf(PdfRequest pdfRequest) {
-        HearingCriteria criteria = HearingCriteria.builder().hearingId(pdfRequest.getHearingId()).build();
+    public MultipartFile getWitnessDepositionPdf(HearingSearchRequest searchRequest) {
+        HearingCriteria criteria = searchRequest.getCriteria();
         Pagination pagination = Pagination.builder().limit(1D).offSet(0D).build();
         HearingSearchRequest hearingSearchRequest = HearingSearchRequest.builder()
                 .criteria(criteria).pagination(pagination).build();
         Optional<Hearing> optionalHearing = hearingRepository.getHearings(hearingSearchRequest).stream().findFirst();
         if (optionalHearing.isPresent()) {
-            List<WitnessDeposition> witnessDepositions = createWitnessObjects(pdfRequest.getRequestInfo(), optionalHearing.get());
+            List<WitnessDeposition> witnessDepositions = createWitnessObjects(searchRequest.getRequestInfo(), optionalHearing.get());
             WitnessPdfRequest witnessPdfRequest = WitnessPdfRequest.builder()
-                    .witnessDepositions(witnessDepositions).requestInfo(pdfRequest.getRequestInfo()).build();
-            return pdfRequestUtil.createPdfForWitness(witnessPdfRequest, pdfRequest.getTenantId());
+                    .witnessDepositions(witnessDepositions).requestInfo(searchRequest.getRequestInfo()).build();
+            return pdfRequestUtil.createPdfForWitness(witnessPdfRequest, searchRequest.getRequestInfo().getUserInfo().getTenantId());
         } else {
-            log.error("Provided Pdf Request details: {} are not valid", pdfRequest);
+            log.error("Provided Pdf Request details: {} are not valid", searchRequest);
             throw new CustomException("VALIDATION_EXCEPTION", "Provided Pdf Request details are not valid");
         }
     }
