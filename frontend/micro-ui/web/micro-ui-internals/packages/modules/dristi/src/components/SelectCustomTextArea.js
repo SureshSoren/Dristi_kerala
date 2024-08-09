@@ -8,7 +8,7 @@ function SelectCustomTextArea({ t, config, formData = {}, onSelect, errors }) {
       config?.populators?.inputs || [
         {
           textAreaHeader: "custom note",
-          textAreaSubHeader: "please provide some more details.",
+          textAreaSubHeader: "please provide some more details.", 
           isOptional: false,
         },
       ],

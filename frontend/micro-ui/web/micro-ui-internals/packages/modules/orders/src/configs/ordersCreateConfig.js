@@ -552,26 +552,51 @@ export const configsOrderMandatorySubmissions = [
   },
   {
     body: [
+      // {
+      //   type: "component",
+      //   component: "SelectCustomTextArea",
+      //   key: "additionalComments",
+      //   isMandatory: false,
+      //   populators: {
+      //     inputs: [
+      //       {
+      //         name: "text",
+      //         textAreaSubHeader: "ADDITIONAL_COMMENTS",
+      //         placeholder: "TYPE_HERE_PLACEHOLDER",
+      //         isOptional: true,
+      //         type: "TextAreaComponent",
+      //       },
+      //     ],
+      //     validation: {
+      //       customValidationFn: {
+      //         moduleName: "dristiOrders",
+      //         masterName: "alphaNumericValidation",
+      //       },
+      //     },
+      //   },
+      // },
       {
         type: "component",
-        component: "SelectCustomTextArea",
+        component: "SelectTranscriptTextArea",
         key: "additionalComments",
-        isMandatory: false,
         populators: {
-          inputs: [
-            {
-              name: "text",
-              textAreaSubHeader: "ADDITIONAL_COMMENTS",
-              placeholder: "TYPE_HERE_PLACEHOLDER",
-              isOptional: true,
-              type: "TextAreaComponent",
-            },
-          ],
+          input: {
+            name: "text",
+            textAreaSubHeader: "ADDITIONAL_COMMENTS",
+            type: "TranscriptionTextAreaComponent",
+            placeholder: "TYPE_HERE_PLACEHOLDER",
+            isOptional: true,
+          },
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
               masterName: "alphaNumericValidation",
             },
+          },
+          mdmsConfig: {
+            moduleName: "Order",
+            masterName: "", // TO DO: ADD CONFIG IN MDMS
+            localePrefix: "",
           },
         },
       },
