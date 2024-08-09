@@ -61,7 +61,7 @@ public class SummonsDelivery {
     private String deliveryRequestDate;
 
     @JsonProperty("deliveryStatus")
-    private String deliveryStatus;
+    private DeliveryStatus deliveryStatus;
 
     @JsonProperty("additionalFields")
     private AdditionalFields additionalFields;

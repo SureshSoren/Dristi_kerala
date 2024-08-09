@@ -68,7 +68,7 @@ public class SummonsService {
         Document document = createDocument(fileStoreId);
         taskRequest.getTask().addDocumentsItem(document);
 
-        return taskUtil.callUpdateTask(taskRequest);
+        return taskUtil.callUploadDocumentTask(taskRequest);
     }
 
     public SummonsDelivery sendSummonsViaChannels(TaskRequest request) {
@@ -79,9 +79,9 @@ public class SummonsService {
         if (channelMessage.getAcknowledgementStatus().equalsIgnoreCase("success")) {
             summonsDelivery.setIsAcceptedByChannel(Boolean.TRUE);
             if (summonsDelivery.getChannelName() == ChannelName.SMS || summonsDelivery.getChannelName() == ChannelName.EMAIL) {
-                summonsDelivery.setDeliveryStatus("SUMMONS_DELIVERED");
+                summonsDelivery.setDeliveryStatus(DeliveryStatus.DELIVERED);
             } else {
-                summonsDelivery.setDeliveryStatus("SUMMONS_IN_PROGRESS");
+                summonsDelivery.setDeliveryStatus(DeliveryStatus.IN_TRANSIT);
             }
             summonsDelivery.setChannelAcknowledgementId(channelMessage.getAcknowledgeUniqueNumber());
         }

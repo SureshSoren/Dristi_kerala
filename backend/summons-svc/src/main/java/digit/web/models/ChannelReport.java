@@ -14,7 +14,7 @@ public class ChannelReport {
     private String summonId;
 
     @JsonProperty("deliveryStatus")
-    private String deliveryStatus;
+    private DeliveryStatus deliveryStatus;
 
     @JsonProperty("additionalFields")
     private AdditionalFields additionalFields;
