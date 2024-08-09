@@ -150,4 +150,9 @@ public class TaskService {
 
         task.setStatus(status);
     }
+
+    public List<TaskCase> searchCaseTask(TaskCaseSearchRequest request) {
+
+        return taskRepository.getTaskWithCaseDetails(request);
+    }
 }
