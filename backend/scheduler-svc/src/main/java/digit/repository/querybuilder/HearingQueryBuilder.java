@@ -39,7 +39,7 @@ public class HearingQueryBuilder {
     public String getJudgeAvailableDatesQuery(ScheduleHearingSearchCriteria scheduleHearingSearchCriteria, List<Object> preparedStmtList) {
         StringBuilder query = new StringBuilder("SELECT meeting_hours.hearing_date AS date,meeting_hours.total_hours  AS hours ");
         query.append("FROM (");
-        query.append("SELECT hb.hearing_date, SUM((hb.end_time - hb.start_time) / 3600000) AS total_hours ");
+        query.append("SELECT hb.hearing_date, SUM(((hb.end_time - hb.start_time)*60) / 3600000) AS total_hours ");
         query.append("FROM hearing_booking hb ");
 
         getWhereFields(scheduleHearingSearchCriteria, query, preparedStmtList, null, null);
