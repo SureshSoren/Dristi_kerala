@@ -31,7 +31,7 @@ import { CustomDeleteIcon } from "../../../../dristi/src/icons/svgIndex";
 import OrderReviewModal from "../../pageComponents/OrderReviewModal";
 import OrderSignatureModal from "../../pageComponents/OrderSignatureModal";
 import OrderDeleteModal from "../../pageComponents/OrderDeleteModal";
-import { ordersService } from "../../hooks/services";
+import { ordersService, schedulerService } from "../../hooks/services";
 import { Loader } from "@egovernments/digit-ui-components";
 import OrderSucessModal from "../../pageComponents/OrderSucessModal";
 import { applicationTypes } from "../../utils/applicationTypes";
@@ -932,7 +932,30 @@ const GenerateOrders = () => {
       { tenantId }
     );
   };
-
+  const handleRescheduleHearing = async ({ hearingNumber, rescheduledRequestId, comments, requesterId, date }) => {
+    await schedulerService.RescheduleHearing(
+      {
+        RescheduledRequest: [
+          {
+            rescheduledRequestId: rescheduledRequestId,
+            hearingBookingId: hearingNumber,
+            tenantId: tenantId,
+            judgeId: "",
+            caseId: filingNumber,
+            hearingType: "TRIAL_HEARING",
+            requesterId: requesterId,
+            reason: comments,
+            availableAfter: date,
+            rowVersion: 1,
+            suggestedDates: null,
+            availableDates: null,
+            scheduleDate: null,
+          },
+        ],
+      },
+      {}
+    );
+  };
   const generateAddress = ({ pincode = "", district = "", city = "", state = "", coordinates = { longitude: "", latitude: "" }, locality = "" }) => {
     return `${locality} ${district} ${city} ${state} ${pincode ? ` - ${pincode}` : ""}`.trim();
   };
@@ -1316,11 +1339,17 @@ const GenerateOrders = () => {
         }
       }
       if (orderType === "INITIATING_RESCHEDULING_OF_HEARING_DATE") {
+        const dateObject = new Date(applicationDetails?.additionalDetails?.formdata?.initialHearingDate);
+        const date = dateObject && dateObject?.getTime();
+        const requesterId = "";
+        const rescheduledRequestId = currentOrder?.additionalDetails?.formdata?.refApplicationId;
+        const comments = currentOrder?.comments || "";
         await handleUpdateHearing({
           action: HearingWorkflowAction.RESCHEDULE,
           startTime: Date.parse(currentOrder?.additionalDetails?.formdata?.newHearingDate),
           endTime: Date.parse(currentOrder?.additionalDetails?.formdata?.newHearingDate),
         });
+        await handleRescheduleHearing({ hearingNumber, rescheduledRequestId, comments, requesterId, date });
       }
       referenceId && (await handleApplicationAction(currentOrder));
       const orderResponse = await updateOrder(

@@ -2,6 +2,8 @@ import { useIndividualView } from "./useIndividualView";
 import utils from "../utils";
 
 import { ordersService } from "./services";
+import { schedulerService } from "./services";
+
 import { EpostService } from "./services";
 import useSearchOrdersService from "./orders/useSearchOrdersService";
 import useESign from "./orders/useESign";
@@ -12,9 +14,9 @@ import useDocumentUpload from "./orders/useDocumentUpload";
 
 const orders = {
   useIndividualView,
-    useSearchOrdersService,
-    useESign,
-  
+  useSearchOrdersService,
+  useESign,
+
   useGetPendingTask,
   useDocumentUpload,
 };
@@ -46,4 +48,5 @@ export const CustomisedHooks = {
   Utils,
   ordersService,
   EpostService,
+  schedulerService,
 };

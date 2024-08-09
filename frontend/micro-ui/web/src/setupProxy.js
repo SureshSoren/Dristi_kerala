@@ -43,5 +43,7 @@ module.exports = function (app) {
     "/analytics",
     "/epost-tracker",
     "/task",
+    "/scheduler",
+
   ].forEach((location) => app.use(location, createProxy));
 };
