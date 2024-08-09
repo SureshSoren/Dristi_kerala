@@ -73,6 +73,9 @@ public class Configuration {
     @Value("${egov.task.service.update.endpoint}")
     private String taskServiceUpdateEndpoint;
 
+    @Value("${egov.task.service.update.document.endpoint}")
+    private String taskServiceUpdateDocumentEndpoint;
+
     // ICops
 
     @Value("${egov.icops.host}")

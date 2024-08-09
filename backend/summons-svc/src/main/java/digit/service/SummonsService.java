@@ -68,7 +68,7 @@ public class SummonsService {
         Document document = createDocument(fileStoreId);
         taskRequest.getTask().addDocumentsItem(document);
 
-        return taskUtil.callUpdateTask(taskRequest);
+        return taskUtil.callUploadDocumentTask(taskRequest);
     }
 
     public SummonsDelivery sendSummonsViaChannels(TaskRequest request) {
