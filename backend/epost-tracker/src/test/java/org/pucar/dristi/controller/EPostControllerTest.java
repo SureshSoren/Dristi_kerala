@@ -1,9 +1,5 @@
 package org.pucar.dristi.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.response.ResponseInfo;
 import org.pucar.dristi.model.*;
@@ -24,7 +20,7 @@ import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class EPostControllerTest {
+class EPostControllerTest {
 
     @Mock
     private EPostService ePostService;
@@ -42,7 +38,7 @@ public class EPostControllerTest {
     private EPostController ePostController;
 
     @Test
-    public void testSendEPost() {
+    void testSendEPost() {
         // Arrange
 
         ResponseInfo responseInfo = new ResponseInfo();
@@ -63,7 +59,7 @@ public class EPostControllerTest {
     }
 
     @Test
-    public void testGetEPost() {
+    void testGetEPost() {
         // Arrange
         EPostTrackerSearchRequest request = new EPostTrackerSearchRequest();
         EPostResponse ePostResponse = new EPostResponse();
@@ -82,7 +78,7 @@ public class EPostControllerTest {
     }
 
     @Test
-    public void testUpdateEPost() {
+    void testUpdateEPost() {
         // Arrange
         EPostRequest ePostRequest = new EPostRequest();
         EPostTracker ePostTracker = new EPostTracker();

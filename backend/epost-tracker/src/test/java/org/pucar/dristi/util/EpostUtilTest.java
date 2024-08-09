@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class EpostUtilTest {
+class EpostUtilTest {
 
     @Mock
     private IdgenUtil idgenUtil;
@@ -47,12 +47,12 @@ public class EpostUtilTest {
     private EPostTracker ePostTracker;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Initialization for any common setup can be done here
     }
 
     @Test
-    public void testCreatePostTrackerBody() {
+    void testCreatePostTrackerBody() {
         // Arrange
         TaskRequest request = mock(TaskRequest.class);
         RequestInfo requestInfo = mock(RequestInfo.class);
@@ -75,21 +75,21 @@ public class EpostUtilTest {
         when(requestInfo.getUserInfo()).thenReturn(user);
 
         // Act
-        EPostTracker ePostTracker = epostUtil.createPostTrackerBody(request);
+        EPostTracker ePostTrackerResult = epostUtil.createPostTrackerBody(request);
 
         // Assert
         assertNotNull(ePostTracker);
-        assertEquals("PN123", ePostTracker.getProcessNumber());
-        assertEquals("tenantId", ePostTracker.getTenantId());
-        assertEquals("fileStoreId", ePostTracker.getFileStoreId());
-        assertEquals("123 Street", ePostTracker.getAddress());
-        assertEquals("123456", ePostTracker.getPinCode());
-        assertEquals(DeliveryStatus.NOT_UPDATED, ePostTracker.getDeliveryStatus());
-        assertEquals(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), ePostTracker.getBookingDate()); // Current date comparison
+        assertEquals("PN123", ePostTrackerResult.getProcessNumber());
+        assertEquals("tenantId", ePostTrackerResult.getTenantId());
+        assertEquals("fileStoreId", ePostTrackerResult.getFileStoreId());
+        assertEquals("123 Street", ePostTrackerResult.getAddress());
+        assertEquals("123456", ePostTrackerResult.getPinCode());
+        assertEquals(DeliveryStatus.NOT_UPDATED, ePostTrackerResult.getDeliveryStatus());
+        assertEquals(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), ePostTrackerResult.getBookingDate()); // Current date comparison
     }
 
     @Test
-    public void testUpdateEPostTracker() {
+    void testUpdateEPostTracker() {
         // Arrange
         RequestInfo requestInfo = mock(RequestInfo.class);
         AuditDetails auditDetails = mock(AuditDetails.class);

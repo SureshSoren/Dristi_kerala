@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceRequestRepositoryTest {
+class ServiceRequestRepositoryTest {
 
     @Mock
     private ObjectMapper mapper;
@@ -30,7 +30,7 @@ public class ServiceRequestRepositoryTest {
     private ServiceRequestRepository serviceRequestRepository;
 
     @Test
-    public void testFetchResult_Success() {
+    void testFetchResult_Success() {
         StringBuilder uri = new StringBuilder("http://localhost:8080/test");
         Map<String, Object> request = new HashMap<>();
         request.put("key", "value");
@@ -46,7 +46,7 @@ public class ServiceRequestRepositoryTest {
     }
 
     @Test
-    public void testFetchResult_HttpClientErrorException() {
+    void testFetchResult_HttpClientErrorException() {
         StringBuilder uri = new StringBuilder("http://localhost:8080/test");
         Map<String, Object> request = new HashMap<>();
         request.put("key", "value");
@@ -60,7 +60,7 @@ public class ServiceRequestRepositoryTest {
     }
 
     @Test
-    public void testFetchResult_GenericException() {
+    void testFetchResult_GenericException() {
         StringBuilder uri = new StringBuilder("http://localhost:8080/test");
         Map<String, Object> request = new HashMap<>();
         request.put("key", "value");

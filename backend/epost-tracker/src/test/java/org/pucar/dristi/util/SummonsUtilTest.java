@@ -11,9 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +19,9 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
+
+import static org.pucar.dristi.config.ServiceConstants.ERROR_WHILE_UPDATING_SUMMONS;
+import static org.pucar.dristi.config.ServiceConstants.SUMMONS_UPDATE_ERROR;
 
 class SummonsUtilTest {
 
@@ -80,7 +81,7 @@ class SummonsUtilTest {
         // Act & Assert
         CustomException thrown = assertThrows(CustomException.class, () ->
                 summonsUtil.updateSummonsDeliveryStatus(request));
-        assertEquals("SUMMONS_UPDATE_ERROR", thrown.getCode());
-        assertEquals("Error occurred when sending Update Summons Request", thrown.getMessage());
+        assertEquals(SUMMONS_UPDATE_ERROR, thrown.getCode());
+        assertEquals(ERROR_WHILE_UPDATING_SUMMONS, thrown.getMessage());
     }
 }

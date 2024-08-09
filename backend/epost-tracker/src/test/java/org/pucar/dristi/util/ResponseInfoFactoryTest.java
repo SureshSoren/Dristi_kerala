@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 @ExtendWith(MockitoExtension.class)
-public class ResponseInfoFactoryTest {
+class ResponseInfoFactoryTest {
 
     @InjectMocks
     private ResponseInfoFactory responseInfoFactory;
@@ -22,17 +22,14 @@ public class ResponseInfoFactoryTest {
     @Mock
     private RequestInfo requestInfo;
 
-    private static final String RES_MSG_ID = "someResMsgId"; // Replace with the actual constant value if needed
-    private static final String SUCCESSFUL = "SUCCESS";
-    private static final String FAILED = "FAILED";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Initialization for any common setup can be done here
     }
 
     @Test
-    public void testCreateResponseInfoFromRequestInfoSuccess() {
+    void testCreateResponseInfoFromRequestInfoSuccess() {
         // Arrange
         when(requestInfo.getApiId()).thenReturn("apiId123");
         when(requestInfo.getVer()).thenReturn("v1");
@@ -53,7 +50,7 @@ public class ResponseInfoFactoryTest {
     }
 
     @Test
-    public void testCreateResponseInfoFromRequestInfoFailure() {
+    void testCreateResponseInfoFromRequestInfoFailure() {
         // Arrange
         when(requestInfo.getApiId()).thenReturn("apiId123");
         when(requestInfo.getVer()).thenReturn("v1");
@@ -74,7 +71,7 @@ public class ResponseInfoFactoryTest {
     }
 
     @Test
-    public void testCreateResponseInfoFromRequestInfoWithNullRequestInfo() {
+    void testCreateResponseInfoFromRequestInfoWithNullRequestInfo() {
         // Act
         ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(null, true);
 
