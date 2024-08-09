@@ -2314,12 +2314,12 @@ const JoinCaseHome = ({ refreshInbox }) => {
             if (step === 0 && caseDetails?.caseNumber) {
               setCaseDetails({});
             } else if (step === 6) {
-              setStep(step - 3);
+              setStep(step - 2);
             } else if (step === 7) {
-              if (userType === "Litigant") setStep(step - 5);
+              if (userType === "Litigant") setStep(step - 3);
               else {
                 if (roleOfNewAdvocate === t(JoinHomeLocalisation.PRIMARY_ADVOCATE)) setStep(step - 1);
-                else setStep(step - 4);
+                else setStep(step - 3);
               }
               setValidationCode("");
               setErrors({
