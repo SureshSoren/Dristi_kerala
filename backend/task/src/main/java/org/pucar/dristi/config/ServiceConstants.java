@@ -53,6 +53,7 @@ public class ServiceConstants {
     public static final String CREATE_TASK_ERR = "Error creating task";
     public static final String UPDATE_TASK_ERR = "Error updating task";
     public static final String TASK_SEARCH_QUERY_EXCEPTION = "Error updating task";
+    public static final String DOCUMENT_UPLOAD_QUERY_EXCEPTION = "Error uploading task documents";
     public static final String DOCUMENT_SEARCH_QUERY_EXCEPTION = "Error searching task documents";
     public static final String AMOUNT_SEARCH_QUERY_EXCEPTION = "Error searching task amount";
     public static final String ROW_MAPPER_EXCEPTION = "Error in row mapper";
