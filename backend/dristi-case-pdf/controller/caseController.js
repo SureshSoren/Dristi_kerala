@@ -80,9 +80,9 @@ function extractCaseYear(input) {
 }
 
 function extractCaseNumber(input) {
-    const numberMatch = input.match(/-(\d{3})$/);
-    if (numberMatch) {
-        return numberMatch[1]; 
+    const match = input.match(/-(\d+)$/);
+    if (match) {
+        return parseInt(match[1], 10);
     } else {
         return ''; 
     }
