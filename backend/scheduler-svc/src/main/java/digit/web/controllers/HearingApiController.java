@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 
 @jakarta.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2024-04-15T13:15:39.759211883+05:30[Asia/Kolkata]")
@@ -52,5 +53,16 @@ public class HearingApiController {
         log.info("api=/hearing/v1/_search, result = SUCCESS");
         return ResponseEntity.accepted().body(response);
     }
+
+
+    @RequestMapping(value = "/hearing/v1/_update", method = RequestMethod.POST)
+    public ResponseEntity<HearingResponse> updateHearing(@Parameter(in = ParameterIn.DEFAULT, description = "Hearing Details and Request Info", required = true, schema = @Schema()) @Valid @RequestBody UpdateHearingRequest request) {
+        log.info("api=/hearing/v1/_update, result = IN_PROGRESS");
+        ScheduleHearing scheduledHearings = hearingService.updateHearing(request);
+        HearingResponse response = HearingResponse.builder().hearings(Collections.singletonList(scheduledHearings)).responseInfo(ResponseInfoFactory.createResponseInfo(request.getRequestInfo(), true)).build();
+        log.info("api=/hearing/v1/_update, result = SUCCESS");
+        return ResponseEntity.accepted().body(response);
+    }
+
 
 }
