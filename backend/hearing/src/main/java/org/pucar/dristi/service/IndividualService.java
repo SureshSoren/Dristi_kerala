@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.pucar.dristi.config.ServiceConstants.INDIVIDUAL_SERVICE_EXCEPTION;
@@ -49,27 +50,28 @@ public class IndividualService {
         }
     }
 
-    public Individual getIndividual(RequestInfo requestInfo, String userUuid) {
+    public List<Individual> getIndividuals(RequestInfo requestInfo, List<String> uuids) {
         try {
             IndividualSearchRequest individualSearchRequest = new IndividualSearchRequest();
             individualSearchRequest.setRequestInfo(requestInfo);
             IndividualSearch individualSearch = new IndividualSearch();
-            log.info("userUuid :: {}", userUuid);
-            individualSearch.setUserUuid(Collections.singletonList(userUuid));
+            individualSearch.setUserUuid(uuids);
             individualSearchRequest.setIndividual(individualSearch);
             StringBuilder uri = new StringBuilder(config.getIndividualHost()).append(config.getIndividualSearchEndpoint());
-            uri.append("?limit=10").append("&offset=0").append("&tenantId=").append(requestInfo.getUserInfo().getTenantId()).append("&includeDeleted=true");
+            uri.append("?limit=").append(uuids.size()).append("&offset=0")
+                    .append("&tenantId=").append(requestInfo.getUserInfo().getTenantId())
+                    .append("&includeDeleted=true");
             IndividualBulkResponse response = individualUtils.getIndividualByIndividualId(individualSearchRequest, uri);
-            if (response != null && response.getIndividual() != null && !response.getIndividual().isEmpty()) {
-                return response.getIndividual().get(0);
+            if (response != null && response.getIndividual() != null) {
+                return response.getIndividual();
             } else {
-                log.error("Individual not found");
-                return null;
+                log.error("No individuals found");
+                return Collections.emptyList();
             }
         } catch (Exception e) {
             log.error("Error in search individual service :: {}", e.toString());
-            log.error("Individual not found");
-            return null;
+            log.error("Individuals not found");
+            return Collections.emptyList();
         }
     }
 }

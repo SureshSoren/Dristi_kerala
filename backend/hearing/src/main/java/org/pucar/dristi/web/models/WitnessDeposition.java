@@ -1,13 +1,10 @@
 package org.pucar.dristi.web.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.egov.common.models.individual.AdditionalFields;
-import org.egov.common.models.individual.Address;
 import org.egov.common.models.individual.Gender;
 
 import javax.validation.Valid;
@@ -16,10 +13,13 @@ import javax.validation.Valid;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Witness {
+public class WitnessDeposition {
 
-    @JsonProperty("courtName")
-    private String courtName = null;
+    @JsonProperty("hearingId")
+    private String hearingId = null;
+
+    @JsonProperty("courtId")
+    private String courtId = null;
 
     @JsonProperty("caseName")
     private String caseName = null;
@@ -30,14 +30,11 @@ public class Witness {
     @JsonProperty("caseYear")
     private String caseYear = null;
 
-    @JsonProperty("courtCaseNumber")
-    private String courtCaseNumber = null;
+    @JsonProperty("caseNumber")
+    private String caseNumber = null;
 
-    @JsonProperty("userId")
-    private String userId = null;
-
-    @JsonProperty("userUuid")
-    private String userUuid = null;
+    @JsonProperty("hearingDate")
+    private String hearingDate = null;
 
     @JsonProperty("name")
     private String name = null;

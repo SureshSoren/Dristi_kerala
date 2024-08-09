@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 
 @Data
 @AllArgsConstructor
@@ -17,6 +19,6 @@ public class WitnessPdfRequest {
     @JsonProperty("RequestInfo")
     private Object requestInfo;
 
-    @JsonProperty("Witness")
-    private Witness witness;
+    @JsonProperty("WitnessDepositions")
+    private List<WitnessDeposition> witnessDepositions;
 }
