@@ -11,6 +11,7 @@ import EndHearing from "./EndHearing";
 import EvidenceHearingHeader from "./EvidenceHeader";
 import HearingSideCard from "./HearingSideCard";
 import MarkAttendance from "./MarkAttendance";
+import useGetHearingLink from "../../hooks/hearings/useGetHearingLink";
 
 const SECOND = 1000;
 
@@ -58,6 +59,9 @@ const InsideHearingMainPage = () => {
   // if (!userHasRole("HEARING_VIEWER")) {
   //   history.push(`/${window.contextPath}/${userType}/home/home-pending-task`);
   // }
+
+  const { data: hearingLink } = useGetHearingLink();
+  const hearingVcLink = hearingLink?.[0];
 
   const reqBody = {
     hearing: { tenantId },
@@ -216,6 +220,7 @@ const InsideHearingMainPage = () => {
             activeTab={activeTab}
             filingNumber={filingNumber}
             onAddParty={onClickAddWitness}
+            hearingLink={hearingVcLink}
           ></EvidenceHearingHeader>
         </React.Fragment>
         {activeTab === "Witness Deposition" && (

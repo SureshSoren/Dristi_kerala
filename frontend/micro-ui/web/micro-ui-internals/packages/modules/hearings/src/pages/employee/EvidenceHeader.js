@@ -5,7 +5,7 @@ import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { VideoIcon } from "./CustomSVGs";
 
-const EvidenceHearingHeader = ({ hearing, caseData, filingNumber, setActiveTab, activeTab, onAddParty }) => {
+const EvidenceHearingHeader = ({ hearing, caseData, filingNumber, setActiveTab, activeTab, onAddParty, hearingLink }) => {
   const [showMenu, setShowMenu] = useState(false);
   const { t } = useTranslation();
 
@@ -152,8 +152,8 @@ const EvidenceHearingHeader = ({ hearing, caseData, filingNumber, setActiveTab, 
         <Button
           variation={"tertiary"}
           label={t("JOIN_VIDEO_CONFERENCE")}
-          onButtonClick={() => {
-            window.open(hearing.vcLink, "_blank");
+          onClick={() => {
+            window.open(hearingLink, "_blank");
           }}
           style={{
             backgroundColor: "transparent",
