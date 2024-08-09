@@ -5,6 +5,12 @@ const fileService = require('../service/fileService');
 exports.generateCasePdf = async (req, res, next) => {
     try {
         const cases = req.body.cases;
+
+        const filingNumber = cases.filingNumber;
+        const courtName = cases.courtName;
+        const caseYear = await extractCaseYear(filingNumber);
+        const caseNumber = await extractCaseNumber(filingNumber);
+        const sectionNumber = await caseService.getCaseSectionNumber(cases);
  
         const complainants = await caseService.getComplainantsDetails(cases);
         const respondents = await caseService.getRespondentsDetails(cases);
@@ -24,6 +30,11 @@ exports.generateCasePdf = async (req, res, next) => {
             RequestInfo: requestInfo,
             caseDetails: {
                 id: Date.now(),
+                courtName: courtName,
+                caseNumber: caseNumber,
+                caseYear: caseYear,
+                filingNumber: filingNumber,
+                sectionNumber: sectionNumber,
                 complainants: complainants,
                 respondents: respondents,
                 witnesses: witnesses,
@@ -46,7 +57,6 @@ exports.generateCasePdf = async (req, res, next) => {
         finalPdf = await fileService.appendDemandNoticeFilesToPDF(finalPdf, demandNoticeDetails);
         finalPdf = await fileService.appendDelayCondonationFilesToPDF(finalPdf, delayCondonationDetails);
         finalPdf = await fileService.appendPrayerSwornFilesToPDF(finalPdf, prayerSwornStatementDetails);
-        finalPdf = await fileService.appendWitnessFilesToPDF(finalPdf, witnesses);
         finalPdf = await fileService.appendAdvocateFilesToPDF(finalPdf, advocates);
 
         const finalPdfBuffer = Buffer.from(finalPdf);
@@ -59,3 +69,21 @@ exports.generateCasePdf = async (req, res, next) => {
         next(error);
     }
 };
+
+function extractCaseYear(input) {
+    const yearMatch = input.match(/-\d{4}-/);
+    if (yearMatch) {
+        return yearMatch[0].replace(/-/g, ''); 
+    } else {
+        return '';
+    }
+}
+
+function extractCaseNumber(input) {
+    const numberMatch = input.match(/-(\d{3})$/);
+    if (numberMatch) {
+        return numberMatch[1]; 
+    } else {
+        return ''; 
+    }
+}

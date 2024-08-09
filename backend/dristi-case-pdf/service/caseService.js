@@ -1,5 +1,23 @@
 const config = require('../config/config'); 
 
+
+exports.getCaseSectionNumber = async (cases) => {
+    const statutesAndSections = cases.statutesAndSections;
+    if (statutesAndSections.length === 0) {
+        return '';
+    }
+
+    const firstElement = statutesAndSections[0];
+    const firstSection = firstElement.sections[0];
+    const firstSubsection = firstElement.subsections[0];
+
+    if (firstSection && firstSubsection) {
+        return `Section ${firstSubsection} of ${firstSection}`;
+    } else {
+        return '';
+    }
+};
+
 const getDocumentFileStore = (documents, fileName) => {
     const document = documents && documents.find(doc => doc.fileName === fileName);
     return document ? document.fileStore : null;

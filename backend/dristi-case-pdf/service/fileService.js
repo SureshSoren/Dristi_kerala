@@ -6,44 +6,63 @@ async function fetchDocument(fileStoreId) {
     const response = await axios.get(url, { responseType: 'arraybuffer' });
 
     if (response.headers['content-type'] === 'application/pdf') {
-      console.log(response.headers); 
-      return response.data;
+        console.log(response.headers); 
+        return response.data;
     } else {
-      const imagePdf = await imageToPdf(response.data);
-      return imagePdf;
+        const imagePdf = await imageToPdf(response.data);
+        return imagePdf;
     }
 }
 
-async function appendPdfPages(existingPdfDoc, fileStoreId) {
+async function appendPdfPagesWithHeader(existingPdfDoc, fileStoreId, header) {
+
+    const helveticaFont = await existingPdfDoc.embedStandardFont('Helvetica');
+
+    const headerPage = existingPdfDoc.addPage();
+    const { width: existingWidth, height: existingHeight } = headerPage.getSize();
+    headerPage.drawText(header, {
+        x: 50,
+        y: existingHeight - 50,
+        size: 24,
+        font: helveticaFont,
+    });
+
     const documentBytes = await fetchDocument(fileStoreId);
     const fetchedPdfDoc = await PDFDocument.load(documentBytes);
     const fetchedPages = await fetchedPdfDoc.getPages();
     for (const pageIndex of fetchedPages.map((_, i) => i)) {
         const [copiedPage] = await existingPdfDoc.copyPages(fetchedPdfDoc, [pageIndex]);
+        const { width: fetchedWidth, height: fetchedHeight } = copiedPage.getSize();
+        const scale = existingWidth / fetchedWidth;
+        copiedPage.scale(scale, scale);
         existingPdfDoc.addPage(copiedPage);
     }
 }
 
-async function appendFilesToPDF(pdf, fileStores) {
+async function appendComplainantFilesToPDF(pdf, complainants) {
     const existingPdfDoc = await PDFDocument.load(pdf);
 
-    for (const fileStoreId of fileStores) {
-        if (fileStoreId) {
-            await appendPdfPages(existingPdfDoc, fileStoreId);
+    for (let i = 0; i < complainants.length; i++) {
+        const complainant = complainants[i];
+        if (complainant.companyDetailsFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, complainant.companyDetailsFileStore, `Authoriastion oF Representative Document ${i + 1}`);
         }
     }
 
-    return await existingPdfDoc.save();  // Save and return the final PDF
-}
-
-async function appendComplainantFilesToPDF(pdf, complainants) {
-    const fileStores = complainants.map(c => c.companyDetailsFileStore).filter(Boolean);
-    return appendFilesToPDF(pdf, fileStores);
+    return await existingPdfDoc.save();
 }
 
 async function appendRespondentFilesToPDF(pdf, respondents) {
-    const fileStores = respondents.map(r => r.inquiryAffidavitFileStore).filter(Boolean);
-    return appendFilesToPDF(pdf, fileStores);
+    const existingPdfDoc = await PDFDocument.load(pdf);
+
+    for (let i = 0; i < respondents.length; i++) {
+        const respondent = respondents[i];
+        if (respondent.inquiryAffidavitFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, respondent.inquiryAffidavitFileStore, `Inquiry Affidavit Document ${i + 1}`);
+        }
+    }
+
+    return await existingPdfDoc.save();
 }
 
 async function appendChequeDetailsToPDF(pdf, chequeDetails) {
@@ -62,45 +81,90 @@ async function appendChequeDetailsToPDF(pdf, chequeDetails) {
             await appendPdfPagesWithHeader(existingPdfDoc, chequeDetail.returnMemoFileStore, `Return Memo Document ${i + 1}`);
         }
     }
+
+    return await existingPdfDoc.save();
 }
 
 async function appendDebtLiabilityFilesToPDF(pdf, debtLiabilityDetails) {
-    const fileStores = debtLiabilityDetails.map(d => d.proofOfLiabilityFileStore).filter(Boolean);
-    return appendFilesToPDF(pdf, fileStores);
+    const existingPdfDoc = await PDFDocument.load(pdf);
+
+    for (let i = 0; i < debtLiabilityDetails.length; i++) {
+        const debtLiability = debtLiabilityDetails[i];
+        if (debtLiability.proofOfLiabilityFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, debtLiability.proofOfLiabilityFileStore, `Debt Liability Document ${i + 1}`);
+        }
+    }
+
+    return await existingPdfDoc.save();
 }
 
 async function appendDemandNoticeFilesToPDF(pdf, demandNoticeDetails) {
-    const fileStores = [
-        ...demandNoticeDetails.map(d => d.legalDemandNoticeFileStore).filter(Boolean),
-        ...demandNoticeDetails.map(d => d.proofOfDispatchFileStore).filter(Boolean),
-        ...demandNoticeDetails.map(d => d.proofOfAcknowledgmentFileStore).filter(Boolean),
-        ...demandNoticeDetails.map(d => d.proofOfReplyFileStore).filter(Boolean)
-    ];
-    return appendFilesToPDF(pdf, fileStores);
+    const existingPdfDoc = await PDFDocument.load(pdf);
+
+    for (let i = 0; i < demandNoticeDetails.length; i++) {
+        const demandNotice = demandNoticeDetails[i];
+
+        if (demandNotice.legalDemandNoticeFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, demandNotice.legalDemandNoticeFileStore, `Demand Notice Document ${i + 1}`);
+        }
+        if (demandNotice.proofOfDispatchFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, demandNotice.proofOfDispatchFileStore, `Proof of Dispatch Document ${i + 1}`);
+        }
+        if (demandNotice.proofOfAcknowledgmentFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, demandNotice.proofOfAcknowledgmentFileStore, `Proof of Acknowledgment Document ${i + 1}`);
+        }
+        if (demandNotice.proofOfReplyFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, demandNotice.proofOfReplyFileStore, `Proof of Reply Document ${i + 1}`);
+        }
+    }
+
+    return await existingPdfDoc.save();
 }
 
 async function appendDelayCondonationFilesToPDF(pdf, delayCondonationDetails) {
-    const fileStores = delayCondonationDetails.map(d => d.delayCondonationFileStore).filter(Boolean);
-    return appendFilesToPDF(pdf, fileStores);
+    const existingPdfDoc = await PDFDocument.load(pdf);
+
+    for (let i = 0; i < delayCondonationDetails.length; i++) {
+        const delayCondonation = delayCondonationDetails[i];
+        if (delayCondonation.delayCondonationFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, delayCondonation.delayCondonationFileStore, `Delay Condonation Document ${i + 1}`);
+        }
+    }
+
+    return await existingPdfDoc.save();
 }
 
 async function appendPrayerSwornFilesToPDF(pdf, prayerSwornStatementDetails) {
-    const fileStores = [
-        ...prayerSwornStatementDetails.map(p => p.memorandumOfComplaintFileStore).filter(Boolean),
-        ...prayerSwornStatementDetails.map(p => p.prayerForReliefFileStore).filter(Boolean),
-        ...prayerSwornStatementDetails.map(p => p.swornStatement).filter(Boolean)
-    ];
-    return appendFilesToPDF(pdf, fileStores);
-}
+    const existingPdfDoc = await PDFDocument.load(pdf);
 
-async function appendWitnessFilesToPDF(pdf, witnesses) {
-    const fileStores = witnesses.map(w => w.witnessAdditionalDetails).filter(Boolean);
-    return appendFilesToPDF(pdf, fileStores);
+    for (let i = 0; i < prayerSwornStatementDetails.length; i++) {
+        const prayerSworn = prayerSwornStatementDetails[i];
+
+        if (prayerSworn.memorandumOfComplaintFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, prayerSworn.memorandumOfComplaintFileStore, `Memorandum of Complaint Document ${i + 1}`);
+        }
+        if (prayerSworn.prayerForReliefFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, prayerSworn.prayerForReliefFileStore, `Prayer for Relief Document ${i + 1}`);
+        }
+        if (prayerSworn.swornStatement) {
+            await appendPdfPagesWithHeader(existingPdfDoc, prayerSworn.swornStatement, `Sworn Statement Document ${i + 1}`);
+        }
+    }
+
+    return await existingPdfDoc.save();
 }
 
 async function appendAdvocateFilesToPDF(pdf, advocates) {
-    const fileStores = advocates.map(a => a.vakalatnamaFileStore).filter(Boolean);
-    return appendFilesToPDF(pdf, fileStores);
+    const existingPdfDoc = await PDFDocument.load(pdf);
+
+    for (let i = 0; i < advocates.length; i++) {
+        const advocate = advocates[i];
+        if (advocate.vakalatnamaFileStore) {
+            await appendPdfPagesWithHeader(existingPdfDoc, advocate.vakalatnamaFileStore, `Vakalatnama Document ${i + 1}`);
+        }
+    }
+
+    return await existingPdfDoc.save();
 }
 
 module.exports = {
@@ -111,6 +175,5 @@ module.exports = {
     appendDemandNoticeFilesToPDF,
     appendDelayCondonationFilesToPDF,
     appendPrayerSwornFilesToPDF,
-    appendWitnessFilesToPDF,
     appendAdvocateFilesToPDF
 };
