@@ -1,6 +1,14 @@
 import React from "react";
 import { formatDateInMonth } from "../Utils";
 
+function isEpoch(item) {
+  return typeof item === "number" && item.toString().length === 13;
+}
+
+function convertEpochToDate(item) {
+  return isEpoch(item) ? new Date(item) : item;
+}
+
 const Chip = ({ label, isSelected, handleClick }) => {
   const chipStyle = {
     backgroundColor: "#FAFAFA",
@@ -23,7 +31,13 @@ const CustomChooseDate = ({ data, selectedChip, handleClick, scheduleHearingPara
   return (
     <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", border: "1px solid lightgrey", padding: "10px", marginBottom: "10px" }}>
       {data.map((item, index) => (
-        <Chip key={index} label={item} isSelected={isSelectMulti ? selectedChip.includes(item) : selectedChip === item} handleClick={handleClick} />
+        <Chip
+          key={index}
+          // label={isEpoch(item) ? formatDateInMonth(convertEpochToDate(item)) : item}
+          label={item}
+          isSelected={isSelectMulti ? selectedChip.includes(item) : selectedChip === item}
+          handleClick={handleClick}
+        />
       ))}
     </div>
   );
