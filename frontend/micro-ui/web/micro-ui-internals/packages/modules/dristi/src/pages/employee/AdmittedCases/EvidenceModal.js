@@ -773,71 +773,109 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
                   modalType === "Documents") && (
                   <div className="comment-send">
                     <div className="comment-input-wrapper">
-                      <TextInput
-                        placeholder={"Type here..."}
-                        value={currentComment}
-                        onChange={(e) => {
-                          setCurrentComment(e.target.value);
-                        }}
-                      />
-                      <div
-                        className="send-comment-btn"
-                        onClick={() => {
-                          if (currentComment !== "") {
-                            const newComment =
-                              modalType === "Submissions"
-                                ? {
-                                    tenantId,
+                      <div style={{ display: "flex" }}>
+                        <TextInput
+                          placeholder={"Type here..."}
+                          value={currentComment}
+                          onChange={(e) => {
+                            setCurrentComment(e.target.value);
+                          }}
+                        />
+                        <div
+                          className="send-comment-btn"
+                          onClick={async () => {
+                            if (currentComment !== "") {
+                              let newComment =
+                                modalType === "Submissions"
+                                  ? {
+                                      tenantId,
+                                      comment: [
+                                        {
+                                          tenantId,
+                                          comment: currentComment,
+                                          individualId: "",
+                                          commentDocumentId: "",
+                                          commentDocumentName: "",
+                                          additionalDetails: {
+                                            author: user,
+                                            timestamp: new Date(Date.now()).toLocaleDateString("en-in", {
+                                              year: "2-digit",
+                                              month: "short",
+                                              day: "2-digit",
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                              hour12: true,
+                                            }),
+                                          },
+                                        },
+                                      ],
+                                      applicationNumber: documentSubmission?.[0]?.applicationList?.applicationNumber,
+                                    }
+                                  : {
+                                      tenantId,
+                                      comment: [
+                                        {
+                                          tenantId,
+                                          comment: currentComment,
+                                          individualId: "",
+                                          commentDocumentId: "",
+                                          commentDocumentName: "",
+                                          artifactId: documentSubmission?.[0]?.artifactList?.id,
+                                          additionalDetails: {
+                                            author: user,
+                                            timestamp: new Date(Date.now()).toLocaleDateString("en-in", {
+                                              year: "2-digit",
+                                              month: "short",
+                                              day: "2-digit",
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                              hour12: true,
+                                            }),
+                                          },
+                                        },
+                                      ],
+                                      artifactNumber: documentSubmission?.[0]?.artifactList?.artifactNumber,
+                                    };
+                              if (formData) {
+                                if (formData?.commentDoc?.commentDoc?.length > 0) {
+                                  const uploadedData = await onDocumentUpload(
+                                    formData?.commentDoc?.commentDoc[0],
+                                    formData?.commentDoc?.commentDoc[0].name,
+                                    tenantId
+                                  );
+                                  newComment = {
+                                    ...newComment,
                                     comment: [
                                       {
-                                        tenantId,
-                                        comment: currentComment,
-                                        individualId: "",
-                                        additionalDetails: {
-                                          author: user,
-                                          timestamp: new Date(Date.now()).toLocaleDateString("en-in", {
-                                            year: "2-digit",
-                                            month: "short",
-                                            day: "2-digit",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            hour12: true,
-                                          }),
-                                        },
+                                        ...newComment.comment[0],
+                                        commentDocumentId: uploadedData.file.files[0].fileStoreId,
+                                        commentDocumentName: uploadedData.filename,
                                       },
                                     ],
-                                    applicationNumber: documentSubmission?.[0]?.applicationList?.applicationNumber,
-                                  }
-                                : {
-                                    tenantId,
-                                    comment: [
-                                      {
-                                        tenantId,
-                                        comment: currentComment,
-                                        individualId: "",
-                                        artifactId: documentSubmission?.[0]?.artifactList?.id,
-                                        additionalDetails: {
-                                          author: user,
-                                          timestamp: new Date(Date.now()).toLocaleDateString("en-in", {
-                                            year: "2-digit",
-                                            month: "short",
-                                            day: "2-digit",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            hour12: true,
-                                          }),
-                                        },
-                                      },
-                                    ],
-                                    artifactNumber: documentSubmission?.[0]?.artifactList?.artifactNumber,
                                   };
-                            setComments((prev) => [...prev, ...newComment.comment]);
-                            setCurrentComment("");
-                            handleSubmitComment(newComment);
-                          }
-                        }}
-                      >
-                        <RightArrow />
+                                }
+                              }
+                              setComments((prev) => [...prev, ...newComment.comment]);
+                              setCurrentComment("");
+                              setFormData({});
+                              handleSubmitComment(newComment);
+                            }
+                          }}
+                        >
+                          <RightArrow />
+                        </div>
+                      </div>
+                      <div style={{ display: "flex" }}>
+                        <SelectCustomDocUpload
+                          t={t}
+                          formData={formData}
+                          config={documentUploaderConfig}
+                          onSelect={(e, p) => {
+                            setFormData({
+                              [documentUploaderConfig.key]: p,
+                            });
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
