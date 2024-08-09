@@ -193,7 +193,7 @@ const InsideHearingMainPage = () => {
     const selectedUUID = selectedWitnessOption.value;
     const selectedWitness = additionalDetails?.witnessDetails?.formdata?.find((w) => w.data.uuid === selectedUUID)?.data || {};
     setSelectedWitness(selectedWitness);
-    console.debug(hearing, selectedWitness);
+    // console.debug(hearing, selectedWitness);
     setWitnessDepositionText(
       hearing?.additionalDetails?.witnessDepositions?.find((witness) => witness.uuid === selectedWitness.uuid)?.deposition || ""
     );
@@ -226,6 +226,7 @@ const InsideHearingMainPage = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("english");
   const [selectedAsrModel, setSelectedAsrModel] = useState("bhashini");
   const [websocket, setWebsocket] = useState(null);
+  const [inputSource, setInputSource] = useState("");
   const inputSourceRef = useRef("mic");
   // const roomIdInputRef = useRef(null);
   const [roomId, setRoomId] = useState(null);
@@ -252,7 +253,7 @@ const InsideHearingMainPage = () => {
   // };
 
   const createRoom = () => {
-    console.log(websocket, "websocket create room");
+    // console.log( "websocket create room");
     if (websocket && websocket.readyState === WebSocket.OPEN) {
       const message = {
         type: "create_room",
@@ -266,33 +267,33 @@ const InsideHearingMainPage = () => {
     const websocketAddress = "wss://dristi-kerala-dev.pucar.org/transcription";
 
     if (!websocketAddress) {
-      console.log("WebSocket address is required.");
+      // console.log("WebSocket address is required.");
       return;
     }
 
     const ws = new WebSocket(websocketAddress);
 
     ws.onopen = () => {
-      console.log("WebSocket connection established");
+      // console.log("WebSocket connection established");
       setWebSocketStatus("Connected");
     };
 
     ws.onclose = (event) => {
-      console.log("WebSocket connection closed", event);
+      // console.log("WebSocket connection closed");
       setWebSocketStatus("Not Connected");
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("kkk-datas", data);
+      // console.log("kkk-datas", data);
       if (data.type === "joined_room" || data.type === "refresh_transcription") {
-        console.log("recieved", data);
+        // console.log("recieved", data);
         // handleRoomJoined(data);
         setClientId(data.client_id);
         setRoomId(data.room_id);
-        roomIdLet = data.room_id;
+        // roomIdLet = data.room_id;
       } else {
-        console.log(transcriptionUrl, audioUrl, "sam", clientId);
+        // console.log(transcriptionUrl, audioUrl, "sam", clientId);
         updateTranscription(data);
       }
     };
@@ -301,7 +302,7 @@ const InsideHearingMainPage = () => {
   };
 
   const handleRoomJoined = (data) => {
-    console.log(data, "joined Data");
+    // console.log(data, "joined Data");
     // setClientId(data.client_id);
     // setRoomId(data.room_id);
     // roomIdInputRef.current.value = data.room_id;
@@ -311,16 +312,16 @@ const InsideHearingMainPage = () => {
 
   // useEffect(() => {
   //   console.log("roomId effect", roomId);
-  //   if (websocket && roomId) {
-  //     // console.log(roomId, roomIdInputRef?.current.value, "roomId");
-  //     const message = {
-  //       type: "config",
-  //       room_id: roomId,
-  //     };
-  //     websocket.send(JSON.stringify(message));
-  //     // sendAudioConfig(newContext);
-  //   }
-  // }, [roomId]);
+  //   // if (websocket && roomId) {
+  //   //   // console.log(roomId, "roomId inside if cond");
+  //   //   const message = {
+  //   //     type: "config",
+  //   //     room_id: roomId,
+  //   //   };
+  //   //   websocket.send(JSON.stringify(message));
+  //   //   // sendAudioConfig(newContext);
+  //   // }
+  // });
 
   const updateTranscription = (transcriptData) => {
     if (transcriptData.words && transcriptData.words.length > 0) {
@@ -334,7 +335,7 @@ const InsideHearingMainPage = () => {
           return `<span style="color: ${color}">${wordData.word} </span>`;
         })
         .join("");
-      console.log("sam", newTranscription);
+      // console.log("sam", newTranscription);
       setTranscription((prev) => prev + newTranscription + " ");
     } else {
       setTranscription((prev) => prev + transcriptData.text + " ");
@@ -346,11 +347,11 @@ const InsideHearingMainPage = () => {
     return roomId;
   }, [roomId]);
 
-  useEffect(() => {
-    console.log("roomId STate", roomId, this);
-  });
-  const startRecording = (roomId) => {
-    window.alert(teja);
+  // useEffect(() => {
+  //   console.log("roomId STate", roomId, this);
+  // });
+  const startRecording = () => {
+    // window.alert(teja);
     if (isRecording) {
       stopRecording();
       return;
@@ -360,14 +361,22 @@ const InsideHearingMainPage = () => {
     createRoom();
 
     const inputSource = inputSourceRef.current.value;
-    if (inputSource === "mic") {
-      setTimeout(() => {
-        startMicRecording(roomId);
-      }, 5000);
+    setInputSource(inputSource);
+  };
+
+  useEffect(() => {
+    console.log("room id", roomId);
+    if (inputSource === "mic" && roomId && isRecording) {
+      console.log("here");
+      startMicRecording();
     } else {
       stopRecording();
     }
-  };
+  }, [inputSource, roomId, isRecording]);
+
+  useEffect(() => {
+    console.log("room id effect", roomId);
+  });
 
   const stopRecording = () => {
     if (!isRecording) return;
@@ -451,12 +460,12 @@ const InsideHearingMainPage = () => {
     return window.btoa(binary);
   };
 
-  console.log("room id test", clientId, roomId, websocket, webSocketStatus, activeTab, this);
-  const startMicRecording = (id) => {
+  const startMicRecording = () => {
+    console.log("room id", roomId);
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const newContext = new AudioContext();
     setContext(newContext);
-    sendAudioConfig(newContext, id);
+    sendAudioConfig(newContext);
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
@@ -471,16 +480,16 @@ const InsideHearingMainPage = () => {
       .catch((error) => console.error("Error accessing microphone", error));
   };
 
-  const sendAudioConfig = (context, id) => {
+  const sendAudioConfig = (context) => {
     if (!context) {
       console.error("Audio context is not initialized");
       return;
     }
-    console.log("letRoomId", roomIdLet);
+    // console.log("letRoomId", roomIdLet);
     // if (roomId) {
     const audioConfig = {
       type: "config",
-      room_id: id,
+      room_id: roomId,
       client_id: clientId,
       data: {
         sampleRate: context.sampleRate,
@@ -583,7 +592,7 @@ const InsideHearingMainPage = () => {
                 ) : ( */}
                 <button
                   onClick={() => {
-                    startRecording(teja);
+                    startRecording();
                   }}
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
