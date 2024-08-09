@@ -102,13 +102,22 @@ public class HearingApiController {
 
     }
 
-    @PostMapping("/witnessDeposition/v1/_getPdf")
-    public ResponseEntity<Object> hearingV1getWitnessDepositionPdf(@Valid @RequestBody PdfRequest pdfRequest) {
+    @PostMapping("/witnessDeposition/v1/downloadPdf")
+    public ResponseEntity<Object> witnessDepositionV1DownloadPdf(@Valid @RequestBody PdfRequest pdfRequest) {
         MultipartFile pdfResponse = witnessDepositionPdfService.getWitnessDepositionPdf(pdfRequest);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"witness_deposition_pdf.pdf\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfResponse);
+    }
+
+    @RequestMapping(value = "/witnessDeposition/v1/uploadPdf", method = RequestMethod.POST)
+    public ResponseEntity<HearingResponse> witnessDepositionV1UploadPdf(@Parameter(in = ParameterIn.DEFAULT, description = "Details for the update hearing(s) + RequestInfo meta data.", required = true, schema = @Schema()) @Valid @RequestBody HearingRequest body) {
+
+        Hearing hearing = hearingService.updateHearing(body);
+        ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(body.getRequestInfo(), true);
+        HearingResponse hearingResponse = HearingResponse.builder().hearing(hearing).responseInfo(responseInfo).build();
+        return new ResponseEntity<>(hearingResponse, HttpStatus.OK);
     }
 }
 

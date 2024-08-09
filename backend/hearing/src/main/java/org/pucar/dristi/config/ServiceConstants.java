@@ -64,6 +64,7 @@ public class ServiceConstants {
     public static final String HEARING_UPDATE_EXCEPTION = "Exception while updating hearing";
     public static final String HEARING_UPDATE_TIME_EXCEPTION = "Exception while updating hearing start and end time";
     public static final String HEARING_SEARCH_EXCEPTION = "Exception while Searching hearing";
+    public static final String WITNESS_DEPOSITION_UPDATE_EXCEPTION = "Exception while uploading witness deposition pdf";
     public static final String SEARCH_QUERY_EXCEPTION = "Exception while creating query";
     public static final String ERROR_WHILE_FETCHING_FROM_CASE = "ERROR_WHILE_FETCHING_FROM_CASE";
     public static final String ERROR_WHILE_FETCHING_FROM_APPLICATION_SERVICE = "ERROR_WHILE_FETCHING_FROM_APPLICATION_SERVICE";
