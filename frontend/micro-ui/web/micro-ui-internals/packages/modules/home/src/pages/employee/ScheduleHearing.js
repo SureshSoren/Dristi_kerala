@@ -342,7 +342,7 @@ function ScheduleHearing({
         Urls.submitOptOutDates,
         {
           OptOut: {
-            tenantId: "kl",
+            tenantId: tenantId,
             individualId: "IND00000001",
             caseId: filingNumber,
             rescheduleRequestId: "0a6097a2-4e98-4613-ae4e-6a444cc9efbe",
@@ -358,7 +358,6 @@ function ScheduleHearing({
         })
         .catch((err) => {
           setIsSubmitDisabled(false);
-          setSucessOptOut(true);
           console.log("err", err);
         });
     }
@@ -459,8 +458,7 @@ function ScheduleHearing({
             onSubmit={() => handleSubmit(scheduleHearingParams)}
             className="primary-label-btn select-participant-submit"
             label={status === "OPTOUT" ? "Done" : t("GENERATE_ORDERS_LINK")}
-            // disabled={!scheduleHearingParams?.date || isSubmitDisabled}
-            disabled={isSubmitDisabled}
+            disabled={(status !== "OPTOUT" && !scheduleHearingParams?.date) || isSubmitDisabled}
           ></SubmitBar>
         </div>
 

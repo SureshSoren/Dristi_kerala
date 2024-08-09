@@ -9,7 +9,7 @@ function convertEpochToDate(item) {
   return isEpoch(item) ? new Date(item) : item;
 }
 
-const Chip = ({ label, isSelected, handleClick }) => {
+const Chip = ({ label, isSelected, handleClick, item }) => {
   const chipStyle = {
     backgroundColor: "#FAFAFA",
     color: "#505A5F",
@@ -21,7 +21,7 @@ const Chip = ({ label, isSelected, handleClick }) => {
   };
 
   return (
-    <div style={chipStyle} onClick={() => handleClick(label)}>
+    <div style={chipStyle} onClick={() => handleClick(isEpoch(item) ? item : label)}>
       {label}
     </div>
   );
@@ -33,8 +33,8 @@ const CustomChooseDate = ({ data, selectedChip, handleClick, scheduleHearingPara
       {data.map((item, index) => (
         <Chip
           key={index}
-          // label={isEpoch(item) ? formatDateInMonth(convertEpochToDate(item)) : item}
-          label={item}
+          label={isEpoch(item) ? formatDateInMonth(convertEpochToDate(item)) : item}
+          item={item}
           isSelected={isSelectMulti ? selectedChip.includes(item) : selectedChip === item}
           handleClick={handleClick}
         />
