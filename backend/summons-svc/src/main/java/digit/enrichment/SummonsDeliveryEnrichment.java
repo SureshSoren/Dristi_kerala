@@ -47,7 +47,7 @@ public class SummonsDeliveryEnrichment {
                 .channelName(taskDetails.getDeliveryChannel().getChannelName())
                 .deliveryRequestDate(LocalDate.now().toString())
                 .auditDetails(auditDetails)
-                .deliveryStatus(DeliveryStatus.STATUS_UNKNOWN)
+                .deliveryStatus(DeliveryStatus.NOT_UPDATED)
                 .rowVersion(1)
                 .build();
     }
