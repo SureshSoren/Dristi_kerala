@@ -7,10 +7,7 @@ import digit.config.ServiceConstants;
 import digit.enrichment.ReScheduleRequestEnrichment;
 import digit.kafka.producer.Producer;
 import digit.repository.ReScheduleRequestRepository;
-import digit.util.CaseUtil;
-import digit.util.DateUtil;
-import digit.util.HearingUtil;
-import digit.util.MasterDataUtil;
+import digit.util.*;
 import digit.validator.ReScheduleRequestValidator;
 import digit.web.models.*;
 import digit.web.models.cases.CaseCriteria;
@@ -50,10 +47,10 @@ public class ReScheduleHearingService {
     private final ServiceConstants constants;
     private final DateUtil dateUtil;
     private final ReScheduleRequestValidator validator;
-
+    private final AdvocateUtil advocateUtil;
 
     @Autowired
-    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, HearingService hearingService, CalendarService calendarService, ServiceConstants serviceConstants, MasterDataUtil helper, CaseUtil caseUtil, HearingUtil hearingUtil, ServiceConstants constants, DateUtil dateUtil) {
+    public ReScheduleHearingService(Configuration config, ReScheduleRequestRepository repository, ReScheduleRequestValidator validator, ReScheduleRequestEnrichment enrichment, Producer producer, HearingService hearingService, CalendarService calendarService, ServiceConstants serviceConstants, MasterDataUtil helper, CaseUtil caseUtil, HearingUtil hearingUtil, ServiceConstants constants, DateUtil dateUtil, AdvocateUtil advocateUtil) {
 
 
         this.config = config;
@@ -69,6 +66,7 @@ public class ReScheduleHearingService {
         this.hearingUtil = hearingUtil;
         this.dateUtil = dateUtil;
         this.validator = validator;
+        this.advocateUtil = advocateUtil;
     }
 
     /**
@@ -110,6 +108,7 @@ public class ReScheduleHearingService {
 
                 litigantIds = caseUtil.getLitigantsFromRepresentatives(litigantIds, representatives);
 
+                representativeIds = advocateUtil.fetchAdvocateDetails(reScheduleHearingsRequest.getRequestInfo(), representativeIds);
                 hearingDetail.setRepresentatives(representativeIds);
                 hearingDetail.setLitigants(litigantIds);
 

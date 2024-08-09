@@ -164,4 +164,11 @@ public class Configuration {
 
     @Value("${drishti.hearing.search.endpoint}")
     private String hearingSearchEndPoint;
+
+    // Advocate
+    @Value("${drishti.advocate.host}")
+    private String advocateHost;
+
+    @Value("${drishti.advocate.search.endpoint}")
+    private String advocateSearchEndPoint;
 }
