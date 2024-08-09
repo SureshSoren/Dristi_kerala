@@ -12,6 +12,9 @@ export const Urls = {
   },
   FileFetchById: "/filestore/v1/files/id",
   Epost: {
-    EpostUpdate: "/epost-tracker/epost/v1/_updateEPost"
-  }
+    EpostUpdate: "/epost-tracker/epost/v1/_updateEPost",
+  },
+  Scheduler: {
+    reschedule: "/scheduler/hearing/v1/_reschedule",
+  },
 };
