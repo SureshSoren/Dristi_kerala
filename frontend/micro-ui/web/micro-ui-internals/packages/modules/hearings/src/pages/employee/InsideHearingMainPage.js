@@ -11,6 +11,8 @@ import EndHearing from "./EndHearing";
 import EvidenceHearingHeader from "./EvidenceHeader";
 import HearingSideCard from "./HearingSideCard";
 import MarkAttendance from "./MarkAttendance";
+import WitnessModal from "../../components/WitnessModal";
+import { hearingService } from "../../hooks/services";
 import useGetHearingLink from "../../hooks/hearings/useGetHearingLink";
 
 const SECOND = 1000;
@@ -33,6 +35,8 @@ const InsideHearingMainPage = () => {
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const { hearingId } = Digit.Hooks.useQueryParams();
   const [filingNumber, setFilingNumber] = useState("");
+  const [witnessModalOpen, setWitnessModalOpen] = useState(false);
+  const [signedDocumentUploadID, setSignedDocumentUploadID] = useState("");
   const { t } = useTranslation();
 
   const onCancel = () => {
@@ -188,6 +192,7 @@ const InsideHearingMainPage = () => {
     _updateTranscriptRequest({ body: { hearing: updatedHearing } }).then((res) => {
       setHearing(res.hearing);
     });
+    setWitnessModalOpen(true);
   };
 
   const handleDropdownChange = (selectedWitnessOption) => {
@@ -205,6 +210,40 @@ const InsideHearingMainPage = () => {
 
   const handleExitHearing = () => {
     history.push(`/${window.contextPath}/${userType}/home/home-pending-task`);
+  };
+
+  const handleClose = () => {
+    setWitnessModalOpen(false);
+  };
+
+  const handleProceed = async () => {
+    try {
+      const documents = Array.isArray(hearing?.documents) ? hearing.documents : [];
+      const documentsFile =
+        signedDocumentUploadID !== ""
+          ? {
+              documentType: "WitnessSignedDocument",
+              fileStoreId: signedDocumentUploadID,
+            }
+          : null;
+
+      const reqBody = {
+        hearing: {
+          ...hearing,
+          documents: documentsFile ? [...documents, documentsFile] : documents,
+        },
+      };
+
+      const updateWitness = await hearingService.customApiService(
+        Urls.hearing.uploadWitnesspdf,
+        { tenantId: tenantId, hearing: reqBody },
+        { applicationNumber: "", cnrNumber: "" }
+      );
+      setWitnessModalOpen(false);
+    } catch (error) {
+      console.error("Error updating witness:", error);
+      // Optionally, you can handle the error more gracefully here, e.g., show an error message to the user
+    }
   };
 
   const attendanceCount = useMemo(() => hearing?.attendees?.filter((attendee) => attendee.wasPresent).length || 0, [hearing]);
@@ -418,6 +457,14 @@ const InsideHearingMainPage = () => {
           ></AddParty>
         )}
       </div>
+      {witnessModalOpen && (
+        <WitnessModal
+          handleClose={handleClose}
+          hearingId={hearingId}
+          setSignedDocumentUploadID={setSignedDocumentUploadID}
+          handleProceed={handleProceed}
+        />
+      )}
       {endHearingModalOpen && <EndHearing handleEndHearingModal={handleEndHearingModal} hearingId={hearingId} hearing={hearing} />}
     </div>
   );
