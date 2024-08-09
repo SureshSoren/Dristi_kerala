@@ -63,8 +63,6 @@ const InsideHearingMainPage = () => {
   const { data: hearingLink } = useGetHearingLink();
   const hearingVcLink = hearingLink?.[0];
 
-  console.log(hearingLink?.[0], "llll");
-
   const reqBody = {
     hearing: { tenantId },
     criteria: {

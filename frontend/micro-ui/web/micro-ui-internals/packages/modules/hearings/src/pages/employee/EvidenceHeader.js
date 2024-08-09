@@ -153,7 +153,6 @@ const EvidenceHearingHeader = ({ hearing, caseData, filingNumber, setActiveTab, 
           variation={"tertiary"}
           label={t("JOIN_VIDEO_CONFERENCE")}
           onClick={() => {
-            console.log(hearingLink, "lll");
             window.open(hearingLink, "_blank");
           }}
           style={{
