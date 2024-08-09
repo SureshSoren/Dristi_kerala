@@ -17,6 +17,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import static org.pucar.dristi.config.ServiceConstants.ERROR_WHILE_UPDATING_SUMMONS;
+import static org.pucar.dristi.config.ServiceConstants.SUMMONS_UPDATE_ERROR;
+
 @Component
 @Slf4j
 public class SummonsUtil {
@@ -55,7 +58,7 @@ public class SummonsUtil {
             return objectMapper.convertValue(responseEntity.getBody(), Object.class);
         } catch (RestClientException e) {
             log.error("Error occurred when sending Process Request ", e);
-            throw new CustomException("SUMMONS_UPDATE_ERROR","Error occurred when sending Update Summons Request");
+            throw new CustomException(SUMMONS_UPDATE_ERROR,ERROR_WHILE_UPDATING_SUMMONS);
         }
     }
 }

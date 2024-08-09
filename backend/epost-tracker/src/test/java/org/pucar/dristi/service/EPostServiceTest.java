@@ -2,7 +2,6 @@ package org.pucar.dristi.service;
 
 
 import org.egov.common.contract.request.RequestInfo;
-import org.egov.common.contract.response.ResponseInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class EPostServiceTest {
+class EPostServiceTest {
 
     @Mock
     private EPostRepository ePostRepository;
@@ -32,9 +31,8 @@ public class EPostServiceTest {
     private EPostService ePostService;
 
     @Test
-    public void testSendEPost() {
+    void testSendEPost() {
         // Arrange
-//        ResponseInfo responseInfo = new ResponseInfo();
         TaskRequest taskRequest = TaskRequest.builder()
                 .requestInfo(new RequestInfo())
                 .task(Task.builder().build())
@@ -59,7 +57,7 @@ public class EPostServiceTest {
     }
 
     @Test
-    public void testGetEPost() {
+    void testGetEPost() {
         // Arrange
         EPostTrackerSearchRequest searchRequest = new EPostTrackerSearchRequest();
         EPostResponse ePostResponse = new EPostResponse();
@@ -76,7 +74,7 @@ public class EPostServiceTest {
     }
 
     @Test
-    public void testUpdateEPost() {
+    void testUpdateEPost() {
         // Arrange
         EPostRequest ePostRequest = EPostRequest.builder()
                 .requestInfo(new RequestInfo())

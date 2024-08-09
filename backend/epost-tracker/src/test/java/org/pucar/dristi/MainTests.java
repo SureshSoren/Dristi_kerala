@@ -1,11 +1,10 @@
 package org.pucar.dristi;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.annotation.Configuration;
 
-@ExtendWith(MockitoExtension.class)
-public class MainTests {
+@Configuration
+class MainTests {
 
     @Test
     void contextLoads() {

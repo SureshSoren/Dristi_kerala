@@ -10,18 +10,17 @@ import org.pucar.dristi.model.Order;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class EPostQueryBuilderTest {
+class EPostQueryBuilderTest {
 
     private final EPostQueryBuilder queryBuilder = new EPostQueryBuilder();
 
     @Test
-    public void testGetEPostTrackerSearchQueryWithAllCriteria() {
+    void testGetEPostTrackerSearchQueryWithAllCriteria() {
         // Arrange
         EPostTrackerSearchCriteria searchCriteria = new EPostTrackerSearchCriteria();
         searchCriteria.setDeliveryStatus("DELIVERED");
@@ -46,7 +45,7 @@ public class EPostQueryBuilderTest {
     }
 
     @Test
-    public void testGetEPostTrackerSearchQueryWithDeliveryStatusCriteria() {
+    void testGetEPostTrackerSearchQueryWithDeliveryStatusCriteria() {
         // Arrange
         EPostTrackerSearchCriteria searchCriteria = new EPostTrackerSearchCriteria();
         searchCriteria.setDeliveryStatusList(Arrays.asList("Delivered", "Pending"));
@@ -64,7 +63,7 @@ public class EPostQueryBuilderTest {
     }
 
     @Test
-    public void testGetEPostTrackerSearchQueryWithNoCriteria() {
+    void testGetEPostTrackerSearchQueryWithNoCriteria() {
         // Arrange
         EPostTrackerSearchCriteria searchCriteria = EPostTrackerSearchCriteria.builder().build();
         List<Object> preparedStmtList = new ArrayList<>();
@@ -88,11 +87,11 @@ public class EPostQueryBuilderTest {
 
 
     @Test
-    public void testAddPaginationQueryWithSortingAndOrdering() {
+    void testAddPaginationQueryWithSortingAndOrdering() {
         // Arrange
         String baseQuery = "SELECT * FROM dristi_epost_tracker";
         Pagination pagination = Pagination.builder()
-                .sortBy(Sort.process_number)
+                .sortBy(Sort.PROCESS_NUMBER)
                 .orderBy(Order.ASC)
                 .build();
 
@@ -105,7 +104,7 @@ public class EPostQueryBuilderTest {
 
         // Assert
         assertNotNull(queryWithPagination);
-        assertTrue(queryWithPagination.contains(" ORDER BY process_number ASC "));
+        assertTrue(queryWithPagination.contains(" ORDER BY PROCESS_NUMBER ASC "));
         assertTrue(queryWithPagination.contains(" LIMIT ? OFFSET ?"));
         assertEquals(2, preparedStmtList.size()); // 1 for limit, 1 for offset
         assertEquals(10, preparedStmtList.get(0));
@@ -113,7 +112,7 @@ public class EPostQueryBuilderTest {
     }
 
     @Test
-    public void testAddPaginationQueryWithDefaultValues() {
+    void testAddPaginationQueryWithDefaultValues() {
         // Arrange
         String baseQuery = "SELECT * FROM dristi_epost_tracker";
         Pagination pagination = Pagination.builder() // No sortBy or orderBy set
@@ -136,7 +135,7 @@ public class EPostQueryBuilderTest {
     }
 
     @Test
-    public void testGetTotalCountQuery() {
+    void testGetTotalCountQuery() {
         // Arrange
         String baseQuery = "SELECT * FROM dristi_epost_tracker WHERE process_number = ?";
 
