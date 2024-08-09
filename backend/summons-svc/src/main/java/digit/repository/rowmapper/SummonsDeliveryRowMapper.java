@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.web.models.AdditionalFields;
 import digit.web.models.ChannelName;
+import digit.web.models.DeliveryStatus;
 import digit.web.models.SummonsDelivery;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.models.AuditDetails;
@@ -31,6 +32,8 @@ public class SummonsDeliveryRowMapper implements RowMapper<SummonsDelivery> {
     public SummonsDelivery mapRow(ResultSet rs, int rowNum) throws SQLException {
         SummonsDelivery summonsDelivery = new SummonsDelivery();
 
+        String deliveryStatusStr = rs.getString("delivery_status");
+        DeliveryStatus deliveryStatus = deliveryStatusStr !=null ? DeliveryStatus.valueOf(deliveryStatusStr) : null;
         summonsDelivery.setSummonDeliveryId(rs.getString("summons_id"));
         summonsDelivery.setTaskNumber(rs.getString("task_number"));
         summonsDelivery.setCaseId(rs.getString("case_id"));
@@ -47,7 +50,7 @@ public class SummonsDeliveryRowMapper implements RowMapper<SummonsDelivery> {
         summonsDelivery.setChannelAcknowledgementId(rs.getString("channel_acknowledgement_id"));
 
         summonsDelivery.setDeliveryRequestDate(rs.getString("delivery_request_date"));
-        summonsDelivery.setDeliveryStatus(rs.getString("delivery_status"));
+        summonsDelivery.setDeliveryStatus(deliveryStatus);
 
         AdditionalFields additionalFields = new AdditionalFields();
         try {
