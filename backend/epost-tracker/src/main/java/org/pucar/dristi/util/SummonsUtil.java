@@ -45,6 +45,7 @@ public class SummonsUtil {
                 .deliveryStatus(request.getEPostTracker().getDeliveryStatus())
                 .processNumber(request.getEPostTracker().getProcessNumber())
                 .taskNumber(request.getEPostTracker().getTaskNumber())
+                .remarks(request.getEPostTracker().getRemarks())
                 .build();
         UpdateSummonsRequest summonsRequest = UpdateSummonsRequest.builder().requestInfo(request.getRequestInfo()).channelReport(channelReport).build();
         HttpEntity<UpdateSummonsRequest> requestEntity = new HttpEntity<>(summonsRequest, headers);

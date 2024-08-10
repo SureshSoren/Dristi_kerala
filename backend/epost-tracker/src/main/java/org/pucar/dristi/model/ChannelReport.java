@@ -19,6 +19,9 @@ public class ChannelReport {
     @JsonProperty("deliveryStatus")
     private DeliveryStatus deliveryStatus;
 
+    @JsonProperty("remarks")
+    private String remarks;
+
     @JsonProperty("additionalFields")
     private AdditionalFields additionalFields;
 
