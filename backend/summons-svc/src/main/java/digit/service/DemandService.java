@@ -38,7 +38,7 @@ public class DemandService {
     public BillResponse fetchPaymentDetailsAndGenerateDemandAndBill(TaskRequest taskRequest) {
         Task task = taskRequest.getTask();
         List<Calculation> calculationList = generatePaymentDetails(taskRequest.getRequestInfo(), task);
-        generateDemands(taskRequest.getRequestInfo(), calculationList);
+        generateDemands(taskRequest.getRequestInfo(), calculationList, task);
         return getBill(taskRequest.getRequestInfo(), task);
     }
 
@@ -60,18 +60,20 @@ public class DemandService {
         return calculationResponse.getCalculation();
     }
 
-    public List<Demand> generateDemands(RequestInfo requestInfo, List<Calculation> calculations) {
+    public List<Demand> generateDemands(RequestInfo requestInfo, List<Calculation> calculations, Task task) {
         List<Demand> demands = new ArrayList<>();
 
         for (Calculation calculation : calculations) {
             DemandDetail demandDetail = DemandDetail.builder()
                     .tenantId(calculation.getTenantId())
-                    .taxAmount(BigDecimal.valueOf(calculation.getTotalAmount()))
+                    //.taxAmount(BigDecimal.valueOf(calculation.getTotalAmount()))
+                    .taxAmount(BigDecimal.valueOf(4))
                     .taxHeadMasterCode(config.getTaskTaxHeadMasterCode()).build();
 
-            //TODO- should fetch all these details from mdms service
+            //TODO- should create separate demand details based on break down
             Demand demand = Demand.builder()
-                    .tenantId(calculation.getTenantId()).consumerCode(calculation.getApplicationId())
+                    .tenantId(calculation.getTenantId())
+                    .consumerCode(task.getTaskNumber())
                     .consumerType(config.getTaxConsumerType())
                     .businessService(config.getTaskModuleCode())
                     .taxPeriodFrom(config.getTaxPeriodFrom()).taxPeriodTo(config.getTaxPeriodTo())
