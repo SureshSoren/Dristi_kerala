@@ -94,6 +94,9 @@ public class TaskCase {
     @NotNull
     private String status = null;
 
+    @JsonProperty("documentStatus")
+    private String documentStatus;
+
     @JsonProperty("assignedTo")
     private AssignedTo assignedTo = null;
 

@@ -22,6 +22,9 @@ public class TaskCaseQueryBuilder {
             " task.filingnumber as filingnumber, task.tasknumber as tasknumber, task.datecloseby as datecloseby, task.dateclosed as dateclosed, task.taskdescription as taskdescription, task.cnrnumber as cnrnumber," +
             " task.taskdetails as taskdetails, task.assignedto as assignedto, task.tasktype as tasktype, task.assignedto as assignedto, task.status as status, task.isactive as isactive,task.additionaldetails as additionaldetails, task.createdby as createdby," +
             " task.lastmodifiedby as lastmodifiedby, task.createdtime as createdtime, task.lastmodifiedtime as lastmodifiedtime ,c.caseTitle as caseName , o.orderType as orderType";
+
+    private static final String DOCUMENT_SWITCH_CASE = " ,CASE WHEN EXISTS (SELECT 1 FROM dristi_task_document dtd WHERE dtd.task_id = task.id AND dtd.documentType = 'SIGNED')" +
+            "THEN 'SIGNED' ELSE 'SIGN_PENDING' END AS documentstatus";
     private static final String FROM_TASK_TABLE = " FROM dristi_task task";
     private static final String FROM_DOCUMENTS_TABLE = " FROM dristi_task_document doc";
     private static final String DOCUMENT_SELECT_QUERY_TASK = "SELECT doc.id as id, doc.documenttype as documenttype, doc.filestore as filestore," +
@@ -34,13 +37,17 @@ public class TaskCaseQueryBuilder {
             " JOIN dristi_orders o ON task.orderId = o.id " +
                     " JOIN dristi_cases c ON task.cnrNumber = c.cnrNumber ";
 
+    private static final String DOCUMENT_LEFT_JOIN = " LEFT JOIN dristi_task_document dtd ON task.id = dtd.task_id ";
+
 
     public String getTaskTableSearchQuery(TaskCaseSearchCriteria criteria, List<Object> preparedStmtList) {
         try {
             StringBuilder query = new StringBuilder(BASE_TASK_QUERY);
+            query.append(DOCUMENT_SWITCH_CASE);
             query.append(FROM_TASK_TABLE);
             query.append(DEFAULT_JOIN_CLAUSE);
-            getWhereFields(criteria,query,preparedStmtList);
+            query.append(DOCUMENT_LEFT_JOIN);
+            getWhereFields(criteria, query, preparedStmtList);
             return query.toString();
         } catch (Exception e) {
             log.error("Error while building application search query {}", e.getMessage());
@@ -78,7 +85,7 @@ public class TaskCaseQueryBuilder {
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Error while building document search query :: {}",e.toString());
+            log.error("Error while building document search query :: {}", e.toString());
             throw new CustomException(DOCUMENT_SEARCH_QUERY_EXCEPTION, "Exception occurred while building the query for task document search: " + e.getMessage());
         }
     }
@@ -91,7 +98,7 @@ public class TaskCaseQueryBuilder {
 
         if (!ObjectUtils.isEmpty(taskCaseSearchCriteria.getCompleteStatus())) {
             addClauseIfRequired(query, preparedStmtList);
-            query.append(" status = ? ");
+            query.append(" task.status = ? ");
             preparedStmtList.add(taskCaseSearchCriteria.getCompleteStatus());
         }
 
@@ -102,10 +109,9 @@ public class TaskCaseQueryBuilder {
 
         }
 
-        if (!ObjectUtils.isEmpty(taskCaseSearchCriteria.getCnrNumber())) {
+        if (!ObjectUtils.isEmpty(taskCaseSearchCriteria.getSearchText())) {
             addClauseIfRequired(query, preparedStmtList);
-            query.append(" cnrnumber = ? ");
-            preparedStmtList.add(taskCaseSearchCriteria.getCnrNumber());
+            query.append("(task.tasknumber ILIKE '%").append(taskCaseSearchCriteria.getSearchText()).append("%' or task.cnrnumber ILIKE '%").append(taskCaseSearchCriteria.getSearchText()).append("%' )");
         }
 
 

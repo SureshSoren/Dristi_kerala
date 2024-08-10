@@ -25,8 +25,8 @@ public class TaskCaseSearchCriteria {
     @JsonProperty("applicationStatus")
     private String applicationStatus = null;
 
-    @JsonProperty("cnrNumber")
-    private String cnrNumber = null;
+    @JsonProperty("searchText")
+    private String searchText = null;
 
 
 }

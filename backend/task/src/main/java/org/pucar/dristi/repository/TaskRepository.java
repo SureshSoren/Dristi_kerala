@@ -1,6 +1,7 @@
 package org.pucar.dristi.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.egov.common.contract.models.Document;
 import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.repository.querybuilder.TaskCaseQueryBuilder;
@@ -125,11 +126,10 @@ public class TaskRepository {
     public List<TaskCase> getTaskWithCaseDetails(TaskCaseSearchRequest request) {
 
         List<Object> preparedStmtList = new ArrayList<>();
-        String query = taskCaseQueryBuilder.getTaskTableSearchQuery(request.getCriteria(), preparedStmtList);
 
         String taskQuery = taskCaseQueryBuilder.getTaskTableSearchQuery(request.getCriteria(), preparedStmtList);
         taskQuery = taskCaseQueryBuilder.addOrderByQuery(taskQuery, request.getPagination());
-        log.debug("Final query: " + query);
+        log.debug("Final query: " + taskQuery);
 
         if (request.getPagination() != null) {
             Integer totalRecords = getTotalCountApplication(taskQuery, preparedStmtList);
@@ -139,6 +139,12 @@ public class TaskRepository {
         }
 
         List<TaskCase> list = jdbcTemplate.query(taskQuery, preparedStmtList.toArray(), taskCaseRowMapper);
+        String applicationStatus = request.getCriteria().getApplicationStatus();
+
+        if (!ObjectUtils.isEmpty(applicationStatus) && list!= null) {
+            list = list.stream().filter((element) -> applicationStatus.equals(element.getDocumentStatus())).toList();
+        }
+
         return list;
 
     }

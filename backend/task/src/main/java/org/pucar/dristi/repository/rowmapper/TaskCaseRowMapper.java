@@ -69,6 +69,7 @@ public class TaskCaseRowMapper implements ResultSetExtractor<List<TaskCase>> {
                             .taskDetails(rs.getString("taskdetails"))
                             .taskType(rs.getString("tasktype"))
                             .status(rs.getString("status"))
+                            .documentStatus(rs.getString("documentStatus"))
                             .assignedTo(getObjectFromJson(rs.getString("assignedto"), new TypeReference<AssignedTo>() {
                             }))
                             .isActive(Boolean.valueOf(rs.getString("isactive")))
