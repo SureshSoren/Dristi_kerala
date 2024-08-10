@@ -65,9 +65,9 @@ public class RescheduleRequestOptOutValidator {
         Set<String> litigants = rescheduleReq.getLitigants();
         Set<String> representatives = rescheduleReq.getRepresentatives();
 
-        if (!(representatives.contains(optOut.getIndividualId()) || litigants.contains(optOut.getIndividualId()))) {
-            throw new CustomException("DK_OO_INVALID_REQUESTER_ID", "User is not authorised for opt out");
-        }
+        // if (!(representatives.contains(optOut.getIndividualId()) || litigants.contains(optOut.getIndividualId()))) {
+        //     throw new CustomException("DK_OO_INVALID_REQUESTER_ID", "User is not authorised for opt out");
+        // }
 
         List<SchedulerConfig> dataFromMDMS = mdmsUtil.getDataFromMDMS(SchedulerConfig.class, constants.SCHEDULER_CONFIG_MASTER_NAME, constants.SCHEDULER_CONFIG_MODULE_NAME);
 
