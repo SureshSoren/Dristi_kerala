@@ -108,6 +108,9 @@ public class Task {
     @Valid
     private Workflow workflow = null;
 
+    @JsonProperty("remarks")
+    private String remarks;
+
 
     public Task addDocumentsItem(Document documentsItem) {
         this.documents.add(documentsItem);

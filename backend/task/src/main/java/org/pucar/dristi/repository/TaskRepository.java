@@ -113,4 +113,10 @@ public class TaskRepository {
             throw new CustomException(EXIST_TASK_ERR, "Custom exception while checking task exist : " + e.getMessage());
         }
     }
+
+    public Task getTaskFromTaskType(Task task){
+        List<Object> preparedStmtList = new ArrayList<>();
+        String query = queryBuilder.getTaskFromTaskType(preparedStmtList);
+        return null;
+    }
 }

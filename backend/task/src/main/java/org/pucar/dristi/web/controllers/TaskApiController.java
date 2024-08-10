@@ -79,4 +79,12 @@ public class TaskApiController {
         TaskResponse taskResponse = TaskResponse.builder().task(task).responseInfo(responseInfo).build();
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/task/v1/get", method = RequestMethod.POST)
+    public ResponseEntity<TaskResponse> getSummonsAndWarrantStatus(@Parameter(in = ParameterIn.DEFAULT, description = "details for the update of task", schema = @Schema()) @Valid @RequestBody TaskRequest body) {
+        Task task = taskService.getSummonsAndWarrantStatus(body);
+        ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(body.getRequestInfo(), true);
+        TaskResponse taskResponse = TaskResponse.builder().task(task).responseInfo(responseInfo).build();
+        return new ResponseEntity<>(taskResponse, HttpStatus.OK);
+    }
 }
