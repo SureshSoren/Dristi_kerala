@@ -84,8 +84,9 @@ public class PaymentUpdateService {
             for (Task task : tasks) {
                 log.info("Updating pending payment status for task: {}", task);
                 if (task.getTaskType().equals(SUMMON)) {
-                    Workflow workflow = task.getWorkflow();
+                    Workflow workflow = new Workflow();
                     workflow.setAction("MAKE PAYMENT");
+                    task.setWorkflow(workflow);
                     workflowUtil.updateWorkflowStatus(requestInfo, tenantId, task.getTaskNumber(),
                             config.getTaskSummonBusinessServiceName(), workflow, config.getTaskSummonBusinessName());
                     TaskRequest taskRequest = TaskRequest.builder().requestInfo(requestInfo).task(task).build();
