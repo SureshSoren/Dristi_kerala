@@ -29,7 +29,7 @@ public class RespondentDetails {
     private String phone;
 
     @JsonProperty("address")
-    private Address address;
+    private String address;
 
     @JsonProperty("state")
     private String state;
