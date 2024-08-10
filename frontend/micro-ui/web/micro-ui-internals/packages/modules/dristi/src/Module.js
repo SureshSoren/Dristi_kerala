@@ -55,6 +55,8 @@ import UploadSignatureModal from "./components/UploadSignatureModal";
 import CommentComponent from "./components/CommentComponent";
 import { RightArrow } from "./icons/svgIndex";
 import useBillSearch from "./hooks/dristi/useBillSearch";
+import SelectTranscriptTextArea from "./components/SelectTranscriptTextArea";
+
 
 export const DRISTIModule = ({ stateCode, userType, tenants }) => {
   const { path } = useRouteMatch();
@@ -146,6 +148,7 @@ const componentsToRegister = {
   CustomCalendar,
   RightArrow,
   useBillSearch,
+  SelectTranscriptTextArea
 };
 
 const overrideHooks = () => {
