@@ -749,7 +749,16 @@ const GenerateOrders = () => {
           : null;
 
       localStorage.removeItem("fileStoreId");
-      return await ordersService.updateOrder({ order: { ...order, documents: documentsFile ? [...documents, documentsFile] : documents, workflow: { ...order.workflow, action, documents: [{}] } } }, { tenantId });
+      return await ordersService.updateOrder(
+        {
+          order: {
+            ...order,
+            documents: documentsFile ? [...documents, documentsFile] : documents,
+            workflow: { ...order.workflow, action, documents: [{}] },
+          },
+        },
+        { tenantId }
+      );
     } catch (error) {
       return null;
     }
@@ -1047,7 +1056,9 @@ const GenerateOrders = () => {
     if (address) {
       return address;
     }
-    return `${locality} ${district} ${city} ${state} ${pincode ? ` - ${pincode}` : ""}`.trim();
+    return `${locality ? `${locality},` : ""} ${district ? `${district},` : ""} ${city ? `${city},` : ""} ${state ? `${state},` : ""} ${
+      pincode ? `- ${pincode}` : ""
+    }`.trim();
   };
 
   const createTask = async (orderType, caseDetails, orderDetails) => {
@@ -1107,7 +1118,7 @@ const GenerateOrders = () => {
           },
           respondentDetails: {
             name: respondentName,
-            address: typeof respondentAddress[0] === "object" ? generateAddress(...respondentAddress[0]) : respondentAddress[0],
+            address: typeof respondentAddress[0] === "object" ? generateAddress(respondentAddress[0]) : respondentAddress[0],
             phone: respondentPhoneNo[0] || "",
             email: respondentEmail[0] || "",
             age: "",
@@ -1140,7 +1151,7 @@ const GenerateOrders = () => {
         payload = {
           respondentDetails: {
             name: respondentName,
-            address: respondentAddress[0],
+            address: typeof respondentAddress[0] === "object" ? generateAddress(respondentAddress[0]) : respondentAddress[0],
             phone: respondentPhoneNo[0] || "",
             email: respondentEmail[0] || "",
             age: "",
@@ -1172,7 +1183,7 @@ const GenerateOrders = () => {
         payload = {
           respondentDetails: {
             name: respondentName,
-            address: respondentAddress[0],
+            address: typeof respondentAddress[0] === "object" ? generateAddress(respondentAddress[0]) : respondentAddress[0],
             phone: respondentPhoneNo[0] || "",
             email: respondentEmail[0] || "",
             age: "",
@@ -1219,10 +1230,13 @@ const GenerateOrders = () => {
             typeof respondentEmail[channelMap.get(item?.type) - 1] === "object"
               ? generateAddress(...respondentEmail[channelMap.get(item?.type) - 1])
               : respondentEmail[channelMap.get(item?.type) - 1];
-
           payload.respondentDetails = {
             ...payload.respondentDetails,
-            address: ["Post", "Via Police"].includes(item?.type) ? item?.value : address || "",
+            address: ["Post", "Via Police"].includes(item?.type)
+              ? typeof item?.value === "object"
+                ? generateAddress({ ...item?.value })
+                : item?.value
+              : address || "",
             phone: ["SMS"].includes(item?.type) ? item?.value : sms || "",
             email: ["E-mail"].includes(item?.type) ? item?.value : email || "",
             age: "",
@@ -1258,7 +1272,11 @@ const GenerateOrders = () => {
 
           payload.respondentDetails = {
             ...payload.respondentDetails,
-            address: ["Post", "Via Police"].includes(item?.type) ? item?.value : address || "",
+            address: ["Post", "Via Police"].includes(item?.type)
+              ? typeof item?.value === "object"
+                ? generateAddress({ ...item?.value })
+                : item?.value
+              : address || "",
             phone: ["SMS"].includes(item?.type) ? item?.value : sms || "",
             email: ["E-mail"].includes(item?.type) ? item?.value : email || "",
             age: "",
