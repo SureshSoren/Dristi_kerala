@@ -196,6 +196,21 @@ function ScheduleHearing({
     return null;
   };
 
+  const fetchBasicUserInfo = async () => {
+    const individualData = await window?.Digit.DRISTIService.searchIndividualUser(
+      {
+        Individual: {
+          userUuid: [caseDetails?.auditDetails?.createdBy],
+        },
+      },
+      { tenantId, limit: 1000, offset: 0 },
+      "",
+      caseDetails?.auditDetails?.createdBy
+    );
+
+    return individualData?.Individual?.[0]?.individualId;
+  };
+
   const { filingNumber, status } = Digit.Hooks.useQueryParams();
   const nextFourDates = status === "OPTOUT" ? getSuggestedDates(dateResponse) : getNextNDates(5);
   const [modalInfo, setModalInfo] = useState(null);
@@ -295,7 +310,7 @@ function ScheduleHearing({
     history.push(`/${window?.contextPath}/${userInfoType}/home/home-pending-task`, { taskType: { code: "case", name: "Case" } });
   };
 
-  const handleSubmit = (data) => {
+  const handleSubmit = async (data) => {
     if (status !== "OPTOUT") {
       const dateArr = data.date.split(" ").map((date, i) => (i === 0 ? date.slice(0, date.length - 2) : date));
       const date = new Date(dateArr.join(" "));
@@ -361,16 +376,17 @@ function ScheduleHearing({
           console.log("err", err);
         });
     } else if (status && status === "OPTOUT") {
+      const individualId = await fetchBasicUserInfo();
       setIsSubmitDisabled(true);
       HomeService.customApiService(
         Urls.submitOptOutDates,
         {
           OptOut: {
             tenantId: tenantId,
-            individualId: "IND00000001",
+            individualId: individualId,
             caseId: filingNumber,
             rescheduleRequestId: "0a6097a2-4e98-4613-ae4e-6a444cc9efbe",
-            judgeId: "judge001",
+            judgeId: caseDetails?.judgeId,
             optOutDates: selectedChip,
           },
         },
