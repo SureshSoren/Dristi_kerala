@@ -1,9 +1,9 @@
 export const efilingDocumentKeyAndTypeMapping = {
   returnMemoFileUpload: "CHEQUE_RETURN_MEMO",
   legalDemandNoticeFileUpload: "LEGAL_NOTICE",
-  vakalatnamaFileUpload: "VAKALAT_NAMA",
+  // vakalatnamaFileUpload: "VAKALAT_NAMA",
   inquiryAffidavitFileUpload: "AFFIDAVIT",
-  memorandumOfComplaint: "COMPLAINT_MEMO",
+  // memorandumOfComplaint: "COMPLAINT_MEMO",
 };
 
 export const efilingDocumentTypeAndKeyMapping = {

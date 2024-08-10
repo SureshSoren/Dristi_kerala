@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom/cjs/react-router-dom.min";
 
 const ApplicationInfoComponent = ({ infos, links }) => {
   const { t } = useTranslation();
@@ -15,7 +14,7 @@ const ApplicationInfoComponent = ({ infos, links }) => {
                   <h3>{t(info?.key)}</h3>
                 </div>
                 <div className="info-value">
-                  <h3>{t(info?.value)}</h3>
+                  <h3>{info?.value}</h3>
                 </div>
               </div>
             ))}
@@ -23,9 +22,16 @@ const ApplicationInfoComponent = ({ infos, links }) => {
         <div className="info-link-wrapper">
           {links &&
             links?.map((link, index) => (
-              <Link key={index} className="review-summon-order" to={{ pathname: link?.link }}>
+              <h3
+                key={index}
+                className="review-summon-order"
+                onClick={() => {
+                  if (link?.onClick) link.onClick();
+                  else return;
+                }}
+              >
                 {link?.text}
-              </Link>
+              </h3>
             ))}
         </div>
       </div>

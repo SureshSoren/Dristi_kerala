@@ -658,9 +658,7 @@ const GenerateOrders = () => {
       return await Promise.all(promises);
     }
     if (order?.orderType === "SUMMONS") {
-      debugger;
       assignees = [...[...new Set([...Object.keys(allAdvocates)?.flat(), ...Object.values(allAdvocates)?.flat()])]?.map((uuid) => ({ uuid }))];
-      debugger;
       if (Array.isArray(order?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels)) {
         entityType = "order-managelifecycle";
         const promises = order?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels?.map(async (channel) => {

@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { InboxSearchComposer } from "@egovernments/digit-ui-react-components";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { InboxSearchComposer, Toast } from "@egovernments/digit-ui-react-components";
 import { EpostTrackingConfig } from "./../../configs/E-PostTrackingConfig";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
-import PrintAndSendDocumentsModal from "./PrintAndSendDocumentsModal";
-import UpdateEPostStatus from "./UpdateEPostStatus";
-import { Modal } from "@egovernments/digit-ui-react-components";
 import { useTranslation } from "react-i18next";
+import DocumentModal from "../../components/DocumentModal";
+import EpostPrintAndSendDocument from "./EpostPrintAndSendDocument";
+import EpostUpdateStatus from "./EpostUpdateStatus";
+import { EpostService } from "../../hooks/services";
 
 const EpostTrackingPage = () => {
   const { t } = useTranslation();
@@ -18,9 +19,12 @@ const EpostTrackingPage = () => {
   const [stepper, setStepper] = useState(0);
   const [rowData, setRowData] = useState();
   const [form, setForm] = useState();
+  const [tempForm, setTempForm] = useState({});
+
   const DocViewerWrapper = Digit?.ComponentRegistryService?.getComponent("DocViewerWrapper");
   const [fileStoreId, setFileStoreID] = useState();
   const [showDocument, setShowDocument] = useState(false);
+  const [show, setShow] = useState(false);
   const [tabData, setTabData] = useState(
     EpostTrackingConfig({ inboxFilters, outboxFilters })?.map((configItem, index) => ({
       key: index,
@@ -28,7 +32,15 @@ const EpostTrackingPage = () => {
       active: index === 0 ? true : false,
     }))
   );
+  const [updatedData, setUpdatedData] = useState(rowData?.original);
+  const [toast, setToast] = useState(null);
 
+  const showToast = (type, message, duration = 5000) => {
+    setToast({ key: type, action: message });
+    setTimeout(() => {
+      setToast(null);
+    }, duration);
+  };
   const onTabChange = (n) => {
     setTabData((prev) => prev.map((i, c) => ({ ...i, active: c === n ? true : false })));
     setConfig(EpostTrackingConfig({ inboxFilters, outboxFilters })?.[n]);
@@ -56,37 +68,166 @@ const EpostTrackingPage = () => {
     [tenantId]
   );
 
-  const onClose = () => {
-    if (showDocument) {
-      setShowDocument(false);
-    } else {
-      setStepper(0);
-    }
-  };
-
-  const Close = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFFFFF" style={{ width: "24px", height: "24px" }}>
-      <path d="M0 0h24v24H0V0z" fill="none" />
-      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
-    </svg>
-  );
-
-  const CloseBtn = ({ onClick, isMobileView }) => (
-    <div onClick={onClick} style={isMobileView ? { padding: 5 } : null}>
-      <div style={{ backgroundColor: "#505A5F", display: "flex", justifyContent: "center", alignItems: "center", padding: "8px" }}>
-        <Close />
-      </div>
-    </div>
-  );
-
   const onRowClick = (row) => {
     setRowData(row);
     setFileStoreID(row?.original?.fileStoreId);
     setStepper(stepper + 1);
+    setShow(true);
   };
 
+  const printInfos = useMemo(() => {
+    return [
+      { key: "E-post fees", value: "Rs.575" },
+      { key: "Received on", value: "04/07/2024, 12:56" },
+    ];
+  }, []);
+
+  const printLinks = useMemo(() => {
+    return [{ text: "View Details", link: "" }];
+  }, []);
+
+  const keyMapping = {
+    barCode: "trackingNumber",
+    dateofBooking: "bookingDate",
+    currentStatus: "deliveryStatus",
+    dateOfDelivery: "receivedDate",
+  };
+
+  const updateFunction = () => {
+    let data = updatedData;
+    for (const formKey in keyMapping) {
+      const updatedDataKey = keyMapping[formKey];
+
+      if (formKey === "currentStatus") {
+        data[updatedDataKey] = form[formKey].code;
+      } else if (form[formKey]) {
+        data[updatedDataKey] = form[formKey];
+      }
+    }
+
+    setUpdatedData(data);
+  };
+
+  const onUpdateClick = async () => {
+    updateFunction();
+    const requestBody = {
+      Individual: {
+        tenantId: Digit.ULBService.getCurrentTenantId(),
+      },
+      EPostTracker: updatedData,
+    };
+    try {
+      const data = await EpostService.EpostUpdate(requestBody, {});
+      showToast("success", t("CORE_COMMON_PROFILE_UPDATE_SUCCESS_WITH_PASSWORD"), 50000);
+      setShow(false);
+    } catch (error) {
+      console.log("error updating Status");
+    }
+  };
+
+  const printDocuments = useMemo(() => {
+    return [
+      {
+        fileName: "Summons Document",
+        fileStoreId: "a236b4e0-5ddd-4ece-9ba3-4d02edf15adc",
+        documentName: "file_example_JPG_100kB.jpg",
+        documentType: "image/jpeg",
+      },
+      {
+        fileName: "Receiver’s Address",
+        fileStoreId: "a236b4e0-5ddd-4ece-9ba3-4d02edf15adc",
+        documentName: "file_example_JPG_100kB.jpg",
+        documentType: "image/jpeg",
+      },
+    ];
+  }, []);
+
+  const infos = useMemo(() => {
+    return [
+      { key: "E-post fees", value: "Rs.575" },
+      { key: "Received on", value: "04/07/2024, 12:56" },
+      { key: "Bar Code", value: "1234567890" },
+      { key: "Date of Booking", value: "04/07/2024" },
+    ];
+  }, []);
+
+  const links = useMemo(() => {
+    return [
+      { text: "View Details", link: "", onClick: () => {} },
+      {
+        text: "View Document",
+        link: "",
+        onClick: () => {
+          setShowDocument(true);
+        },
+      },
+    ];
+  }, []);
+
+  const modalConfig = useMemo(() => {
+    return {
+      handleClose: () => {
+        setShow(false);
+      },
+      isStepperModal: true,
+      actionSaveOnSubmit: () => {},
+      steps: [
+        {
+          heading: { label: "Print & Send Documents" },
+          modalBody: (
+            <EpostPrintAndSendDocument
+              t={t}
+              infos={printInfos}
+              links={printLinks}
+              documents={printDocuments}
+              rowData={rowData}
+              setTempForm={setTempForm}
+              tempForm={tempForm}
+            />
+          ),
+          actionSaveOnSubmit: () => {
+            setForm(tempForm);
+          },
+          actionCancelType: "SKIP",
+          actionSaveLabel: "Save & Proceed",
+          actionCancelLabel: "Skip",
+          isDisabled: rowData?.original?.deliveryStatus === "DELIVERED" || rowData?.original?.deliveryStatus === "NOT_DELIVERED" ? true : false,
+        },
+        {
+          heading: { label: "E-post Status" },
+          modalBody: showDocument ? (
+            <DocViewerWrapper docWidth={"calc(80vw* 62/ 100)"} docHeight={"60vh"} fileStoreId={fileStoreId} tenantId={tenantId} />
+          ) : (
+            <EpostUpdateStatus
+              t={t}
+              setForm={setForm}
+              setUpdatedData={setUpdatedData}
+              rowData={rowData}
+              form={form}
+              infos={infos}
+              links={links}
+              setShowDocument={setShowDocument}
+            />
+          ),
+          isDisabled: rowData?.original?.deliveryStatus === "DELIVERED" || rowData?.original?.deliveryStatus === "NOT_DELIVERED" ? true : false,
+          actionSaveOnSubmit: () => onUpdateClick(),
+          actionSaveLabel: "Update Status",
+          handleClose: showDocument ? () => setShowDocument(false) : undefined,
+        },
+      ],
+    };
+  }, [printInfos, printLinks, printDocuments, t, rowData, form, showDocument, tempForm, setTempForm, setShowDocument]);
+
+  useEffect(() => {
+    setUpdatedData(rowData?.original);
+  }, [rowData]);
+
+  useEffect(() => {
+    if (form) setTempForm(form);
+  }, [form]);
+
   return (
-    <div style={{ padding: "16px", margin: "24px" }}>
+    <div style={{ padding: "16px", margin: "24px" }} className="e-post-tracking-main">
       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
         <svg width="40" height="41" viewBox="0 0 40 41" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -100,6 +241,7 @@ const EpostTrackingPage = () => {
         <strong style={{ fontSize: "24px" }}>Online Process Memo</strong>
       </div>
       <InboxSearchComposer
+        key={`e-post-track-${show}`}
         configs={config}
         showTab={true}
         tabData={tabData}
@@ -110,36 +252,14 @@ const EpostTrackingPage = () => {
           },
         }}
       ></InboxSearchComposer>
-      {stepper === 1 && !showDocument && (
-        <PrintAndSendDocumentsModal
-          onClose={onClose}
-          stepper={stepper}
-          setStepper={setStepper}
-          rowData={rowData}
-          form={form}
-          setForm={setForm}
-          fileStoreId={fileStoreId}
+      {show && <DocumentModal config={modalConfig} setShow={setShow} />}
+      {toast && (
+        <Toast
+          error={toast.key === "error"}
+          label={t(toast.key === "success" ? `CORE_COMMON_PROFILE_UPDATE_SUCCESS` : toast.action)}
+          onClose={() => setToast(null)}
+          style={{ maxWidth: "670px" }}
         />
-      )}
-      {stepper === 2 && !showDocument && (
-        <UpdateEPostStatus onClose={onClose} rowData={rowData} form={form} setForm={setForm} setShowDocument={setShowDocument} />
-      )}
-      {showDocument && (
-        <Modal
-          popupStyles={{
-            height: "80%",
-            width: "60%",
-            top: "10%",
-            left: "20%",
-          }}
-          headerBarMain={<h1 className="heading-m">{t("Documents")}</h1>}
-          headerBarEnd={<CloseBtn onClick={onClose} />}
-          popupModuleActionBarStyles={{
-            display: "none",
-          }}
-        >
-          <DocViewerWrapper docWidth={"calc(80vw* 62/ 100)"} docHeight={"60vh"} fileStoreId={fileStoreId} tenantId={tenantId} />
-        </Modal>
       )}
     </div>
   );

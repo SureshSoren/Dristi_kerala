@@ -4,7 +4,7 @@ import React from "react";
 const DocumentPrintComponent = ({ documents }) => {
   return (
     <div className="print-documents-container">
-      <div className="print-documents-heading">Print Documents</div>
+      <div className="print-documents-heading">{`Print Documents (${documents?.length})`}</div>
       {documents?.map((document) => (
         <div className="print-documents-box">
           <div className="print-documents-box-text">

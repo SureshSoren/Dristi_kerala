@@ -51,7 +51,7 @@ export const Urls = {
     eTreasury: "/etreasury/payment/v1/_processChallan",
     demandCreate: "/billing-service/demand/_create",
     sendOCR: "/ocr-service/verify",
-    receiveOCR: "/ocr-service/documentType",
+    receiveOCR: "/ocr-service/data",
   },
   case: {
     addWitness: "/case/case/v1/add/witness",

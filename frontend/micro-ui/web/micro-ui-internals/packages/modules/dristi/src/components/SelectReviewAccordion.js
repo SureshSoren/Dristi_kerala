@@ -51,26 +51,16 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
   const [formDataLoad, setFormDataLoad] = useState(true);
 
   const { isLoading: isOCRDataLoading, data: ocrData } = Digit.Hooks.dristi.useGetOCRData(
-    {},
     {
       filingNumber: caseId,
+      tenantId: tenantId,
     },
+    {},
     Boolean(caseId)
   );
 
   const ocrDataList = useMemo(() => {
-    return [
-      {
-        fileStoreId: "c4c1a3a2-4c99-4219-aebb-abe4f25de6ba",
-        documentType: "AFFIDAVIT",
-        message: "Invalid documents",
-      },
-      {
-        fileStoreId: "c4c1a3a2-4c99-4219-aebb-abe4f25de6ba",
-        documentType: "LEGAL_NOTICE",
-        message: "LEGAL_NOTICE Invalid documents",
-      },
-    ];
+    return ocrData;
   }, [ocrData]);
 
   const { isLoading, data: caseData } = useSearchCaseService(
