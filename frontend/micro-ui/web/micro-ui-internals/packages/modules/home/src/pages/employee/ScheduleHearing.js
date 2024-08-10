@@ -161,31 +161,6 @@ function ScheduleHearing({
     return [];
   };
 
-  const { data: dateResponse } = window?.Digit.Hooks.home.useSearchReschedule(
-    {
-      SearchCriteria: {
-        tenantId: Digit.ULBService.getCurrentTenantId(),
-        rescheduledRequestId: ["0a6097a2-4e98-4613-ae4e-6a444cc9efbe"],
-      },
-    },
-    { limit: 5, offset: 0 },
-    "",
-    true
-  );
-
-  const { data: OptOutLimit, isLoading: loading } = Digit.Hooks.useCustomMDMS(
-    Digit.ULBService.getStateId(),
-    "SCHEDULER-CONFIG",
-    [
-      {
-        name: "config",
-      },
-    ],
-    {
-      cacheTime: 0,
-    }
-  );
-
   const extractUnitValue = (OptOutLimit) => {
     const configArray = OptOutLimit?.["SCHEDULER-CONFIG"]?.config;
     if (Array.isArray(configArray)) {
@@ -212,7 +187,6 @@ function ScheduleHearing({
   };
 
   const { filingNumber, status } = Digit.Hooks.useQueryParams();
-  const nextFourDates = status === "OPTOUT" ? getSuggestedDates(dateResponse) : getNextNDates(5);
   const [modalInfo, setModalInfo] = useState(null);
   const [selectedChip, setSelectedChip] = React.useState(status === "OPTOUT" ? [] : null);
   const [showErrorToast, setShowErrorToast] = useState(false);
@@ -274,6 +248,35 @@ function ScheduleHearing({
     {},
     "",
     true
+  );
+
+  const { data: dateResponse } = Digit.Hooks.home.useSearchReschedule(
+    applicationData
+      ? {
+          SearchCriteria: {
+            tenantId: Digit.ULBService.getCurrentTenantId(),
+            rescheduledRequestId: [applicationData.applicationList[0]?.applicationNumber],
+          },
+        }
+      : null,
+    { limit: 5, offset: 0 },
+    "",
+    !!applicationData
+  );
+
+  const nextFourDates = status === "OPTOUT" ? getSuggestedDates(dateResponse) : getNextNDates(5);
+
+  const { data: OptOutLimit, isLoading: loading } = Digit.Hooks.useCustomMDMS(
+    Digit.ULBService.getStateId(),
+    "SCHEDULER-CONFIG",
+    [
+      {
+        name: "config",
+      },
+    ],
+    {
+      cacheTime: 0,
+    }
   );
 
   const closeToast = () => {
