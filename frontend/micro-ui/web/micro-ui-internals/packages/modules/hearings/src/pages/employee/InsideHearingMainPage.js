@@ -222,7 +222,7 @@ const InsideHearingMainPage = () => {
       const documentsFile =
         signedDocumentUploadID !== ""
           ? {
-              documentType: "WitnessSignedDocument",
+              documentType: "SIGNED",
               fileStore: signedDocumentUploadID,
             }
           : null;

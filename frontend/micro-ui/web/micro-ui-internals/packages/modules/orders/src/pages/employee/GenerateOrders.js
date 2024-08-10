@@ -743,7 +743,7 @@ const GenerateOrders = () => {
       const documentsFile =
         signedDoucumentUploadedID !== "" || localStorageID
           ? {
-              documentType: "Signed",
+              documentType: "SIGNED",
               fileStore: signedDoucumentUploadedID || localStorageID,
             }
           : null;
