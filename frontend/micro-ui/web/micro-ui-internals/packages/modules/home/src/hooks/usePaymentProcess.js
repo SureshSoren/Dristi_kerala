@@ -16,43 +16,46 @@ const usePaymentProcess = ({ tenantId, consumerCode, service, path, caseDetails,
   };
 
   const openPaymentPortal = async (bill) => {
-    const gateway = await DRISTIService.callETreasury(
-      {
-        ChallanData: {
-          ChallanDetails: {
-            FROM_DATE: "26/02/2020",
-            TO_DATE: "26/02/2020",
-            PAYMENT_MODE: "E",
-            NO_OF_HEADS: "1",
-            HEADS_DET: [
-              {
-                AMOUNT: "4",
-                HEADID: "00374",
-              },
-            ],
-            CHALLAN_AMOUNT: "4",
-            PARTY_NAME: caseDetails?.additionalDetails?.payerName,
-            DEPARTMENT_ID: bill?.Bill?.[0]?.billDetails?.[0]?.id,
-            TSB_RECEIPTS: "N",
+    try {
+      const gateway = await DRISTIService.callETreasury(
+        {
+          ChallanData: {
+            ChallanDetails: {
+              FROM_DATE: "26/02/2020",
+              TO_DATE: "26/02/2020",
+              PAYMENT_MODE: "E",
+              NO_OF_HEADS: "1",
+              HEADS_DET: [
+                {
+                  AMOUNT: "4",
+                  HEADID: "00374",
+                },
+              ],
+              CHALLAN_AMOUNT: "4",
+              PARTY_NAME: caseDetails?.additionalDetails?.payerName,
+              DEPARTMENT_ID: bill?.Bill?.[0]?.billDetails?.[0]?.id,
+              TSB_RECEIPTS: "N",
+            },
+            billId: bill?.Bill?.[0]?.billDetails?.[0]?.billId,
+            serviceNumber: consumerCode,
+            businessService: service,
+            totalDue: totalAmount,
+            mobileNumber: "9876543210",
+            paidBy: "COMMON_OWNER",
+            tenantId: tenantId,
           },
-          billId: bill?.Bill?.[0]?.billDetails?.[0]?.billId,
-          serviceNumber: consumerCode,
-          businessService: service,
-          totalDue: totalAmount,
-          mobileNumber: "9876543210",
-          paidBy: "COMMON_OWNER",
-          tenantId: tenantId,
         },
-      },
-      {}
-    );
-
-    if (gateway) {
-      const status = await handleButtonClick(gateway?.payload?.url, gateway?.payload?.data, gateway?.payload?.headers);
-      return status;
-    } else {
-      handleError("Error calling e-Treasury.");
-      return false;
+        {}
+      );
+      if (gateway) {
+        const status = await handleButtonClick(gateway?.payload?.url, gateway?.payload?.data, gateway?.payload?.headers);
+        return status;
+      } else {
+        handleError("Error calling e-Treasury.");
+        return false;
+      }
+    } catch (e) {
+      return true;
     }
   };
 

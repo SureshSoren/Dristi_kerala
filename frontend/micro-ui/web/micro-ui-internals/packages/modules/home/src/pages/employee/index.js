@@ -10,6 +10,7 @@ import HomePopUp from "./HomePopUp";
 import EfilingPaymentBreakdown from "../../components/EfilingPaymentDropdown";
 import EFilingPaymentRes from "../../components/EfilingPaymentRes";
 import ScheduleHearing from "./ScheduleHearing";
+import PaymentStatus from "../../../../orders/src/components/PaymentStatus";
 const bredCrumbStyle = { maxWidth: "min-content" };
 const userInfo = JSON.parse(window.localStorage.getItem("user-info"));
 let userType = "employee";
@@ -55,6 +56,7 @@ const App = ({ path, stateCode, userType, tenants }) => {
         />
         <PrivateRoute path={`${path}/home-pending-task/reissue-summons-modal`} component={() => <ReIssueSummonsModal></ReIssueSummonsModal>} />
         <PrivateRoute path={`${path}/home-pending-task/post-payment-modal`} component={() => <PaymentForSummonModal></PaymentForSummonModal>} />
+        <PrivateRoute path={`${path}/post-payment-screen`} component={() => <PaymentStatus></PaymentStatus>} />
         <PrivateRoute path={`${path}/view-hearing`} component={() => <ViewHearing></ViewHearing>} />
         <PrivateRoute path={`${path}/home-popup`} component={() => <HomePopUp></HomePopUp>} />
         <PrivateRoute path={`${path}/home-pending-task/home-schedule-hearing`} component={() => <ScheduleHearing />} />
