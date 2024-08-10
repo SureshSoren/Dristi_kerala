@@ -261,6 +261,21 @@ function ScheduleHearing({
   const caseDetails = useMemo(() => caseData?.criteria[0]?.responseList[0], [caseData]);
   const cnrNumber = useMemo(() => caseDetails?.cnrNumber, [caseDetails]);
 
+  const { data: applicationData } = Digit.Hooks.submissions.useSearchSubmissionService(
+    {
+      criteria: {
+        filingNumber: filingNumber,
+        tenantId: tenantId,
+        applicationType: "RE_SCHEDULE",
+        status: "COMPLETED",
+      },
+      tenantId,
+    },
+    {},
+    "",
+    true
+  );
+
   const closeToast = () => {
     setShowErrorToast(false);
   };
@@ -385,7 +400,7 @@ function ScheduleHearing({
             tenantId: tenantId,
             individualId: individualId,
             caseId: filingNumber,
-            rescheduleRequestId: "0a6097a2-4e98-4613-ae4e-6a444cc9efbe",
+            rescheduleRequestId: applicationData?.applicationList[0]?.applicationNumber,
             judgeId: caseDetails?.judgeId,
             optOutDates: selectedChip,
           },
@@ -502,7 +517,11 @@ function ScheduleHearing({
             onSubmit={() => handleSubmit(scheduleHearingParams)}
             className="primary-label-btn select-participant-submit"
             label={status === "OPTOUT" ? "Done" : t("GENERATE_ORDERS_LINK")}
-            disabled={(status !== "OPTOUT" && !scheduleHearingParams?.date) || isSubmitDisabled}
+            disabled={
+              (status === "OPTOUT" && Array.isArray(selectedChip) && selectedChip.length === 0) ||
+              (status !== "OPTOUT" && !scheduleHearingParams?.date) ||
+              isSubmitDisabled
+            }
           ></SubmitBar>
         </div>
 
