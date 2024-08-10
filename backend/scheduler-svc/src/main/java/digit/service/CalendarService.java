@@ -109,7 +109,7 @@ public class CalendarService {
         for (int i = 0; i < loopLength; i++) {
 
             if (i < hearingLength)
-                dateMap.put(availableDateForHearing.get(i).getDate(), availableDateForHearing.get(i).getOccupiedBandwidth());
+                dateMap.put(availableDateForHearing.get(i).getDate(), (availableDateForHearing.get(i).getOccupiedBandwidth())/60);
             if (i < court000334.size()) {
                 LinkedHashMap map = (LinkedHashMap) court000334.get(i);
                 if (map.containsKey("date")) {
