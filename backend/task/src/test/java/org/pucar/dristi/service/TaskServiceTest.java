@@ -234,7 +234,7 @@ public class TaskServiceTest {
 
     @Test
     void testWorkflowUpdate_SummonTask() {
-        task.setTaskType("summon"); // Task type in lowercase
+        task.setTaskType("SUMMONS"); // Task type in lowercase
         task.setTenantId("tenant2");
         task.setTaskNumber("T456");
 
@@ -250,7 +250,7 @@ public class TaskServiceTest {
 
     @Test
     void testWorkflowUpdate_WarrantTask() {
-        task.setTaskType("warrant"); // Task type in lowercase
+        task.setTaskType("WARRANT"); // Task type in lowercase
         task.setTenantId("tenant3");
         task.setTaskNumber("T789");
 
