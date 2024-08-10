@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class EPostRowMapperTest {
+class EPostRowMapperTest {
 
     @Mock
     private ObjectMapper objectMapper;
@@ -31,7 +31,7 @@ public class EPostRowMapperTest {
     private ResultSet resultSet;
 
     @Test
-    public void testMapRow() throws SQLException, JsonProcessingException {
+    void testMapRow() throws SQLException, JsonProcessingException {
         // Arrange
         String deliveryStatusStr = "DELIVERED";
         DeliveryStatus deliveryStatus = DeliveryStatus.valueOf(deliveryStatusStr);
@@ -92,7 +92,7 @@ public class EPostRowMapperTest {
     }
 
     @Test
-    public void testMapRow_ThrowsException() throws SQLException, JsonProcessingException {
+    void testMapRow_ThrowsException() throws SQLException {
         // Arrange
         when(resultSet.getString("delivery_status")).thenReturn(null);
         when(resultSet.getString("additional_details")).thenThrow(new SQLException("Error reading additional details"));

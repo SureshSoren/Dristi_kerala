@@ -1,5 +1,5 @@
-import { Button, TextArea } from "@egovernments/digit-ui-components";
-import { ActionBar, CardLabel, Dropdown, LabelFieldPair } from "@egovernments/digit-ui-react-components";
+import { TextArea } from "@egovernments/digit-ui-components";
+import { ActionBar, CardLabel, Dropdown, LabelFieldPair, Button } from "@egovernments/digit-ui-react-components";
 import debounce from "lodash/debounce";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ import EndHearing from "./EndHearing";
 import EvidenceHearingHeader from "./EvidenceHeader";
 import HearingSideCard from "./HearingSideCard";
 import MarkAttendance from "./MarkAttendance";
+import useGetHearingLink from "../../hooks/hearings/useGetHearingLink";
 
 const SECOND = 1000;
 
@@ -29,12 +30,10 @@ const InsideHearingMainPage = () => {
   const [endHearingModalOpen, setEndHearingModalOpen] = useState(false);
   const textAreaRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [attendees, setAttendees] = useState([]);
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const { hearingId } = Digit.Hooks.useQueryParams();
   const [filingNumber, setFilingNumber] = useState("");
   const { t } = useTranslation();
-  let roomIdLet = null;
 
   const onCancel = () => {
     setAddPartyModal(false);
@@ -61,6 +60,9 @@ const InsideHearingMainPage = () => {
   //   history.push(`/${window.contextPath}/${userType}/home/home-pending-task`);
   // }
 
+  const { data: hearingLink } = useGetHearingLink();
+  const hearingVcLink = hearingLink?.[0];
+
   const reqBody = {
     hearing: { tenantId },
     criteria: {
@@ -68,7 +70,7 @@ const InsideHearingMainPage = () => {
       hearingId: hearingId,
     },
   };
-  const { data: hearingsData } = Digit.Hooks.hearings.useGetHearings(
+  const { data: hearingsData, refetch: refetchHearing } = Digit.Hooks.hearings.useGetHearings(
     reqBody,
     { applicationNumber: "", cnrNumber: "", hearingId },
     "dristi",
@@ -77,7 +79,7 @@ const InsideHearingMainPage = () => {
   );
 
   const { mutateAsync: _updateTranscriptRequest } = Digit.Hooks.useCustomAPIMutationHook({
-    url: Urls.hearing.hearingUpdate,
+    url: Urls.hearing.hearingUpdateTranscript,
     params: { applicationNumber: "", cnrNumber: "" },
     body: { tenantId, hearingType: "", status: "" },
     config: {
@@ -109,7 +111,6 @@ const InsideHearingMainPage = () => {
       if (hearingData) {
         setHearing(hearingData);
         setTranscriptText(hearingData?.transcript[0]);
-        setAttendees(hearingData.attendees || []);
         setFilingNumber(hearingData?.filingNumber[0]);
       }
     }
@@ -193,7 +194,6 @@ const InsideHearingMainPage = () => {
     const selectedUUID = selectedWitnessOption.value;
     const selectedWitness = additionalDetails?.witnessDetails?.formdata?.find((w) => w.data.uuid === selectedUUID)?.data || {};
     setSelectedWitness(selectedWitness);
-    console.debug(hearing, selectedWitness);
     setWitnessDepositionText(
       hearing?.additionalDetails?.witnessDepositions?.find((witness) => witness.uuid === selectedWitness.uuid)?.deposition || ""
     );
@@ -209,266 +209,8 @@ const InsideHearingMainPage = () => {
 
   const attendanceCount = useMemo(() => hearing?.attendees?.filter((attendee) => attendee.wasPresent).length || 0, [hearing]);
 
-  const [context, setContext] = useState(null);
-  const [globalStream, setGlobalStream] = useState(null);
-  const [processor, setProcessor] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const startTimeRef = useRef([0, 0, 0]);
-  const endTimeRef = useRef([0, 0, 0]);
-  const [transcription, setTranscription] = useState("");
-  const [webSocketStatus, setWebSocketStatus] = useState("Not Connected");
-  const [transcriptionUrl, setTranscriptionUrl] = useState("");
-  const [editableTranscription, setEditableTranscription] = useState("");
-  const [sendOriginal, setSendOriginal] = useState("");
-  const [clientId, setClientId] = useState(null);
-  const [detectedLanguage, setDetectedLanguage] = useState("Undefined");
-  const [currentPosition, setCurrentPosition] = useState(0);
-  const [selectedLanguage, setSelectedLanguage] = useState("english");
-  const [selectedAsrModel, setSelectedAsrModel] = useState("bhashini");
-  const [websocket, setWebsocket] = useState(null);
-  const inputSourceRef = useRef("mic");
-  // const roomIdInputRef = useRef(null);
-  const [roomId, setRoomId] = useState(null);
-  const [audioUrl, setAudioUrl] = useState("");
-  const [isConnected, setIsConnected] = useState(false);
-
-  const bufferSize = 4096;
-
-  useEffect(() => {
-    initWebSocket();
-  }, []);
-
-  const joinRoom = () => {
-    console.log(websocket, "websocket join room", WebSocket.OPEN);
-    if (websocket && websocket.readyState === WebSocket.OPEN) {
-      const message = {
-        type: "joined_room",
-        room_id: roomId,
-      };
-      console.log(websocket, message, "websocket join room success");
-
-      websocket.send(JSON.stringify(message));
-    }
-  };
-
-  const createRoom = () => {
-    console.log(websocket, "websocket create room");
-    if (websocket && websocket.readyState === WebSocket.OPEN) {
-      const message = {
-        type: "create_room",
-        room_id: roomId,
-      };
-      websocket.send(JSON.stringify(message));
-    }
-  };
-
-  const initWebSocket = () => {
-    const websocketAddress = "wss://dristi-kerala-dev.pucar.org/transcription";
-
-    if (!websocketAddress) {
-      console.log("WebSocket address is required.");
-      return;
-    }
-
-    const ws = new WebSocket(websocketAddress);
-
-    ws.onopen = () => {
-      console.log("WebSocket connection established");
-      setWebSocketStatus("Connected");
-    };
-
-    ws.onclose = (event) => {
-      console.log("WebSocket connection closed", event);
-      setWebSocketStatus("Not Connected");
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === "joined_room" || data.type === "refresh_transcription") {
-        handleRoomJoined(data);
-        roomIdLet = data.room_id;
-      } else {
-        updateTranscription(data);
-      }
-    };
-
-    setWebsocket(ws);
-  };
-
-  const handleRoomJoined = (data) => {
-    setClientId(data.client_id);
-    setRoomId(data.room_id);
-    setTranscriptionUrl(data.transcript_url);
-    setAudioUrl(data.audio_url);
-  };
-
-  const updateTranscription = (transcriptData) => {
-    if (transcriptData.words && transcriptData.words.length > 0) {
-      const newTranscription = transcriptData.words
-        .map((wordData) => {
-          const probability = wordData.probability;
-          let color = "black";
-          if (probability > 0.9) color = "green";
-          else if (probability > 0.6) color = "orange";
-          else color = "red";
-          return `<span style="color: ${color}">${wordData.word} </span>`;
-        })
-        .join("");
-      setTranscription((prev) => prev + newTranscription + " ");
-    } else {
-      setTranscription((prev) => prev + transcriptData.text + " ");
-    }
-    setEditableTranscription((prev) => prev + transcriptData.text + " ");
-    setSendOriginal((prev) => prev + transcriptData.text + " ");
-  };
-  const startRecording = () => {
-    joinRoom();
-    if (isRecording) {
-      return;
-    }
-    setEditableTranscription(transcriptText);
-    setIsRecording(true);
-
-    const inputSource = inputSourceRef.current.value;
-    if (inputSource === "mic") {
-      startMicRecording();
-    } else {
-      window.alert("mic is not connected!");
-    }
-  };
-
-  const stopRecording = () => {
-    if (!isRecording) return;
-
-    setTranscriptText(editableTranscription);
-
-    setIsRecording(false);
-
-    if (globalStream) {
-      globalStream.getTracks().forEach((track) => track.stop());
-      setGlobalStream(null);
-    }
-    if (processor) {
-      setCurrentPosition(context.currentTime);
-      processor.disconnect();
-      setProcessor(null);
-    }
-    if (context) {
-      context.close().then(() => setContext(null));
-    }
-    const now = new Date();
-    endTimeRef.current = [now.getHours(), now.getMinutes(), now.getSeconds()];
-  };
-
-  const processAudio = (e, audioContext) => {
-    if (!audioContext) {
-      console.error("Audio context is not initialized");
-      return;
-    }
-    const inputSampleRate = audioContext.sampleRate;
-    const outputSampleRate = 16000;
-
-    const left = e.inputBuffer.getChannelData(0);
-    const downsampledBuffer = downsampleBuffer(left, inputSampleRate, outputSampleRate);
-    const audioData = convertFloat32ToInt16(downsampledBuffer);
-    if (websocket && websocket.readyState === WebSocket.OPEN) {
-      const audioBase64 = bufferToBase64(audioData);
-      const message = {
-        type: "audio",
-        data: audioBase64,
-        room_id: roomId,
-        client_id: clientId,
-      };
-      websocket.send(JSON.stringify(message));
-    }
-  };
-
-  const downsampleBuffer = (buffer, inputSampleRate, outputSampleRate) => {
-    if (inputSampleRate === outputSampleRate) {
-      return buffer;
-    }
-    const sampleRateRatio = inputSampleRate / outputSampleRate;
-    const newLength = Math.round(buffer.length / sampleRateRatio);
-    const result = new Float32Array(newLength);
-    let offsetResult = 0;
-    let offsetBuffer = 0;
-    while (offsetResult < result.length) {
-      const nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
-      let accum = 0,
-        count = 0;
-      for (let i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
-        accum += buffer[i];
-        count++;
-      }
-      result[offsetResult] = accum / count;
-      offsetResult++;
-      offsetBuffer = nextOffsetBuffer;
-    }
-    return result;
-  };
-
-  const convertFloat32ToInt16 = (buffer) => {
-    const l = buffer.length;
-    const buf = new Int16Array(l);
-    for (let i = 0; i < l; i++) {
-      buf[i] = Math.min(1, buffer[i]) * 0x7fff;
-    }
-    return buf.buffer;
-  };
-
-  const bufferToBase64 = (buffer) => {
-    const binary = String.fromCharCode.apply(null, new Uint8Array(buffer));
-    return window.btoa(binary);
-  };
-
-  const startMicRecording = () => {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const newContext = new AudioContext();
-    setContext(newContext);
-
-    sendAudioConfig(newContext);
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((stream) => {
-        setGlobalStream(stream);
-        const input = newContext.createMediaStreamSource(stream);
-        const newProcessor = newContext.createScriptProcessor(bufferSize, 1, 1);
-        newProcessor.onaudioprocess = (e) => processAudio(e, newContext);
-        input.connect(newProcessor);
-        newProcessor.connect(newContext.destination);
-        setProcessor(newProcessor);
-      })
-      .catch((error) => console.error("Error accessing microphone", error));
-  };
-
-  const sendAudioConfig = (context) => {
-    if (!context) {
-      console.error("Audio context is not initialized");
-      return;
-    }
-    const audioConfig = {
-      type: "config",
-      room_id: roomId,
-      client_id: clientId,
-      data: {
-        sampleRate: context.sampleRate,
-        bufferSize: bufferSize,
-        channels: 1,
-        language: selectedLanguage !== "multilingual" ? selectedLanguage : null,
-        asr_model: selectedAsrModel,
-        processing_strategy: "silence_at_end_of_chunk",
-        processing_args: {
-          chunk_length_seconds: 1,
-          chunk_offset_seconds: 0.1,
-        },
-      },
-    };
-
-    websocket.send(JSON.stringify(audioConfig));
-  };
-
   return (
-    <div className="admitted-case" style={{ display: "flex" }}>
+    <div className="admitted-case" style={{ display: "flex", height: "100vh" }}>
       <div className="left-side" style={{ padding: "24px 40px" }}>
         <React.Fragment>
           <EvidenceHearingHeader
@@ -478,6 +220,7 @@ const InsideHearingMainPage = () => {
             activeTab={activeTab}
             filingNumber={filingNumber}
             onAddParty={onClickAddWitness}
+            hearingLink={hearingVcLink}
           ></EvidenceHearingHeader>
         </React.Fragment>
         {activeTab === "Witness Deposition" && (
@@ -517,97 +260,19 @@ const InsideHearingMainPage = () => {
         <div style={{ padding: "40px, 40px", gap: "16px" }}>
           <div style={{ gap: "16px", border: "1px solid", marginTop: "2px" }}>
             {userHasRole("EMPLOYEE") ? (
-              <React.Fragment>
-                <TextArea
-                  ref={textAreaRef}
-                  style={{ width: "100%", minHeight: "40vh" }}
-                  value={activeTab === "Witness Deposition" ? witnessDepositionText : !isRecording ? transcriptText : editableTranscription}
-                  onChange={handleChange}
-                  disabled={activeTab === "Witness Deposition" && isDepositionSaved}
-                />
-                <input type="radio" id="micInput" name="inputSource" value="mic" defaultChecked ref={inputSourceRef} style={{ display: "none" }} />
-
-                {!isConnected && (
-                  <div style={{ textAlign: "right" }}>
-                    <button
-                      onClick={() => {
-                        initWebSocket("login");
-                        createRoom();
-                        setIsConnected(true);
-                      }}
-                      title="Connect"
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <g clip-path="url(#clip0_4370_85284)">
-                          <path
-                            d="M12 2C10.34 2 9 3.34 9 5V7H15V5C15 3.34 13.66 2 12 2ZM5 8C3.34 8 2 9.34 2 11V13C2 14.66 3.34 16 5 16H7V8H5ZM19 8H17V16H19C20.66 16 22 14.66 22 13V11C22 9.34 20.66 8 19 8ZM11 18H13V20H11V18Z"
-                            fill="#3D3C3C"
-                          />
-                          <path d="M7 8L17 8" stroke="#3D3C3C" stroke-width="2" stroke-linecap="round" />
-                          <path d="M12 16L12 20" stroke="#3D3C3C" stroke-width="2" stroke-linecap="round" />
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_4370_85284">
-                            <rect width="24" height="24" fill="white" />
-                          </clipPath>
-                        </defs>
-                      </svg>
-                    </button>
-                  </div>
-                )}
-                {isConnected && !isRecording && (
-                  <div style={{ textAlign: "right" }}>
-                    <button onClick={startRecording} title="Start Recording">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <g clip-path="url(#clip0_4370_85283)">
-                          <path
-                            d="M12 13C13.66 13 14.99 11.66 14.99 10L15 4C15 2.34 13.66 1 12 1C10.34 1 9 2.34 9 4V10C9 11.66 10.34 13 12 13ZM19 10H17.3C17.3 13 14.76 15.1 12 15.1C9.24 15.1 6.7 13 6.7 10H5C5 13.41 7.72 16.23 11 16.72V20H13V16.72C16.28 16.23 19 13.41 19 10Z"
-                            fill="#3D3C3C"
-                          />
-                          {/* <path d="M5 5L19 19" stroke="#3D3C3C" stroke-width="2" stroke-linecap="round" /> */}
-                          <path d="M19 5L5 19" stroke="#3D3C3C" stroke-width="2" stroke-linecap="round" />
-                          <path
-                            d="M7 24H9V22H7V24ZM11 24H13V22H11V24ZM15 24H17V22H15V24ZM12 20V16.72C8.72 16.23 6 13.41 6 10H7.7C7.7 13 10.24 15.1 12 15.1C13.76 15.1 16.3 13 16.3 10H18C18 13.41 15.28 16.23 12 16.72V20H12Z"
-                            fill="#3D3C3C"
-                          />
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_4370_85283">
-                            <rect width="24" height="24" fill="white" />
-                          </clipPath>
-                        </defs>
-                      </svg>
-                    </button>
-                  </div>
-                )}
-                {isConnected && isRecording && (
-                  <div style={{ textAlign: "right" }}>
-                    <button onClick={stopRecording} title="Stop Recording">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <g clip-path="url(#clip0_4370_85283)">
-                          <path
-                            d="M7 24H9V22H7V24ZM12 13C13.66 13 14.99 11.66 14.99 10L15 4C15 2.34 13.66 1 12 1C10.34 1 9 2.34 9 4V10C9 11.66 10.34 13 12 13ZM11 24H13V22H11V24ZM15 24H17V22H15V24ZM19 10H17.3C17.3 13 14.76 15.1 12 15.1C9.24 15.1 6.7 13 6.7 10H5C5 13.41 7.72 16.23 11 16.72V20H13V16.72C16.28 16.23 19 13.41 19 10Z"
-                            fill="#3D3C3C"
-                          />
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_4370_85283">
-                            <rect width="24" height="24" fill="white" />
-                          </clipPath>
-                        </defs>
-                      </svg>
-                    </button>
-                  </div>
-                )}
-              </React.Fragment>
+              <TextArea
+                ref={textAreaRef}
+                style={{ width: "100%", minHeight: "40vh" }}
+                value={activeTab === "Witness Deposition" ? witnessDepositionText : transcriptText}
+                onChange={handleChange}
+                disabled={activeTab === "Witness Deposition" && isDepositionSaved}
+              />
             ) : (
-              <>
-                <TextArea
-                  style={{ width: "100%", minHeight: "40vh", cursor: "default", backgroundColor: "#E8E8E8", color: "#3D3C3C" }}
-                  value={activeTab === "Witness Deposition" ? witnessDepositionText : transcriptText}
-                  disabled
-                ></TextArea>
-              </>
+              <TextArea
+                style={{ width: "100%", minHeight: "40vh", cursor: "default", backgroundColor: "#E8E8E8", color: "#3D3C3C" }}
+                value={activeTab === "Witness Deposition" ? witnessDepositionText : transcriptText}
+                disabled
+              />
             )}
           </div>
         </div>
@@ -617,7 +282,7 @@ const InsideHearingMainPage = () => {
               <Button
                 label={t("SAVE_WITNESS_DEPOSITION")}
                 isDisabled={isDepositionSaved}
-                onClick={() => {
+                onButtonClick={() => {
                   saveWitnessDeposition();
                 }}
               ></Button>
@@ -625,7 +290,7 @@ const InsideHearingMainPage = () => {
           )}
         </div>
       </div>
-      <div className="right-side">
+      <div className="right-side" style={{ borderLeft: "1px solid lightgray" }}>
         <HearingSideCard hearingId={hearingId} caseId={caseData?.criteria?.[0]?.responseList?.[0]?.id} filingNumber={filingNumber}></HearingSideCard>
         {adjournHearing && <AdjournHearing hearing={hearing} updateTranscript={_updateTranscriptRequest} tenantID={tenantId} />}
       </div>
@@ -643,22 +308,48 @@ const InsideHearingMainPage = () => {
               gap: "16px",
             }}
           >
-            <button
-              style={{
-                border: "1px solid blue",
-                backgroundColor: "#e6f0ff",
-                color: "#1a73e8",
-                fontWeight: "bold",
-                padding: "10px 20px",
-                borderRadius: "5px",
-                cursor: "pointer",
-                display: "inline-block",
+            <Button
+              label={"ATTENDANCE_CHIP"}
+              style={{ boxShadow: "none", backgroundColor: "#ECF3FD", borderRadius: "4px", border: "none", padding: "10px" }}
+              textStyles={{
+                fontFamily: "Roboto",
                 fontSize: "16px",
+                fontWeight: 400,
+                lineHeight: "18.75px",
+                textAlign: "center",
+                color: "#0F3B8C",
               }}
             >
-              Attendance: <strong>{attendanceCount}</strong>
-            </button>
-            {userHasRole("EMPLOYEE") && <Button label={"Mark Attendance"} variation={"teritiary"} onClick={handleModal} style={{ width: "100%" }} />}
+              <h2
+                style={{
+                  paddingLeft: "4px",
+                  fontFamily: "Roboto",
+                  fontSize: "16px",
+                  lineHeight: "18.75px",
+                  textAlign: "center",
+                  color: "#0F3B8C",
+                  fontWeight: "700",
+                }}
+              >
+                {`${attendanceCount}`}
+              </h2>
+            </Button>
+            {userHasRole("EMPLOYEE") && (
+              <Button
+                label={"MARK_ATTENDANCE"}
+                variation={"teritiary"}
+                onButtonClick={handleModal}
+                style={{ boxShadow: "none", backgroundColor: "none", borderRadius: "4px", border: "none", padding: "10px" }}
+                textStyles={{
+                  fontFamily: "Roboto",
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  lineHeight: "18.75px",
+                  textAlign: "center",
+                  color: "#007E7E",
+                }}
+              />
+            )}
           </div>
           {userHasRole("EMPLOYEE") ? (
             <div
@@ -666,27 +357,53 @@ const InsideHearingMainPage = () => {
                 display: "flex",
                 gap: "16px",
                 width: "100%",
+                justifyContent: "flex-end",
               }}
             >
-              <Button label={t("ADJOURN_HEARING")} variation={"secondary"} onClick={() => setAdjournHearing(true)} style={{ width: "100%" }} />
+              <Button
+                label={t("ADJOURN_HEARING")}
+                variation={"secondary"}
+                onButtonClick={() => setAdjournHearing(true)}
+                style={{ boxShadow: "none", backgroundColor: "#fff", padding: "10px", width: "166px" }}
+                textStyles={{
+                  fontFamily: "Roboto",
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  lineHeight: "18.75px",
+                  textAlign: "center",
+                  color: "#007E7E",
+                }}
+              />
 
-              <Button label={t("END_HEARING")} variation={"primary"} onClick={handleEndHearingModal} style={{ width: "100%" }} />
+              <Button
+                label={t("END_HEARING")}
+                variation={"primary"}
+                onButtonClick={handleEndHearingModal}
+                style={{ boxShadow: "none", backgroundColor: "#BB2C2F", border: "none", padding: "10px", width: "166px" }}
+                textStyles={{
+                  fontFamily: "Roboto",
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  lineHeight: "18.75px",
+                  textAlign: "center",
+                  color: "#ffffff",
+                }}
+              />
             </div>
           ) : (
             <Button label={t("EXIT_HEARING")} variation={"primary"} onClick={handleExitHearing} />
           )}
-          {isOpen && (
-            <MarkAttendance
-              handleModal={handleModal}
-              attendees={attendees}
-              setAttendees={setAttendees}
-              hearingData={hearing}
-              setAddPartyModal={setAddPartyModal}
-            />
-          )}
         </div>
       </ActionBar>
-
+      {isOpen && (
+        <MarkAttendance
+          handleModal={handleModal}
+          attendees={hearing.attendees || []}
+          refetchHearing={refetchHearing}
+          hearingData={hearing}
+          setAddPartyModal={setAddPartyModal}
+        />
+      )}
       <div>
         {addPartyModal && (
           <AddParty
@@ -696,7 +413,8 @@ const InsideHearingMainPage = () => {
             }}
             caseData={caseData}
             tenantId={tenantId}
-            hearingId={hearingId}
+            hearing={hearing}
+            refetchHearing={refetchHearing}
           ></AddParty>
         )}
       </div>

@@ -67,6 +67,7 @@ public class ServiceConstants {
 	public static final String ENRICHMENT_EXCEPTION = "ENRICHMENT_EXCEPTION";
 	public static final String WORKFLOW_SERVICE_EXCEPTION = "WORKFLOW_SERVICE_EXCEPTION";
 	public static final String INDIVIDUAL_SERVICE_EXCEPTION = "INDIVIDUAL_SERVICE_EXCEPTION";
+	public static final String CASE_PDF_SERVICE_EXCEPTION = "CASE_PDF_SERVICE_EXCEPTION";
 	public static final String ROW_MAPPER_EXCEPTION = "ROW_MAPPER_EXCEPTION";
 
 	public static final String WITNESS_SEARCH_QUERY_EXCEPTION = "WITNESS_SEARCH_QUERY_EXCEPTION";
@@ -88,6 +89,7 @@ public class ServiceConstants {
     public static final String INVALID_LINKEDCASE_ID = "INVALID_LINKEDCASE_ID";
 
 	public static final String INDIVIDUAL_UTILITY_EXCEPTION = "INDIVIDUAL_UTILITY_EXCEPTION";
+	public static final String CASE_PDF_UTILITY_EXCEPTION = "CASE_PDF_UTILITY_EXCEPTION";
 
 	public static final String SAVE_DRAFT_CASE_WORKFLOW_ACTION = "SAVE_DRAFT";
 	public static final String SUBMIT_CASE_WORKFLOW_ACTION = "SUBMIT_CASE";

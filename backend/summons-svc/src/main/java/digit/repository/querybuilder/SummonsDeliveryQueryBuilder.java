@@ -19,15 +19,15 @@ public class SummonsDeliveryQueryBuilder {
         StringBuilder query = new StringBuilder(BASE_APPLICATION_QUERY);
         query.append(FROM_TABLES);
 
-        if (!ObjectUtils.isEmpty(searchCriteria.getOrderId())) {
+        if (!ObjectUtils.isEmpty(searchCriteria.getSummonsDeliveryId())) {
             addClauseIfRequired(query, preparedStmtList);
-            query.append(" summons_delivery_unique_id = ? ");
-            preparedStmtList.add(searchCriteria.getOrderId());
+            query.append(" summons_delivery_id = ? ");
+            preparedStmtList.add(searchCriteria.getSummonsDeliveryId());
         }
-        if(!ObjectUtils.isEmpty(searchCriteria.getSummonsId())){
+        if (!ObjectUtils.isEmpty(searchCriteria.getTaskNumber())) {
             addClauseIfRequired(query, preparedStmtList);
-            query.append(" summons_id = ? ");
-            preparedStmtList.add(searchCriteria.getSummonsId());
+            query.append(" task_number = ? ");
+            preparedStmtList.add(searchCriteria.getTaskNumber());
         }
 
         return query.toString();

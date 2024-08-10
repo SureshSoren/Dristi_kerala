@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class EPostRepositoryTest {
+class EPostRepositoryTest {
 
     @Mock
     private JdbcTemplate jdbcTemplate;
@@ -33,7 +33,7 @@ public class EPostRepositoryTest {
     private EPostRepository ePostRepository;
 
     @Test
-    public void testGetEPostTrackerResponse() {
+    void testGetEPostTrackerResponse() {
         // Arrange
         EPostTrackerSearchCriteria searchCriteria = new EPostTrackerSearchCriteria();
         Pagination pagination = new Pagination();
@@ -54,7 +54,7 @@ public class EPostRepositoryTest {
     }
 
     @Test
-    public void testGetEPostTrackerList() {
+    void testGetEPostTrackerList() {
         // Arrange
         EPostTrackerSearchCriteria searchCriteria = new EPostTrackerSearchCriteria();
         List<Object> preparedStmtList = Collections.emptyList();
@@ -63,7 +63,7 @@ public class EPostRepositoryTest {
         when(queryBuilder.addPaginationQuery(query, preparedStmtList, searchCriteria.getPagination(), 10, 0))
                 .thenReturn(query);
         List<EPostTracker> expectedList = Collections.singletonList(new EPostTracker());
-        when(jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper)).thenReturn(expectedList);
+        when(jdbcTemplate.query(query,rowMapper,preparedStmtList.toArray())).thenReturn(expectedList);
 
         // Act
         List<EPostTracker> result = ePostRepository.getEPostTrackerList(searchCriteria, 10, 0);
@@ -74,7 +74,7 @@ public class EPostRepositoryTest {
     }
 
     @Test
-    public void testGetTotalCountQuery() {
+    void testGetTotalCountQuery() {
         // Arrange
         EPostTrackerSearchCriteria searchCriteria = new EPostTrackerSearchCriteria();
         List<Object> preparedStmtList = Collections.emptyList();
@@ -82,7 +82,7 @@ public class EPostRepositoryTest {
         String countQuery = "SELECT COUNT(*) FROM epost_tracker";
         when(queryBuilder.getEPostTrackerSearchQuery(searchCriteria, preparedStmtList)).thenReturn(query);
         when(queryBuilder.getTotalCountQuery(query)).thenReturn(countQuery);
-        when(jdbcTemplate.queryForObject(countQuery, preparedStmtList.toArray(), Integer.class)).thenReturn(100);
+        when(jdbcTemplate.queryForObject(countQuery, Integer.class, preparedStmtList.toArray())).thenReturn(100);
 
         // Act
         Integer result = ePostRepository.getTotalCountQuery(searchCriteria);

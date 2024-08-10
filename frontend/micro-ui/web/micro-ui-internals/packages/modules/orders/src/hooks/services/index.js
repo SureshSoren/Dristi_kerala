@@ -34,6 +34,14 @@ export const ordersService = {
       data,
       params,
     }),
+  getPendingTaskService: (data, params) =>
+    Request({
+      url: Urls.orders.getPendingTaskFields,
+      useCache: false,
+      userService: true,
+      data,
+      params,
+    }),
   createHearings: (data, params) =>
     Request({
       url: Urls.orders.createHearings,
@@ -53,7 +61,7 @@ export const ordersService = {
 };
 
 export const EpostService = {
-  EpostUpdate: (data, params)=> 
+  EpostUpdate: (data, params) =>
     Request({
       url: Urls.Epost.EpostUpdate,
       useCache: true,
@@ -62,11 +70,21 @@ export const EpostService = {
       params,
     }),
   customApiService: (url, data, params, useCache = false, userService = true) =>
-      Request({
-        url: url,
-        useCache: useCache,
-        userService,
-        data,
-        params,
-      }),
-}
+    Request({
+      url: url,
+      useCache: useCache,
+      userService,
+      data,
+      params,
+    }),
+};
+export const schedulerService = {
+  RescheduleHearing: (data, params) =>
+    Request({
+      url: Urls.Scheduler.reschedule,
+      useCache: true,
+      userService: true,
+      data,
+      params,
+    }),
+};

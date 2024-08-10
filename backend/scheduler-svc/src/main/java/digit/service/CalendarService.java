@@ -109,14 +109,14 @@ public class CalendarService {
         for (int i = 0; i < loopLength; i++) {
 
             if (i < hearingLength)
-                dateMap.put(availableDateForHearing.get(i).getDate(), availableDateForHearing.get(i).getOccupiedBandwidth());
+                dateMap.put(availableDateForHearing.get(i).getDate(), (availableDateForHearing.get(i).getOccupiedBandwidth())/60);
             if (i < court000334.size()) {
                 LinkedHashMap map = (LinkedHashMap) court000334.get(i);
                 if (map.containsKey("date")) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                     String date = String.valueOf(map.get("date"));
                     dateMap.put(dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter)).toString(), -1.0);
-                    ;
+
                     lastDateInDefaultCalendar = dateUtil.getEPochFromLocalDate(LocalDate.parse(date, formatter));
                 }
 

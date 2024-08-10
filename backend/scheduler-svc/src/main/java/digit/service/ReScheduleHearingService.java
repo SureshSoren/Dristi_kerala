@@ -124,6 +124,7 @@ public class ReScheduleHearingService {
                 List<ScheduleHearing> hearings = hearingService.search(HearingSearchRequest.builder().requestInfo(requestInfo).criteria(ScheduleHearingSearchCriteria.builder().hearingIds(Collections.singletonList(hearingDetail.getHearingBookingId())).build()).build(), null, null);
                 ScheduleHearing hearing = hearings.get(0);
                 hearing.setStatus("RESCHEDULE");
+                hearing.setRescheduleRequestId(hearingDetail.getRescheduledRequestId());
 
 
                 //reschedule hearing to unblock the calendar

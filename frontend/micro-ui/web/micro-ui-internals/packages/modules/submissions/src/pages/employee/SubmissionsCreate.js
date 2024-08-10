@@ -205,10 +205,18 @@ const SubmissionsCreate = ({ path }) => {
     return caseData?.criteria?.[0]?.responseList?.[0];
   }, [caseData]);
   const allAdvocates = useMemo(() => getAdvocates(caseDetails), [caseDetails]);
-  const onBehalfOf = useMemo(() => Object.keys(allAdvocates)?.find((key) => allAdvocates[key].includes(userInfo?.uuid)), [
+  const onBehalfOfuuid = useMemo(() => Object.keys(allAdvocates)?.find((key) => allAdvocates[key].includes(userInfo?.uuid)), [
     allAdvocates,
     userInfo?.uuid,
   ]);
+  const onBehalfOfLitigent = useMemo(() => caseDetails?.litigants?.find((item) => item.additionalDetails.uuid === onBehalfOfuuid), [
+    caseDetails,
+    onBehalfOfuuid,
+  ]);
+  const sourceType = useMemo(() => (onBehalfOfLitigent?.partyType?.toLowerCase()?.includes("complainant") ? "COMPLAINANT" : "ACCUSED"), [
+    onBehalfOfLitigent,
+  ]);
+
   const { data: orderData, isloading: isOrdersLoading } = Digit.Hooks.orders.useSearchOrdersService(
     { tenantId, criteria: { filingNumber, applicationNumber: "", cnrNumber: caseDetails?.cnrNumber, orderNumber: orderNumber } },
     { tenantId },
@@ -231,6 +239,7 @@ const SubmissionsCreate = ({ path }) => {
           isactive: true,
           name: "APPLICATION_TYPE_RE_SCHEDULE",
         },
+        applicationDate: formatDate(new Date()),
       };
     } else if (orderNumber) {
       if (orderDetails?.orderType === orderTypes.MANDATORY_SUBMISSIONS_RESPONSES) {
@@ -284,6 +293,7 @@ const SubmissionsCreate = ({ path }) => {
             code: "APPLICATION",
             name: "APPLICATION",
           },
+          applicationDate: formatDate(new Date()),
         };
       }
     } else if (applicationType) {
@@ -305,6 +315,7 @@ const SubmissionsCreate = ({ path }) => {
           code: "APPLICATION",
           name: "APPLICATION",
         },
+        applicationDate: formatDate(new Date()),
       };
     }
   }, [
@@ -395,14 +406,18 @@ const SubmissionsCreate = ({ path }) => {
       if (formdata?.reasonForDocumentsSubmission?.documents?.length > 0) {
         documentsList = [...documentsList, ...formdata?.reasonForDocumentsSubmission?.documents];
       }
-      if (formdata?.documentsListForBail?.documents) {
-        documentsList = [...documentsList, ...formdata?.documentsListForBail?.documents];
-      }
-      const documentres = await Promise.all(documentsList?.map((doc) => onDocumentUpload(doc, doc?.name)));
+      const bailDocuments =
+        formdata?.additionalDetails?.submissionDocuments?.submissionDocuments?.map((item) => ({
+          fileType: item?.document?.documentType,
+          fileStore: item?.document?.fileStore,
+          additionalDetails: item?.document?.additionalDetails,
+        })) || [];
+      const documentres = (await Promise.all(documentsList?.map((doc) => onDocumentUpload(doc, doc?.name)))) || [];
       let documents = [];
       let file = null;
       let evidenceReqBody = {};
-      documentres.forEach((res) => {
+      const uploadedDocumentList = [...(documentres || []), ...bailDocuments];
+      uploadedDocumentList.forEach((res) => {
         file = {
           documentType: res?.fileType,
           fileStore: res?.file?.files?.[0]?.fileStoreId,
@@ -417,8 +432,7 @@ const SubmissionsCreate = ({ path }) => {
             tenantId,
             comments: [],
             file,
-            sourceType: "COMPLAINANT",
-            //ACCUSED // COURT - if respondant is uplading submission
+            sourceType,
           },
         };
         DRISTIService.createEvidence(evidenceReqBody);
@@ -441,7 +455,7 @@ const SubmissionsCreate = ({ path }) => {
             formdata,
             ...(orderDetails && { orderDate: formatDate(new Date(orderDetails?.auditDetails?.lastModifiedTime)) }),
             ...(orderDetails?.additionalDetails?.formdata?.documentName && { documentName: orderDetails?.additionalDetails?.formdata?.documentName }),
-            onBehalOfName: userInfo.name,
+            onBehalOfName: onBehalfOfLitigent?.additionalDetails?.fullName,
             partyType: "complainant.primary",
             ...(orderDetails &&
               orderDetails?.additionalDetails?.formdata?.isResponseRequired?.code === "Yes" && {
@@ -451,7 +465,8 @@ const SubmissionsCreate = ({ path }) => {
             ...(hearingId && { hearingId }),
           },
           documents,
-          onBehalfOf: [userInfo?.uuid],
+          onBehalfOf: [onBehalfOfuuid],
+          comment: [],
           workflow: {
             id: "workflow123",
             action: SubmissionWorkflowAction.CREATE,
@@ -621,6 +636,14 @@ const SubmissionsCreate = ({ path }) => {
           setMakePaymentLabel(false);
           setShowPaymentModal(false);
           setShowSuccessModal(true);
+          await updateSubmission(SubmissionWorkflowAction.PAY);
+          applicationType === "PRODUCTION_DOCUMENTS" &&
+            orderNumber &&
+            createPendingTask({
+              refId: `${userInfo?.uuid}_${orderNumber}`,
+              isCompleted: true,
+              status: "Completed",
+            });
           createPendingTask({ name: t("MAKE_PAYMENT_SUBMISSION"), status: "MAKE_PAYMENT_SUBMISSION", isCompleted: true });
         } else {
           setMakePaymentLabel(true);
@@ -659,6 +682,7 @@ const SubmissionsCreate = ({ path }) => {
         onFormValueChange={onFormValueChange}
         onSubmit={handleOpenReview}
         fieldStyle={fieldStyle}
+        key={applicationType}
       />
       {showReviewModal && (
         <ReviewSubmissionModal

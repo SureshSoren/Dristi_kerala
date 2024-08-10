@@ -13,7 +13,7 @@ import java.util.List;
 @Slf4j
 public class EPostQueryBuilder {
 
-    private final String BASE_APPLICATION_QUERY = "SELECT process_number, tenant_id, file_store_id, task_number, tracking_number, pincode, address, delivery_status, remarks, additional_details, row_version, booking_date, received_date, createdBy, lastModifiedBy, createdTime, lastModifiedTime ";
+    private static final String BASE_APPLICATION_QUERY = "SELECT process_number, tenant_id, file_store_id, task_number, tracking_number, pincode, address, delivery_status, remarks, additional_details, row_version, booking_date, received_date, createdBy, lastModifiedBy, createdTime, lastModifiedTime ";
 
     private static final String FROM_TABLES = " FROM dristi_epost_tracker ";
 
@@ -23,7 +23,7 @@ public class EPostQueryBuilder {
 
     private static final String DEFAULT_SORTING_ORDER = "DESC";
 
-    private final String LIMIT_OFFSET = " LIMIT ? OFFSET ?";
+    private static final String LIMIT_OFFSET = " LIMIT ? OFFSET ?";
 
     private  static  final String TOTAL_COUNT_QUERY = "SELECT COUNT(*) FROM ({baseQuery}) total_result";
 
@@ -105,8 +105,6 @@ public class EPostQueryBuilder {
     }
 
     private void addToPreparedStatement(List<Object> preparedStmtList, List<String> ids) {
-        ids.forEach(id -> {
-            preparedStmtList.add(id);
-        });
+        preparedStmtList.addAll(ids);
     }
 }
