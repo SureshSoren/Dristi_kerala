@@ -60,7 +60,7 @@ public class ServiceConstants {
     public static final String EXIST_TASK_ERR = "Error while checking task exist";
     public static final String SEARCH_TASK_ERR = "Error while searching task";
     public static final String BAIL = "BAIL";
-    public static final String SUMMON = "SUMMON";
+    public static final String SUMMON = "SUMMONS";
     public static final String WARRANT = "WARRANT";
     public static final String ISSUESUMMON = "ISSUESUMMON";
 

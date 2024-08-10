@@ -82,6 +82,7 @@ public class PaymentUpdateService {
             requestInfo.getUserInfo().getRoles().add(role);
 
             for (Task task : tasks) {
+                log.info("Updating pending payment status for task: {}", task);
                 if (task.getTaskType().equals(SUMMON)) {
                     Workflow workflow = task.getWorkflow();
                     workflow.setAction("MAKE PAYMENT");
