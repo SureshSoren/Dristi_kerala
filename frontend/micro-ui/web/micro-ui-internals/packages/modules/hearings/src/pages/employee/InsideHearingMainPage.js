@@ -180,6 +180,7 @@ const InsideHearingMainPage = () => {
 
   const saveWitnessDeposition = () => {
     const updatedHearing = structuredClone(hearing);
+    setWitnessModalOpen(true);
     updatedHearing.additionalDetails = updatedHearing.additionalDetails || {};
     updatedHearing.additionalDetails.witnessDepositions = updatedHearing.additionalDetails.witnessDepositions || [];
     if (isDepositionSaved) {
@@ -192,7 +193,6 @@ const InsideHearingMainPage = () => {
     _updateTranscriptRequest({ body: { hearing: updatedHearing } }).then((res) => {
       setHearing(res.hearing);
     });
-    setWitnessModalOpen(true);
   };
 
   const handleDropdownChange = (selectedWitnessOption) => {
