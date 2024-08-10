@@ -2,6 +2,7 @@ package org.pucar.dristi.util;
 
 import org.egov.common.contract.models.AuditDetails;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.config.EPostConfiguration;
 import org.pucar.dristi.model.*;
 import org.pucar.dristi.repository.EPostRepository;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static org.pucar.dristi.config.ServiceConstants.EPOST_TRACKER_ERROR;
+import static org.pucar.dristi.config.ServiceConstants.INVALID_EPOST_TRACKER_FIELD;
 
 @Component
 public class EpostUtil {
@@ -54,7 +58,7 @@ public class EpostUtil {
                 .processNumber(ePostRequest.getEPostTracker().getProcessNumber()).pagination(pagination).build();
         List<EPostTracker> ePostTrackers = ePostRepository.getEPostTrackerList(searchCriteria,5,0);
         if (ePostTrackers.size() != 1) {
-            throw new RuntimeException("Invalid EPost Tracker field with processNumber : " + ePostRequest.getEPostTracker().getProcessNumber());
+            throw new CustomException(EPOST_TRACKER_ERROR,INVALID_EPOST_TRACKER_FIELD + ePostRequest.getEPostTracker().getProcessNumber());
         }
         EPostTracker ePostTracker = ePostTrackers.get(0);
 

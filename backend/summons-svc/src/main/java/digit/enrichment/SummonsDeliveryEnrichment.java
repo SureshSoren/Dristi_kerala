@@ -2,6 +2,7 @@ package digit.enrichment;
 
 import digit.config.Configuration;
 import digit.util.IdgenUtil;
+import digit.web.models.DeliveryStatus;
 import digit.web.models.SummonsDelivery;
 import digit.web.models.Task;
 import digit.web.models.TaskDetails;
@@ -46,7 +47,7 @@ public class SummonsDeliveryEnrichment {
                 .channelName(taskDetails.getDeliveryChannel().getChannelName())
                 .deliveryRequestDate(LocalDate.now().toString())
                 .auditDetails(auditDetails)
-                .deliveryStatus("DELIVERY_NOT_STARTED")
+                .deliveryStatus(DeliveryStatus.NOT_UPDATED)
                 .rowVersion(1)
                 .build();
     }

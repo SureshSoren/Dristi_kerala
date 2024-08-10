@@ -154,6 +154,14 @@ export const DRISTIService = {
       params,
     });
   },
+  createDemand: (data, params) =>
+    Request({
+      url: Urls.dristi.demandCreate,
+      useCache: false,
+      userService: false,
+      data,
+      params,
+    }),
   customApiService: (url, data, params, useCache = false, userService = true) =>
     Request({
       url: url,
@@ -170,11 +178,11 @@ export const DRISTIService = {
       data,
       params,
     }),
-  createDemand: (data, params) =>
+  getPendingTaskService: (data, params) =>
     Request({
-      url: Urls.dristi.demandCreate,
+      url: Urls.dristi.getPendingTaskFields,
       useCache: false,
-      userService: false,
+      userService: true,
       data,
       params,
     }),

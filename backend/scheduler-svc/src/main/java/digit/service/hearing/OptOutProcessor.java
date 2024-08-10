@@ -1,11 +1,11 @@
-package digit.service;
+package digit.service.hearing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.Configuration;
-import digit.kafka.Producer;
+import digit.kafka.producer.Producer;
 import digit.repository.ReScheduleRequestRepository;
-import digit.util.CaseUtil;
-import digit.util.DateUtil;
+import digit.service.HearingService;
+import digit.service.RescheduleRequestOptOutService;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
@@ -19,48 +19,42 @@ import static digit.config.ServiceConstants.INACTIVE;
 
 @Service
 @Slf4j
-public class OptOutConsumerService {
+public class OptOutProcessor {
 
     private final Producer producer;
-
     private final ReScheduleRequestRepository repository;
-
     private final Configuration configuration;
-
     private final ObjectMapper mapper;
-
     private final HearingService hearingService;
-
     private final RescheduleRequestOptOutService optOutService;
 
-    private final CaseUtil caseUtil;
 
 
     @Autowired
-    public OptOutConsumerService(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, HearingService hearingService, RescheduleRequestOptOutService optOutService, CaseUtil caseUtil) {
+    public OptOutProcessor(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, HearingService hearingService, RescheduleRequestOptOutService optOutService) {
         this.producer = producer;
         this.repository = repository;
         this.configuration = configuration;
         this.mapper = mapper;
         this.hearingService = hearingService;
         this.optOutService = optOutService;
-        this.caseUtil = caseUtil;
+
     }
 
 
     public void checkAndScheduleHearingForOptOut(HashMap<String, Object> record) {
         try {
             log.info("operation = checkAndScheduleHearingForOptOut, result = IN_PROGRESS, record = {}", record);
-            OptOutRequest optOutRequest = mapper.convertValue(record, OptOutRequest.class);
-            RequestInfo requestInfo = optOutRequest.getRequestInfo();
+            OptOut optOut = mapper.convertValue(record, OptOut.class);
+//            RequestInfo requestInfo = optOutRequest.getRequestInfo();
 
-            OptOut optOut = optOutRequest.getOptOut();
+//            OptOut optOut = optOutRequest.getOptOut();
             List<Long> optoutDates = optOut.getOptoutDates();
 
             String rescheduleRequestId = optOut.getRescheduleRequestId();
 
             OptOutSearchRequest searchRequest = OptOutSearchRequest.builder()
-                    .requestInfo(requestInfo)
+                    .requestInfo(new RequestInfo())
                     .criteria(OptOutSearchCriteria.builder()
                             .rescheduleRequestId(rescheduleRequestId)
                             .build()).build();
@@ -74,8 +68,8 @@ public class OptOutConsumerService {
             int totalOptOutCanBeMade = reScheduleHearing.getLitigants().size() + reScheduleHearing.getRepresentatives().size();
 
             List<Long> suggestedDates = reScheduleHearing.getSuggestedDates();
-            List<Long> availableDates = reScheduleHearing.getAvailableDates();
-            Set<Long> suggestedDatesSet = optOuts.isEmpty() ? new HashSet<>(suggestedDates) : new HashSet<>(availableDates);
+            List<Long> availableDates = reScheduleHearing.getAvailableDates()==null?new ArrayList<>():reScheduleHearing.getAvailableDates();
+            Set<Long> suggestedDatesSet = availableDates.isEmpty() ? new HashSet<>(suggestedDates) : new HashSet<>(availableDates);
 
             optoutDates.forEach(suggestedDatesSet::remove);
 
@@ -84,10 +78,9 @@ public class OptOutConsumerService {
             if (totalOptOutCanBeMade - optOutAlreadyMade == 1 || totalOptOutCanBeMade - optOutAlreadyMade == 0) { // second condition is for lag if this data is already persisted into the db,it should be second only
 
                 // this is last opt out, need to close the request. open the pending task for judge
-
+                reScheduleHearing.setStatus(INACTIVE);
                 //unblock the calendar for judge (suggested days -available days)
-                ReScheduleHearingRequest request = ReScheduleHearingRequest.builder().requestInfo(requestInfo).reScheduleHearing(Collections.singletonList(reScheduleHearing)).build();
-                unblockJudgeCalendarForSuggestedDays(request);
+                unblockJudgeCalendarForSuggestedDays(reScheduleHearing);
 
             } else {
                 //update the request and reduce available dates
@@ -105,11 +98,9 @@ public class OptOutConsumerService {
         }
     }
 
-    public void unblockJudgeCalendarForSuggestedDays(ReScheduleHearingRequest request) {
+    public void unblockJudgeCalendarForSuggestedDays(ReScheduleHearing reScheduleHearing ) {
         try {
-            log.info("operation = unblockJudgeCalendarForSuggestedDays, result = IN_PROGRESS, request = {}", request.getReScheduleHearing());
-            ReScheduleHearing reScheduleHearing = request.getReScheduleHearing().get(0);
-            RequestInfo requestInfo = request.getRequestInfo();
+            log.info("operation = unblockJudgeCalendarForSuggestedDays, result = IN_PROGRESS, request = {}",reScheduleHearing);
             List<Long> suggestedDays = reScheduleHearing.getSuggestedDates();
             List<Long> availableDays = reScheduleHearing.getAvailableDates();
             Set<Long> suggestedDaysSet = new HashSet<>(suggestedDays);
@@ -129,10 +120,11 @@ public class OptOutConsumerService {
                     newHearings.add(scheduleHearing);
                 }
             }
-            hearingService.update(ScheduleHearingRequest.builder()
-                    .requestInfo(requestInfo)
-                    .hearing(newHearings)
-                    .build());
+//            hearingService.update(ScheduleHearingRequest.builder()
+//                    .requestInfo(requestInfo)
+//                    .hearing(newHearings)
+//                    .build());
+            producer.push(configuration.getScheduleHearingUpdateTopic(),Collections.singletonList(newHearings) );
             log.info("operation = unblockJudgeCalendarForSuggestedDays, result = SUCCESS");
         } catch (Exception e) {
             log.error("Error unblocking calendar: {}", e.getMessage());

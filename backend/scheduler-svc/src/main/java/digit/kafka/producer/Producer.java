@@ -1,4 +1,4 @@
-package digit.kafka;
+package digit.kafka.producer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.egov.tracer.kafka.CustomKafkaTemplate;

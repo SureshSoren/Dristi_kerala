@@ -23,15 +23,22 @@ public class ServiceConstants {
     public static final String TENANTID = "?tenantId=";
     public static final String BUSINESS_SERVICES = "&businessServices=";
 
+    public static final String OPT_OUT_DUE = "OPT_OUT_DUE";
+
+    public static final String OPT_OUT_SELECTION_LIMIT = "OPT_OUT_SELECTION_LIMIT";
+
 
     public static final String INACTIVE = "INACTIVE";
     public static final String ACTIVE = "ACTIVE";
-
+    public static final String BLOCKED = "BLOCKED";
+    public static final String SCHEDULE = "SCHEDULED";
     public final String DEFAULT_JUDGE_CALENDAR_MODULE_NAME = "schedule-hearing";
     public final String DEFAULT_JUDGE_CALENDAR_MASTER_NAME = "COURT000334";
     public final String DEFAULT_COURT_MODULE_NAME = "court";
     public final String DEFAULT_SLOTTING_MASTER_NAME = "slots";
     public final String DEFAULT_HEARING_MASTER_NAME = "hearings";
+    public final String SCHEDULER_CONFIG_MASTER_NAME = "config";
+    public final String SCHEDULER_CONFIG_MODULE_NAME = "SCHEDULER-CONFIG";
 
     public static final String PENDING_TASK_ENTITY_TYPE ="order-managelifecycle";
     public static final String PENDING_TASK_NAME = "Create Order for rescheduling the hearing";

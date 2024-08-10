@@ -3,6 +3,7 @@ package digit.kafka;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.service.DemandService;
 import digit.service.SummonsService;
+import digit.web.models.DeliveryStatus;
 import digit.web.models.SummonsRequest;
 import digit.web.models.TaskRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class SummonsConsumer {
         try {
             TaskRequest taskRequest = objectMapper.convertValue(record, TaskRequest.class);
             String taskType = taskRequest.getTask().getTaskType().toLowerCase();
-            if (taskType.equals("summons") || taskType.equals("bail") || taskType.equals("warrant")) {
+            if (taskType.equals("summons") || taskType.equals("warrant")) {
                 log.info(taskRequest.getTask().toString());
                 summonsService.generateSummonsDocument(taskRequest);
             }
@@ -55,7 +56,7 @@ public class SummonsConsumer {
         try {
             TaskRequest taskRequest = objectMapper.convertValue(record, TaskRequest.class);
             String taskType = taskRequest.getTask().getTaskType().toLowerCase();
-            if (taskType.equals("summons") || taskType.equals("bail") || taskType.equals("warrant")) {
+            if (taskType.equals("summons")) {
                 log.info(taskRequest.getTask().toString());
                 demandService.fetchPaymentDetailsAndGenerateDemandAndBill(taskRequest);
             }
@@ -70,7 +71,7 @@ public class SummonsConsumer {
         try {
             SummonsRequest request = objectMapper.convertValue(record, SummonsRequest.class);
             log.info(request.toString());
-            if (request.getSummonsDelivery().getDeliveryStatus().equalsIgnoreCase("SUMMONS_DELIVERED")) {
+            if (request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.DELIVERED)) {
                 summonsService.updateTaskStatus(request);
             }
         } catch (final Exception e) {
@@ -84,7 +85,7 @@ public class SummonsConsumer {
         try {
             SummonsRequest request = objectMapper.convertValue(record, SummonsRequest.class);
             log.info(request.toString());
-            if (request.getSummonsDelivery().getDeliveryStatus().equalsIgnoreCase("SUMMONS_DELIVERED")) {
+            if (request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.DELIVERED)) {
                 summonsService.updateTaskStatus(request);
             }
         } catch (final Exception e) {

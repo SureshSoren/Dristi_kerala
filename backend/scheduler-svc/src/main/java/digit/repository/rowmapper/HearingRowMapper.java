@@ -16,10 +16,6 @@ public class HearingRowMapper implements RowMapper<ScheduleHearing> {
     @Override
     public ScheduleHearing mapRow(ResultSet resultSet, int rowNum) throws SQLException {
 
-        String pattern = "yyyy-MM-dd HH:mm:ss";
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-
         ScheduleHearing hearing = ScheduleHearing.builder()
                 .description(resultSet.getString("description"))
                 .hearingBookingId(resultSet.getString("hearing_booking_id"))
@@ -29,9 +25,11 @@ public class HearingRowMapper implements RowMapper<ScheduleHearing> {
                 .hearingType(resultSet.getString("hearing_type"))
                 .caseId(resultSet.getString("case_id"))
                 .title(resultSet.getString("title"))
-//                .status(resultSet.getString("status")==null?null:Status.valueOf(resultSet.getString("status")).toString())
+                .status(resultSet.getString("status"))
+                .hearingDate(resultSet.getLong("hearing_date"))
                 .startTime(Long.parseLong(resultSet.getString("start_time")))
                 .endTime(Long.parseLong(resultSet.getString("end_time")))
+                .rescheduleRequestId(resultSet.getString("reschedule_request_id"))
                 .auditDetails(AuditDetails.builder()
                         .createdBy(resultSet.getString("created_by"))
                         .createdTime(resultSet.getLong("created_time"))

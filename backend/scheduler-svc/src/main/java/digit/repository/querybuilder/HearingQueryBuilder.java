@@ -10,13 +10,16 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
+import static digit.config.ServiceConstants.BLOCKED;
+import static digit.config.ServiceConstants.SCHEDULE;
+
 
 @Component
 @Slf4j
 public class HearingQueryBuilder {
 
     private static final String FROM_TABLES = " FROM hearing_booking hb ";
-    private final String BASE_APPLICATION_QUERY = "SELECT  hb.hearing_booking_id, hb.tenant_id, hb.court_id, hb.judge_id, hb.case_id, hb.hearing_type, hb.title, hb.description, hb.status, hb.start_time, hb.end_time, hb.created_by,hb.last_modified_by,hb.created_time,hb.last_modified_time, hb.row_version ,hb.reschedule_request_id";
+    private final String BASE_APPLICATION_QUERY = "SELECT  hb.hearing_booking_id, hb.tenant_id, hb.court_id,hb.hearing_date, hb.judge_id, hb.case_id, hb.hearing_type, hb.title, hb.description, hb.status, hb.start_time, hb.end_time, hb.created_by,hb.last_modified_by,hb.created_time,hb.last_modified_time, hb.row_version ,hb.reschedule_request_id";
     private final String ORDER_BY = " ORDER BY ";
     private final String GROUP_BY = " GROUP BY ";
     private final String LIMIT_OFFSET = " LIMIT ? OFFSET ?";
@@ -36,16 +39,15 @@ public class HearingQueryBuilder {
     public String getJudgeAvailableDatesQuery(ScheduleHearingSearchCriteria scheduleHearingSearchCriteria, List<Object> preparedStmtList) {
         StringBuilder query = new StringBuilder("SELECT meeting_hours.hearing_date AS date,meeting_hours.total_hours  AS hours ");
         query.append("FROM (");
-        query.append("SELECT hb.hearing_date, SUM((hb.end_time - hb.start_time) / 3600000) AS total_hours ");
+        query.append("SELECT hb.hearing_date, SUM(((hb.end_time - hb.start_time)*60) / 3600000) AS total_hours ");
         query.append("FROM hearing_booking hb ");
 
         getWhereFields(scheduleHearingSearchCriteria, query, preparedStmtList, null, null);
-        // add status block
-//        queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
-//        query.append(" ( hb.status = ? ");
-//        preparedStmtList.add(Status.BLOCKED.toString());
-//        query.append(" OR hb.status = ? )");
-//        preparedStmtList.add(Status.SCHEDULED.toString());
+        queryBuilderHelper.addClauseIfRequired(query, preparedStmtList);
+        query.append(" ( hb.status = ? ");
+        preparedStmtList.add(BLOCKED);
+        query.append(" OR hb.status = ? )");
+        preparedStmtList.add(SCHEDULE);
 
 
         query.append("GROUP BY hb.hearing_date) AS meeting_hours ");

@@ -68,7 +68,7 @@ public class SummonsService {
         Document document = createDocument(fileStoreId);
         taskRequest.getTask().addDocumentsItem(document);
 
-        return taskUtil.callUpdateTask(taskRequest);
+        return taskUtil.callUploadDocumentTask(taskRequest);
     }
 
     public SummonsDelivery sendSummonsViaChannels(TaskRequest request) {
@@ -79,9 +79,9 @@ public class SummonsService {
         if (channelMessage.getAcknowledgementStatus().equalsIgnoreCase("success")) {
             summonsDelivery.setIsAcceptedByChannel(Boolean.TRUE);
             if (summonsDelivery.getChannelName() == ChannelName.SMS || summonsDelivery.getChannelName() == ChannelName.EMAIL) {
-                summonsDelivery.setDeliveryStatus("SUMMONS_DELIVERED");
+                summonsDelivery.setDeliveryStatus(DeliveryStatus.DELIVERED);
             } else {
-                summonsDelivery.setDeliveryStatus("SUMMONS_IN_PROGRESS");
+                summonsDelivery.setDeliveryStatus(DeliveryStatus.IN_TRANSIT);
             }
             summonsDelivery.setChannelAcknowledgementId(channelMessage.getAcknowledgeUniqueNumber());
         }
@@ -134,15 +134,14 @@ public class SummonsService {
     private String getPdfTemplateKey(String taskType) {
         return switch (taskType.toLowerCase()) {
             case "summon" -> config.getSummonsPdfTemplateKey();
-            case "warrant" -> config.getWarrantPdfTemplateKey();
-            case "bail" -> config.getBailPdfTemplateKey();
+            case "warrant" -> config.getNonBailableWarrantPdfTemplateKey();
             default -> throw new CustomException("INVALID_TASK_TYPE", "Task Type must be valid. Provided: " + taskType);
         };
     }
 
     private SummonsDelivery fetchSummonsDelivery(UpdateSummonsRequest request) {
         SummonsDeliverySearchCriteria searchCriteria = SummonsDeliverySearchCriteria.builder()
-                .summonsId(request.getChannelReport().getSummonId())
+                .taskNumber(request.getChannelReport().getTaskNumber())
                 .build();
         Optional<SummonsDelivery> optionalSummons = getSummonsDeliveryFromSearchCriteria(searchCriteria).stream().findFirst();
         if (optionalSummons.isEmpty()) {

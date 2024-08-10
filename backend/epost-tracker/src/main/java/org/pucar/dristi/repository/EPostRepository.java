@@ -42,14 +42,14 @@ public class EPostRepository {
         String query = queryBuilder.getEPostTrackerSearchQuery(searchCriteria, preparedStmtList);
         query = queryBuilder.addPaginationQuery(query, preparedStmtList, searchCriteria.getPagination(),limit,offset);
         log.info("Final query: " + query);
-        return jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
+        return jdbcTemplate.query(query,rowMapper,preparedStmtList.toArray());
     }
 
-    private Integer getTotalCountQuery(EPostTrackerSearchCriteria searchCriteria) {
+    public Integer getTotalCountQuery(EPostTrackerSearchCriteria searchCriteria) {
         List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getEPostTrackerSearchQuery(searchCriteria, preparedStmtList);
         String countQuery = queryBuilder.getTotalCountQuery(query);
         log.info("Final count query :: {}", countQuery);
-        return jdbcTemplate.queryForObject(countQuery, preparedStmtList.toArray(), Integer.class);
+        return jdbcTemplate.queryForObject(countQuery, Integer.class, preparedStmtList.toArray());
     }
 }

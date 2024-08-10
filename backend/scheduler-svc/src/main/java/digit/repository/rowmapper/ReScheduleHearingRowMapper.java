@@ -39,8 +39,10 @@ public class ReScheduleHearingRowMapper implements RowMapper<ReScheduleHearing> 
                     }))
                     .availableDates(resultSet.getString("available_days") == null ? null : objectMapper.readValue(resultSet.getString("available_days"), new TypeReference<>() {
                     }))
-                    .litigants(Collections.singleton(resultSet.getString("litigants")))
-                    .representatives(Collections.singleton(resultSet.getString("representatives")))
+                    .litigants(resultSet.getString("litigants") == null ? null : objectMapper.readValue(resultSet.getString("litigants"), new TypeReference<>() {
+                    }))
+                    .representatives(resultSet.getString("representatives") == null ? null : objectMapper.readValue(resultSet.getString("representatives"), new TypeReference<>() {
+                    }))
                     .auditDetails(AuditDetails.builder()
                             .createdBy(resultSet.getString("created_by"))
                             .createdTime(resultSet.getLong("created_time"))

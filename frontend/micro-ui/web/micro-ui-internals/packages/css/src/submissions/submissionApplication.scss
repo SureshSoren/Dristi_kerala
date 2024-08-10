@@ -139,6 +139,7 @@
     width: 536px;
     .popup-module-main {
       custom-stepper-modal-success,
+      custom-stepper-modal-success,
       .submission-success-modal-body-main {
         display: flex;
         flex-direction: column;
@@ -153,6 +154,18 @@
 .create-submission {
   form {
     .card {
+      .card-label-error {
+        color: #bb2c2f !important;
+        margin-left: 0px !important;
+      }
+    }
+  }
+}
+
+
+.add-party {
+  form {
+    .employeeCard  {
       .card-label-error {
         color: #bb2c2f !important;
         margin-left: 0px !important;

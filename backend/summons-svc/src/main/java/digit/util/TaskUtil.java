@@ -66,4 +66,24 @@ public class TaskUtil {
             throw new CustomException("TASK_SEARCH_ERROR", "Error getting response from task Service");
         }
     }
+
+    public TaskResponse callUploadDocumentTask(TaskRequest taskRequest) {
+        try {
+            StringBuilder uri = new StringBuilder();
+            uri.append(config.getTaskServiceHost())
+                    .append(config.getTaskServiceUpdateDocumentEndpoint());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<TaskRequest> requestEntity = new HttpEntity<>(taskRequest, headers);
+
+            ResponseEntity<TaskResponse> responseEntity = restTemplate.postForEntity(uri.toString(),
+                    requestEntity, TaskResponse.class);
+
+            return responseEntity.getBody();
+        } catch (Exception e) {
+            log.error("Error getting response from Task Service", e);
+            throw new CustomException("TASK_UPLOAD_DOCUMENT_ERROR", "Error getting response from task Service");
+        }
+    }
 }

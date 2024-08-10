@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import static org.pucar.dristi.config.ServiceConstants.*;
 @Component
 public class ResponseInfoFactory {
-    public ResponseInfo createResponseInfoFromRequestInfo(final RequestInfo requestInfo, final Boolean success) {
+    public ResponseInfo createResponseInfoFromRequestInfo(final RequestInfo requestInfo, final boolean success) {
 
         final String apiId = requestInfo != null ? requestInfo.getApiId() : "";
         final String ver = requestInfo != null ? requestInfo.getVer() : "";

@@ -1,7 +1,7 @@
-package digit.kafka;
+package digit.kafka.cosumer;
 
 
-import digit.service.OptOutConsumerService;
+import digit.service.hearing.OptOutProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,12 +16,12 @@ import java.util.HashMap;
 public class OptOutConsumer {
 
 
-    private final OptOutConsumerService optOutConsumerService;
+    private final OptOutProcessor optOutProcessor;
 
     @Autowired
-    public OptOutConsumer(OptOutConsumerService optOutConsumerService) {
+    public OptOutConsumer(OptOutProcessor optOutProcessor) {
 
-        this.optOutConsumerService = optOutConsumerService;
+        this.optOutProcessor = optOutProcessor;
     }
 
 
@@ -29,7 +29,7 @@ public class OptOutConsumer {
     public void listenOptOut(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
 
         try {
-            optOutConsumerService.checkAndScheduleHearingForOptOut(record);
+            optOutProcessor.checkAndScheduleHearingForOptOut(record);
         } catch (Exception e) {
             log.error("error occurred while serializing", e);
         }

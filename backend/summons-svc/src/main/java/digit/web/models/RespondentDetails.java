@@ -1,7 +1,6 @@
 package digit.web.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
@@ -30,7 +29,7 @@ public class RespondentDetails {
     private String phone;
 
     @JsonProperty("address")
-    private String address;
+    private Address address;
 
     @JsonProperty("state")
     private String state;

@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Sort {
-    process_number("processNumber"),
-    task_number("taskNumber"),
-    tracking_number("trackingNumber"),
-    delivery_status("deliveryStatus"),
-    booking_date("bookingDate"),
-    received_date("receivedDate");
+    PROCESS_NUMBER("processNumber"),
+    TASK_NUMBER("taskNumber"),
+    TRACKING_NUMBER("trackingNumber"),
+    DELIVERY_STATUS("deliveryStatus"),
+    BOOKING_DATE("bookingDate"),
+    RECEIVED_DATE("receivedDate");
 
     private String value;
 
