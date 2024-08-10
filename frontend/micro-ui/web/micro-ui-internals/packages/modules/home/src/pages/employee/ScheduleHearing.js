@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button, CardText, CustomDropdown, SubmitBar, TextInput, Toast, Modal, Loader, Banner } from "@egovernments/digit-ui-react-components";
 import { formatDateInMonth } from "../../utils";
 import { useTranslation } from "react-i18next";
@@ -173,6 +173,29 @@ function ScheduleHearing({
     true
   );
 
+  const { data: OptOutLimit, isLoading: loading } = Digit.Hooks.useCustomMDMS(
+    Digit.ULBService.getStateId(),
+    "SCHEDULER-CONFIG",
+    [
+      {
+        name: "config",
+      },
+    ],
+    {
+      cacheTime: 0,
+    }
+  );
+
+  const extractUnitValue = (OptOutLimit) => {
+    const configArray = OptOutLimit?.["SCHEDULER-CONFIG"]?.config;
+    if (Array.isArray(configArray)) {
+      const configItem = configArray.find((item) => item.identifier === "OPT_OUT_SELECTION_LIMIT");
+      return configItem ? configItem.unit : null;
+    }
+
+    return null;
+  };
+
   const { filingNumber, status } = Digit.Hooks.useQueryParams();
   const nextFourDates = status === "OPTOUT" ? getSuggestedDates(dateResponse) : getNextNDates(5);
   const [modalInfo, setModalInfo] = useState(null);
@@ -182,6 +205,7 @@ function ScheduleHearing({
   const [selectedCustomDate, setSelectedCustomDate] = useState(new Date());
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
   const [sucessOptOut, setSucessOptOut] = useState(false);
+  const [OptOutLimitValue, setOptOutLimitValue] = useState(null);
 
   const CustomCaseInfoDiv = Digit.ComponentRegistryService.getComponent("CustomCaseInfoDiv") || <React.Fragment></React.Fragment>;
   const CustomChooseDate = Digit.ComponentRegistryService.getComponent("CustomChooseDate") || <React.Fragment></React.Fragment>;
@@ -237,7 +261,7 @@ function ScheduleHearing({
         if (newSelectedChip === null) {
           return prevSelectedChip.filter((chip) => chip !== label);
         }
-        if (prevSelectedChip.length >= 3) {
+        if (prevSelectedChip.length >= OptOutLimitValue) {
           return prevSelectedChip;
         }
 
@@ -363,6 +387,10 @@ function ScheduleHearing({
     }
   };
 
+  useEffect(() => {
+    if (OptOutLimit) setOptOutLimitValue(extractUnitValue(OptOutLimit));
+  }, [OptOutLimit]);
+
   if (isLoading) {
     return <Loader />;
   }
@@ -425,7 +453,7 @@ function ScheduleHearing({
         )}
         {!modalInfo?.showCustomDate && (
           <div>
-            <CardText>{status === "OPTOUT" ? "Select upto 3 dates that do not work for you" : t("CS_SELECT_DATE")}</CardText>
+            <CardText>{status === "OPTOUT" ? `Select upto ${OptOutLimitValue} dates that do not work for you` : t("CS_SELECT_DATE")}</CardText>
             <CustomChooseDate
               data={nextFourDates}
               selectedChip={selectedChip}
