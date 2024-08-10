@@ -141,7 +141,7 @@ public class SummonsService {
 
     private SummonsDelivery fetchSummonsDelivery(UpdateSummonsRequest request) {
         SummonsDeliverySearchCriteria searchCriteria = SummonsDeliverySearchCriteria.builder()
-                .summonsId(request.getChannelReport().getSummonId())
+                .taskNumber(request.getChannelReport().getTaskNumber())
                 .build();
         Optional<SummonsDelivery> optionalSummons = getSummonsDeliveryFromSearchCriteria(searchCriteria).stream().findFirst();
         if (optionalSummons.isEmpty()) {

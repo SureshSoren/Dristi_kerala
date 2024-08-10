@@ -25,5 +25,4 @@ public class ChannelReport {
     @JsonProperty("additionalFields")
     private AdditionalFields additionalFields;
 
-
 }
