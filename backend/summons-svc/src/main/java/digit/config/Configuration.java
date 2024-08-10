@@ -38,9 +38,6 @@ public class Configuration {
     @Value("${bailable.warrant.pdf.template.key}")
     private String bailableWarrantPdfTemplateKey;
 
-    @Value("${bail.pdf.template.key}")
-    private String bailPdfTemplateKey;
-
     //MDMS
     @Value("${egov.mdms.host}")
     private String mdmsHost;

@@ -12,9 +12,9 @@ import lombok.*;
 @Builder
 public class SummonsDeliverySearchCriteria {
 
-    @JsonProperty("orderId")
-    private String orderId = null;
+    @JsonProperty("summonsDeliveryId")
+    private String summonsDeliveryId = null;
 
-    @JsonProperty("summonsId")
-    private String summonsId = null;
+    @JsonProperty("taskNumber")
+    private String taskNumber = null;
 }
