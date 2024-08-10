@@ -135,7 +135,6 @@ public class SummonsService {
         return switch (taskType.toLowerCase()) {
             case "summon" -> config.getSummonsPdfTemplateKey();
             case "warrant" -> config.getNonBailableWarrantPdfTemplateKey();
-            case "bail" -> config.getBailPdfTemplateKey();
             default -> throw new CustomException("INVALID_TASK_TYPE", "Task Type must be valid. Provided: " + taskType);
         };
     }
