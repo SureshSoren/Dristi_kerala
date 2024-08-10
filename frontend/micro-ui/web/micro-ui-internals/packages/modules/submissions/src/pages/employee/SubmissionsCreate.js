@@ -493,7 +493,7 @@ const SubmissionsCreate = ({ path }) => {
         signedDoucumentUploadedID !== "" || localStorageID
           ? {
               documentType: "Signed",
-              fileStoreId: signedDoucumentUploadedID || localStorageID,
+              fileStore: signedDoucumentUploadedID || localStorageID,
             }
           : null;
 

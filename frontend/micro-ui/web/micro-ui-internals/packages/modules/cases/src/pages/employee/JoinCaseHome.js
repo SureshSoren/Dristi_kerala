@@ -19,6 +19,7 @@ import isEqual from "lodash/isEqual";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { formatDate } from "../../utils";
+import { FileUploadIcon } from "../../../../dristi/src/icons/svgIndex";
 
 const CloseBtn = (props) => {
   return (
@@ -1288,6 +1289,17 @@ const JoinCaseHome = ({ refreshInbox }) => {
                       className={"aadhar-sign-in"}
                       labelClassName={"aadhar-sign-in"}
                     ></CustomButton>
+                    <CustomButton
+                      icon={<FileUploadIcon />}
+                      label={t("Upload Signature")}
+                      onButtonClick={() => {
+                        // setOpenUploadSignatureModal(true);
+                        // setIsSigned(true);
+                        setIsSignedAdvocate(true);
+                      }}
+                      className={"upload-signature"}
+                      labelClassName={"upload-signature-label"}
+                    ></CustomButton>
                   </div>
                 )}
               </div>
@@ -1315,6 +1327,17 @@ const JoinCaseHome = ({ refreshInbox }) => {
                       }}
                       className={"aadhar-sign-in"}
                       labelClassName={"aadhar-sign-in"}
+                    ></CustomButton>
+                    <CustomButton
+                      icon={<FileUploadIcon />}
+                      label={t("Upload Signature")}
+                      onButtonClick={() => {
+                        // setOpenUploadSignatureModal(true);
+                        // setIsSigned(true);
+                        setIsSignedParty(true);
+                      }}
+                      className={"upload-signature"}
+                      labelClassName={"upload-signature-label"}
                     ></CustomButton>
                   </div>
                 )}

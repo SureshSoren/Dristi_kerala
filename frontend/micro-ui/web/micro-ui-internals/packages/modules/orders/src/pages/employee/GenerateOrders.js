@@ -659,18 +659,17 @@ const GenerateOrders = () => {
   const updateOrder = async (order, action) => {
     try {
       const localStorageID = localStorage.getItem("fileStoreId");
-      const documents =
+      const documents = Array.isArray(order?.documents) ? order.documents : [];
+      const documentsFile =
         signedDoucumentUploadedID !== "" || localStorageID
-          ? [
-              {
-                signaturedDocument: {
-                  fileStoreId: signedDoucumentUploadedID || localStorageID,
-                },
-              },
-            ]
-          : [{}];
+          ? {
+              documentType: "Signed",
+              fileStore: signedDoucumentUploadedID || localStorageID,
+            }
+          : null;
+
       localStorage.removeItem("fileStoreId");
-      return await ordersService.updateOrder({ order: { ...order, workflow: { ...order.workflow, action, documents } } }, { tenantId });
+      return await ordersService.updateOrder({ order: { ...order, documents: documentsFile ? [...documents, documentsFile] : documents, workflow: { ...order.workflow, action, documents: [{}] } } }, { tenantId });
     } catch (error) {
       return null;
     }
