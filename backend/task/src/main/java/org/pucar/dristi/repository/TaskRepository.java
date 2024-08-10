@@ -3,12 +3,13 @@ package org.pucar.dristi.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.models.Document;
 import org.egov.tracer.model.CustomException;
+import org.pucar.dristi.repository.querybuilder.TaskCaseQueryBuilder;
 import org.pucar.dristi.repository.querybuilder.TaskQueryBuilder;
-import org.pucar.dristi.repository.rowmapper.*;
-import org.pucar.dristi.web.models.Amount;
-import org.pucar.dristi.web.models.Task;
-import org.pucar.dristi.web.models.TaskCriteria;
-import org.pucar.dristi.web.models.TaskExists;
+import org.pucar.dristi.repository.rowmapper.AmountRowMapper;
+import org.pucar.dristi.repository.rowmapper.DocumentRowMapper;
+import org.pucar.dristi.repository.rowmapper.TaskCaseRowMapper;
+import org.pucar.dristi.repository.rowmapper.TaskRowMapper;
+import org.pucar.dristi.web.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -30,20 +31,24 @@ public class TaskRepository {
     private final TaskRowMapper rowMapper;
     private final AmountRowMapper amountRowMapper;
     private final DocumentRowMapper documentRowMapper;
+    private final TaskCaseQueryBuilder taskCaseQueryBuilder;
+    private final TaskCaseRowMapper taskCaseRowMapper;
 
     @Autowired
     public TaskRepository(TaskQueryBuilder queryBuilder,
                           JdbcTemplate jdbcTemplate,
                           TaskRowMapper rowMapper,
                           AmountRowMapper amountRowMapper,
-                          DocumentRowMapper documentRowMapper) {
+                          DocumentRowMapper documentRowMapper, TaskCaseQueryBuilder taskCaseQueryBuilder, TaskCaseRowMapper taskCaseRowMapper) {
         this.queryBuilder = queryBuilder;
         this.jdbcTemplate = jdbcTemplate;
         this.rowMapper = rowMapper;
         this.amountRowMapper = amountRowMapper;
         this.documentRowMapper = documentRowMapper;
+        this.taskCaseQueryBuilder = taskCaseQueryBuilder;
+        this.taskCaseRowMapper = taskCaseRowMapper;
     }
-    
+
 
     public List<Task> getApplications(TaskCriteria criteria) {
         try {
@@ -52,7 +57,8 @@ public class TaskRepository {
             List<Object> preparedStmtAm = new ArrayList<>();
             List<Object> preparedStmtDc = new ArrayList<>();
             String casesQuery = "";
-            casesQuery = queryBuilder.getTaskSearchQuery(criteria,preparedStmtList);             log.info("Final case query :: {}", casesQuery);
+            casesQuery = queryBuilder.getTaskSearchQuery(criteria, preparedStmtList);
+            log.info("Final case query :: {}", casesQuery);
             List<Task> list = jdbcTemplate.query(casesQuery, preparedStmtList.toArray(), rowMapper);
             log.info("DB task list :: {}", list);
             if (list != null) {
@@ -99,11 +105,13 @@ public class TaskRepository {
     public TaskExists checkTaskExists(TaskExists taskExists) {
         try {
             List<Object> preparedStmtList = new ArrayList<>();
-            if (taskExists.getCnrNumber() == null && taskExists.getFilingNumber() == null &&taskExists.getTaskId()==null) {                taskExists.setExists(false);
+            if (taskExists.getCnrNumber() == null && taskExists.getFilingNumber() == null && taskExists.getTaskId() == null) {
+                taskExists.setExists(false);
             } else {
-                String taskExistQuery = queryBuilder.checkTaskExistQuery(taskExists.getCnrNumber(), taskExists.getFilingNumber(), taskExists.getTaskId(),preparedStmtList);
+                String taskExistQuery = queryBuilder.checkTaskExistQuery(taskExists.getCnrNumber(), taskExists.getFilingNumber(), taskExists.getTaskId(), preparedStmtList);
                 log.info("Final task exist query :: {}", taskExistQuery);
-                Integer count = jdbcTemplate.queryForObject(taskExistQuery, preparedStmtList.toArray(), Integer.class);                taskExists.setExists(count != null && count > 0);
+                Integer count = jdbcTemplate.queryForObject(taskExistQuery, preparedStmtList.toArray(), Integer.class);
+                taskExists.setExists(count != null && count > 0);
             }
             return taskExists;
         } catch (CustomException e) {
@@ -112,5 +120,32 @@ public class TaskRepository {
             log.error("Error while checking task exist :: {} ", e.toString());
             throw new CustomException(EXIST_TASK_ERR, "Custom exception while checking task exist : " + e.getMessage());
         }
+    }
+
+    public List<TaskCase> getTaskWithCaseDetails(TaskCaseSearchRequest request) {
+
+        List<Object> preparedStmtList = new ArrayList<>();
+        String query = taskCaseQueryBuilder.getTaskTableSearchQuery(request.getCriteria(), preparedStmtList);
+
+        String taskQuery = taskCaseQueryBuilder.getTaskTableSearchQuery(request.getCriteria(), preparedStmtList);
+        taskQuery = taskCaseQueryBuilder.addOrderByQuery(taskQuery, request.getPagination());
+        log.debug("Final query: " + query);
+
+        if (request.getPagination() != null) {
+            Integer totalRecords = getTotalCountApplication(taskQuery, preparedStmtList);
+            log.info("Total count without pagination :: {}", totalRecords);
+            request.getPagination().setTotalCount(Double.valueOf(totalRecords));
+            taskQuery = taskCaseQueryBuilder.addPaginationQuery(taskQuery, request.getPagination(), preparedStmtList);
+        }
+
+        List<TaskCase> list = jdbcTemplate.query(taskQuery, preparedStmtList.toArray(), taskCaseRowMapper);
+        return list;
+
+    }
+
+    public Integer getTotalCountApplication(String baseQuery, List<Object> preparedStmtList) {
+        String countQuery = taskCaseQueryBuilder.getTotalCountQuery(baseQuery);
+        log.info("Final count query :: {}", countQuery);
+        return jdbcTemplate.queryForObject(countQuery, preparedStmtList.toArray(), Integer.class);
     }
 }

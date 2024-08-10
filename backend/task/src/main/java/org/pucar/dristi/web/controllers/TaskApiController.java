@@ -1,24 +1,22 @@
 package org.pucar.dristi.web.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import org.egov.common.contract.response.ResponseInfo;
 import org.pucar.dristi.service.TaskService;
 import org.pucar.dristi.util.ResponseInfoFactory;
 import org.pucar.dristi.web.models.*;
-
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.*;
-
-import jakarta.validation.Valid;
+import java.util.List;
 
 @jakarta.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2024-04-18T11:14:50.003326400+05:30[Asia/Calcutta]")
 @Controller
@@ -35,7 +33,7 @@ public class TaskApiController {
         this.responseInfoFactory = responseInfoFactory;
     }
 
-    public void setMockInjects(TaskService taskService, ResponseInfoFactory responseInfoFactory){
+    public void setMockInjects(TaskService taskService, ResponseInfoFactory responseInfoFactory) {
         this.taskService = taskService;
         this.responseInfoFactory = responseInfoFactory;
     }
@@ -57,7 +55,7 @@ public class TaskApiController {
     }
 
     @RequestMapping(value = "/v1/search", method = RequestMethod.POST)
-    public ResponseEntity<TaskListResponse> taskV1SearchPost( @Parameter(in = ParameterIn.DEFAULT, schema = @Schema()) @Valid @RequestBody TaskSearchRequest request){
+    public ResponseEntity<TaskListResponse> taskV1SearchPost(@Parameter(in = ParameterIn.DEFAULT, schema = @Schema()) @Valid @RequestBody TaskSearchRequest request) {
         List<Task> tasks = taskService.searchTask(request);
         ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(request.getRequestInfo(), true);
         TaskListResponse taskListResponse = TaskListResponse.builder().list(tasks).totalCount(tasks.size()).responseInfo(responseInfo).build();
@@ -70,6 +68,12 @@ public class TaskApiController {
         ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(body.getRequestInfo(), true);
         TaskResponse taskResponse = TaskResponse.builder().task(task).responseInfo(responseInfo).build();
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/v1/table/search", method = RequestMethod.POST)
+    public ResponseEntity<List<TaskCase>> taskV1SearchPost(@Parameter(in = ParameterIn.DEFAULT, schema = @Schema()) @Valid @RequestBody TaskCaseSearchRequest request) {
+        List<TaskCase> tasks = taskService.searchCaseTask(request);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/v1/uploadDocument", method = RequestMethod.POST)

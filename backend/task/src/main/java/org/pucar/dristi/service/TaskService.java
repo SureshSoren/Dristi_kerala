@@ -152,6 +152,10 @@ public class TaskService {
         task.setStatus(status);
     }
 
+    public List<TaskCase> searchCaseTask(TaskCaseSearchRequest request) {
+
+        return taskRepository.getTaskWithCaseDetails(request);
+    }
     public Task uploadDocument(@Valid TaskRequest body) {
         try {
             // Validate whether the application that is being requested for update indeed exists
