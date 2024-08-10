@@ -114,7 +114,7 @@ public class HearingApiController {
     @RequestMapping(value = "/witnessDeposition/v1/uploadPdf", method = RequestMethod.POST)
     public ResponseEntity<HearingResponse> witnessDepositionV1UploadPdf(@Parameter(in = ParameterIn.DEFAULT, description = "Details for the update hearing(s) + RequestInfo meta data.", required = true, schema = @Schema()) @Valid @RequestBody HearingRequest body) {
 
-        Hearing hearing = hearingService.updateHearing(body);
+        Hearing hearing = hearingService.uploadWitnessDeposition(body);
         ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(body.getRequestInfo(), true);
         HearingResponse hearingResponse = HearingResponse.builder().hearing(hearing).responseInfo(responseInfo).build();
         return new ResponseEntity<>(hearingResponse, HttpStatus.OK);
