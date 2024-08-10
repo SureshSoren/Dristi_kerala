@@ -1,4 +1,5 @@
 import { Button, CardText, Modal } from "@egovernments/digit-ui-react-components";
+import { CloseSvg, InfoCard } from "@egovernments/digit-ui-components";
 import { FileUploadIcon } from "../../../dristi/src/icons/svgIndex";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,28 +7,8 @@ import { Urls } from "../hooks/services/Urls";
 import { hearingService } from "../hooks/services";
 
 const Heading = (props) => {
-  return (
-    <div style={{ width: "300px", height: "28px" }}>
-      <p
-        style={{
-          fontWeight: 700,
-          fontSize: "24px",
-          lineHeight: "28.13px",
-          color: "#0A0A0A",
-        }}
-      >
-        {props.label}
-      </p>
-    </div>
-  );
+  return <h1 className="heading-m">{props.label}</h1>;
 };
-
-const Close = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0A0A0A">
-    <path d="M0 0h24v24H0V0z" fill="none" />
-    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
-  </svg>
-);
 
 const ForwardArrowIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-arrow-right-short" viewBox="0 0 16 16">
@@ -40,11 +21,8 @@ const ForwardArrowIcon = () => (
 
 const CloseBtn = (props) => {
   return (
-    <div onClick={props?.onClick} style={{ paddingTop: 0 }}>
-      <div className={"icon-bg-secondary"} style={{ backgroundColor: "#ffff", cursor: "pointer" }}>
-        {" "}
-        <Close />{" "}
-      </div>
+    <div onClick={props?.onClick} style={{ height: "100%", display: "flex", alignItems: "center", paddingRight: "20px", cursor: "pointer" }}>
+      <CloseSvg />
     </div>
   );
 };
@@ -64,10 +42,13 @@ const WitnessModal = ({ handleClose, hearingId, setSignedDocumentUploadID, handl
   const { t } = useTranslation();
   const [isUploaded, setUploaded] = useState(false);
   const UploadSignatureModal = window?.Digit?.ComponentRegistryService?.getComponent("UploadSignatureModal");
+  const CustomButton = window?.Digit?.ComponentRegistryService?.getComponent("CustomButton");
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const [formData, setFormData] = useState({}); // storing the file upload data
   const [openUploadSignatureModal, setOpenUploadSignatureModal] = useState(false);
   const { uploadDocuments } = Digit.Hooks.orders.useDocumentUpload();
+  const [fileStoreId, setFileStoreId] = useState("c162c182-103f-463e-99b6-18654ed7a5b1"); // have to set the uploaded fileStoreID
+  const uri = `${window.location.origin}${Urls.FileFetchById}?tenantId=${tenantId}&fileStoreId=${fileStoreId}`;
   const name = "Signature";
   const uploadModalConfig = useMemo(() => {
     return {
@@ -81,7 +62,7 @@ const WitnessModal = ({ handleClose, hearingId, setSignedDocumentUploadID, handl
             uploadGuidelines: "Ensure the image is not blurry and under 5MB.",
             maxFileSize: 5,
             maxFileErrorMessage: "CS_FILE_LIMIT_5_MB",
-            fileTypes: ["JPG", "PNG", "JPEG"],
+            fileTypes: ["PDF"],
             isMultipleUpload: false,
           },
         ],
@@ -121,113 +102,84 @@ const WitnessModal = ({ handleClose, hearingId, setSignedDocumentUploadID, handl
     },
   };
 
-  const handleDownload = async () => {
-    try {
-      const res = await hearingService.customApiService(Urls.hearing.downloadWitnesspdf, reqBody, { applicationNumber: "", cnrNumber: "" });
-      // complete the download part
-      console.log(res, "lllppp");
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // for Dowloading the Witness Deposition
+  //   const handleDownload = async () => {
+  //     try {
+  //       const res = await hearingService.customApiService(Urls.hearing.downloadWitnesspdf, reqBody, { applicationNumber: "", cnrNumber: "" });
+  //       // complete the download part
+  //       console.log(res, "lllppp");
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
 
-  return (
-    <div>
-      {!openUploadSignatureModal && (
-        <Modal
-          popupStyles={{
-            height: "300px", // Adjusted height for the modal
-            maxHeight: "300px",
-            width: "500px", // Width of the modal
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            borderRadius: "4px",
-          }}
-          headerBarMainStyle={{
-            padding: "0px 24px 0px 24px",
-          }}
-          popupModuleActionBarStyles={{
-            display: "flex",
-            justifyContent: "flex-end",
-            position: "absolute",
-            right: 0,
-            bottom: 0,
-            width: "100%",
-            borderTop: "1px solid #dbd7d2",
-            padding: "10px 16px 16px 0px",
-          }}
-          actionSaveLabelStyles={{
-            backgroundColor: "#BB2C2F",
-            width: "150px",
-            height: "40px",
-            padding: "8px 24px",
-          }}
-          headerBarMain={<Heading label={t("Witness Deposition Upload")} />}
-          headerBarEnd={<CloseBtn onClick={handleClose} />}
-          actionSaveLabel={<BackBtn text={t("PROCEED")} />}
-          isDisabled={!isUploaded}
-          actionSaveOnSubmit={() => handleProceed()} // pass the handler of next modal
-          formId="modal-action"
-        >
-          <div
-            style={{
-              height: "calc(100% - 50px)",
-              padding: "5px 24px",
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
-          >
-            {!isUploaded ? (
-              <React.Fragment>
-                <div className="sign-button-wrap">
-                  <Button
-                    icon={<FileUploadIcon />}
-                    label={t("Upload the Signatured Document")}
-                    onButtonClick={() => {
-                      setOpenUploadSignatureModal(true);
-                    }}
-                    className={"upload-signature"}
-                    labelClassName={"upload-signature-label"}
-                  />
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "20px" }}>
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <h2 style={{ margin: 0 }}>{t("Download the Witness Deposition")}</h2>
-                    <button
-                      style={{ marginLeft: "10px", color: "#007E7E", cursor: "pointer", textDecoration: "underline", background: "none" }}
-                      onClick={handleDownload}
-                    >
-                      {t("CLICK_HERE")}
-                    </button>
-                  </div>
-                </div>
-              </React.Fragment>
-            ) : (
-              <div>
-                <div style={{ backgroundColor: "#E4F2E4", fontWeight: 700, borderRadius: "5px", fontSize: "24px", color: "teal", padding: "3px" }}>
-                  <p>{t("Documented Uploaded")}</p>
-                </div>
-              </div>
-            )}
+  return !openUploadSignatureModal ? (
+    <Modal
+      headerBarMain={<Heading label={t("Upload Witness Deposition")} />}
+      headerBarEnd={<CloseBtn onClick={handleClose} />}
+      actionSaveLabel={<BackBtn text={t("PROCEED")} />}
+      isDisabled={!isUploaded}
+      actionSaveOnSubmit={() => handleProceed()} // pass the handler of next modal
+      className={"add-signature-modal"}
+    >
+      <div className="add-signature-main-div" style={{ padding: "10px", marginTop: "10px" }}>
+        {!isUploaded ? (
+          <div className="not-signed">
+            <div className="sign-button-wrap">
+              <CustomButton
+                icon={<FileUploadIcon />}
+                label={t("Upload the Signatured Document")}
+                onButtonClick={() => {
+                  // setOpenUploadSignatureModal(true);
+                  // setIsSigned(true);
+                  setOpenUploadSignatureModal(true);
+                }}
+                className={"upload-signature"}
+                labelClassName={"upload-signature-label"}
+              ></CustomButton>
+            </div>
+            <div className="donwload-submission" style={{ display: "flex", alignItems: "center" }}>
+              <h2>{t("Download the Witness Deposition")}</h2>
+              <a
+                href={uri}
+                arget="_blank"
+                rel="noreferrer"
+                style={{ marginLeft: "10px", color: "#007E7E", cursor: "pointer", textDecoration: "underline", background: "none" }}
+                // onClick={handleDownload}
+              >
+                {t("CLICK_HERE")}
+              </a>
+            </div>
           </div>
-        </Modal>
-      )}
-      {openUploadSignatureModal && (
-        <UploadSignatureModal
-          t={t}
-          key={name}
-          name={name}
-          setOpenUploadSignatureModal={setOpenUploadSignatureModal}
-          onSelect={onSelect}
-          config={uploadModalConfig}
-          formData={formData}
-        />
-      )}
-    </div>
+        ) : (
+          <div className="signed" style={{ display: "flex", alignItems: "center" }}>
+            <div style={{ fontWeight: 400, fontSize: "20px" }}>{t("Witness Deposition")}</div>
+            <div
+              style={{
+                fontSize: "16px",
+                marginLeft: "10px",
+                borderRadius: "999px",
+                padding: "6px",
+                backgroundColor: "#E4F2E4",
+                color: "#00703C",
+              }}
+            >
+              {t("SIGNED")}
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  ) : (
+    <UploadSignatureModal
+      t={t}
+      key={name}
+      name={name}
+      setOpenUploadSignatureModal={setOpenUploadSignatureModal}
+      onSelect={onSelect}
+      config={uploadModalConfig}
+      formData={formData}
+    />
   );
 };
 

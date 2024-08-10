@@ -15,4 +15,5 @@ export const Urls = {
   case: {
     caseSearch: "/case/v1/_search",
   },
+  FileFetchById: "/filestore/v1/files/id",
 };

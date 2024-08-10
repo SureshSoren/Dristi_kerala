@@ -223,7 +223,7 @@ const InsideHearingMainPage = () => {
         signedDocumentUploadID !== ""
           ? {
               documentType: "WitnessSignedDocument",
-              fileStoreId: signedDocumentUploadID,
+              fileStore: signedDocumentUploadID,
             }
           : null;
 
@@ -236,13 +236,12 @@ const InsideHearingMainPage = () => {
 
       const updateWitness = await hearingService.customApiService(
         Urls.hearing.uploadWitnesspdf,
-        { tenantId: tenantId, hearing: reqBody },
+        { tenantId: tenantId, hearing: reqBody?.hearing, hearingType: "", status: "" },
         { applicationNumber: "", cnrNumber: "" }
       );
       setWitnessModalOpen(false);
     } catch (error) {
       console.error("Error updating witness:", error);
-      // Optionally, you can handle the error more gracefully here, e.g., show an error message to the user
     }
   };
 
