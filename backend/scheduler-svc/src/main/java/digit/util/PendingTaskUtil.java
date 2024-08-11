@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 import static digit.config.ServiceConstants.*;
 
 @Component
@@ -38,6 +40,7 @@ public class PendingTaskUtil {
         pendingTask.setReferenceId(reScheduleHearing.getRescheduledRequestId());
         pendingTask.setStatus(PENDING_TASK_STATUS);
         pendingTask.setFilingNumber(reScheduleHearing.getCaseId());
+        pendingTask.setAssignedRole(List.of("JUDGE_ROLE"));
         return pendingTask;
     }
 
