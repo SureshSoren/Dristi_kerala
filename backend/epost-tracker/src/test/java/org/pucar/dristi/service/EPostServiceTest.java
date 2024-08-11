@@ -1,6 +1,7 @@
 package org.pucar.dristi.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.egov.common.contract.request.RequestInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +32,7 @@ class EPostServiceTest {
     private EPostService ePostService;
 
     @Test
-    void testSendEPost() {
+    void testSendEPost() throws JsonProcessingException {
         // Arrange
         TaskRequest taskRequest = TaskRequest.builder()
                 .requestInfo(new RequestInfo())

@@ -1,5 +1,6 @@
 package org.pucar.dristi.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,7 +33,7 @@ public class EPostController {
     }
 
     @PostMapping("/epost/v1/_sendEPost")
-    public ResponseEntity<ChannelResponse> sendEPost(@RequestBody TaskRequest body){
+    public ResponseEntity<ChannelResponse> sendEPost(@RequestBody TaskRequest body) throws JsonProcessingException {
         ChannelMessage channelMessage = ePostService.sendEPost(body);
         ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(body.getRequestInfo(), true);
         ChannelResponse channelResponse = ChannelResponse.builder().channelMessage(channelMessage).responseInfo(responseInfo).build();

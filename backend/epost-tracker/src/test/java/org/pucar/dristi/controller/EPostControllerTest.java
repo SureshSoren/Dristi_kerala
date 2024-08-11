@@ -1,5 +1,6 @@
 package org.pucar.dristi.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.response.ResponseInfo;
 import org.pucar.dristi.model.*;
@@ -38,7 +39,7 @@ class EPostControllerTest {
     private EPostController ePostController;
 
     @Test
-    void testSendEPost() {
+    void testSendEPost() throws JsonProcessingException {
         // Arrange
 
         ResponseInfo responseInfo = new ResponseInfo();

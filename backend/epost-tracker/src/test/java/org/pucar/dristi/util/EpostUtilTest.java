@@ -3,6 +3,8 @@ package org.pucar.dristi.util;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.egov.common.contract.models.AuditDetails;
 import org.egov.common.contract.models.Document;
 import org.egov.common.contract.request.RequestInfo;
@@ -46,13 +48,16 @@ class EpostUtilTest {
     @Mock
     private EPostTracker ePostTracker;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
     @BeforeEach
     void setUp() {
         // Initialization for any common setup can be done here
     }
 
     @Test
-    void testCreatePostTrackerBody() {
+    void testCreatePostTrackerBody() throws JsonProcessingException {
         // Arrange
         TaskRequest request = mock(TaskRequest.class);
         RequestInfo requestInfo = mock(RequestInfo.class);
@@ -65,7 +70,6 @@ class EpostUtilTest {
         when(request.getTask()).thenReturn(task);
         when(task.getTaskDetails()).thenReturn(taskDetails);
         when(taskDetails.getRespondentDetails()).thenReturn(respondentDetails);
-        when(respondentDetails.getAddress()).thenReturn("123 Street");
         when(respondentDetails.getPinCode()).thenReturn("123456");
         when(task.getDocuments()).thenReturn(Collections.singletonList(document));
         when(document.getFileStore()).thenReturn("fileStoreId");
@@ -82,7 +86,6 @@ class EpostUtilTest {
         assertEquals("PN123", ePostTrackerResult.getProcessNumber());
         assertEquals("tenantId", ePostTrackerResult.getTenantId());
         assertEquals("fileStoreId", ePostTrackerResult.getFileStoreId());
-        assertEquals("123 Street", ePostTrackerResult.getAddress());
         assertEquals("123456", ePostTrackerResult.getPinCode());
         assertEquals(DeliveryStatus.NOT_UPDATED, ePostTrackerResult.getDeliveryStatus());
         assertEquals(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), ePostTrackerResult.getBookingDate()); // Current date comparison

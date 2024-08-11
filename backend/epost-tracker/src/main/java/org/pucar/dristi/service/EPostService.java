@@ -1,5 +1,6 @@
 package org.pucar.dristi.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.model.*;
 import org.pucar.dristi.repository.EPostRepository;
@@ -23,7 +24,7 @@ public class EPostService {
         this.producer = producer;
     }
 
-    public ChannelMessage sendEPost(TaskRequest request) {
+    public ChannelMessage sendEPost(TaskRequest request) throws JsonProcessingException {
 
         EPostTracker ePostTracker = epostUtil.createPostTrackerBody(request);
 

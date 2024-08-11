@@ -32,7 +32,7 @@ public class RespondentDetails {
 
     @JsonProperty("address")
     @Valid
-    private String address;
+    private Address address;
 
     @JsonProperty("state")
     private String state;
