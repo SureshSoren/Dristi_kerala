@@ -87,8 +87,9 @@ public class PaymentUpdateService {
                     Workflow workflow = new Workflow();
                     workflow.setAction("MAKE PAYMENT");
                     task.setWorkflow(workflow);
-                    workflowUtil.updateWorkflowStatus(requestInfo, tenantId, task.getTaskNumber(),
+                    String status = workflowUtil.updateWorkflowStatus(requestInfo, tenantId, task.getTaskNumber(),
                             config.getTaskSummonBusinessServiceName(), workflow, config.getTaskSummonBusinessName());
+                    task.setStatus(status);
                     TaskRequest taskRequest = TaskRequest.builder().requestInfo(requestInfo).task(task).build();
                     producer.push(config.getTaskUpdateTopic(), taskRequest);
                 }
