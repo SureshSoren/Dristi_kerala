@@ -1052,17 +1052,17 @@ const GenerateOrders = () => {
       { tenantId }
     );
   };
-  const handleRescheduleHearing = async ({ hearingNumber, rescheduledRequestId, comments, requesterId, date }) => {
+  const handleRescheduleHearing = async ({ hearingType, hearingBookingId, rescheduledRequestId, comments, requesterId, date }) => {
     await schedulerService.RescheduleHearing(
       {
         RescheduledRequest: [
           {
             rescheduledRequestId: rescheduledRequestId,
-            hearingBookingId: hearingNumber,
+            hearingBookingId: hearingBookingId,
             tenantId: tenantId,
-            judgeId: "",
+            judgeId: "super",
             caseId: filingNumber,
-            hearingType: "TRIAL_HEARING",
+            hearingType: "ADMISSION",
             requesterId: requesterId,
             reason: comments,
             availableAfter: date,
@@ -1495,12 +1495,20 @@ const GenerateOrders = () => {
         const requesterId = "";
         const rescheduledRequestId = currentOrder?.additionalDetails?.formdata?.refApplicationId;
         const comments = currentOrder?.comments || "";
+        const hearingBookingId = currentOrder?.hearingNumber;
         await handleUpdateHearing({
           action: HearingWorkflowAction.RESCHEDULE,
           startTime: Date.parse(currentOrder?.additionalDetails?.formdata?.newHearingDate),
           endTime: Date.parse(currentOrder?.additionalDetails?.formdata?.newHearingDate),
         });
-        await handleRescheduleHearing({ hearingNumber, rescheduledRequestId, comments, requesterId, date });
+        await handleRescheduleHearing({ hearingBookingId, rescheduledRequestId, comments, requesterId, date });
+      }
+      if (orderType === "ASSIGNING_DATE_RESCHEDULED_HEARING") {
+        await handleUpdateHearing({
+          action: HearingWorkflowAction.SETDATE,
+          startTime: Date.parse(currentOrder?.additionalDetails?.formdata?.newHearingDate),
+          endTime: Date.parse(currentOrder?.additionalDetails?.formdata?.newHearingDate),
+        });
       }
       referenceId && (await handleApplicationAction(currentOrder));
       const orderResponse = await updateOrder(

@@ -363,6 +363,17 @@ export const pendingTaskOrderActions = {
       ],
     },
   },
+  RESCHEDULE_HEARING: {
+    actorName: ["JUDGE"],
+    actionName: "Schedule admission hearing",
+    redirectDetails: {
+      url: "/home/home-pending-task/home-set-next-hearing",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "hearingId", value: "referenceId" },
+      ],
+    },
+  },
 };
 
 export const pendingTaskOrderOfJudgementActions = {};
