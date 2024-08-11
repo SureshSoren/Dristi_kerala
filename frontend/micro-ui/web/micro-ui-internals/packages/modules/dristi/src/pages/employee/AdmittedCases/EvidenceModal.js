@@ -1,5 +1,5 @@
 import { CloseSvg, TextInput } from "@egovernments/digit-ui-react-components";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import CommentComponent from "../../../components/CommentComponent";
@@ -14,6 +14,7 @@ import { SubmissionWorkflowAction, SubmissionWorkflowState } from "../../../Util
 import { getAdvocates } from "../../citizen/FileCase/EfilingValidationUtils";
 import DocViewerWrapper from "../docViewerWrapper";
 import SelectCustomDocUpload from "../../../components/SelectCustomDocUpload";
+import ESignSignatureModal from "../../../components/ESignSignatureModal";
 
 const stateSla = {
   DRAFT_IN_PROGRESS: 2,
@@ -42,6 +43,10 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
   const userType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo?.type]);
   const todayDate = new Date().getTime();
   const [formData, setFormData] = useState({});
+
+  const setData = (data) => {
+    setFormData(data);
+  };
 
   const CloseBtn = (props) => {
     return (
@@ -641,25 +646,57 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
     }
   };
 
-  const documentUploaderConfig = {
-    key: "commentDoc",
-    populators: {
-      inputs: [
-        {
-          name: "commentDoc",
-          documentSubText: "",
-          isOptional: "",
-          infoTooltipMessage: "",
-          type: "DragDropComponent",
-          uploadGuidelines: t("UPLOAD_DOC_50"),
-          maxFileSize: 50,
-          maxFileErrorMessage: "CS_FILE_LIMIT_50_MB",
-          fileTypes: ["JPG", "PNG", "PDF"],
-          isMultipleUpload: false,
-        },
-      ],
-    },
-  };
+  const documentUploaderConfig = useMemo(
+    () => [
+      {
+        body: [
+          {
+            type: "component",
+            component: "SelectUserTypeComponent",
+            key: "SelectUserTypeComponent",
+            withoutLabel: true,
+            populators: {
+              inputs: [
+                {
+                  label: "Document Type",
+                  type: "dropdown",
+                  name: "selectIdType",
+                  optionsKey: "name",
+                  error: "CORE_REQUIRED_FIELD_ERROR",
+                  validation: {},
+                  isMandatory: true,
+                  disableMandatoryFieldFor: ["aadharNumber"],
+                  disableFormValidation: false,
+                  options: [
+                    {
+                      code: "EVIDENCE",
+                      name: "Evidence",
+                    },
+                  ],
+                  optionsCustomStyle: {
+                    top: "40px",
+                  },
+                },
+                {
+                  label: "Upload Document",
+                  type: "documentUpload",
+                  name: "doc",
+                  validation: {},
+                  allowedFileTypes: /(.*?)(png|jpg|pdf)$/i,
+                  isMandatory: true,
+                  disableMandatoryFieldFor: ["aadharNumber"],
+                  errorMessage: "CUSTOM_DOCUMENT_ERROR_MSG",
+                  disableFormValidation: false,
+                },
+              ],
+              validation: {},
+            },
+          },
+        ],
+      },
+    ],
+    []
+  );
 
   const onDocumentUpload = async (fileData, filename, tenantId) => {
     if (fileData?.fileStore) return fileData;
@@ -837,19 +874,14 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
                                       artifactNumber: documentSubmission?.[0]?.artifactList?.artifactNumber,
                                     };
                               if (formData) {
-                                if (formData?.commentDoc?.commentDoc?.length > 0) {
-                                  const uploadedData = await onDocumentUpload(
-                                    formData?.commentDoc?.commentDoc[0],
-                                    formData?.commentDoc?.commentDoc[0].name,
-                                    tenantId
-                                  );
+                                if (formData?.SelectUserTypeComponent?.doc?.length > 0) {
                                   newComment = {
                                     ...newComment,
                                     comment: [
                                       {
                                         ...newComment.comment[0],
-                                        commentDocumentId: uploadedData.file.files[0].fileStoreId,
-                                        commentDocumentName: uploadedData.filename,
+                                        commentDocumentId: formData?.SelectUserTypeComponent?.doc?.[0]?.[1]?.fileStoreId?.fileStoreId,
+                                        commentDocumentName: documentUploaderConfig?.[0]?.body?.[0]?.populators?.inputs?.[0]?.options?.[0]?.code,
                                       },
                                     ],
                                   };
@@ -866,16 +898,7 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
                         </div>
                       </div>
                       <div style={{ display: "flex" }}>
-                        <SelectCustomDocUpload
-                          t={t}
-                          formData={formData}
-                          config={documentUploaderConfig}
-                          onSelect={(e, p) => {
-                            setFormData({
-                              [documentUploaderConfig.key]: p,
-                            });
-                          }}
-                        />
+                        <SelectCustomDocUpload t={t} formUploadData={formData} config={[documentUploaderConfig?.[0]]} setData={setData} />
                       </div>
                     </div>
                   </div>
