@@ -759,6 +759,16 @@ const GenerateOrders = () => {
         },
         { tenantId }
       );
+      return await ordersService.updateOrder(
+        {
+          order: {
+            ...order,
+            documents: documentsFile ? [...documents, documentsFile] : documents,
+            workflow: { ...order.workflow, action, documents: [{}] },
+          },
+        },
+        { tenantId }
+      );
     } catch (error) {
       return null;
     }
@@ -1077,7 +1087,7 @@ const GenerateOrders = () => {
     const orderData = orderDetails?.order;
     const orderFormData = orderDetails?.order?.additionalDetails?.formdata?.SummonsOrder?.party?.data;
     const selectedChannel = orderData?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels;
-    const respondentAddress = orderFormData?.addressDetails?.map((data) => generateAddress({ ...data?.addressDetails }));
+    const respondentAddress = orderFormData?.addressDetails?.map((data) => ({ ...data?.addressDetails }));
     const respondentName = `${orderFormData?.respondentFirstName || ""}${
       orderFormData?.respondentMiddleName ? " " + orderFormData?.respondentMiddleName + " " : " "
     }${orderFormData?.respondentLastName || ""}`.trim();
@@ -1098,7 +1108,7 @@ const GenerateOrders = () => {
       complainantDetails?.name?.otherNames ? " " + complainantDetails?.name?.otherNames + " " : " "
     }${complainantDetails?.name?.familyName || ""}`;
     const address = `${doorNo ? doorNo + "," : ""} ${buildingName ? buildingName + "," : ""} ${street}`.trim();
-    const complainantAddress = generateAddress({
+    const complainantAddress = {
       pincode: pincode,
       district: addressLine2,
       city: city,
@@ -1108,17 +1118,18 @@ const GenerateOrders = () => {
         latitude: longitude,
       },
       locality: address,
-    });
+    };
     const courtDetails = courtRoomData?.Court_Rooms?.find((data) => data?.code === caseDetails?.courtId);
     switch (orderType) {
       case "SUMMONS":
         payload = {
           summonDetails: {
             issueDate: orderData?.auditDetails?.lastModifiedTime,
+            caseFilingDate: caseDetails?.filingDate,
           },
           respondentDetails: {
             name: respondentName,
-            address: typeof respondentAddress[0] === "object" ? generateAddress(respondentAddress[0]) : respondentAddress[0],
+            address: respondentAddress[0],
             phone: respondentPhoneNo[0] || "",
             email: respondentEmail[0] || "",
             age: "",
@@ -1149,9 +1160,13 @@ const GenerateOrders = () => {
         break;
       case "WARRANT":
         payload = {
+          warrantDetails: {
+            issueDate: orderData?.auditDetails?.lastModifiedTime,
+            caseFilingDate: caseDetails?.filingDate,
+          },
           respondentDetails: {
             name: respondentName,
-            address: typeof respondentAddress[0] === "object" ? generateAddress(respondentAddress[0]) : respondentAddress[0],
+            address: respondentAddress[0],
             phone: respondentPhoneNo[0] || "",
             email: respondentEmail[0] || "",
             age: "",
@@ -1183,7 +1198,7 @@ const GenerateOrders = () => {
         payload = {
           respondentDetails: {
             name: respondentName,
-            address: typeof respondentAddress[0] === "object" ? generateAddress(respondentAddress[0]) : respondentAddress[0],
+            address: respondentAddress[0],
             phone: respondentPhoneNo[0] || "",
             email: respondentEmail[0] || "",
             age: "",
@@ -1218,25 +1233,13 @@ const GenerateOrders = () => {
             channelName: channelTypeEnum?.[item?.type]?.type,
           };
 
-          const address =
-            typeof respondentAddress[channelMap.get(item?.type) - 1] === "object"
-              ? generateAddress(...respondentAddress[channelMap.get(item?.type) - 1])
-              : respondentAddress[channelMap.get(item?.type) - 1];
-          const sms =
-            typeof respondentPhoneNo[channelMap.get(item?.type) - 1] === "object"
-              ? generateAddress(...respondentPhoneNo[channelMap.get(item?.type) - 1])
-              : respondentPhoneNo[channelMap.get(item?.type) - 1];
-          const email =
-            typeof respondentEmail[channelMap.get(item?.type) - 1] === "object"
-              ? generateAddress(...respondentEmail[channelMap.get(item?.type) - 1])
-              : respondentEmail[channelMap.get(item?.type) - 1];
+          const address = respondentAddress[channelMap.get(item?.type) - 1];
+          const sms = respondentPhoneNo[channelMap.get(item?.type) - 1];
+          const email = respondentEmail[channelMap.get(item?.type) - 1];
+
           payload.respondentDetails = {
             ...payload.respondentDetails,
-            address: ["Post", "Via Police"].includes(item?.type)
-              ? typeof item?.value === "object"
-                ? generateAddress({ ...item?.value })
-                : item?.value
-              : address || "",
+            address: ["Post", "Via Police"].includes(item?.type) ? item?.value : address || "",
             phone: ["SMS"].includes(item?.type) ? item?.value : sms || "",
             email: ["E-mail"].includes(item?.type) ? item?.value : email || "",
             age: "",
@@ -1256,33 +1259,21 @@ const GenerateOrders = () => {
             [channelDetailsEnum?.[item?.type]]: item?.value || "",
           };
 
-          const address =
-            typeof respondentAddress[channelMap.get(item?.type) - 1] === "object"
-              ? generateAddress(...respondentAddress[channelMap.get(item?.type) - 1])
-              : respondentAddress[channelMap.get(item?.type) - 1];
+          const address = respondentAddress[channelMap.get(item?.type) - 1];
 
-          const sms =
-            typeof respondentPhoneNo[channelMap.get(item?.type) - 1] === "object"
-              ? generateAddress(...respondentPhoneNo[channelMap.get(item?.type) - 1])
-              : respondentPhoneNo[channelMap.get(item?.type) - 1];
-          const email =
-            typeof respondentEmail[channelMap.get(item?.type) - 1] === "object"
-              ? generateAddress(...respondentEmail[channelMap.get(item?.type) - 1])
-              : respondentEmail[channelMap.get(item?.type) - 1];
+          const sms = respondentPhoneNo[channelMap.get(item?.type) - 1];
+          const email = respondentEmail[channelMap.get(item?.type) - 1];
 
           payload.respondentDetails = {
             ...payload.respondentDetails,
-            address: ["Post", "Via Police"].includes(item?.type)
-              ? typeof item?.value === "object"
-                ? generateAddress({ ...item?.value })
-                : item?.value
-              : address || "",
+            address: ["Post", "Via Police"].includes(item?.type) ? item?.value : address || "",
             phone: ["SMS"].includes(item?.type) ? item?.value : sms || "",
             email: ["E-mail"].includes(item?.type) ? item?.value : email || "",
             age: "",
             gender: "",
           };
         }
+
         await ordersService.customApiService(Urls.orders.taskCreate, {
           task: {
             taskDetails: payload,
