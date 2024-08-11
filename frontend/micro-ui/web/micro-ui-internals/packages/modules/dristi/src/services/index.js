@@ -267,4 +267,13 @@ export const DRISTIService = {
       data,
       params,
     }),
+  judgeAvailabilityDates: (data, params) => {
+    return Request({
+      url: Urls.dristi.judgeAvailabilityDates,
+      useCache: false,
+      userService: false,
+      data,
+      params,
+    });
+  },
 };

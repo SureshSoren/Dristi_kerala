@@ -53,6 +53,7 @@ const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript 
   const ordersService = Digit.ComponentRegistryService.getComponent("OrdersService") || {};
   const userInfo = Digit.UserService.getUser()?.info;
   const userType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo]);
+  const [nextFiveDates, setNextFiveDates] = useState([]);
 
   const history = useHistory();
 
@@ -79,8 +80,8 @@ const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript 
     }
   };
 
-  const { data: datesResponse, refetch: refetchGetAvailableDates } = useGetAvailableDates(true);
-  const Dates = useMemo(() => datesResponse || [], [datesResponse]);
+  // const { data: datesResponse, refetch: refetchGetAvailableDates } = useGetAvailableDates(true);
+  // const Dates = useMemo(() => datesResponse || [], [datesResponse]);
 
   const { data: MdmsCourtList, isLoading: loading } = Digit.Hooks.useCustomMDMS(
     Digit.ULBService.getStateId(),
@@ -156,6 +157,52 @@ const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript 
     setStepper(stepper - 1);
   };
 
+  function dateToEpoch(date) {
+    //This is in milliseconds
+    return Math.floor(new Date(date).getTime());
+  }
+
+  const { data: dateResponse } = window?.Digit.Hooks.dristi.useJudgeAvailabilityDates(
+    {
+      SearchCriteria: {
+        tenantId: Digit.ULBService.getCurrentTenantId(),
+        fromDate: dateToEpoch(new Date(new Date().setDate(new Date().getDate() + 1))),
+      },
+    },
+    {},
+    "",
+    true
+  );
+
+  const convertAvailableDatesToDateObjects = (availableDates) => {
+    return availableDates.map((dateInfo) => ({
+      ...dateInfo,
+      date: new Date(dateInfo.date / 1),
+    }));
+  };
+
+  const getNextNDates = (n, availableDates) => {
+    const datesArray = [];
+    const options = { day: "numeric", month: "long", year: "numeric" };
+    for (let i = 0; i < n; i++) {
+      if (i < availableDates.length) {
+        const dateObject = availableDates[i].date;
+        datesArray.push(dateObject.toLocaleDateString("en-GB", options));
+      } else {
+        break;
+      }
+    }
+    return datesArray;
+  };
+
+  useEffect(() => {
+    if (dateResponse?.AvailableDates) {
+      const availableDatesWithDateObjects = convertAvailableDatesToDateObjects(dateResponse.AvailableDates);
+      const nextDates = getNextNDates(5, availableDatesWithDateObjects);
+      setNextFiveDates(nextDates);
+    }
+  }, [dateResponse]);
+
   return (
     <div>
       <Modal
@@ -189,7 +236,7 @@ const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript 
         <div style={{ margin: "10px" }}>Select a Date</div>
         <Card>
           <div className="case-card">
-            {Dates.map((date, index) => (
+            {nextFiveDates.map((date, index) => (
               <DateCard key={index} date={date} isSelected={selectedDate === date} onClick={() => setSelectedDate(date)} />
             ))}
           </div>
