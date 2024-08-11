@@ -6,6 +6,7 @@ import digit.kafka.producer.Producer;
 import digit.repository.ReScheduleRequestRepository;
 import digit.service.HearingService;
 import digit.service.RescheduleRequestOptOutService;
+import digit.util.PendingTaskUtil;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
@@ -27,18 +28,18 @@ public class OptOutProcessor {
     private final ObjectMapper mapper;
     private final HearingService hearingService;
     private final RescheduleRequestOptOutService optOutService;
-
+    private final PendingTaskUtil pendingTaskUtil;
 
 
     @Autowired
-    public OptOutProcessor(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, HearingService hearingService, RescheduleRequestOptOutService optOutService) {
+    public OptOutProcessor(Producer producer, ReScheduleRequestRepository repository, Configuration configuration, ObjectMapper mapper, HearingService hearingService, RescheduleRequestOptOutService optOutService, PendingTaskUtil pendingTaskUtil) {
         this.producer = producer;
         this.repository = repository;
         this.configuration = configuration;
         this.mapper = mapper;
         this.hearingService = hearingService;
         this.optOutService = optOutService;
-
+        this.pendingTaskUtil = pendingTaskUtil;
     }
 
 
@@ -78,6 +79,11 @@ public class OptOutProcessor {
             if (totalOptOutCanBeMade - optOutAlreadyMade == 1 || totalOptOutCanBeMade - optOutAlreadyMade == 0) { // second condition is for lag if this data is already persisted into the db,it should be second only
 
                 // this is last opt out, need to close the request. open the pending task for judge
+                PendingTask pendingTask = pendingTaskUtil.createPendingTask(reScheduleHearing);
+                PendingTaskRequest request = PendingTaskRequest.builder()
+                        .pendingTask(pendingTask)
+                        .requestInfo(new RequestInfo()).build();
+                pendingTaskUtil.callAnalytics(request);
                 reScheduleHearing.setStatus(INACTIVE);
                 //unblock the calendar for judge (suggested days -available days)
                 unblockJudgeCalendarForSuggestedDays(reScheduleHearing);
@@ -120,10 +126,6 @@ public class OptOutProcessor {
                     newHearings.add(scheduleHearing);
                 }
             }
-//            hearingService.update(ScheduleHearingRequest.builder()
-//                    .requestInfo(requestInfo)
-//                    .hearing(newHearings)
-//                    .build());
             producer.push(configuration.getScheduleHearingUpdateTopic(),Collections.singletonList(newHearings) );
             log.info("operation = unblockJudgeCalendarForSuggestedDays, result = SUCCESS");
         } catch (Exception e) {
