@@ -648,7 +648,7 @@ const GenerateOrders = () => {
                 email: item.data.emails?.emailId,
               },
             }))?.[0],
-          selectedChannels: [],
+          selectedChannels: currentOrder?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels,
         };
       }
     }
