@@ -22,6 +22,8 @@ const ReviewSummonsNoticeAndWarrant = () => {
   const [isSigned, setIsSigned] = useState(false);
   const [actionModalType, setActionModalType] = useState("");
   const [isDisabled, setIsDisabled] = useState(true);
+  const [rowData, setRowData] = useState({});
+  const [taskDocuments, setTaskDocumens] = useState([]);
 
   const [tabData, setTabData] = useState(
     SummonsTabsConfig?.SummonsTabsConfig?.map((configItem, index) => ({ key: index, label: configItem.label, active: index === 0 ? true : false }))
@@ -49,36 +51,53 @@ const ReviewSummonsNoticeAndWarrant = () => {
     setConfig(SummonsTabsConfig?.SummonsTabsConfig?.[n]); // as per tab number filtering the config
   };
 
+  const getTaskDocuments = async () => {
+    try {
+      const response = await window?.Digit?.DRISTIService.getTaskDocuments(
+        {
+          taskId: rowData?.id,
+        },
+        {}
+      );
+      console.log("response :>> ", response);
+    } catch (error) {
+      setTaskDocumens([
+        {
+          // fileName: "Summons Document",
+          fileStoreId: "03e93220-7254-4877-ac80-bb808a722a61",
+          documentName: "file_example_JPG_100kB.jpg",
+          // documentType: "image/jpeg",
+        },
+        {
+          // fileName: "Vakalatnama Document",
+          fileStoreId: "03e93220-7254-4877-ac80-bb808a722a61",
+          documentName: "file_example_JPG_100kB.jpg",
+          // documentType: "image/jpeg",
+        },
+      ]);
+    }
+  };
+
   const infos = useMemo(() => {
-    return [
-      { key: "Issued to", value: "Vikram Singh" },
-      { key: "Issued Date", value: "23/04/2024" },
-      { key: "Next Hearing Date", value: "04/07/2024" },
-      { key: "Amount Paid", value: "Rs. 15" },
-      { key: "Channel Details", value: "Physical Post" },
-    ];
-  }, []);
+    if (rowData?.taskDetails) {
+      const caseDetails = JSON.parse(rowData?.taskDetails);
+      return [
+        { key: "Issued to", value: caseDetails?.respondentDetails?.name },
+        { key: "Issued Date", value: rowData?.createdDate },
+        { key: "Next Hearing Date", value: "04/07/2024" },
+        { key: "Amount Paid", value: `Rs. ${caseDetails?.deliveryChannels?.fees}` },
+        { key: "Channel Details", value: caseDetails?.deliveryChannels?.channelName },
+      ];
+    }
+  }, [rowData]);
 
   const links = useMemo(() => {
     return [{ text: "View order", link: "" }];
   }, []);
 
   const documents = useMemo(() => {
-    return [
-      {
-        fileName: "Summons Document",
-        fileStoreId: "a236b4e0-5ddd-4ece-9ba3-4d02edf15adc",
-        documentName: "file_example_JPG_100kB.jpg",
-        documentType: "image/jpeg",
-      },
-      {
-        fileName: "Vakalatnama Document",
-        fileStoreId: "a236b4e0-5ddd-4ece-9ba3-4d02edf15adc",
-        documentName: "file_example_JPG_100kB.jpg",
-        documentType: "image/jpeg",
-      },
-    ];
-  }, []);
+    return taskDocuments;
+  }, [taskDocuments]);
 
   const submissionData = useMemo(() => {
     return [
@@ -98,7 +117,6 @@ const ReviewSummonsNoticeAndWarrant = () => {
         {
           type: "document",
           modalBody: <DocumentViewerWithComment infos={infos} documents={documents} links={links} />,
-          // modalBody: <UpdateDeliveryStatusComponent t={t} infos={infos} />,
           actionSaveOnSubmit: () => {},
         },
         {
@@ -140,6 +158,10 @@ const ReviewSummonsNoticeAndWarrant = () => {
     };
   }, [infos, isDisabled, links, t]);
 
+  useEffect(() => {
+    if (rowData?.id) getTaskDocuments();
+  }, [rowData]);
+
   return (
     <div className="review-summon-warrant">
       <div className="header-wraper">
@@ -157,7 +179,9 @@ const ReviewSummonsNoticeAndWarrant = () => {
           additionalConfig={{
             resultsTable: {
               onClickRow: (props) => {
-                setActionModalType("signed");
+                console.log("props?.original :>> ", props?.original);
+                setRowData(props?.original);
+                setActionModalType("SIGN_PENDING");
                 setShowActionModal(true);
               },
             },
@@ -165,7 +189,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
         ></InboxSearchComposer>
         {showActionModal && (
           <DocumentModal
-            config={config?.label === "Pending" ? (actionModalType !== "signed" ? signedModalConfig : unsignedModalConfig) : sentModalConfig}
+            config={config?.label === "Pending" ? (actionModalType !== "SIGN_PENDING" ? signedModalConfig : unsignedModalConfig) : sentModalConfig}
           />
         )}
       </div>

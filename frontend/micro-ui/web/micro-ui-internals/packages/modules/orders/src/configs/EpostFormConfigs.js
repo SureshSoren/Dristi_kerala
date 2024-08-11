@@ -1,27 +1,27 @@
-export const printAndSendDocumentsConfig =[
-    {
-        body:[
-            {
-                inline: false,
-                label: "Bar Code",
-                isMandatory: true,
-                key: "barCode",
-                type: "text",
-                disable: false,
-                populators: { name: "barCode", error: "Required",},
-              },
-            {
-                type: "date",
-                label: "Date of Booking",
-                key: "dateOfBooking",
-                populators: {
-                  name: "dateofBooking",
-                },
-              },
-        ]
-    }
+export const printAndSendDocumentsConfig = [
+  {
+    body: [
+      {
+        inline: false,
+        label: "Bar Code",
+        isMandatory: true,
+        key: "barCode",
+        type: "text",
+        disable: false,
+        populators: { name: "barCode", error: "Required" },
+      },
+      {
+        type: "date",
+        label: "Date of Booking",
+        key: "dateOfBooking",
+        populators: {
+          name: "dateofBooking",
+        },
+      },
+    ],
+  },
 ];
- 
+
 export const updateEPostConfig = (status) => {
   if (status === "DELIVERED") {
     return [
@@ -56,7 +56,7 @@ export const updateEPostConfig = (status) => {
                   code: "NOT_UPDATED",
                   name: "Not Updated",
                   isEnabled: true,
-                }
+                },
               ],
             },
           },
@@ -67,13 +67,11 @@ export const updateEPostConfig = (status) => {
             populators: {
               name: "dateOfDelivery",
             },
-          }
-
+          },
         ],
       },
     ];
   }
-
 
   if (status === "NOT_DELIVERED") {
     return [
@@ -108,7 +106,7 @@ export const updateEPostConfig = (status) => {
                   code: "NOT_UPDATED",
                   name: "Not Updated",
                   isEnabled: true,
-                }
+                },
               ],
             },
           },
@@ -119,8 +117,7 @@ export const updateEPostConfig = (status) => {
             populators: {
               name: "dateOfDelivery",
             },
-          }
-
+          },
         ],
       },
     ];
@@ -158,12 +155,11 @@ export const updateEPostConfig = (status) => {
                 code: "NOT_UPDATED",
                 name: "Not Updated",
                 isEnabled: true,
-              }
+              },
             ],
           },
         },
       ],
     },
-];
-}
- 
+  ];
+};

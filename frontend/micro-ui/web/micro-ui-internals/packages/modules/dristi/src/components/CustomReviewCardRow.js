@@ -172,7 +172,7 @@ const CustomReviewCardRow = ({
                   ? textValue.length > 0
                     ? textValue.map((text, index) => <div key={index}>{text || t("CS_NOT_AVAILABLE")}</div>)
                     : t("CS_NOT_AVAILABLE")
-                  : textValue || dependentOnValue && textDependentValue || t("CS_NOT_AVAILABLE")}
+                  : textValue || (dependentOnValue && textDependentValue) || t("CS_NOT_AVAILABLE")}
               </div>
               {showFlagIcon && (
                 <div

@@ -3,6 +3,7 @@ import { getUserDetails } from "../../../hooks/useGetAccessToken";
 import { DRISTIService } from "../../../services";
 import { userTypeOptions } from "../registration/config";
 import { formatDate } from "./CaseType";
+import { efilingDocumentKeyAndTypeMapping } from "./Config/efilingDocumentKeyAndTypeMapping";
 
 export const showDemandNoticeModal = ({
   selected,
@@ -952,6 +953,19 @@ const onDocumentUpload = async (fileData, filename, tenantId) => {
   return { file: fileUploadRes?.data, fileType: fileData.type, filename };
 };
 
+const sendDocumentForOcr = async (key, fileStoreId, filingNumber, tenantId) => {
+  if (efilingDocumentKeyAndTypeMapping[key])
+    await window?.Digit?.DRISTIService.sendDocuemntForOCR(
+      {
+        documentType: efilingDocumentKeyAndTypeMapping[key],
+        fileStoreId: fileStoreId,
+        filingNumber: filingNumber,
+        tenantId: tenantId,
+      },
+      {}
+    );
+};
+
 export const getAllAssignees = (caseDetails, getAdvocates = true, getLitigent = true) => {
   if (Array.isArray(caseDetails?.representatives || []) && caseDetails?.representatives?.length > 0) {
     return caseDetails?.representatives
@@ -1021,6 +1035,9 @@ const documentUploadHandler = async (document, index, prevCaseDetails, data, pag
       documentName: uploadedData.filename || document?.documentName,
       fileName: pageConfig?.selectDocumentName?.[key],
     };
+    if (uploadedData.file?.files?.[0]?.fileStoreId && efilingDocumentKeyAndTypeMapping[key]) {
+      sendDocumentForOcr(key, uploadedData.file?.files?.[0]?.fileStoreId, prevCaseDetails?.filingNumber, tenantId);
+    }
     if (oldBouncedChequeFileUpload !== undefined) {
       const xTemp = prevCaseDetails?.documents?.filter((doc) => doc.fileStore === oldBouncedChequeFileUpload?.document?.[index]?.fileStore)?.[0];
       tempDocList.push({
@@ -1364,6 +1381,14 @@ export const updateCaseDetails = async ({
               data?.data?.inquiryAffidavitFileUpload?.document?.map(async (document) => {
                 if (document) {
                   const uploadedData = await onDocumentUpload(document, document.name, tenantId);
+                  if (uploadedData.file?.files?.[0]?.fileStoreId && efilingDocumentKeyAndTypeMapping["inquiryAffidavitFileUpload"]) {
+                    sendDocumentForOcr(
+                      "inquiryAffidavitFileUpload",
+                      uploadedData.file?.files?.[0]?.fileStoreId,
+                      prevCaseDetails?.filingNumber,
+                      tenantId
+                    );
+                  }
                   return {
                     documentType: uploadedData.fileType || document?.documentType,
                     fileStore: uploadedData.file?.files?.[0]?.fileStoreId || document?.fileStore,
@@ -1870,6 +1895,9 @@ export const updateCaseDetails = async ({
               data?.data?.vakalatnamaFileUpload?.document?.map(async (document) => {
                 if (document) {
                   const uploadedData = await onDocumentUpload(document, document.name, tenantId);
+                  if (uploadedData.file?.files?.[0]?.fileStoreId && efilingDocumentKeyAndTypeMapping["vakalatnamaFileUpload"]) {
+                    sendDocumentForOcr("vakalatnamaFileUpload", uploadedData.file?.files?.[0]?.fileStoreId, prevCaseDetails?.filingNumber, tenantId);
+                  }
                   return {
                     documentType: uploadedData.fileType || document?.documentType,
                     fileStore: uploadedData.file?.files?.[0]?.fileStoreId || document?.fileStore,

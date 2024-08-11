@@ -367,6 +367,7 @@ export const UICustomizations = {
           criteria: {
             ...requestCriteria.body.criteria,
             ...filterList,
+            ...(filterList?.orderType ? { orderType: [filterList?.orderType] } : { orderType: [] }),
           },
           tenantId,
           pagination: {
@@ -377,19 +378,22 @@ export const UICustomizations = {
         config: {
           ...requestCriteria?.config,
           select: (data) => {
-            return { ...data, list: data.list?.filter((order) => order.taskType) };
+            return { ...data, list: data?.filter((order) => order.taskType) };
           },
         },
       };
     },
     additionalCustomizations: (row, key, column, value, t, searchResult) => {
+      const caseDetails = JSON.parse(row?.taskDetails);
       switch (key) {
         case "Case Name & ID":
-          return t(value);
+          return `${row?.caseName}, ${value}`;
         case "Status":
-          return t(value);
+          return t(value); // document status
         case "Issued":
           return `${formatDateDifference(value)} days ago`;
+        case "Delivery Channel":
+          return caseDetails?.deliveryChannels?.channelName;
         default:
           return t("ES_COMMON_NA");
       }

@@ -5,13 +5,13 @@ import ApplicationInfoComponent from "./ApplicationInfoComponent";
 
 const DocumentViewerWithComment = ({ infos, links, documents, showCommentSection, comments, showAddNewComment, onAddComment }) => {
   const { t } = useTranslation();
-  const DocViewerWrapper = window?.Digit?.ComponentRegistryService?.getComponent("DocViewerWrapper");
+  const DocViewerWrapper = Digit?.ComponentRegistryService?.getComponent("DocViewerWrapper");
 
   return (
     <div className="document-viewer-with-comment">
       <div className={`application-details ${!showCommentSection && "without-comment"}`}>
         <React.Fragment>
-          <ApplicationInfoComponent infos={infos} links={links} />
+          {infos && <ApplicationInfoComponent infos={infos} links={links} />}
           {documents &&
             documents?.map((docs, index) => (
               <React.Fragment>
@@ -21,7 +21,7 @@ const DocumentViewerWithComment = ({ infos, links, documents, showCommentSection
                       key={docs.fileStoreId}
                       fileStoreId={docs.fileStoreId}
                       displayFilename={docs.fileName}
-                      tenantId={Digit.ULBService.getCurrentTenantId()}
+                      tenantId={"kl"}
                       docWidth="100%"
                       docHeight="unset"
                       showDownloadOption={false}
