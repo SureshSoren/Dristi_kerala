@@ -759,16 +759,6 @@ const GenerateOrders = () => {
         },
         { tenantId }
       );
-      return await ordersService.updateOrder(
-        {
-          order: {
-            ...order,
-            documents: documentsFile ? [...documents, documentsFile] : documents,
-            workflow: { ...order.workflow, action, documents: [{}] },
-          },
-        },
-        { tenantId }
-      );
     } catch (error) {
       return null;
     }
