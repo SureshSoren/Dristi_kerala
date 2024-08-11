@@ -172,6 +172,8 @@ const CustomReviewCardRow = ({
                   ? textValue.length > 0
                     ? textValue.map((text, index) => <div key={index}>{text || t("CS_NOT_AVAILABLE")}</div>)
                     : t("CS_NOT_AVAILABLE")
+                  : textValue && typeof textValue === "object"
+                  ? textValue?.text || ""
                   : textValue || (dependentOnValue && textDependentValue) || t("CS_NOT_AVAILABLE")}
               </div>
               {showFlagIcon && (
@@ -516,18 +518,24 @@ const CustomReviewCardRow = ({
         if (Array.isArray(addressDetails)) {
           address = addressDetails.map(({ addressDetails }) => {
             return {
-              address: `${addressDetails?.locality || ""}, ${addressDetails?.city || ""}, ${addressDetails?.district || ""}, ${
-                addressDetails?.state || ""
-              } - ${addressDetails?.pincode || ""}`,
+              address:
+                typeof addressDetails === "string"
+                  ? addressDetails
+                  : `${addressDetails?.locality || ""}, ${addressDetails?.city || ""}, ${addressDetails?.district || ""}, ${
+                      addressDetails?.state || ""
+                    } - ${addressDetails?.pincode || ""}`,
               coordinates: addressDetails?.coordinates,
             };
           });
         } else {
           address = [
             {
-              address: `${addressDetails?.locality || ""}, ${addressDetails?.city || ""}, ${addressDetails?.district || ""}, ${
-                addressDetails?.state || ""
-              } - ${addressDetails?.pincode || ""}`,
+              address:
+                typeof addressDetails === "string"
+                  ? addressDetails
+                  : `${addressDetails?.locality || ""}, ${addressDetails?.city || ""}, ${addressDetails?.district || ""}, ${
+                      addressDetails?.state || ""
+                    } - ${addressDetails?.pincode || ""}`,
               coordinates: addressDetails?.coordinates,
             },
           ];
