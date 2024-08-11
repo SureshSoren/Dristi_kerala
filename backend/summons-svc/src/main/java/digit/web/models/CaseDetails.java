@@ -38,6 +38,6 @@ public class CaseDetails {
     @JsonProperty("courtName")
     private String courtName;
 
-    @JsonProperty("courtAddress")
-    private String courtAddress;
+//    @JsonProperty("courtAddress")
+//    private String courtAddress;
 }
