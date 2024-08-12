@@ -8,6 +8,8 @@ import DocumentModal from "../../components/DocumentModal";
 import { formatDate } from "../../../../hearings/src/utils";
 import usePaymentProcess from "../../../../home/src/hooks/usePaymentProcess";
 import { DRISTIService } from "@egovernments/digit-ui-module-dristi/src/services";
+import { ordersService } from "../../hooks/services";
+import { Urls } from "../../hooks/services/Urls";
 
 const modeOptions = [
   { label: "E-Post (3-5 days)", value: "e-post" },
@@ -234,6 +236,44 @@ const PaymentForSummonModal = ({ path }) => {
         if (billPaymentStatus === true) {
           console.log("YAAAYYYYY");
           const fileStoreId = await DRISTIService.fetchBillFileStoreId({}, { billId: bill?.Bill?.[0]?.id, tenantId });
+
+          await Promise.all([
+            ordersService.customApiService(Urls.orders.pendingTask, {
+              pendingTask: {
+                name: "Show Summon-Warrant Status",
+                entityType: "order-managelifecycle",
+                referenceId: hearingsData?.HearingList?.[0]?.hearingId,
+                status: `SUMMON_WARRANT_STATUS`,
+                assignedTo: [],
+                assignedRole: ["JUDGE_ROLE"],
+                cnrNumber: filteredTasks?.[0]?.cnrNumber,
+                filingNumber: filingNumber,
+                isCompleted: false,
+                stateSla: "",
+                additionalDetails: {
+                  hearingId: hearingsData?.list?.[0]?.hearingId,
+                },
+                tenantId,
+              },
+            }),
+            ordersService.customApiService(Urls.orders.pendingTask, {
+              pendingTask: {
+                name: `MAKE_PAYMENT_FOR_SUMMONS_POST`,
+                entityType: "async-order-submission-managelifecycle",
+                referenceId: `MANUAL_${orderNumber}`,
+                status: `PAYMENT_PENDING_POST`,
+                assignedTo: [],
+                assignedRole: [],
+                cnrNumber: filteredTasks?.[0]?.cnrNumber,
+                filingNumber: filingNumber,
+                isCompleted: true,
+                stateSla: "",
+                additionalDetails: {},
+                tenantId,
+              },
+            }),
+          ]);
+
           fileStoreId &&
             history.push(`/${window?.contextPath}/citizen/home/post-payment-screen`, {
               state: {
