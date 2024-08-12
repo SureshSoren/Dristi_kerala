@@ -141,8 +141,28 @@ public class TaskRepository {
         List<TaskCase> list = jdbcTemplate.query(taskQuery, preparedStmtList.toArray(), taskCaseRowMapper);
         String applicationStatus = request.getCriteria().getApplicationStatus();
 
-        if (!ObjectUtils.isEmpty(applicationStatus) && list!= null) {
+        if (!ObjectUtils.isEmpty(applicationStatus) && list != null) {
             list = list.stream().filter((element) -> applicationStatus.equals(element.getDocumentStatus())).toList();
+        }
+
+        List<Object> preparedStmtDc = new ArrayList<>();
+
+        List<String> ids = new ArrayList<>();
+        if (list == null) {
+            return new ArrayList<>();
+        }
+        for (TaskCase task : list)
+            ids.add(task.getId().toString());
+
+        String documentQuery = "";
+        documentQuery = queryBuilder.getDocumentSearchQuery(ids, preparedStmtDc);
+        log.info("Final document query in summon table :: {}", documentQuery);
+        Map<UUID, List<Document>> documentMap = jdbcTemplate.query(documentQuery, preparedStmtDc.toArray(), documentRowMapper);
+        log.info("DB document map in summon table :: {}", documentMap);
+        if (documentMap != null) {
+            list.forEach(order -> {
+                order.setDocuments(documentMap.get(order.getId()));
+            });
         }
 
         return list;
