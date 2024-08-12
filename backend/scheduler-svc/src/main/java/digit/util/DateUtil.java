@@ -1,5 +1,7 @@
 package digit.util;
 
+import digit.config.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.*;
@@ -8,9 +10,16 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class DateUtil {
 
+    private final Configuration config;
+
+    @Autowired
+    public DateUtil(Configuration config) {
+        this.config = config;
+    }
+
 
     public LocalDateTime getLocalDateTimeFromEpoch(long startTime) {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime), ZoneId.systemDefault());
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime), ZoneId.of(config.getZoneId()));
     }
 
     public LocalTime getLocalTime(String time) {
@@ -29,19 +38,19 @@ public class DateUtil {
 
     public LocalDate getLocalDateFromEpoch(long startTime) {
         return Instant.ofEpochMilli(startTime)
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneId.of(config.getZoneId()))
                 .toLocalDate();
     }
 
     public Long getEPochFromLocalDate(LocalDate date) {
 
-        return date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return date.atStartOfDay(ZoneId.of(config.getZoneId())).toInstant().toEpochMilli();
 
     }
 
 
     public Long getEpochFromLocalDateTime(LocalDateTime dateTime) {
-        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return dateTime.atZone(ZoneId.of(config.getZoneId())).toInstant().toEpochMilli();
     }
 
     public Long getStartOfTheDayForEpoch(Long date) {
