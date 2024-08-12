@@ -17,7 +17,7 @@ import java.util.Map;
 public class DeliveryChannel {
 
     @JsonProperty("channelName")
-    private ChannelName channelName;
+    private String channelName;
 
     @JsonProperty("paymentFees")
     private String paymentFees;

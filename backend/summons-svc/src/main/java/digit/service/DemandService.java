@@ -44,7 +44,7 @@ public class DemandService {
 
     public List<Calculation> generatePaymentDetails(RequestInfo requestInfo, Task task) {
         SummonCalculationCriteria criteria = SummonCalculationCriteria.builder()
-                .channelId(task.getTaskDetails().getDeliveryChannel().getChannelName().name())
+                .channelId(task.getTaskDetails().getDeliveryChannel().getChannelName())
                 .receiverPincode(task.getTaskDetails().getRespondentDetails().getPinCode())
                 .tenantId(task.getTenantId()).summonId(task.getTaskNumber()).build();
 

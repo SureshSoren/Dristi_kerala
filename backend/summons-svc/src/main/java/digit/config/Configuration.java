@@ -141,4 +141,11 @@ public class Configuration {
     @Value("${kafka.topic.issue.summons.application}")
     private String issueSummonsTopic;
 
+    // EPost
+
+    @Value("${egov.epost.host}")
+    private String ePostHost;
+
+    @Value("${egov.epost.request.endpoint}")
+    private String ePostRequestEndPoint;
 }
