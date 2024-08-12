@@ -71,6 +71,7 @@ class EpostUtilTest {
         when(task.getTaskDetails()).thenReturn(taskDetails);
         when(taskDetails.getRespondentDetails()).thenReturn(respondentDetails);
         when(respondentDetails.getPinCode()).thenReturn("123456");
+        when(respondentDetails.getAddress()).thenReturn(new Address());
         when(task.getDocuments()).thenReturn(Collections.singletonList(document));
         when(document.getFileStore()).thenReturn("fileStoreId");
 

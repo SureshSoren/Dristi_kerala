@@ -41,14 +41,13 @@ public class EpostUtil {
         String processNumber = idgenUtil.getIdList(request.getRequestInfo(), config.getEgovStateTenantId(),
                 config.getIdName(),null,1).get(0);
         String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String address = objectMapper.writeValueAsString(request.getTask().getTaskDetails().getRespondentDetails().getAddress());
 
         return EPostTracker.builder()
                 .processNumber(processNumber)
                 .tenantId(config.getEgovStateTenantId())
                 .taskNumber(request.getTask().getTaskNumber())
                 .fileStoreId(request.getTask().getDocuments().get(0).getFileStore())
-                .address(address)
+                .address(request.getTask().getTaskDetails().getRespondentDetails().getAddress().toString())
                 .pinCode(request.getTask().getTaskDetails().getRespondentDetails().getPinCode())
                 .deliveryStatus(DeliveryStatus.NOT_UPDATED)
                 .additionalDetails(request.getTask().getAdditionalDetails())
