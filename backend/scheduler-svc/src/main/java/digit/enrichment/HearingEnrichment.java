@@ -109,7 +109,7 @@ public class HearingEnrichment {
                     flag = false;
                     break;
                 }
-                currentStartTime = currentStartTime.plusMinutes(5); // Move to the next time slot
+                currentStartTime = currentStartTime.plusMinutes(1); // Move to the next time slot
             }
             if (!flag) break;
         }
