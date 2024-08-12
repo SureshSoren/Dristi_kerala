@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.config.Configuration;
+import org.pucar.dristi.repository.CaseRepository;
 import org.pucar.dristi.util.CasePdfUtil;
 import org.pucar.dristi.web.models.CaseRequest;
 import org.pucar.dristi.web.models.CaseSearchRequest;
@@ -23,14 +24,18 @@ public class CasePdfService {
 
     private final CasePdfUtil casePdfUtil;
 
+    private final CaseRepository caseRepository;
+
     @Autowired
-    public CasePdfService(Configuration config, CasePdfUtil casePdfUtil) {
+    public CasePdfService(Configuration config, CasePdfUtil casePdfUtil, CaseRepository caseRepository) {
         this.config = config;
         this.casePdfUtil = casePdfUtil;
+        this.caseRepository = caseRepository;
     }
 
     public ByteArrayResource generatePdf(CaseSearchRequest body) {
         try {
+            caseRepository.getApplications(body.getCriteria(), body.getRequestInfo());
             CourtCase courtCase = body.getCriteria().get(0).getResponseList().get(0);
             RequestInfo requestInfo = body.getRequestInfo();
             CaseRequest caseRequest = CaseRequest.builder().requestInfo(requestInfo).cases(courtCase).build();

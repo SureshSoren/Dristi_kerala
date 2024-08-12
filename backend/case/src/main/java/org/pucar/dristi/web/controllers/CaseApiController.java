@@ -139,7 +139,6 @@ public class CaseApiController {
     public ResponseEntity<?> caseV1GeneratePdf (
             @Parameter(in = ParameterIn.DEFAULT, description = "Search criteria + RequestInfo meta data.", required = true, schema = @Schema()) @Valid @RequestBody CaseSearchRequest body){
 
-        caseService.searchCases(body);
         ByteArrayResource pdfFile = casePdfService.generatePdf(body);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"case_pdf.pdf\"")
