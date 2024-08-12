@@ -341,13 +341,13 @@ const InsideHearingMainPage = () => {
                 )}
               </React.Fragment>
             ) : (
-              <>
+              <div>
                 <TextArea
                   style={{ width: "100%", minHeight: "40vh", cursor: "default", backgroundColor: "#E8E8E8", color: "#3D3C3C" }}
                   value={activeTab === "Witness Deposition" ? witnessDepositionText : transcriptText}
                   disabled
                 ></TextArea>
-              </>
+              </div>
             )}
           </div>
         </div>
