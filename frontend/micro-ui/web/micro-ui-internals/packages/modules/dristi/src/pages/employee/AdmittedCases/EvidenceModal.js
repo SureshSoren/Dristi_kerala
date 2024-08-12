@@ -898,7 +898,13 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
                         </div>
                       </div>
                       <div style={{ display: "flex" }}>
-                        <SelectCustomDocUpload t={t} formUploadData={formData} config={[documentUploaderConfig?.[0]]} setData={setData} />
+                        <SelectCustomDocUpload
+                          t={t}
+                          formUploadData={formData}
+                          config={[documentUploaderConfig?.[0]]}
+                          setData={setData}
+                          documentSubmission={documentSubmission}
+                        />
                       </div>
                     </div>
                   </div>

@@ -487,6 +487,14 @@ const AdmittedCases = () => {
   useEffect(() => {
     // Set default values when component mounts
     setDefaultValues(defaultSearchValues);
+    const isSignSuccess = localStorage.getItem("esignProcess");
+    const doc = JSON.parse(localStorage.getItem("docSubmission"));
+    if (isSignSuccess) {
+      if (doc) {
+        setDocumentSubmission(doc);
+      }
+      setShow(true);
+    }
   }, []);
 
   const onTabChange = (n) => {

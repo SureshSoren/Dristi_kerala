@@ -3,10 +3,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import Modal from "../../../dristi/src/components/Modal";
 import { Urls } from "../hooks/services/Urls";
 import { FileUploadIcon } from "../../../dristi/src/icons/svgIndex";
+import { getFilestoreId } from "@egovernments/digit-ui-module-dristi/src/Utils/fileStoreUtil";
 
 function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup, setSignedDocumentUploadID }) {
   const [isSigned, setIsSigned] = useState(false);
   const { handleEsign, checkSignStatus } = Digit.Hooks.orders.useESign();
+  const fileStoreIdESign = getFilestoreId();
   const { uploadDocuments } = Digit.Hooks.orders.useDocumentUpload();
   const [formData, setFormData] = useState({}); // storing the file upload data
   const [fileStoreId, setFileStoreId] = useState("c162c182-103f-463e-99b6-18654ed7a5b1"); // have to set the uploaded fileStoreID
@@ -112,7 +114,7 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup,
                 onClick={() => {
                   // setOpenAadharModal(true);
                   // setIsSigned(true);
-                  handleEsign(name, pageModule);
+                  handleEsign(name, pageModule,fileStoreIdESign);
                 }}
                 className={"aadhar-sign-in"}
                 labelClassName={"submission-aadhar-sign-in"}

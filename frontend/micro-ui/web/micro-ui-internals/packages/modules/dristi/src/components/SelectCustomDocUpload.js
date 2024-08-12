@@ -16,10 +16,11 @@ const DragDropJSX = ({ t, currentValue, error }) => {
   );
 };
 
-function SelectCustomDocUpload({ t, config, formUploadData = {}, setData }) {
+function SelectCustomDocUpload({ t, config, formUploadData = {}, setData, documentSubmission }) {
   const [upload, setUpload] = useState(false);
   const [eSignModal, setEsignModal] = useState(false);
   const [showDocument, setShowDocument] = useState(false);
+  const [isSigned, setIsSigned] = useState(false);
 
   const handleOpenUploadModal = () => {
     setUpload(true);
@@ -41,6 +42,26 @@ function SelectCustomDocUpload({ t, config, formUploadData = {}, setData }) {
   };
 
   const handleEsign = () => {
+    localStorage.removeItem("docSubmission");
+    localStorage.removeItem("formUploadData");
+    localStorage.removeItem("EvidenceFile");
+    const localStorageID = localStorage.getItem("fileStoreId");
+    setData((prevData) => ({
+      ...prevData,
+      SelectUserTypeComponent: {
+        ...prevData.SelectUserTypeComponent,
+        doc: [
+          [
+            prevData.SelectUserTypeComponent.doc[0][0],
+            {
+              ...prevData.SelectUserTypeComponent.doc[0][1],
+              fileStoreId: localStorageID ? localStorageID : prevData.SelectUserTypeComponent.doc[0][1].fileStoreId,
+            },
+          ],
+        ],
+      },
+    }));
+    localStorage.removeItem("fileStoreId");
     setShowDocument(true);
     setEsignModal(false);
   };
@@ -49,6 +70,76 @@ function SelectCustomDocUpload({ t, config, formUploadData = {}, setData }) {
     setShowDocument(false);
     setData({});
   };
+
+  const loadFileFromLocalStorage = () => {
+    const storedData = localStorage.getItem("EvidenceFile");
+
+    if (storedData) {
+      const storedObject = JSON.parse(storedData);
+
+      // Ensure that SelectUserTypeComponent and doc are present
+      if (storedObject.SelectUserTypeComponent?.doc?.[0]?.[1]?.fileData) {
+        const fileData = storedObject.SelectUserTypeComponent.doc[0][1].fileData;
+        const byteString = atob(fileData.base64String.split(",")[1]);
+        const mimeType = fileData.base64String.split(",")[0].match(/:(.*?);/)[1];
+        const byteArray = new Uint8Array(byteString.length);
+
+        for (let i = 0; i < byteString.length; i++) {
+          byteArray[i] = byteString.charCodeAt(i);
+        }
+
+        const restoredFile = new File([byteArray], fileData.fileName, { type: mimeType });
+
+        // Return the restored object with updated file
+        const restoredObject = {
+          ...storedObject,
+          SelectUserTypeComponent: {
+            ...storedObject.SelectUserTypeComponent,
+            doc: [
+              [
+                storedObject.SelectUserTypeComponent.doc[0][0], // Preserve the first element
+                {
+                  ...storedObject.SelectUserTypeComponent.doc[0][1],
+                  file: restoredFile, // Update with the restored file
+                },
+              ],
+            ],
+          },
+        };
+
+        return restoredObject;
+      }
+    }
+
+    return {}; // Return empty object if no valid data found
+  };
+
+  useEffect(() => {
+    const isSignSuccess = localStorage.getItem("esignProcess");
+    const formData = localStorage.getItem("formUploadData");
+    const restoreFileData = loadFileFromLocalStorage();
+
+    if (isSignSuccess) {
+      if (formData) {
+        const parsedFormData = JSON.parse(formData);
+
+        // Ensure that `restoreFileData` contains the correct file structure
+        if (restoreFileData.SelectUserTypeComponent?.doc?.[0]?.[1]?.file) {
+          const restoredFile = restoreFileData.SelectUserTypeComponent.doc[0][1].file;
+
+          // Update the file in `parsedFormData` with the restored file
+          if (parsedFormData.SelectUserTypeComponent?.doc?.[0]?.[1]) {
+            parsedFormData.SelectUserTypeComponent.doc[0][1].file = restoredFile;
+          }
+        }
+
+        setData(parsedFormData);
+      }
+
+      setEsignModal(true);
+      localStorage.removeItem("esignProcess");
+    }
+  }, []);
 
   return (
     <React.Fragment>
@@ -76,6 +167,10 @@ function SelectCustomDocUpload({ t, config, formUploadData = {}, setData }) {
           doctype={formUploadData?.SelectUserTypeComponent?.selectIdType?.code}
           handleGoBackSignatureModal={handleGoBackSignatureModal}
           handleIssueOrder={handleEsign}
+          documentSubmission={documentSubmission}
+          formUploadData={formUploadData}
+          isSigned={isSigned}
+          setIsSigned={setIsSigned}
         />
       )}
       {showDocument && (

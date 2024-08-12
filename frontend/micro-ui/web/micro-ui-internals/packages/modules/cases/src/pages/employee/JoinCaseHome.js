@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { formatDate } from "../../utils";
 import { FileUploadIcon } from "../../../../dristi/src/icons/svgIndex";
+import { getFilestoreId } from "@egovernments/digit-ui-module-dristi/src/Utils/fileStoreUtil";
 
 const CloseBtn = (props) => {
   return (
@@ -240,6 +241,7 @@ const JoinCaseHome = ({ refreshInbox }) => {
   const isUserLoggedIn = Boolean(token);
   const [pageModule, setPageModule] = useState("en");
   const { handleEsign, checkJoinACaseESignStatus } = Digit.Hooks.orders.useESign();
+  const fileStoreId = getFilestoreId();
 
   const documentUploaderConfig = {
     key: "vakalatnama",
@@ -1284,7 +1286,7 @@ const JoinCaseHome = ({ refreshInbox }) => {
                         setIsDisabled(false);
                         // setIsSignedAdvocate(true);
                         saveStateToLocalStorage();
-                        handleEsign("Advocate", pageModule);
+                        handleEsign("Advocate", pageModule, fileStoreId);
                       }}
                       className={"aadhar-sign-in"}
                       labelClassName={"aadhar-sign-in"}
@@ -1323,7 +1325,7 @@ const JoinCaseHome = ({ refreshInbox }) => {
                       onButtonClick={() => {
                         // setIsSignedParty(true);
                         saveStateToLocalStorage();
-                        handleEsign("Party", pageModule);
+                        handleEsign("Party", pageModule, fileStoreId);
                       }}
                       className={"aadhar-sign-in"}
                       labelClassName={"aadhar-sign-in"}

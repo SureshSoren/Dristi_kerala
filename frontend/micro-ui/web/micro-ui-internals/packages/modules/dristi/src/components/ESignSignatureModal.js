@@ -17,8 +17,17 @@ const CloseBtn = (props) => {
   );
 };
 
-function ESignSignatureModal({ t, handleIssueOrder, handleGoBackSignatureModal, saveOnsubmitLabel, setSignedDocumentUploadID, doctype }) {
-  const [isSigned, setIsSigned] = useState(false);
+function ESignSignatureModal({
+  t,
+  handleIssueOrder,
+  handleGoBackSignatureModal,
+  saveOnsubmitLabel,
+  doctype,
+  documentSubmission,
+  formUploadData,
+  isSigned,
+  setIsSigned,
+}) {
   const { handleEsign, checkSignStatus } = Digit.Hooks.orders.useESign();
   const [formData, setFormData] = useState({}); // storing the file upload data
   const [openUploadSignatureModal, setOpenUploadSignatureModal] = useState(false);
@@ -51,7 +60,6 @@ function ESignSignatureModal({ t, handleIssueOrder, handleGoBackSignatureModal, 
   }, [name]);
 
   const onSelect = (key, value) => {
-    console.log(value, "value");
     if (value?.Signature === null) {
       setFormData({});
       setIsSigned(false);
@@ -79,6 +87,36 @@ function ESignSignatureModal({ t, handleIssueOrder, handleGoBackSignatureModal, 
   useEffect(() => {
     checkSignStatus(name, formData, uploadModalConfig, onSelect, setIsSigned);
   }, [checkSignStatus]);
+
+  const saveFileToLocalStorage = (docData) => {
+    const file = docData?.file;
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const base64String = e.target.result;
+
+        const fileData = {
+          fileName: file.name,
+          base64String: base64String,
+          lastModified: file.lastModified,
+          size: file.size,
+          type: file.type,
+        };
+
+        const storedData = {
+          ...formUploadData,
+          SelectUserTypeComponent: {
+            ...formUploadData.SelectUserTypeComponent,
+            doc: [[docData[0], { ...docData[1], fileData }]],
+          },
+        };
+
+        localStorage.setItem("EvidenceFile", JSON.stringify(storedData));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return !openUploadSignatureModal ? (
     <Modal
@@ -115,8 +153,11 @@ function ESignSignatureModal({ t, handleIssueOrder, handleGoBackSignatureModal, 
                 label={t("CS_ESIGN")}
                 onButtonClick={() => {
                   // setOpenAadharModal(true);
-                  setIsSigned(true);
-                  // handleEsign(name, pageModule);
+                  // setIsSigned(true);
+                  localStorage.setItem("docSubmission", JSON.stringify(documentSubmission));
+                  localStorage.setItem("formUploadData", JSON.stringify(formUploadData));
+                  saveFileToLocalStorage(formUploadData?.SelectUserTypeComponent?.doc?.[0]?.[1]);
+                  handleEsign(name, pageModule, formUploadData?.SelectUserTypeComponent?.doc?.[0]?.[1]?.fileStoreId?.fileStoreId);
                 }}
                 className={"aadhar-sign-in"}
                 labelClassName={"aadhar-sign-in"}
@@ -127,7 +168,7 @@ function ESignSignatureModal({ t, handleIssueOrder, handleGoBackSignatureModal, 
                 onButtonClick={() => {
                   // setOpenUploadSignatureModal(true);
                   setIsSigned(true);
-                  //   setOpenUploadSignatureModal(true);
+                  // setOpenUploadSignatureModal(true);
                 }}
                 className={"upload-signature"}
                 labelClassName={"upload-signature-label"}
