@@ -12,6 +12,7 @@ import EFilingPaymentRes from "../../components/EfilingPaymentRes";
 import ScheduleHearing from "./ScheduleHearing";
 import PaymentStatus from "../../../../orders/src/components/PaymentStatus";
 import ScheduleNextHearing from "./ScheduleNextHearing";
+import DashboardPage from "./Dashboard";
 const bredCrumbStyle = { maxWidth: "min-content" };
 const userInfo = JSON.parse(window.localStorage.getItem("user-info"));
 let userType = "employee";
@@ -47,6 +48,8 @@ const App = ({ path, stateCode, userType, tenants }) => {
         <PrivateRoute path={`${path}/inside-hearing`} component={() => <InsideHearingMainPage />} />
         <PrivateRoute path={`${path}/home-pending-task/e-filing-payment-response`} component={() => <EFilingPaymentRes></EFilingPaymentRes>} />
         <PrivateRoute path={`${path}/home-pending-task`} component={() => <HomeView></HomeView>} />
+
+        <PrivateRoute path={`${path}/dashboard`} component={() => <DashboardPage></DashboardPage>} />
         <PrivateRoute
           path={`${path}/home-pending-task/e-filing-payment-breakdown`}
           component={() => <EfilingPaymentBreakdown></EfilingPaymentBreakdown>}

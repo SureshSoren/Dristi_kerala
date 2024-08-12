@@ -12,6 +12,7 @@ import LitigantHomePage from "./LitigantHomePage";
 import { TabLitigantSearchConfig } from "../../configs/LitigantHomeConfig";
 import ReviewCard from "../../components/ReviewCard";
 import { InboxIcon, DocumentIcon } from "../../../homeIcon";
+import { Link } from "react-router-dom";
 
 const defaultSearchValues = {
   filingNumber: "",
@@ -274,6 +275,9 @@ const HomeView = () => {
           <div className="left-side">
             <div className="home-header-wrapper">
               <UpcomingHearings handleNavigate={handleNavigate} attendeeIndividualId={individualId} userInfoType={userInfoType} t={t} />
+              <div className="hearingCard" style={{backgroundColor : "#ECF3FD"}}>
+                <Link to={`/${window.contextPath}/employee/home/dashboard`}> Open Dashboard </Link>
+              </div>
               {isCourtRoomRole && <ReviewCard data={data} userInfoType={userInfoType} />}
             </div>
             <div className="content-wrapper">
