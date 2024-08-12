@@ -8,6 +8,7 @@ import DocumentViewerWithComment from "../../components/DocumentViewerWithCommen
 import AddSignatureComponent from "../../components/AddSignatureComponent";
 import CustomStepperSuccess from "../../components/CustomStepperSuccess";
 import UpdateDeliveryStatusComponent from "../../components/UpdateDeliveryStatusComponent";
+import { taskService } from "../../hooks/services";
 
 const defaultSearchValues = {
   eprocess: "",
@@ -16,6 +17,7 @@ const defaultSearchValues = {
 
 const ReviewSummonsNoticeAndWarrant = () => {
   const { t } = useTranslation();
+  const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const [defaultValues, setDefaultValues] = useState(defaultSearchValues);
   const [config, setConfig] = useState(SummonsTabsConfig?.SummonsTabsConfig?.[0]);
   const [showActionModal, setShowActionModal] = useState(false);
@@ -24,6 +26,8 @@ const ReviewSummonsNoticeAndWarrant = () => {
   const [isDisabled, setIsDisabled] = useState(true);
   const [rowData, setRowData] = useState({});
   const [taskDocuments, setTaskDocumens] = useState([]);
+  const [step, setStep] = useState(0);
+  const [signatureId, setSignatureId] = useState("");
 
   const [tabData, setTabData] = useState(
     SummonsTabsConfig?.SummonsTabsConfig?.map((configItem, index) => ({ key: index, label: configItem.label, active: index === 0 ? true : false }))
@@ -44,6 +48,18 @@ const ReviewSummonsNoticeAndWarrant = () => {
   useEffect(() => {
     // Set default values when component mounts
     setDefaultValues(defaultSearchValues);
+    const isSignSuccess = localStorage.getItem("esignProcess");
+    const isRowData = JSON.parse(localStorage.getItem("ESignSummons"));
+    if (isSignSuccess) {
+      if (rowData) {
+        setRowData(isRowData);
+      }
+      setShowActionModal(true);
+      setActionModalType("SIGN_PENDING");
+      setStep(1);
+      localStorage.removeItem("esignProcess");
+      localStorage.removeItem("ESignSummons");
+    }
   }, []);
 
   const onTabChange = (n) => {
@@ -106,6 +122,38 @@ const ReviewSummonsNoticeAndWarrant = () => {
     ];
   }, []);
 
+  const handleSubmit = async () => {
+    try {
+      const localStorageID = localStorage.getItem("fileStoreId");
+      const documents = Array.isArray(rowData?.documents) ? rowData.documents : [];
+      const documentsFile =
+        signatureId !== "" || localStorageID
+          ? {
+              documentType: "SIGNED",
+              fileStore: signatureId || localStorageID,
+            }
+          : null;
+
+      localStorage.removeItem("fileStoreId");
+
+      const reqBody = {
+        task: {
+          ...rowData,
+          documents: documentsFile ? [...documents, documentsFile] : documents,
+          tenantId,
+        },
+        tenantId,
+      };
+
+      // Attempt to upload the document and handle the response
+      const update = await taskService.UploadTaskDocument(reqBody, { tenantId });
+      console.log("Document upload successful:", update);
+    } catch (error) {
+      // Handle errors that occur during the upload process
+      console.error("Error uploading document:", error);
+    }
+  };
+
   const unsignedModalConfig = useMemo(() => {
     return {
       handleClose: handleClose,
@@ -123,8 +171,17 @@ const ReviewSummonsNoticeAndWarrant = () => {
           heading: { label: "Add Signature (1)" },
           actionSaveLabel: "Send Email",
           actionCancelLabel: "Back",
-          modalBody: <AddSignatureComponent t={t} isSigned={isSigned} handleSigned={() => setIsSigned(true)} />,
+          modalBody: (
+            <AddSignatureComponent
+              t={t}
+              isSigned={isSigned}
+              handleSigned={() => setIsSigned(true)}
+              rowData={rowData}
+              setSignatureId={setSignatureId}
+            />
+          ),
           isDisabled: isSigned ? false : true,
+          actionSaveOnSubmit: handleSubmit,
         },
         {
           type: "success",
@@ -183,6 +240,8 @@ const ReviewSummonsNoticeAndWarrant = () => {
                 setRowData(props?.original);
                 setActionModalType("SIGN_PENDING");
                 setShowActionModal(true);
+                setStep(0);
+                setIsSigned(props?.original?.documentStatus === "SIGN_PENDING" ? false : true);
               },
             },
           }}
@@ -190,6 +249,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
         {showActionModal && (
           <DocumentModal
             config={config?.label === "Pending" ? (actionModalType !== "SIGN_PENDING" ? signedModalConfig : unsignedModalConfig) : sentModalConfig}
+            currentStep={step}
           />
         )}
       </div>

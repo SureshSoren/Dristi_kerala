@@ -5,6 +5,7 @@ import { ordersService } from "./services";
 import { schedulerService } from "./services";
 
 import { EpostService } from "./services";
+import { taskService } from "./services";
 import useSearchOrdersService from "./orders/useSearchOrdersService";
 import useESign from "./orders/useESign";
 
@@ -49,4 +50,5 @@ export const CustomisedHooks = {
   ordersService,
   EpostService,
   schedulerService,
+  taskService
 };

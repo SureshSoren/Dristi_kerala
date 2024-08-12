@@ -17,4 +17,7 @@ export const Urls = {
   Scheduler: {
     reschedule: "/scheduler/hearing/v1/_reschedule",
   },
+  Task: {
+    uploadDoc: "/task/v1/uploadDocument",
+  },
 };

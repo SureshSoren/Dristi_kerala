@@ -15,9 +15,9 @@ const Heading = ({ heading }) => {
     </div>
   );
 };
-const DocumentModal = ({ config, setShow }) => {
+const DocumentModal = ({ config, setShow, currentStep }) => {
   const Modal = window?.Digit?.ComponentRegistryService?.getComponent("Modal");
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(currentStep || 0);
   // const [isDisabled, setIsDisabled] = useState(false);
 
   const isDisabled = useMemo(() => {

@@ -88,3 +88,14 @@ export const schedulerService = {
       params,
     }),
 };
+
+export const taskService = {
+  UploadTaskDocument: (data, params) =>
+    Request({
+      url: Urls.Task.uploadDoc,
+      useCache: true,
+      userService: true,
+      data,
+      params,
+    }),
+};
