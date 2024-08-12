@@ -46,5 +46,10 @@ public class ServiceConstants {
     public static final String TENANTID = "?tenantId=";
     public static final String BUSINESS_SERVICES = "&businessServices=";
 
+    public static final String BAIL = "BAIL";
+    public static final String SUMMON = "SUMMONS";
+    public static final String WARRANT = "WARRANT";
+    public static final String ISSUESUMMON = "ISSUESUMMON";
+
 
 }

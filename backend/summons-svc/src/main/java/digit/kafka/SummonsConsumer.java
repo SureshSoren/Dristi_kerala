@@ -14,6 +14,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
+import static digit.config.ServiceConstants.*;
 
 import java.util.HashMap;
 
@@ -35,13 +36,13 @@ public class SummonsConsumer {
         this.demandService = demandService;
     }
 
-    @KafkaListener(topics = "save-task-application")
+    @KafkaListener(topics = {"${kafka.topic.save.task.application}"})
     @Async
     public void listenForGenerateSummonsDocument(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             TaskRequest taskRequest = objectMapper.convertValue(record, TaskRequest.class);
-            String taskType = taskRequest.getTask().getTaskType().toLowerCase();
-            if (taskType.equals("summons") || taskType.equals("warrant")) {
+            String taskType = taskRequest.getTask().getTaskType();
+            if (taskType.equalsIgnoreCase(SUMMON) || taskType.equalsIgnoreCase(WARRANT)) {
                 log.info(taskRequest.getTask().toString());
                 summonsService.generateSummonsDocument(taskRequest);
             }
@@ -50,13 +51,13 @@ public class SummonsConsumer {
         }
     }
 
-    @KafkaListener(topics = "save-task-application")
+    @KafkaListener(topics = {"${kafka.topic.save.task.application}"})
     @Async
     public void listenForGenerateSummonsBill(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             TaskRequest taskRequest = objectMapper.convertValue(record, TaskRequest.class);
-            String taskType = taskRequest.getTask().getTaskType().toLowerCase();
-            if (taskType.equals("summons")) {
+            String taskType = taskRequest.getTask().getTaskType();
+            if (taskType.equalsIgnoreCase(SUMMON) && taskRequest.getTask().getStatus().equalsIgnoreCase("PAYMENT_PENDING")) {
                 log.info(taskRequest.getTask().toString());
                 demandService.fetchPaymentDetailsAndGenerateDemandAndBill(taskRequest);
             }
@@ -65,7 +66,7 @@ public class SummonsConsumer {
         }
     }
 
-    @KafkaListener(topics = "insert-summons")
+    @KafkaListener(topics = {"${kafka.topic.insert.summons}"})
     @Async
     public void listenForInsertSummons(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
@@ -79,7 +80,7 @@ public class SummonsConsumer {
         }
     }
 
-    @KafkaListener(topics = "update-summons")
+    @KafkaListener(topics = {"${kafka.topic.update.summons}"})
     @Async
     public void listenForUpdateSummons(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
@@ -93,7 +94,7 @@ public class SummonsConsumer {
         }
     }
 
-    @KafkaListener(topics = "send-summons")
+    @KafkaListener(topics = {"${kafka.topic.issue.summons.application}"})
     @Async
     public void listenForSendSummons(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {

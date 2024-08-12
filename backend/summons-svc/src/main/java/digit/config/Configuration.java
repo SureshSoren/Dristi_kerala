@@ -128,4 +128,17 @@ public class Configuration {
 
     @Value("${payment.calculator.calculate.endpoint}")
     private String paymentCalculatorCalculateEndpoint;
+
+    @Value(("${kafka.topic.save.task.application}"))
+    private String saveTaskApplicationTopic;
+
+    @Value("${kafka.topic.insert.summons}")
+    private String insertSummonsTopic;
+
+    @Value("${kafka.topic.update.summons}")
+    private String updateSummonsTopic;
+
+    @Value("${kafka.topic.issue.summons.application}")
+    private String issueSummonsTopic;
+
 }

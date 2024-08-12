@@ -87,7 +87,7 @@ public class SummonsService {
         }
         SummonsRequest summonsRequest = createSummonsRequest(request.getRequestInfo(), summonsDelivery);
 
-        producer.push("insert-summons", summonsRequest);
+        producer.push(config.getInsertSummonsTopic(), summonsRequest);
         return summonsDelivery;
     }
 
@@ -101,7 +101,7 @@ public class SummonsService {
         enrichAndUpdateSummonsDelivery(summonsDelivery, request);
 
         SummonsRequest summonsRequest = createSummonsRequest(request.getRequestInfo(), summonsDelivery);
-        producer.push("update-summons", summonsRequest);
+        producer.push(config.getUpdateSummonsTopic(), summonsRequest);
 
         return createChannelMessage(summonsDelivery);
     }
