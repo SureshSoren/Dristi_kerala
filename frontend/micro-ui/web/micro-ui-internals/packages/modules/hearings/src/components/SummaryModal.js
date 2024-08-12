@@ -72,7 +72,17 @@ const CloseBtn = (props) => {
   );
 };
 
-const SummaryModal = ({ handleConfirmationModal, hearingId, hearing, onSaveSummary, onCancel, transcript, setTranscript, isEndHearing }) => {
+const SummaryModal = ({
+  handleConfirmationModal,
+  hearingId,
+  hearing,
+  onSaveSummary,
+  onCancel,
+  transcript,
+  setTranscript,
+  isEndHearing,
+  disableTextArea,
+}) => {
   const { t } = useTranslation();
   const [caseDetails, setCaseDetails] = useState();
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
@@ -96,7 +106,7 @@ const SummaryModal = ({ handleConfirmationModal, hearingId, hearing, onSaveSumma
     // await refetch();
     if (latestText && latestText?.HearingList?.[0]?.transcript?.[0]) {
       const hearingData = latestText?.HearingList?.[0];
-      setTranscript(hearingData.transcript[0]);
+      setTranscript(hearingData.transcript[0] || "");
     }
   }, [latestText, setTranscript]);
 
@@ -213,7 +223,7 @@ const SummaryModal = ({ handleConfirmationModal, hearingId, hearing, onSaveSumma
           onCancel();
         }}
         formId="modal-action"
-        isDisabled={!transcript}
+        isDisabled={!transcript || disableTextArea}
       >
         <div style={{ height: "308px", padding: "5px 24px 16px 24px", width: "100%" }}>
           <div style={{ height: "80px", backgroundColor: "#ECF3FD", borderRadius: "4px" }}>

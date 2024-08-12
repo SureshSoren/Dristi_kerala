@@ -61,6 +61,7 @@ const InsideHearingMainPage = () => {
     return userRoles.some((role) => role.code === userRole);
   };
 
+  const disableTextArea = !!userHasRole("HEARING_VIEWER");
   // if (!userHasRole("HEARING_VIEWER")) {
   //   history.push(`/${window.contextPath}/${userType}/home/home-pending-task`);
   // }
@@ -79,7 +80,7 @@ const InsideHearingMainPage = () => {
     reqBody,
     { applicationNumber: "", cnrNumber: "", hearingId },
     "dristi",
-    !!userHasRole("HEARING_VIEWER"),
+    disableTextArea,
     10 * SECOND
   );
 
@@ -115,7 +116,7 @@ const InsideHearingMainPage = () => {
       // hearing data with particular id will always give array of one object
       if (hearingData) {
         setHearing(hearingData);
-        setTranscriptText(hearingData?.transcript[0]);
+        setTranscriptText(hearingData?.transcript[0] || "");
         setFilingNumber(hearingData?.filingNumber[0]);
       }
     }
@@ -306,11 +307,11 @@ const InsideHearingMainPage = () => {
                     <TextArea
                       ref={textAreaRef}
                       style={{ width: "100%", minHeight: "40vh" }}
-                      value={witnessDepositionText}
+                      value={witnessDepositionText || ""}
                       onChange={handleChange}
-                      disabled={(activeTab === "Witness Deposition" && isDepositionSaved) || userHasRole("HEARING_VIEWER")}
+                      disabled={(activeTab === "Witness Deposition" && isDepositionSaved) || disableTextArea}
                     />
-                    {!!userHasRole("HEARING_VIEWER") && (
+                    {!disableTextArea && (
                       <TranscriptComponent
                         setWitnessDepositionText={setWitnessDepositionText}
                         isRecording={isRecording}
@@ -325,11 +326,11 @@ const InsideHearingMainPage = () => {
                     <TextArea
                       ref={textAreaRef}
                       style={{ width: "100%", minHeight: "40vh" }}
-                      value={transcriptText}
+                      value={transcriptText || ""}
                       onChange={handleChange}
-                      disabled={userHasRole("HEARING_VIEWER")}
+                      disabled={disableTextArea}
                     />
-                    {!!userHasRole("HEARING_VIEWER") && (
+                    {!disableTextArea && (
                       <TranscriptComponent
                         setTranscriptText={setTranscriptText}
                         isRecording={isRecording}
@@ -367,7 +368,15 @@ const InsideHearingMainPage = () => {
       </div>
       <div className="right-side" style={{ borderLeft: "1px solid lightgray" }}>
         <HearingSideCard hearingId={hearingId} caseId={caseData?.criteria?.[0]?.responseList?.[0]?.id} filingNumber={filingNumber}></HearingSideCard>
-        {adjournHearing && <AdjournHearing hearing={hearing} updateTranscript={_updateTranscriptRequest} tenantID={tenantId} />}
+        {adjournHearing && (
+          <AdjournHearing
+            hearing={hearing}
+            updateTranscript={_updateTranscriptRequest}
+            transcriptText={transcriptText}
+            setAdjournHearing={setAdjournHearing}
+            disableTextArea={disableTextArea}
+          />
+        )}
       </div>
       <ActionBar>
         <div
@@ -501,7 +510,15 @@ const InsideHearingMainPage = () => {
           handleProceed={handleProceed}
         />
       )}
-      {endHearingModalOpen && <EndHearing handleEndHearingModal={handleEndHearingModal} hearingId={hearingId} hearing={hearing} />}
+      {endHearingModalOpen && (
+        <EndHearing
+          handleEndHearingModal={handleEndHearingModal}
+          hearingId={hearingId}
+          hearing={hearing}
+          transcriptText={transcriptText}
+          disableTextArea={disableTextArea}
+        />
+      )}
     </div>
   );
 };

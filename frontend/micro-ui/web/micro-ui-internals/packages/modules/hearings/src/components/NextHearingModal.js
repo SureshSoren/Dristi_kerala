@@ -41,7 +41,7 @@ const DateCard = ({ date, isSelected, onClick }) => (
   </div>
 );
 
-const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript }) => {
+const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript, handleConfirmationModal }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [isCustomDateSelected, setIsCustomDateSelected] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -207,8 +207,8 @@ const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript 
     <div>
       <Modal
         headerBarMain={<Heading label={"Set Next Hearing Date"} />}
-        headerBarEnd={<CloseBtn onClick={() => handleNavigate(`/employee/hearings/inside-hearing?hearingId=${hearingId}`)} />}
-        onClose={closeSetDate}
+        headerBarEnd={<CloseBtn onClick={handleConfirmationModal} />}
+        onClose={handleConfirmationModal}
         actionSaveLabel="Generate Order"
         actionSaveOnSubmit={onGenerateOrder}
         actionCancelLabel="Back"

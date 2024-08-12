@@ -30,7 +30,6 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
   const bufferSize = 4096;
 
   useEffect(() => {
-    console.log("use Effect [] called");
     initWebSocket();
   }, []);
 
@@ -85,7 +84,6 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
   };
 
   const joinRoom = () => {
-    console.log(websocket, "websocket join room", WebSocket.OPEN);
     if (websocket && websocket.readyState === WebSocket.OPEN) {
       const message = {
         type: "joined_room",
@@ -98,7 +96,6 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
   };
 
   const createRoom = () => {
-    console.log(websocket, "websocket create room");
     if (websocket && websocket.readyState === WebSocket.OPEN) {
       const message = {
         type: "create_room",
@@ -109,7 +106,6 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
   };
 
   const initWebSocket = () => {
-    console.log("inside init");
     const websocketAddress = "wss://dristi-kerala-dev.pucar.org/transcription";
 
     if (!websocketAddress) {
@@ -173,7 +169,6 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
     if (isRecording) {
       return;
     }
-    console.log(formData, config, input, "kkk");
     if (formdata?.[config.key]?.[input.name]) setEditableTranscription(formdata?.[config.key]?.[input.name]);
     setIsRecording(true);
 

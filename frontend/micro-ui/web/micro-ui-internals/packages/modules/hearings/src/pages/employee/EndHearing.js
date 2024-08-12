@@ -41,11 +41,11 @@ const CloseBtn = (props) => {
   );
 };
 
-const EndHearing = ({ handleEndHearingModal, hearingId, updateTranscript, hearing }) => {
+const EndHearing = ({ handleEndHearingModal, hearingId, updateTranscript, hearing, transcriptText, disableTextArea }) => {
   const { t } = useTranslation();
   const [stepper, setStepper] = useState(1);
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
-  const [transcript, setTranscript] = useState("");
+  const [transcript, setTranscript] = useState(transcriptText);
   const history = useHistory();
 
   const handleNavigate = (path) => {
@@ -69,7 +69,7 @@ const EndHearing = ({ handleEndHearingModal, hearingId, updateTranscript, hearin
   };
 
   const handleConfirmationModal = () => {
-    handleNavigate(`/employee/hearings/inside-hearing?hearingId=${hearingId}`);
+    handleEndHearingModal();
   };
 
   return (
@@ -126,19 +126,27 @@ const EndHearing = ({ handleEndHearingModal, hearingId, updateTranscript, hearin
           hearingId={hearingId}
           hearing={hearing}
           isEndHearing={true}
+          disableTextArea={disableTextArea}
           onSaveSummary={(updatedTranscriptText) => {
             endHearing(updatedTranscriptText).then(() => {
               setStepper((stepper) => stepper + 1);
             });
           }}
           onCancel={() => {
-            setTranscript(hearing.transcript[0]);
+            setTranscript(transcriptText);
             setStepper((stepper) => stepper - 1);
           }}
         />
       )}
       {stepper === 3 && (
-        <NextHearingModal transcript={transcript} hearingId={hearingId} hearing={hearing} stepper={stepper} setStepper={setStepper} />
+        <NextHearingModal
+          transcript={transcript}
+          hearingId={hearingId}
+          hearing={hearing}
+          stepper={stepper}
+          setStepper={setStepper}
+          handleConfirmationModal={handleConfirmationModal}
+        />
       )}
     </div>
   );
