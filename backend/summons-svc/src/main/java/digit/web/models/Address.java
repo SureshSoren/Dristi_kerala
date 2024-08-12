@@ -25,7 +25,20 @@ public class Address {
     @JsonProperty("locality")
     private String locality;
 
+
     @JsonProperty("coordinate")
     private Coordinate coordinate;
+
+    @Override
+    public String toString() {
+        return String.join(", ",
+                state != null ? state : "",
+                city != null ? city : "",
+                district != null ? district : "",
+                pinCode != null ? pinCode : "",
+                locality != null ? locality : ""
+        );
+    }
+
 
 }
