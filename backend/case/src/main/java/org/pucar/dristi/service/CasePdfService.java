@@ -11,7 +11,7 @@ import org.pucar.dristi.web.models.CaseSearchRequest;
 import org.pucar.dristi.web.models.CourtCase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.ByteArrayResource;
 
 import static org.pucar.dristi.config.ServiceConstants.CASE_PDF_SERVICE_EXCEPTION;
 
@@ -29,7 +29,7 @@ public class CasePdfService {
         this.casePdfUtil = casePdfUtil;
     }
 
-    public MultipartFile generatePdf(CaseSearchRequest body) {
+    public ByteArrayResource generatePdf(CaseSearchRequest body) {
         try {
             CourtCase courtCase = body.getCriteria().get(0).getResponseList().get(0);
             RequestInfo requestInfo = body.getRequestInfo();
