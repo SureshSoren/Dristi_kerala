@@ -44,6 +44,7 @@ import {
 import _, { isEqual, isMatch } from "lodash";
 import CorrectionsSubmitModal from "../../../components/CorrectionsSubmitModal";
 import { Urls } from "../../../hooks";
+import useGetStatuteSection from "../../../hooks/dristi/useGetStatuteSection";
 const OutlinedInfoIcon = () => (
   <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: "absolute", right: -22, top: 0 }}>
     <g clip-path="url(#clip0_7603_50401)">
@@ -408,6 +409,8 @@ function EFilingCases({ path }) {
   const isCaseReAssigned = useMemo(() => state === CaseWorkflowState.CASE_RE_ASSIGNED, [state]);
   const isDisableAllFieldsMode = !(state === CaseWorkflowState.CASE_RE_ASSIGNED || state === CaseWorkflowState.DRAFT_IN_PROGRESS);
   const isDraftInProgress = state === CaseWorkflowState.DRAFT_IN_PROGRESS;
+  const { data: courtRoomDetails, isLoading: isCourtIdsLoading } = useGetStatuteSection("common-masters", [{ name: "Court_Rooms" }]);
+  const courtRooms = useMemo(() => courtRoomDetails?.Court_Rooms || [], [courtRoomDetails]);
 
   useEffect(() => {
     setParentOpen(sideMenuConfig.findIndex((parent) => parent.children.some((child) => child.key === selected)));
@@ -1423,7 +1426,12 @@ function EFilingCases({ path }) {
     }
 
     if (selected === "addSignature" && isDraftInProgress) {
-      setOpenConfirmCourtModal(true);
+      if (courtRooms?.length === 1) {
+        onSubmitCase({ court: courtRooms[0] });
+        return;
+      } else {
+        setOpenConfirmCourtModal(true);
+      }
     } else {
       updateCaseDetails({
         isCompleted: true,
@@ -1627,7 +1635,7 @@ function EFilingCases({ path }) {
   };
 
   const [isOpen, setIsOpen] = useState(false);
-  if (isLoading || isGetAllCasesLoading) {
+  if (isLoading || isGetAllCasesLoading || isCourtIdsLoading) {
     return <Loader />;
   }
 
