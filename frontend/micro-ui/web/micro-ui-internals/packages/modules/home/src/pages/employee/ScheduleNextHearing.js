@@ -110,13 +110,6 @@ const CloseBtn = (props) => {
   );
 };
 
-const customDateConfig = {
-  headModal: "CS_SELECT_CUSTOM_DATE",
-  label: "CS_HEARINGS_SCHEDULED",
-  showBottomBar: true,
-  buttonText: "CS_COMMON_CONFIRM",
-};
-
 function ScheduleNextHearing({
   config = {
     headModal: "Set Next Hearing Date",
@@ -141,26 +134,22 @@ function ScheduleNextHearing({
   isCaseAdmitted = false,
   showPurposeOfHearing = false,
 }) {
-  const getNextNDates = (n) => {
-    const today = new Date();
-    const datesArray = [];
-
-    for (let i = 1; i <= n; i++) {
-      const nextDate = new Date(today);
-      nextDate.setDate(today.getDate() + i);
-      datesArray.push(formatDateInMonth(nextDate));
+  const getSuggestedDates = (dateResponse) => {
+    const dates = [];
+    if (dateResponse?.Hearings?.[0]?.suggestedDates && dateResponse?.Hearings?.[0]?.availableDates) {
+      return dateResponse?.Hearings?.[0]?.suggestedDates;
     }
-
-    return datesArray;
+    return [];
   };
 
-  const getSuggestedDates = (dateResponse) => {
+  const getAvailableDates = (dateResponse) => {
     const dates = [];
     if (dateResponse?.Hearings?.[0]?.suggestedDates && dateResponse?.Hearings?.[0]?.availableDates) {
       return dateResponse?.Hearings?.[0]?.availableDates;
     }
     return [];
   };
+
   const extractUnitValue = (OptOutLimit) => {
     const configArray = OptOutLimit?.["SCHEDULER-CONFIG"]?.config;
     if (Array.isArray(configArray)) {
@@ -191,14 +180,12 @@ function ScheduleNextHearing({
   const [selectedChip, setSelectedChip] = React.useState(null);
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [scheduleHearingParams, setScheduleHearingParam] = useState({ purpose: "Admission Purpose" });
-  const [selectedCustomDate, setSelectedCustomDate] = useState(new Date());
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
   const [sucessOptOut, setSucessOptOut] = useState(false);
   const [OptOutLimitValue, setOptOutLimitValue] = useState(null);
 
   const CustomCaseInfoDiv = Digit.ComponentRegistryService.getComponent("CustomCaseInfoDiv") || <React.Fragment></React.Fragment>;
   const CustomChooseDate = Digit.ComponentRegistryService.getComponent("CustomChooseDate") || <React.Fragment></React.Fragment>;
-  const CustomCalendar = Digit.ComponentRegistryService.getComponent("CustomCalendar") || <React.Fragment></React.Fragment>;
   const userInfo = JSON.parse(window.localStorage.getItem("user-info"));
   const userInfoType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo]);
   const OrderWorkflowAction = Digit.ComponentRegistryService.getComponent("OrderWorkflowActionEnum") || {};
@@ -217,7 +204,7 @@ function ScheduleNextHearing({
   }, [filingNumber, submitModalInfo?.shortCaseInfo]);
 
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
-  console.log(hearingId, "HEARING I");
+
   const { data: caseData, isLoading } = useSearchCaseService(
     {
       criteria: [
@@ -249,7 +236,7 @@ function ScheduleNextHearing({
     "",
     true
   );
-  console.log(applicationData, "APPLICATION");
+
   const { data: dateResponse } = Digit.Hooks.home.useSearchReschedule(
     applicationData
       ? {
@@ -263,9 +250,9 @@ function ScheduleNextHearing({
     "",
     !!applicationData
   );
-  console.log(dateResponse, "DATE");
-  console.log(getSuggestedDates(dateResponse));
+
   const nextFourDates = getSuggestedDates(dateResponse);
+  const availableDates = getAvailableDates(dateResponse);
 
   const { data: OptOutLimit, isLoading: loading } = Digit.Hooks.useCustomMDMS(
     Digit.ULBService.getStateId(),
@@ -287,9 +274,8 @@ function ScheduleNextHearing({
   const setPurposeValue = (value, input) => {
     setScheduleHearingParam({ ...scheduleHearingParams, purpose: isCaseAdmitted ? value : value.code });
   };
-  console.log("STATUS", status);
+
   const handleClickDate = (label) => {
-    console.log(label);
     const newSelectedChip = selectedChip === label ? null : label;
     setSelectedChip(newSelectedChip);
     setScheduleHearingParam({
@@ -298,27 +284,11 @@ function ScheduleNextHearing({
     });
   };
 
-  const showCustomDateModal = () => {
-    setModalInfo({ ...modalInfo, showDate: true });
-  };
-
-  const onCalendarConfirm = () => {
-    setModalInfo({ ...modalInfo, page: 0, showDate: false, showCustomDate: true });
-    setSelectedChip(null);
-  };
-
-  const handleSelect = (date) => {
-    setScheduleHearingParam({ ...scheduleHearingParams, date: formatDateInMonth(date) });
-    setSelectedCustomDate(date);
-  };
-
   const handleClose = () => {
     history.push(`/${window?.contextPath}/${userInfoType}/home/home-pending-task`, { taskType: { code: "case", name: "Case" } });
   };
 
   const handleSubmit = async (data) => {
-    console.log(formatDateInMonth(new Date(data?.date)), "FORMAT");
-
     if (status !== "OPTOUT") {
       const dateArr = formatDateInMonth(new Date(data?.date))
         ?.split(" ")
@@ -487,6 +457,7 @@ function ScheduleNextHearing({
               handleClick={handleClickDate}
               scheduleHearingParams={scheduleHearingParams}
               isSelectMulti={false}
+              enabledData={availableDates}
             />
           </div>
         )}
