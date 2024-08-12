@@ -55,7 +55,9 @@ public class PaymentUpdateService {
             String tenantId = paymentRequest.getPayment().getTenantId();
 
             for (PaymentDetail paymentDetail : paymentDetails) {
-                updateWorkflowForCasePayment(requestInfo, tenantId, paymentDetail);
+                if (paymentDetail.getBusinessService().equalsIgnoreCase(config.getTaskSummonBusinessServiceName())) {
+                    updateWorkflowForCasePayment(requestInfo, tenantId, paymentDetail);
+                }
             }
         } catch (Exception e) {
             log.error("KAFKA_PROCESS_ERROR:", e);
