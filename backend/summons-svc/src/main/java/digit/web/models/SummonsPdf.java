@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SummonsPdf  {
 
+    @JsonProperty("tenantId")
+    private String tenantId;
+
     @JsonProperty("cnrNumber")
     private String cnrNumber;
 

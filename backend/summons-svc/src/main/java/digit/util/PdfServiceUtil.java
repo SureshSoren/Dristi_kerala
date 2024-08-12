@@ -62,6 +62,7 @@ public class PdfServiceUtil {
         String issueDateString = formatDateFromMillis(task.getTaskDetails().getSummonDetails().getIssueDate());
         String filingNUmber = task.getFilingNumber();
         return SummonsPdf.builder()
+                .tenantId(task.getTenantId())
                 .cnrNumber(task.getCnrNumber())
                 .issueDate(issueDateString)
                 .caseName(task.getTaskDetails().getCaseDetails().getCaseTitle())
