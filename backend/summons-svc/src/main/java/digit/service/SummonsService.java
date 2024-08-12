@@ -22,6 +22,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static digit.config.ServiceConstants.SUMMON;
+import static digit.config.ServiceConstants.WARRANT;
+
 @Service
 @Slf4j
 public class SummonsService {
@@ -81,7 +84,7 @@ public class SummonsService {
             if (summonsDelivery.getChannelName() == ChannelName.SMS || summonsDelivery.getChannelName() == ChannelName.EMAIL) {
                 summonsDelivery.setDeliveryStatus(DeliveryStatus.DELIVERED);
             } else {
-                summonsDelivery.setDeliveryStatus(DeliveryStatus.IN_TRANSIT);
+                summonsDelivery.setDeliveryStatus(DeliveryStatus.NOT_UPDATED);
             }
             summonsDelivery.setChannelAcknowledgementId(channelMessage.getAcknowledgeUniqueNumber());
         }
@@ -119,10 +122,10 @@ public class SummonsService {
                 .requestInfo(request.getRequestInfo()).criteria(taskCriteria).build();
         TaskListResponse taskListResponse = taskUtil.callSearchTask(searchRequest);
         Task task = taskListResponse.getList().get(0);
-        if (task.getTaskType().equalsIgnoreCase("summon")) {
+        if (task.getTaskType().equalsIgnoreCase(SUMMON)) {
             Workflow workflow = Workflow.builder().action("SERVE").build();
             task.setWorkflow(workflow);
-        } else if (task.getTaskType().equalsIgnoreCase("warrant")) {
+        } else if (task.getTaskType().equalsIgnoreCase(WARRANT)) {
             Workflow workflow = Workflow.builder().action("DELIVERED").build();
             task.setWorkflow(workflow);
         }
@@ -132,9 +135,9 @@ public class SummonsService {
     }
 
     private String getPdfTemplateKey(String taskType) {
-        return switch (taskType.toLowerCase()) {
-            case "summon" -> config.getSummonsPdfTemplateKey();
-            case "warrant" -> config.getNonBailableWarrantPdfTemplateKey();
+        return switch (taskType) {
+            case SUMMON -> config.getSummonsPdfTemplateKey();
+            case WARRANT -> config.getNonBailableWarrantPdfTemplateKey();
             default -> throw new CustomException("INVALID_TASK_TYPE", "Task Type must be valid. Provided: " + taskType);
         };
     }
