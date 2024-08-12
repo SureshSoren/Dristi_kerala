@@ -953,8 +953,8 @@ const onDocumentUpload = async (fileData, filename, tenantId) => {
   return { file: fileUploadRes?.data, fileType: fileData.type, filename };
 };
 
-const sendDocumentForOcr = async (key, fileStoreId, filingNumber, tenantId) => {
-  if (efilingDocumentKeyAndTypeMapping[key])
+const sendDocumentForOcr = async (key, fileStoreId, filingNumber, tenantId, document) => {
+  if ((efilingDocumentKeyAndTypeMapping[key] && document?.type === "image/jpeg") || document?.type === "application/pdf")
     await window?.Digit?.DRISTIService.sendDocuemntForOCR(
       {
         documentType: efilingDocumentKeyAndTypeMapping[key],
@@ -1036,7 +1036,7 @@ const documentUploadHandler = async (document, index, prevCaseDetails, data, pag
       fileName: pageConfig?.selectDocumentName?.[key],
     };
     if (uploadedData.file?.files?.[0]?.fileStoreId && efilingDocumentKeyAndTypeMapping[key]) {
-      sendDocumentForOcr(key, uploadedData.file?.files?.[0]?.fileStoreId, prevCaseDetails?.filingNumber, tenantId);
+      sendDocumentForOcr(key, uploadedData.file?.files?.[0]?.fileStoreId, prevCaseDetails?.filingNumber, tenantId, document);
     }
     if (oldBouncedChequeFileUpload !== undefined) {
       const xTemp = prevCaseDetails?.documents?.filter((doc) => doc.fileStore === oldBouncedChequeFileUpload?.document?.[index]?.fileStore)?.[0];
@@ -1386,7 +1386,8 @@ export const updateCaseDetails = async ({
                       "inquiryAffidavitFileUpload",
                       uploadedData.file?.files?.[0]?.fileStoreId,
                       prevCaseDetails?.filingNumber,
-                      tenantId
+                      tenantId,
+                      document
                     );
                   }
                   return {
@@ -1896,7 +1897,13 @@ export const updateCaseDetails = async ({
                 if (document) {
                   const uploadedData = await onDocumentUpload(document, document.name, tenantId);
                   if (uploadedData.file?.files?.[0]?.fileStoreId && efilingDocumentKeyAndTypeMapping["vakalatnamaFileUpload"]) {
-                    sendDocumentForOcr("vakalatnamaFileUpload", uploadedData.file?.files?.[0]?.fileStoreId, prevCaseDetails?.filingNumber, tenantId);
+                    sendDocumentForOcr(
+                      "vakalatnamaFileUpload",
+                      uploadedData.file?.files?.[0]?.fileStoreId,
+                      prevCaseDetails?.filingNumber,
+                      tenantId,
+                      document
+                    );
                   }
                   return {
                     documentType: uploadedData.fileType || document?.documentType,

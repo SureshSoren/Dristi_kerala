@@ -59,7 +59,7 @@ export const Urls = {
     judgeAvailabilityDates: "/scheduler/judge/v1/_availability",
     sendOCR: "/ocr-service/verify",
     receiveOCR: "/ocr-service/data",
-    taskDocuments: "/task/v1/document",
+    taskDocuments: "/task/v1/document/search",
   },
   case: {
     addWitness: "/case/v1/add/witness",

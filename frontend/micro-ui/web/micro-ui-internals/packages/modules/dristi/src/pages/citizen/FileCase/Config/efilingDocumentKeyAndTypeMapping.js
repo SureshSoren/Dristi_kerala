@@ -1,15 +1,15 @@
 export const efilingDocumentKeyAndTypeMapping = {
   returnMemoFileUpload: "CHEQUE_RETURN_MEMO",
   legalDemandNoticeFileUpload: "LEGAL_NOTICE",
-  // vakalatnamaFileUpload: "VAKALAT_NAMA",
+  vakalatnamaFileUpload: "VAKALATNAMA",
   inquiryAffidavitFileUpload: "AFFIDAVIT",
-  // memorandumOfComplaint: "COMPLAINT_MEMO",
+  memorandumOfComplaint: "COMPLAINT_MEMO",
 };
 
 export const efilingDocumentTypeAndKeyMapping = {
   CHEQUE_RETURN_MEMO: "returnMemoFileUpload",
   LEGAL_NOTICE: "legalDemandNoticeFileUpload",
-  VAKALAT_NAMA: "vakalatnamaFileUpload",
+  VAKALATNAMA: "vakalatnamaFileUpload",
   AFFIDAVIT: "inquiryAffidavitFileUpload",
   COMPLAINT_MEMO: "memorandumOfComplaint",
 };
@@ -29,6 +29,14 @@ export const ocrErrorLocations = {
     fieldName: "image",
     configKey: "caseSpecificDetails",
     inputlist: ["legalDemandNoticeFileUpload.document"],
+    fileName: null,
+  },
+  returnMemoFileUpload: {
+    name: "chequeDetails",
+    index: 0,
+    fieldName: "image",
+    configKey: "caseSpecificDetails",
+    inputlist: ["returnMemoFileUpload.document"],
     fileName: null,
   },
 };

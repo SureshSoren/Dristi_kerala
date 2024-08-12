@@ -50,19 +50,6 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const [formDataLoad, setFormDataLoad] = useState(true);
 
-  const { isLoading: isOCRDataLoading, data: ocrData } = Digit.Hooks.dristi.useGetOCRData(
-    {
-      filingNumber: caseId,
-      tenantId: tenantId,
-    },
-    {},
-    Boolean(caseId)
-  );
-
-  const ocrDataList = useMemo(() => {
-    return ocrData;
-  }, [ocrData]);
-
   const { isLoading, data: caseData } = useSearchCaseService(
     {
       criteria: [
@@ -84,6 +71,19 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
     }),
     [caseData]
   );
+
+  const { isLoading: isOCRDataLoading, data: ocrData } = Digit.Hooks.dristi.useGetOCRData(
+    {
+      filingNumber: caseDetails?.filingNumber,
+      tenantId: tenantId,
+    },
+    {},
+    Boolean(caseDetails?.filingNumber)
+  );
+
+  const ocrDataList = useMemo(() => {
+    return ocrData;
+  }, [ocrData]);
 
   const state = useMemo(() => caseDetails?.status, [caseDetails]);
 
@@ -268,6 +268,7 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
 
   const updateObject = (formData, update, message) => {
     if (update?.configKey in formData) {
+      debugger;
       handleAddError(update, message);
     }
   };
@@ -278,8 +279,11 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
       "additionalDetails" in formData &&
       "caseSpecificDetails" in formData &&
       "scrutinyMessage" in formData &&
-      formDataLoad
+      formDataLoad &&
+      ocrDataList &&
+      ocrDataList?.length > 0
     ) {
+      debugger;
       setFormDataLoad(false);
       ocrDataList?.forEach((data) => updateObject(formData, ocrErrorLocations[efilingDocumentTypeAndKeyMapping[data.documentType]], data.message));
     }

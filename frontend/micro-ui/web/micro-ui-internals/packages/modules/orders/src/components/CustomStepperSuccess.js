@@ -22,7 +22,7 @@ const CustomStepperSuccess = ({ closeButtonAction, t, submissionData, documents 
         tableDataClassName={"e-filing-table-data-style"}
         tableValueClassName={"e-filing-table-value-style"}
       />
-      <DocumentPrintComponent documents={documents} />
+      {documents && documents?.length > 0 && <DocumentPrintComponent documents={documents} />}
       <div className="action-button-success">
         <Button
           className={"selector-button-border"}

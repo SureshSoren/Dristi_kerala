@@ -8,6 +8,7 @@ import DocumentViewerWithComment from "../../components/DocumentViewerWithCommen
 import AddSignatureComponent from "../../components/AddSignatureComponent";
 import CustomStepperSuccess from "../../components/CustomStepperSuccess";
 import UpdateDeliveryStatusComponent from "../../components/UpdateDeliveryStatusComponent";
+import { formatDate } from "../../utils";
 import { taskService } from "../../hooks/services";
 
 const defaultSearchValues = {
@@ -26,6 +27,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
   const [isDisabled, setIsDisabled] = useState(true);
   const [rowData, setRowData] = useState({});
   const [taskDocuments, setTaskDocumens] = useState([]);
+  const [nextHearingDate, setNextHearingDate] = useState();
   const [step, setStep] = useState(0);
   const [signatureId, setSignatureId] = useState("");
 
@@ -67,6 +69,30 @@ const ReviewSummonsNoticeAndWarrant = () => {
     setConfig(SummonsTabsConfig?.SummonsTabsConfig?.[n]); // as per tab number filtering the config
   };
 
+  function findNextHearings(objectsList) {
+    const now = Date.now();
+    const futureStartTimes = objectsList.filter((obj) => obj.startTime > now);
+    futureStartTimes.sort((a, b) => a.startTime - b.startTime);
+    return futureStartTimes.length > 0 ? futureStartTimes[0] : null;
+  }
+
+  const getHearingFromCaseId = async () => {
+    try {
+      const response = await Digit.HearingService.searchHearings(
+        {
+          criteria: {
+            tenantId: Digit.ULBService.getCurrentTenantId(),
+            filingNumber: rowData?.filingNumber,
+          },
+        },
+        {}
+      );
+      setNextHearingDate(findNextHearings(response?.HearingList));
+    } catch (error) {
+      console.error("error :>> ", error);
+    }
+  };
+
   const getTaskDocuments = async () => {
     try {
       const response = await window?.Digit?.DRISTIService.getTaskDocuments(
@@ -95,25 +121,25 @@ const ReviewSummonsNoticeAndWarrant = () => {
   };
 
   const infos = useMemo(() => {
-    if (rowData?.taskDetails) {
+    if (rowData?.taskDetails || nextHearingDate) {
       const caseDetails = JSON.parse(rowData?.taskDetails);
       return [
         { key: "Issued to", value: caseDetails?.respondentDetails?.name },
         { key: "Issued Date", value: rowData?.createdDate },
-        { key: "Next Hearing Date", value: "04/07/2024" },
+        { key: "Next Hearing Date", value: nextHearingDate?.startTime ? formatDate(nextHearingDate?.startTime) : "N/A" },
         { key: "Amount Paid", value: `Rs. ${caseDetails?.deliveryChannels?.fees}` },
         { key: "Channel Details", value: caseDetails?.deliveryChannels?.channelName },
       ];
     }
-  }, [rowData]);
+  }, [rowData, nextHearingDate]);
 
   const links = useMemo(() => {
     return [{ text: "View order", link: "" }];
   }, []);
 
   const documents = useMemo(() => {
-    return taskDocuments;
-  }, [taskDocuments]);
+    if (rowData?.documents) return rowData?.documents;
+  }, [rowData]);
 
   const submissionData = useMemo(() => {
     return [
@@ -216,7 +242,8 @@ const ReviewSummonsNoticeAndWarrant = () => {
   }, [infos, isDisabled, links, t]);
 
   useEffect(() => {
-    if (rowData?.id) getTaskDocuments();
+    // if (rowData?.id) getTaskDocuments();
+    if (rowData?.filingNumber) getHearingFromCaseId();
   }, [rowData]);
 
   return (
