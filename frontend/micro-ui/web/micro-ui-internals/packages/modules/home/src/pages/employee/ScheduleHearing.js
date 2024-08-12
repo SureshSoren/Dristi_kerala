@@ -182,8 +182,7 @@ function ScheduleHearing({
       "",
       caseDetails?.auditDetails?.createdBy
     );
-
-    return individualData?.Individual?.[0]?.individualId;
+    return individualData?.Individual?.[0];
   };
 
   const { filingNumber, status } = Digit.Hooks.useQueryParams();
@@ -329,7 +328,6 @@ function ScheduleHearing({
   };
 
   const handleSubmit = async (data) => {
-    console.log(data);
     if (status !== "OPTOUT") {
       const dateArr = data.date.split(" ").map((date, i) => (i === 0 ? date.slice(0, date.length - 2) : date));
       const date = new Date(dateArr.join(" "));
@@ -403,7 +401,7 @@ function ScheduleHearing({
         {
           OptOut: {
             tenantId: tenantId,
-            individualId: individualId,
+            individualId: individualId?.individualId,
             caseId: filingNumber,
             rescheduleRequestId: applicationData?.applicationList[0]?.applicationNumber,
             judgeId: "super",
@@ -412,7 +410,24 @@ function ScheduleHearing({
         },
         {}
       )
-        .then(() => {
+        .then(async () => {
+          const individualId = await fetchBasicUserInfo();
+          await HomeService.customApiService(Urls.pendingTask, {
+            pendingTask: {
+              name: "Completed",
+              entityType: "order-managelifecycle",
+              referenceId: `MANUAL_${individualId?.userUuid}_${applicationData?.applicationList[0]?.additionalDetails?.hearingId}`,
+              status: "DRAFT_IN_PROGRESS",
+              assignedTo: [],
+              assignedRole: [],
+              cnrNumber: cnrNumber,
+              filingNumber: filingNumber,
+              isCompleted: true,
+              stateSla: null,
+              additionalDetails: {},
+              tenantId,
+            },
+          });
           setIsSubmitDisabled(false);
           setSucessOptOut(true);
         })

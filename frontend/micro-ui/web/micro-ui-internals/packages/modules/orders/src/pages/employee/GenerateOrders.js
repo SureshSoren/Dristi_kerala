@@ -1170,6 +1170,8 @@ const GenerateOrders = () => {
             courtAddress: courtDetails?.address,
             courtPhone: courtDetails?.phone,
             courtId: caseDetails?.courtId,
+            hearingNumber: orderData?.hearingNumber,
+            judgeName: "super",
           },
           deliveryChannels: {
             channelName: "",
