@@ -162,7 +162,7 @@ public class SummonsService {
         AdditionalFields additionalFields = AdditionalFields.builder().fields(Collections.singletonList(field)).build();
         return Document.builder()
                 .fileStore(fileStoreId)
-                .documentType("application/pdf")
+                .documentType("UNSIGNED")
                 .additionalDetails(additionalFields)
                 .build();
     }
