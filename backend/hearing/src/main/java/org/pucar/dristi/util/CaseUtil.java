@@ -56,7 +56,7 @@ public class CaseUtil {
         Object response = new HashMap<>();
         try {
             response = restTemplate.postForObject(uri.toString(), caseSearchRequest, Map.class);
-            JsonNode jsonNode = mapper.readTree(response.toString());
+            JsonNode jsonNode = mapper.readTree(mapper.writeValueAsString(response));
             JsonNode caseList = jsonNode.get("criteria").get(0).get("responseList");
             return caseList.get(0);
         } catch (Exception e) {
