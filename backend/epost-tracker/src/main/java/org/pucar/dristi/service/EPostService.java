@@ -31,7 +31,7 @@ public class EPostService {
         EPostRequest ePostRequest = EPostRequest.builder().requestInfo(request.getRequestInfo()).ePostTracker(ePostTracker).build();
         producer.push("save-epost-tracker", ePostRequest);
 
-        return ChannelMessage.builder().processNumber(ePostTracker.getProcessNumber()).build();
+        return ChannelMessage.builder().processNumber(ePostTracker.getProcessNumber()).acknowledgementStatus("SUCCESS").build();
     }
 
     public EPostResponse getEPost(EPostTrackerSearchRequest searchRequest, int limit, int offset) {
