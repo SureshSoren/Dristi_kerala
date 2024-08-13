@@ -92,7 +92,11 @@ public class PaymentUpdateService {
                     String status = workflowUtil.updateWorkflowStatus(requestInfo, tenantId, task.getTaskNumber(),
                             config.getTaskSummonBusinessServiceName(), workflow, config.getTaskSummonBusinessName());
                     task.setStatus(status);
+
                     TaskRequest taskRequest = TaskRequest.builder().requestInfo(requestInfo).task(task).build();
+                    if (ISSUESUMMON.equalsIgnoreCase(status))
+                        producer.push(config.getTaskIssueSummonTopic(), taskRequest);
+
                     producer.push(config.getTaskUpdateTopic(), taskRequest);
                 }
             }

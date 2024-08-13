@@ -86,7 +86,7 @@ public class SummonsConsumer {
     public void listenForSendSummons(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         try {
             TaskRequest taskRequest = objectMapper.convertValue(record, TaskRequest.class);
-            log.info(taskRequest.getTask().toString());
+            log.info("Received message for sending summons {}", taskRequest.getTask());
             summonsService.sendSummonsViaChannels(taskRequest);
         } catch (final Exception e) {
             log.error("Error while listening to value: {}: ", record, e);

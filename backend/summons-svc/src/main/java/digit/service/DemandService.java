@@ -51,6 +51,8 @@ public class DemandService {
         StringBuilder url = new StringBuilder().append(config.getPaymentCalculatorHost())
                 .append(config.getPaymentCalculatorCalculateEndpoint());
 
+        log.info("Requesting Payment Calculator : {}", criteria.toString());
+
         SummonCalculationRequest calculationRequest = SummonCalculationRequest.builder()
                 .requestInfo(requestInfo).calculationCriteria(Collections.singletonList(criteria)).build();
 
