@@ -34,7 +34,7 @@ public class SummonsDeliveryRowMapper implements RowMapper<SummonsDelivery> {
 
         String deliveryStatusStr = rs.getString("delivery_status");
         DeliveryStatus deliveryStatus = deliveryStatusStr !=null ? DeliveryStatus.valueOf(deliveryStatusStr) : null;
-        summonsDelivery.setSummonDeliveryId(rs.getString("summons_id"));
+        summonsDelivery.setSummonDeliveryId(rs.getString("summons_delivery_id"));
         summonsDelivery.setTaskNumber(rs.getString("task_number"));
         summonsDelivery.setCaseId(rs.getString("case_id"));
         summonsDelivery.setTenantId(rs.getString("tenant_id"));

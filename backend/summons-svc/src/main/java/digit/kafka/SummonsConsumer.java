@@ -73,7 +73,10 @@ public class SummonsConsumer {
         try {
             SummonsRequest request = objectMapper.convertValue(record, SummonsRequest.class);
             log.info(request.toString());
-            if (request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.DELIVERED)) {
+            if (request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.DELIVERED)
+                || request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.NOT_DELIVERED)
+                || request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.EXECUTED)
+                    || request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.NOT_EXECUTED) ) {
                 summonsService.updateTaskStatus(request);
             }
         } catch (final Exception e) {

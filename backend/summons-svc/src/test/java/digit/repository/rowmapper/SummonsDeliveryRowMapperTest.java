@@ -58,7 +58,7 @@ class SummonsDeliveryRowMapperTest {
         long lastModifiedTime = 1609545600000L; // 2021-01-02
         int rowVersion = 1;
 
-        when(resultSet.getString("summons_id")).thenReturn(summonsId);
+        when(resultSet.getString("summons_delivery_id")).thenReturn(summonsId);
         when(resultSet.getString("task_number")).thenReturn(taskNumber);
         when(resultSet.getString("case_id")).thenReturn(caseId);
         when(resultSet.getString("tenant_id")).thenReturn(tenantId);
@@ -109,7 +109,7 @@ class SummonsDeliveryRowMapperTest {
         assertEquals(lastModifiedTime, summonsDelivery.getAuditDetails().getLastModifiedTime());
         assertEquals(rowVersion, summonsDelivery.getRowVersion());
 
-        verify(resultSet, times(1)).getString("summons_id");
+        verify(resultSet, times(1)).getString("summons_delivery_id");
         verify(resultSet, times(1)).getString("task_number");
         verify(resultSet, times(1)).getString("case_id");
         verify(resultSet, times(1)).getString("tenant_id");

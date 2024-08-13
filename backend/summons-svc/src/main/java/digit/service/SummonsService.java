@@ -122,13 +122,21 @@ public class SummonsService {
                 .requestInfo(request.getRequestInfo()).criteria(taskCriteria).build();
         TaskListResponse taskListResponse = taskUtil.callSearchTask(searchRequest);
         Task task = taskListResponse.getList().get(0);
+        Workflow workflow = null;
         if (task.getTaskType().equalsIgnoreCase(SUMMON)) {
-            Workflow workflow = Workflow.builder().action("SERVE").build();
-            task.setWorkflow(workflow);
+            if (request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.DELIVERED)) {
+                workflow = Workflow.builder().action("SERVE").build();
+            } else {
+                workflow = Workflow.builder().action("REISSUE").build();
+            }
         } else if (task.getTaskType().equalsIgnoreCase(WARRANT)) {
-            Workflow workflow = Workflow.builder().action("DELIVERED").build();
-            task.setWorkflow(workflow);
+            if (request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.EXECUTED)) {
+                workflow = Workflow.builder().action("DELIVERED").build();
+            } else {
+                workflow = Workflow.builder().action("NOT DELIVERED").build();
+            }
         }
+        task.setWorkflow(workflow);
         TaskRequest taskRequest = TaskRequest.builder()
                 .requestInfo(request.getRequestInfo()).task(task).build();
         taskUtil.callUpdateTask(taskRequest);

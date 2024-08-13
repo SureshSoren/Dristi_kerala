@@ -10,5 +10,8 @@ public enum DeliveryStatus {
 
     NOT_UPDATED,
 
-    STATUS_UNKNOWN
+    STATUS_UNKNOWN,
+    EXECUTED,
+
+    NOT_EXECUTED
 }
