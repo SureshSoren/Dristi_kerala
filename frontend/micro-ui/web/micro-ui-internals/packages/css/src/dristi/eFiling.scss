@@ -967,6 +967,10 @@
                 background-color: #ecf3fd;
                 border-left: 2px #4d83cf solid;
               }
+              &.system-error-class {
+                background-color: #fdf1de;
+                border-left: 2px #4d83cf solid;
+              }
             }
 
             .address {

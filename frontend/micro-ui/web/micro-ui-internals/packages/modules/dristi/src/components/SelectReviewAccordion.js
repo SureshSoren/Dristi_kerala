@@ -235,13 +235,13 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
     setValue("scrutinyMessage", null, "popupInfo");
   };
 
-  const handleAddError = (popupInfoData, message) => {
+  const handleAddError = (popupInfoData, message, type) => {
     const trimmedError = message ? message : scrutinyError.trim();
 
     const { name, configKey, index, fieldName, inputlist, fileName } = popupInfoData ? popupInfoData : popupInfo;
-    let fieldObj = { [fieldName]: { FSOError: trimmedError } };
+    let fieldObj = { [fieldName]: { [type ? type : "FSOError"]: trimmedError } };
     inputlist.forEach((key) => {
-      fieldObj[key] = { FSOError: trimmedError, fileName };
+      fieldObj[key] = { [type ? type : "FSOError"]: trimmedError, fileName };
     });
     let currentMessage =
       formData && formData[configKey] && formData[config.key]?.[name]
@@ -253,7 +253,7 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
 
     if (currentMessage?.form) {
       if (index == null) {
-        currentMessage.scrutinyMessage = { FSOError: trimmedError, fileName };
+        currentMessage.scrutinyMessage = { [type ? type : "FSOError"]: trimmedError, fileName };
       } else {
         currentMessage.form[index] = {
           ...(currentMessage?.form?.[index] || {}),
@@ -269,7 +269,7 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
   const updateObject = (formData, update, message) => {
     if (update?.configKey in formData) {
       debugger;
-      handleAddError(update, message);
+      handleAddError(update, message, "systemError");
     }
   };
 

@@ -340,6 +340,7 @@ const CustomReviewCardRow = ({
         );
       case "image":
         let FSOErrors = [];
+        let systemErrors = [];
         let valuesAvailable = [];
         if (typeof dataError === "object") {
           value?.forEach((val) => {
@@ -348,9 +349,17 @@ const CustomReviewCardRow = ({
             }
           });
         }
+        if (typeof dataError === "object") {
+          value?.forEach((val) => {
+            if (dataError?.[val]?.systemError) {
+              systemErrors.push(dataError?.[val]);
+            }
+          });
+        }
         bgclassname =
           isScrutiny && FSOErrors?.length > 0 ? (JSON.stringify(dataError) === JSON.stringify(prevDataError) ? "preverror" : "error") : "";
-        bgclassname = FSOErrors?.length > 0 && isCaseReAssigned ? "preverrorside" : bgclassname;
+        bgclassname =
+          FSOErrors?.length > 0 && isCaseReAssigned ? "preverrorside" : isScrutiny && systemErrors?.length > 0 ? "system-error-class" : bgclassname;
         if (isPrevScrutiny && !disableScrutiny) {
           showFlagIcon = prevDataError?.[type]?.FSOError;
         }
@@ -507,6 +516,20 @@ const CustomReviewCardRow = ({
                       <FlagIcon isError={true} />
                     )}
                     {`${error.fileName ? t(error.fileName) + " : " : ""}${error.FSOError}`}
+                  </div>
+                );
+              })}
+            {systemErrors?.length > 0 &&
+              isScrutiny &&
+              systemErrors.map((error, ind) => {
+                return (
+                  <div className="scrutiny-error input" key={ind}>
+                    {bgclassname === "preverror" ? (
+                      <span style={{ color: "#4d83cf", fontWeight: 300 }}>{t("CS_PREVIOUS_ERROR")}</span>
+                    ) : (
+                      <FlagIcon isError={true} />
+                    )}
+                    {`${error.fileName ? t(error.fileName) + " : " : ""}${error.systemError}`}
                   </div>
                 );
               })}
