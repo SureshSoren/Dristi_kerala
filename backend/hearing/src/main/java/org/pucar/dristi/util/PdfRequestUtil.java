@@ -7,12 +7,16 @@ import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.repository.ServiceRequestRepository;
 import org.pucar.dristi.web.models.WitnessPdfRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.pucar.dristi.config.ServiceConstants.CASE_PDF_UTILITY_EXCEPTION;
 import static org.pucar.dristi.config.ServiceConstants.PDF_UTILITY_EXCEPTION;
 
 
@@ -21,7 +25,7 @@ import static org.pucar.dristi.config.ServiceConstants.PDF_UTILITY_EXCEPTION;
 public class PdfRequestUtil {
 
     private final Configuration configuration;
-    private final ServiceRequestRepository serviceRequestRepository;
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
     private static final String FILE_STORE_ID_KEY = "fileStoreId";
@@ -29,27 +33,31 @@ public class PdfRequestUtil {
     private static final String DOCUMENT_TYPE_PDF = "application/pdf";
 
     @Autowired
-    public PdfRequestUtil(Configuration configuration, ServiceRequestRepository serviceRequestRepository, ObjectMapper objectMapper) {
+    public PdfRequestUtil(Configuration configuration, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.configuration = configuration;
-        this.serviceRequestRepository = serviceRequestRepository;
+        this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
     }
 
-    public MultipartFile createPdfForWitness(WitnessPdfRequest request, String tenantId) {
-        StringBuilder requestUrl = new StringBuilder();
-        requestUrl.append(configuration.getGeneratePdfHost()).append(configuration.getGeneratePdfUrl()).append("?key=")
-                .append(configuration.getWitnessPdfKey()).append("&tenantId=").append(tenantId);
+    public ByteArrayResource createPdfForWitness(WitnessPdfRequest request, String tenantId) {
+        try {
+            StringBuilder requestUrl = new StringBuilder();
+            requestUrl.append(configuration.getGeneratePdfHost()).append(configuration.getGeneratePdfUrl()).append("?key=")
+                    .append(configuration.getWitnessPdfKey()).append("&tenantId=").append(tenantId);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+            headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
-        HttpEntity<WitnessPdfRequest> requestEntity = new HttpEntity<>(request, headers);
-        Object response = serviceRequestRepository.fetchResult(requestUrl, requestEntity);
-        if (response instanceof MultipartFile) {
-            return (MultipartFile) response;
-        } else {
-            throw new CustomException(PDF_UTILITY_EXCEPTION, "Failed to get valid file from Pdf Service: " + response.getClass());
+            HttpEntity<WitnessPdfRequest> requestEntity = new HttpEntity<>(request, headers);
+
+            ResponseEntity<ByteArrayResource> responseEntity = restTemplate.postForEntity(requestUrl.toString(),
+                    requestEntity, ByteArrayResource.class);
+
+            return responseEntity.getBody();
+        } catch (Exception e) {
+            log.error("Error generating PDF for case {}: {}", request, e.getMessage());
+            throw new CustomException(PDF_UTILITY_EXCEPTION, "Error generating PDF for case: " + e.getMessage());
         }
     }
 }

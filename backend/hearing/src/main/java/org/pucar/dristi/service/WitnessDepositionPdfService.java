@@ -11,6 +11,7 @@ import org.pucar.dristi.util.CaseUtil;
 import org.pucar.dristi.util.PdfRequestUtil;
 import org.pucar.dristi.web.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,7 +37,7 @@ public class WitnessDepositionPdfService {
         this.pdfRequestUtil = pdfRequestUtil;
     }
 
-    public MultipartFile getWitnessDepositionPdf(HearingSearchRequest searchRequest) {
+    public ByteArrayResource getWitnessDepositionPdf(HearingSearchRequest searchRequest) {
         HearingCriteria criteria = searchRequest.getCriteria();
         Pagination pagination = Pagination.builder().limit(1D).offSet(0D).build();
         HearingSearchRequest hearingSearchRequest = HearingSearchRequest.builder()

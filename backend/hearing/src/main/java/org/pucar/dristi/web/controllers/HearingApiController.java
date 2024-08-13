@@ -11,6 +11,7 @@ import org.pucar.dristi.service.WitnessDepositionPdfService;
 import org.pucar.dristi.util.ResponseInfoFactory;
 import org.pucar.dristi.web.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -104,7 +105,7 @@ public class HearingApiController {
 
     @PostMapping("/witnessDeposition/v1/downloadPdf")
     public ResponseEntity<Object> witnessDepositionV1DownloadPdf(@Valid @RequestBody HearingSearchRequest searchRequest) {
-        MultipartFile pdfResponse = witnessDepositionPdfService.getWitnessDepositionPdf(searchRequest);
+        ByteArrayResource pdfResponse = witnessDepositionPdfService.getWitnessDepositionPdf(searchRequest);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"witness_deposition_pdf.pdf\"")
                 .contentType(MediaType.APPLICATION_PDF)
