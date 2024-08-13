@@ -48,7 +48,7 @@ public class EpostUtil {
                 .taskNumber(request.getTask().getTaskNumber())
                 .fileStoreId(request.getTask().getDocuments().get(0).getFileStore())
                 .address(request.getTask().getTaskDetails().getRespondentDetails().getAddress().toString())
-                .pinCode(request.getTask().getTaskDetails().getRespondentDetails().getPinCode())
+                .pinCode(request.getTask().getTaskDetails().getRespondentDetails().getAddress().getPinCode())
                 .deliveryStatus(DeliveryStatus.NOT_UPDATED)
                 .additionalDetails(request.getTask().getAdditionalDetails())
                 .rowVersion(0)

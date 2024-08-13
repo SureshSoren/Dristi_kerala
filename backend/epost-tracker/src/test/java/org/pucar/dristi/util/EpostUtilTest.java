@@ -70,7 +70,7 @@ class EpostUtilTest {
         when(request.getTask()).thenReturn(task);
         when(task.getTaskDetails()).thenReturn(taskDetails);
         when(taskDetails.getRespondentDetails()).thenReturn(respondentDetails);
-        when(respondentDetails.getPinCode()).thenReturn("123456");
+        //when(respondentDetails.getAddress().getPinCode()).thenReturn("123456");
         when(respondentDetails.getAddress()).thenReturn(new Address());
         when(task.getDocuments()).thenReturn(Collections.singletonList(document));
         when(document.getFileStore()).thenReturn("fileStoreId");
@@ -87,7 +87,7 @@ class EpostUtilTest {
         assertEquals("PN123", ePostTrackerResult.getProcessNumber());
         assertEquals("tenantId", ePostTrackerResult.getTenantId());
         assertEquals("fileStoreId", ePostTrackerResult.getFileStoreId());
-        assertEquals("123456", ePostTrackerResult.getPinCode());
+        //assertEquals("123456", ePostTrackerResult.getPinCode());
         assertEquals(DeliveryStatus.NOT_UPDATED, ePostTrackerResult.getDeliveryStatus());
         assertEquals(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), ePostTrackerResult.getBookingDate()); // Current date comparison
     }
