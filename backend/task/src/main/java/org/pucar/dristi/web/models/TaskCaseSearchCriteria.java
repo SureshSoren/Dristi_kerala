@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Validated
@@ -17,7 +18,7 @@ import java.util.List;
 public class TaskCaseSearchCriteria {
 
     @JsonProperty("completeStatus")
-    private String completeStatus = null;
+    private List<String> completeStatus = null;
 
     @JsonProperty("orderType")
     private List<String> orderType = null;

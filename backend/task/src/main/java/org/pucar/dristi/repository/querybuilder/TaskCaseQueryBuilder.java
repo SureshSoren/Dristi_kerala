@@ -96,10 +96,10 @@ public class TaskCaseQueryBuilder {
 
     private void getWhereFields(TaskCaseSearchCriteria taskCaseSearchCriteria, StringBuilder query, List<Object> preparedStmtList) {
 
-        if (!ObjectUtils.isEmpty(taskCaseSearchCriteria.getCompleteStatus())) {
+        if (!CollectionUtils.isEmpty(taskCaseSearchCriteria.getCompleteStatus())) {
             addClauseIfRequired(query, preparedStmtList);
-            query.append(" task.status = ? ");
-            preparedStmtList.add(taskCaseSearchCriteria.getCompleteStatus());
+            query.append(" task.status IN ( ").append(createQuery(taskCaseSearchCriteria.getCompleteStatus())).append(" ) ");
+            addToPreparedStatement(preparedStmtList, taskCaseSearchCriteria.getCompleteStatus());
         }
 
         if (!CollectionUtils.isEmpty(taskCaseSearchCriteria.getOrderType())) {
