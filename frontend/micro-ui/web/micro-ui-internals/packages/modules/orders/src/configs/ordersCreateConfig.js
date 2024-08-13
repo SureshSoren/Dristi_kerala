@@ -2986,8 +2986,8 @@ export const configsCreateOrderWarrant = [
           error: "required ",
           options: [
             {
-              code: "Warrant_Type_1",
-              name: "Warrant_Type_1",
+              code: "Arrest",
+              name: "arrest",
             },
           ],
         },
