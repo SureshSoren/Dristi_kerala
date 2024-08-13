@@ -132,7 +132,8 @@ const PaymentForSummonModal = ({ path }) => {
   }, [caseData]);
 
   console.log("caseData :>> ", caseData);
-
+  const todayDate = new Date().getTime();
+  const dayInMillisecond = 24 * 3600 * 1000;
   const { data: orderData, isloading: isOrdersLoading } = Digit.Hooks.orders.useSearchOrdersService(
     { tenantId, criteria: { orderNumber: orderNumber } },
     { tenantId },
@@ -249,7 +250,7 @@ const PaymentForSummonModal = ({ path }) => {
                 cnrNumber: filteredTasks?.[0]?.cnrNumber,
                 filingNumber: filingNumber,
                 isCompleted: false,
-                stateSla: "",
+                stateSla: 3 * dayInMillisecond + todayDate,
                 additionalDetails: {
                   hearingId: hearingsData?.list?.[0]?.hearingId,
                 },

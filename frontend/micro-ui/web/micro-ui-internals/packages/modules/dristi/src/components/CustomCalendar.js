@@ -98,7 +98,7 @@ function CustomCalendar({ config, t, handleSelect, onCalendarConfirm, selectedCu
         <Calendar
           date={selectedCustomDate}
           onChange={handleSelect}
-          // minDate={minDate}
+          minDate={minDate}
           maxDate={maxDate}
           dayContentRenderer={renderCustomDay}
           navigatorRenderer={navigatorRenderer}

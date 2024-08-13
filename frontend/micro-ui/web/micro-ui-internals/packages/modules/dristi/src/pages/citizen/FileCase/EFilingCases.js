@@ -30,6 +30,7 @@ import {
   chequeDateValidation,
   chequeDetailFileValidation,
   complainantValidation,
+  debtLiabilityValidation,
   delayApplicationValidation,
   demandNoticeFileValidation,
   getAllAssignees,
@@ -897,6 +898,8 @@ function EFilingCases({ path }) {
                           isDisabled: input?.shouldBeEnabled ? false : true,
                         };
                       }
+
+                      // 225 Inquiry Affidavit Validation in respondent details
                       if (selected === "respondentDetails") {
                         if (
                           Array.isArray(data?.addressDetails) &&
@@ -913,8 +916,8 @@ function EFilingCases({ path }) {
                               body?.key === "inquiryAffidavitFileUpload"
                           )
                         ) {
-                          delete input.isOptional;
-                          body.isMandatory = true;
+                          // delete input.isOptional;
+                          body.isMandatory = false;
                           return {
                             ...input,
                             hideDocument: false,
@@ -924,7 +927,7 @@ function EFilingCases({ path }) {
                           return {
                             ...input,
                             isOptional: "CS_IS_OPTIONAL",
-                            hideDocument: true,
+                            hideDocument: false,
                           };
                         } else {
                           return {
@@ -1362,6 +1365,23 @@ function EFilingCases({ path }) {
             toast,
             setFormErrors: setFormErrors.current,
             clearFormDataErrors: clearFormDataErrors.current,
+          })
+        )
+    ) {
+      return;
+    }
+    if (
+      formdata
+        .filter((data) => data.isenabled)
+        .some((data) =>
+          debtLiabilityValidation({
+            formData: data?.data,
+            t,
+            caseDetails,
+            selected,
+            setShowErrorToast,
+            toast,
+            setFormErrors: setFormErrors.current,
           })
         )
     ) {
