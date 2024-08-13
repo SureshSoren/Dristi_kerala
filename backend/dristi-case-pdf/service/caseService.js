@@ -122,9 +122,9 @@ exports.getWitnessDetails = async (cases) => {
         const middleName = data.middleName || '';
         const lastName = data.lastName || '';
 
-        const additionalDetails = data.witnessAdditionalDetails 
-        ? data.witnessAdditionalDetails.text || '' 
-        : '';
+        const additionalDetails = data && data.witnessAdditionalDetails && typeof data.witnessAdditionalDetails === 'object'
+          ? data.witnessAdditionalDetails.text || ''
+          : '';
 
         return {
             name: `${firstName} ${middleName} ${lastName}`,

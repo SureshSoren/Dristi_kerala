@@ -65,7 +65,17 @@ async function appendPdfPagesWithHeader(existingPdfDoc, fileStoreId, header) {
 
     const documentBytes = await fetchDocument(fileStoreId);
     const fetchedPdfDoc = await PDFDocument.load(documentBytes);
-    const fetchedPages = await fetchedPdfDoc.getPages();
+    if (!fetchedPdfDoc) {
+        console.error("Failed to load PDF document.");
+        return;
+    }
+
+    const fetchedPages = fetchedPdfDoc.getPages();
+    if (fetchedPages.length === 0) {
+        console.error("No pages found in the fetched PDF document.");
+        return;
+    }
+
     for (const pageIndex of fetchedPages.map((_, i) => i)) {
         const [copiedPage] = await existingPdfDoc.copyPages(fetchedPdfDoc, [pageIndex]);
         const { width: fetchedWidth, height: fetchedHeight } = copiedPage.getSize();
