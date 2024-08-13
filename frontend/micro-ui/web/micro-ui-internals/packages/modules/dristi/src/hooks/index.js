@@ -10,6 +10,8 @@ import useGetOrders from "./dristi/useGetOrders";
 import useGetSubmissions from "./dristi/useGetSubmissions";
 import useInboxCustomHook from "./dristi/useInboxCustomHook";
 import useSearchCaseService from "./dristi/useSearchCaseService";
+import useCasePdfGeneration from "./dristi/useCasePdfGeneration";
+
 import usePaymentCalculator from "./dristi/usePaymentCalculator";
 import { useToast } from "../components/Toast/useToast.js";
 import useCreateHearings from "./dristi/useCreateHearings.js";
@@ -32,6 +34,7 @@ export const Urls = {
     caseCreate: "/case/v1/_create",
     caseUpdate: "/case/v1/_update",
     caseSearch: "/case/v1/_search",
+    casePfGeneration: "/case/v1/_generatePdf",
     evidenceSearch: "/evidence/v1/_search",
     evidenceCreate: "/evidence/v1/_create",
     evidenceUpdate: "/evidence/v1/_update",
@@ -75,6 +78,7 @@ const dristi = {
   useGetIndividualUser,
   useInboxCustomHook,
   useSearchCaseService,
+  useCasePdfGeneration,
   usePaymentCalculator,
   useCreateHearings,
   useGetEvidence,

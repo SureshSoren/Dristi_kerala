@@ -913,7 +913,7 @@ export const createIndividualUser = async ({ data, documentData, tenantId }) => 
           latitude: data?.addressDetails?.coordinates?.latitude,
           longitude: data?.addressDetails?.coordinates?.longitude,
           city: data?.addressDetails?.city,
-          pincode: data?.addressDetails?.pincode,
+          pincode: data?.addressDetails?.pincode || data?.["addressDetails-select"]?.pincode,
           addressLine1: data?.addressDetails?.state,
           addressLine2: data?.addressDetails?.district,
           street: data?.addressDetails?.locality,
