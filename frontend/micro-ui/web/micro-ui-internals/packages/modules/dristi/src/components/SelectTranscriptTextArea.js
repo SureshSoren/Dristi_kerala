@@ -338,7 +338,7 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
             handleChange(data, input);
           }}
           rows={5}
-          maxLength={400}
+          // maxLength={400}
           className={`custom-textarea-style${errors[config.key] ? " alert-error-border" : ""}`}
           placeholder={t(input?.placeholder)}
           disabled={config.disable}

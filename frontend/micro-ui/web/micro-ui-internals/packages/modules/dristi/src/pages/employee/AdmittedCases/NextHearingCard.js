@@ -3,7 +3,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { DRISTIService } from "../../../services";
-import { NextHearingIcon } from "../../../icons/svgIndex";
 
 function timeInMillisFromDateAndTime(date, hhmmssms) {
   const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -95,12 +94,9 @@ const NextHearingCard = ({ caseData, width }) => {
           fontSize: "16px",
           lineHeight: "18.75px",
           color: "#231F20",
-          display: "flex",
-          alignItems: "center",
         }}
       >
-        <NextHearingIcon />
-        <span style={{ lineHeight: "normal", marginLeft: "12px" }}>Next Hearing</span>
+        Next Hearing
       </div>
       <hr style={{ border: "1px solid #FFF6E880" }} />
       <div style={{ display: "flex", justifyContent: "space-between", padding: "10px" }}>
