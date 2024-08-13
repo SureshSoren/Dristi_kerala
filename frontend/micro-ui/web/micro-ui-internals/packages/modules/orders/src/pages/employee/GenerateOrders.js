@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
@@ -39,11 +39,35 @@ import isEqual from "lodash/isEqual";
 import { OrderWorkflowAction, OrderWorkflowState } from "../../utils/orderWorkflow";
 import { Urls } from "../../hooks/services/Urls";
 import { SubmissionWorkflowAction, SubmissionWorkflowState } from "../../utils/submissionWorkflow";
-import { getAdvocates } from "../../utils/caseUtils";
+import { getAdvocates, getuuidNameMap } from "../../utils/caseUtils";
 import { HearingWorkflowAction } from "../../utils/hearingWorkflow";
 import _ from "lodash";
 import { useGetPendingTask } from "../../hooks/orders/useGetPendingTask";
 import useSearchOrdersService from "../../hooks/orders/useSearchOrdersService";
+import useGetStatuteSection from "../../hooks/orders/useGetStatuteSection";
+const configKeys = {
+  SECTION_202_CRPC: configsOrderSection202CRPC,
+  MANDATORY_SUBMISSIONS_RESPONSES: configsOrderMandatorySubmissions,
+  EXTENSION_OF_DOCUMENT_SUBMISSION_DATE: configsOrderSubmissionExtension,
+  REFERRAL_CASE_TO_ADR: configsOrderTranferToADR,
+  SCHEDULE_OF_HEARING_DATE: configsScheduleHearingDate,
+  SCHEDULING_NEXT_HEARING: configsScheduleNextHearingDate,
+  RESCHEDULE_OF_HEARING_DATE: configsRescheduleHearingDate,
+  REJECTION_RESCHEDULE_REQUEST: configsRejectRescheduleHeadingDate,
+  INITIATING_RESCHEDULING_OF_HEARING_DATE: configsInitiateRescheduleHearingDate,
+  ASSIGNING_DATE_RESCHEDULED_HEARING: configsAssignDateToRescheduledHearing,
+  ASSIGNING_NEW_HEARING_DATE: configsAssignNewHearingDate,
+  CASE_TRANSFER: configsCaseTransfer,
+  SETTLEMENT: configsCaseSettlement,
+  SUMMONS: configsIssueSummons,
+  BAIL: configsBail,
+  WARRANT: configsCreateOrderWarrant,
+  WITHDRAWAL: configsCaseWithdrawal,
+  OTHERS: configsOthers,
+  APPROVE_VOLUNTARY_SUBMISSIONS: configsVoluntarySubmissionStatus,
+  REJECT_VOLUNTARY_SUBMISSIONS: configRejectSubmission,
+  JUDGEMENT: configsJudgement,
+};
 
 function applyMultiSelectDropdownFix(setValue, formData, keys) {
   keys.forEach((key) => {
@@ -131,7 +155,9 @@ const GenerateOrders = () => {
   const closeToast = () => {
     setShowErrorToast(null);
   };
-
+  // const hearingsList = useMemo(() => hearingsData?.HearingList?.sort((a, b) => b.startTime - a.startTime), [hearingsData]);
+  const { data: courtRoomDetails, isLoading: isCourtIdsLoading } = useGetStatuteSection("common-masters", [{ name: "Court_Rooms" }]);
+  const courtRooms = useMemo(() => courtRoomDetails?.Court_Rooms || [], [courtRoomDetails]);
   const { data: caseData, isLoading: isCaseDetailsLoading } = Digit.Hooks.dristi.useSearchCaseService(
     {
       criteria: [
@@ -146,6 +172,7 @@ const GenerateOrders = () => {
     filingNumber,
     filingNumber
   );
+  const userInfo = Digit.UserService.getUser()?.info;
 
   const caseDetails = useMemo(
     () => ({
@@ -153,6 +180,8 @@ const GenerateOrders = () => {
     }),
     [caseData]
   );
+  const setFormErrors = useRef(null);
+  const [currentFormData, setCurrentFormData] = useState(null);
 
   const { data: courtRoomData } = Digit.Hooks.useCustomMDMS(Digit.ULBService.getStateId(), "common-masters", [{ name: "Court_Rooms" }], {
     select: (data) => {
@@ -167,9 +196,17 @@ const GenerateOrders = () => {
       return newData;
     },
   });
+  const { data: orderTypeData } = Digit.Hooks.useCustomMDMS(Digit.ULBService.getStateId(), "Order", [{ name: "OrderType" }], {
+    select: (data) => {
+      return _.get(data, "Order.OrderType", [])
+        .filter((opt) => (opt?.hasOwnProperty("isactive") ? opt.isactive : true))
+        .map((opt) => ({ ...opt }));
+    },
+  });
 
   const cnrNumber = useMemo(() => caseDetails?.cnrNumber, [caseDetails]);
   const allAdvocates = useMemo(() => getAdvocates(caseDetails), [caseDetails]);
+  const uuidNameMap = useMemo(() => getuuidNameMap(caseDetails), [caseDetails]);
 
   const complainants = useMemo(() => {
     return (
@@ -203,6 +240,7 @@ const GenerateOrders = () => {
         }) || []
     );
   }, [caseDetails, allAdvocates]);
+  console.log(complainants, "COMPL", allAdvocates);
 
   const unJoinedLitigant = useMemo(() => {
     return (
@@ -227,7 +265,17 @@ const GenerateOrders = () => {
     filingNumber,
     Boolean(filingNumber && cnrNumber)
   );
-
+  const { data: publishedOrdersData, isLoading: isPublishedOrdersLoading } = useSearchOrdersService(
+    {
+      tenantId,
+      criteria: { filingNumber, applicationNumber: "", cnrNumber, status: OrderWorkflowState.PUBLISHED },
+      pagination: { limit: 1000, offset: 0 },
+    },
+    { tenantId },
+    filingNumber + OrderWorkflowState.PUBLISHED,
+    Boolean(filingNumber && cnrNumber)
+  );
+  const publishedBailOrder = useMemo(() => publishedOrdersData?.list?.find((item) => item?.orderType === "BAIL") || {}, [publishedOrdersData]);
   const advocateIds = caseDetails.representatives?.map((representative) => {
     return {
       id: representative.advocateId,
@@ -394,7 +442,7 @@ const GenerateOrders = () => {
     true
   );
   const hearingDetails = useMemo(() => hearingsData?.HearingList?.[0], [hearingsData]);
-
+  const hearingsList = useMemo(() => hearingsData?.HearingList?.sort((a, b) => b.startTime - a.startTime), [hearingsData]);
   const isHearingAlreadyScheduled = useMemo(() => {
     const isPresent = hearingsData?.HearingList.some((hearing) => {
       return !(hearing?.status === "COMPLETED" || hearing?.status === "ABATED");
@@ -403,29 +451,6 @@ const GenerateOrders = () => {
   }, [hearingsData]);
 
   const modifiedFormConfig = useMemo(() => {
-    const configKeys = {
-      SECTION_202_CRPC: configsOrderSection202CRPC,
-      MANDATORY_SUBMISSIONS_RESPONSES: configsOrderMandatorySubmissions,
-      EXTENSION_OF_DOCUMENT_SUBMISSION_DATE: configsOrderSubmissionExtension,
-      REFERRAL_CASE_TO_ADR: configsOrderTranferToADR,
-      SCHEDULE_OF_HEARING_DATE: configsScheduleHearingDate,
-      SCHEDULING_NEXT_HEARING: configsScheduleNextHearingDate,
-      RESCHEDULE_OF_HEARING_DATE: configsRescheduleHearingDate,
-      REJECTION_RESCHEDULE_REQUEST: configsRejectRescheduleHeadingDate,
-      INITIATING_RESCHEDULING_OF_HEARING_DATE: configsInitiateRescheduleHearingDate,
-      ASSIGNING_DATE_RESCHEDULED_HEARING: configsAssignDateToRescheduledHearing,
-      ASSIGNING_NEW_HEARING_DATE: configsAssignNewHearingDate,
-      CASE_TRANSFER: configsCaseTransfer,
-      SETTLEMENT: configsCaseSettlement,
-      SUMMONS: configsIssueSummons,
-      BAIL: configsBail,
-      WARRANT: configsCreateOrderWarrant,
-      WITHDRAWAL: configsCaseWithdrawal,
-      OTHERS: configsOthers,
-      APPROVE_VOLUNTARY_SUBMISSIONS: configsVoluntarySubmissionStatus,
-      REJECT_VOLUNTARY_SUBMISSIONS: configRejectSubmission,
-      JUDGEMENT: configsJudgement,
-    };
     let newConfig = currentOrder?.orderNumber
       ? applicationTypeConfig?.map((item) => ({ body: item.body.map((input) => ({ ...input, disable: true })) }))
       : structuredClone(applicationTypeConfig);
@@ -492,12 +517,19 @@ const GenerateOrders = () => {
                   },
                 };
               }
-              if (field?.key === "respondingParty") {
+              if (field?.populators?.inputs?.some((input) => input?.name === "respondingParty")) {
                 return {
                   ...field,
                   populators: {
                     ...field?.populators,
-                    options: [...complainants, ...respondents],
+                    inputs: field?.populators?.inputs.map((input) =>
+                      input.name === "respondingParty"
+                        ? {
+                            ...input,
+                            options: [...complainants, ...respondents],
+                          }
+                        : input
+                    ),
                   },
                 };
               }
@@ -588,13 +620,32 @@ const GenerateOrders = () => {
     if (currentOrder?.orderType && !currentOrder?.additionalDetails?.formdata) {
       return {
         orderType: {
-          code: currentOrder?.orderType,
-          type: currentOrder?.orderType,
-          name: `ORDER_TYPE_${currentOrder?.orderType}`,
+          ...orderTypeData?.find((item) => item.code === currentOrder?.orderType),
         },
       };
     }
     let updatedFormdata = structuredClone(currentOrder?.additionalDetails?.formdata || {});
+    if (orderType === "JUDGEMENT") {
+      const complainantPrimary = caseDetails?.litigants?.filter((item) => item?.partyType?.includes("complainant.primary"))?.[0];
+      const respondentPrimary = caseDetails?.litigants?.filter((item) => item?.partyType?.includes("respondent.primary"))?.[0];
+      updatedFormdata.nameofComplainant = complainantPrimary?.additionalDetails?.fullName;
+      updatedFormdata.nameofRespondent = respondentPrimary?.additionalDetails?.fullName;
+      updatedFormdata.nameofComplainantAdvocate = uuidNameMap?.[allAdvocates?.[complainantPrimary?.additionalDetails?.uuid]] || "";
+      updatedFormdata.nameofRespondentAdvocate = uuidNameMap?.[allAdvocates?.[respondentPrimary?.additionalDetails?.uuid]] || "";
+      updatedFormdata.caseNumber = caseDetails?.courtCaseNumber;
+      updatedFormdata.nameOfCourt = courtRooms.find((room) => room.code === caseDetails?.courtId)?.name;
+      updatedFormdata.addressRespondant = generateAddress(
+        caseDetails?.additionalDetails?.respondentDetails?.formdata?.[0]?.data?.addressDetails?.map((data) => data?.addressDetails)[0]
+      );
+      updatedFormdata.dateChequeReturnMemo = formatDate(new Date(caseDetails?.caseDetails?.chequeDetails?.formdata?.[0]?.data?.depositDate));
+      updatedFormdata.dateFiling = formatDate(new Date(caseDetails?.filingDate));
+      updatedFormdata.dateApprehension = formatDate(new Date(publishedBailOrder?.auditDetails?.lastModifiedTime)) || "";
+      updatedFormdata.dateofReleaseOnBail = formatDate(new Date(publishedBailOrder?.auditDetails?.lastModifiedTime)) || "";
+      updatedFormdata.dateofCommencementTrial = formatDate(new Date(publishedBailOrder?.auditDetails?.lastModifiedTime)) || "";
+      updatedFormdata.dateofCloseTrial = formatDate(new Date(hearingsList?.[hearingsList?.length - 2]?.startTime));
+      updatedFormdata.dateofSentence = formatDate(new Date(hearingsList?.[hearingsList?.length - 1]?.startTime));
+      updatedFormdata.offense = "NIA 138";
+    }
     if (orderType === "BAIL") {
       updatedFormdata.bailType = { type: applicationDetails?.applicationType };
       updatedFormdata.submissionDocuments = applicationDetails?.additionalDetails?.formdata?.submissionDocuments;
@@ -663,8 +714,9 @@ const GenerateOrders = () => {
         applicationDetails?.additionalDetails?.formdata?.initialHearingDate || currentOrder.additionalDetails?.formdata?.originalHearingDate || "";
     }
     return updatedFormdata;
-  }, [currentOrder, orderType, applicationDetails, t, hearingDetails, caseDetails]);
+  }, [currentOrder, orderType, applicationDetails, t, hearingDetails, caseDetails, orderTypeData]);
   const onFormValueChange = (setValue, formData, formState, reset, setError, clearErrors, trigger, getValues) => {
+    console.log(formData, "FOERMDATAA");
     applyMultiSelectDropdownFix(setValue, formData, multiSelectDropdownKeys);
 
     if (orderType && ["MANDATORY_SUBMISSIONS_RESPONSES"].includes(orderType)) {
@@ -689,20 +741,30 @@ const GenerateOrders = () => {
       ) {
         setError("isResponseRequired", { message: t("CORE_REQUIRED_FIELD_ERROR") });
       }
-      if (formData?.responseInfo?.responseDeadline && Object.keys(formState?.errors).includes("responseDeadline")) {
+      if (
+        formData?.responseInfo?.responseDeadline &&
+        new Date(formData?.submissionDeadline).getTime() < new Date(formData?.responseInfo?.responseDeadline).getTime() &&
+        Object.keys(formState?.errors).includes("responseDeadline")
+      ) {
+        clearErrors("responseDeadline");
+      } else if (formData?.responseInfo?.isResponseRequired?.code === false && Object.keys(formState?.errors).includes("responseDeadline")) {
         clearErrors("responseDeadline");
       } else if (
         formState?.submitCount &&
         !formData?.responseInfo?.responseDeadline &&
+        formData?.responseInfo?.isResponseRequired?.code === true &&
         !Object.keys(formState?.errors).includes("responseDeadline")
       ) {
         setError("responseDeadline", { message: t("PROPOSED_DATE_CAN_NOT_BE_BEFORE_SUBMISSION_DEADLINE") });
       }
       if (formData?.responseInfo?.respondingParty?.length > 0 && Object.keys(formState?.errors).includes("respondingParty")) {
         clearErrors("respondingParty");
+      } else if (formData?.responseInfo?.isResponseRequired?.code === false && Object.keys(formState?.errors).includes("respondingParty")) {
+        clearErrors("respondingParty");
       } else if (
         formState?.submitCount &&
         (!formData?.responseInfo?.respondingParty || formData?.responseInfo?.respondingParty?.length === 0) &&
+        formData?.responseInfo?.isResponseRequired?.code === true &&
         !Object.keys(formState?.errors).includes("respondingParty")
       ) {
         setError("respondingParty", { message: t("CORE_REQUIRED_FIELD_ERROR") });
@@ -717,22 +779,37 @@ const GenerateOrders = () => {
       }
       if (formData?.bailInfo?.noOfSureties && Object.keys(formState?.errors).includes("noOfSureties")) {
         clearErrors("noOfSureties");
-      } else if (formState?.submitCount && !formData?.bailInfo?.noOfSureties && !Object.keys(formState?.errors).includes("noOfSureties")) {
+      } else if (formData?.bailInfo?.isBailable?.code === false && Object.keys(formState?.errors).includes("noOfSureties")) {
+        clearErrors("noOfSureties");
+      } else if (
+        formState?.submitCount &&
+        !formData?.bailInfo?.noOfSureties &&
+        formData?.bailInfo?.isBailable?.code === true &&
+        !Object.keys(formState?.errors).includes("noOfSureties")
+      ) {
         setError("noOfSureties", { message: t("CORE_REQUIRED_FIELD_ERROR") });
       }
       if (
-        formState?.submitCount &&
-        formData?.bailInfo?.bailableAmount[formData?.bailInfo?.bailableAmount?.length - 1] === "." &&
-        !Object.keys(formState?.errors).includes("bailableAmount")
-      ) {
-        setError("bailableAmount", { message: t("CS_VALID_AMOUNT_DECIMAL") });
-      } else if (
         formData?.bailInfo?.bailableAmount &&
         formData?.bailInfo?.bailableAmount[formData?.bailInfo?.bailableAmount?.length - 1] !== "." &&
         Object.keys(formState?.errors).includes("bailableAmount")
       ) {
         clearErrors("bailableAmount");
-      } else if (formState?.submitCount && !formData?.bailInfo?.bailableAmount && !Object.keys(formState?.errors).includes("bailableAmount")) {
+      } else if (formData?.bailInfo?.isBailable?.code === false && Object.keys(formState?.errors).includes("bailableAmount")) {
+        clearErrors("bailableAmount");
+      } else if (
+        formState?.submitCount &&
+        formData?.bailInfo?.isBailable?.code === true &&
+        formData?.bailInfo?.bailableAmount[formData?.bailInfo?.bailableAmount?.length - 1] === "." &&
+        !Object.keys(formState?.errors).includes("bailableAmount")
+      ) {
+        setError("bailableAmount", { message: t("CS_VALID_AMOUNT_DECIMAL") });
+      } else if (
+        formState?.submitCount &&
+        !formData?.bailInfo?.bailableAmount &&
+        formData?.bailInfo?.isBailable?.code === true &&
+        !Object.keys(formState?.errors).includes("bailableAmount")
+      ) {
         setError("bailableAmount", { message: t("CS_VALID_AMOUNT_DECIMAL") });
       }
     }
@@ -753,7 +830,9 @@ const GenerateOrders = () => {
               };
         });
       });
+      setCurrentFormData(formData);
     }
+    setFormErrors.current = setError;
     if (Object.keys(formState?.errors).length) {
       setIsSubmitDisabled(true);
     } else {
@@ -774,10 +853,13 @@ const GenerateOrders = () => {
           : null;
 
       localStorage.removeItem("fileStoreId");
+      const orderSchema = {};
+
       return await ordersService.updateOrder(
         {
           order: {
             ...order,
+            ...orderSchema,
             documents: documentsFile ? [...documents, documentsFile] : documents,
             workflow: { ...order.workflow, action, documents: [{}] },
           },
@@ -885,7 +967,9 @@ const GenerateOrders = () => {
       return await Promise.all(promises);
     }
     if (order?.orderType === "SUMMONS") {
-      assignees = [...[...new Set([...Object.keys(allAdvocates)?.flat(), ...Object.values(allAdvocates)?.flat()])]?.map((uuid) => ({ uuid }))];
+      const assignee = [userInfo?.uuid];
+      const advocateUuid = Object.values(allAdvocates)?.flat();
+      assignees = [...assignee, ...advocateUuid]?.map((uuid) => ({ uuid }));
       if (Array.isArray(order?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels)) {
         entityType = "order-managelifecycle";
         const promises = order?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels?.map(async (channel) => {
@@ -1102,7 +1186,9 @@ const GenerateOrders = () => {
     const orderData = orderDetails?.order;
     const orderFormData = orderDetails?.order?.additionalDetails?.formdata?.SummonsOrder?.party?.data;
     const selectedChannel = orderData?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels;
-    const respondentAddress = orderFormData?.addressDetails?.map((data) => ({ ...data?.addressDetails }));
+    const respondentAddress = orderFormData?.addressDetails
+      ? orderFormData?.addressDetails?.map((data) => ({ ...data?.addressDetails }))
+      : caseDetails?.additionalDetails?.respondentDetails?.formdata?.[0]?.data?.addressDetails?.map((data) => data?.addressDetails);
     const respondentName = `${orderFormData?.respondentFirstName || ""}${
       orderFormData?.respondentMiddleName ? " " + orderFormData?.respondentMiddleName + " " : " "
     }${orderFormData?.respondentLastName || ""}`.trim();
@@ -1183,9 +1269,9 @@ const GenerateOrders = () => {
           },
           respondentDetails: {
             name: respondentName,
-            address: respondentAddress[0],
-            phone: respondentPhoneNo[0] || "",
-            email: respondentEmail[0] || "",
+            address: respondentAddress?.[0],
+            phone: respondentPhoneNo?.[0] || "",
+            email: respondentEmail?.[0] || "",
             age: "",
             gender: "",
           },
@@ -1215,9 +1301,9 @@ const GenerateOrders = () => {
         payload = {
           respondentDetails: {
             name: respondentName,
-            address: respondentAddress[0],
-            phone: respondentPhoneNo[0] || "",
-            email: respondentEmail[0] || "",
+            address: respondentAddress?.[0],
+            phone: respondentPhoneNo?.[0] || "",
+            email: respondentEmail?.[0] || "",
             age: "",
             gender: "",
           },
@@ -1362,36 +1448,34 @@ const GenerateOrders = () => {
 
   const handleIssueSummons = async (hearingDate, hearingNumber) => {
     try {
-      const reqbody = {
-        order: {
-          createdDate: new Date().getTime(),
+      const orderbody = {
+        createdDate: new Date().getTime(),
+        tenantId,
+        cnrNumber,
+        filingNumber,
+        statuteSection: {
           tenantId,
-          cnrNumber,
-          filingNumber,
-          statuteSection: {
-            tenantId,
-          },
-          orderType: "SUMMONS",
-          status: "",
-          isActive: true,
-          workflow: {
-            action: OrderWorkflowAction.SAVE_DRAFT,
-            comments: "Creating order",
-            assignes: null,
-            rating: null,
-            documents: [{}],
-          },
-          documents: [],
-          ...(hearingNumber && { hearingNumber }),
-          additionalDetails: {
-            formdata: {
-              orderType: {
-                code: "SUMMONS",
-                type: "SUMMONS",
-                name: "ORDER_TYPE_SUMMONS",
-              },
-              hearingDate,
+        },
+        orderType: "SUMMONS",
+        status: "",
+        isActive: true,
+        workflow: {
+          action: OrderWorkflowAction.SAVE_DRAFT,
+          comments: "Creating order",
+          assignes: null,
+          rating: null,
+          documents: [{}],
+        },
+        documents: [],
+        ...(hearingNumber && { hearingNumber }),
+        additionalDetails: {
+          formdata: {
+            orderType: {
+              code: "SUMMONS",
+              type: "SUMMONS",
+              name: "ORDER_TYPE_SUMMONS",
             },
+            hearingDate,
           },
         },
       };
@@ -1401,13 +1485,10 @@ const GenerateOrders = () => {
       const promiseList = summonsArray?.map((data) =>
         ordersService.createOrder(
           {
-            ...reqbody,
-            order: {
-              ...reqbody.order,
-              additionalDetails: {
-                ...reqbody.order?.additionalDetails,
-                selectedParty: data,
-              },
+            ...orderbody,
+            additionalDetails: {
+              ...orderbody?.additionalDetails,
+              selectedParty: data,
             },
           },
           { tenantId }
@@ -1557,14 +1638,14 @@ const GenerateOrders = () => {
   };
   const successModalActionSaveLabel = useMemo(() => {
     if (
-      (prevOrder?.orderType === "RESCHEDULE_OF_HEARING_DATE") & prevOrder?.additionalDetails?.isReIssueSummons ||
+      prevOrder?.orderType === "RESCHEDULE_OF_HEARING_DATE" ||
       (currentOrder?.orderType === "SCHEDULE_OF_HEARING_DATE" &&
-        currentOrder?.additionalDetails?.formdata?.namesOfPartiesRequired?.some((data) => data?.partyType === "respondent"))
+        currentOrder?.additionalDetails?.formdata?.namesOfPartiesRequired?.some((data) => data?.partyType.includes("respondent")))
     ) {
       return t("ISSUE_SUMMONS_BUTTON");
     }
     return t("CS_COMMON_CLOSE");
-  }, [currentOrder, prevOrder?.additionalDetails?.isReIssueSummons, prevOrder?.orderType, t]);
+  }, [currentOrder, prevOrder?.orderType, t]);
 
   const handleGoBackSignatureModal = () => {
     setShowsignatureModal(false);
@@ -1588,6 +1669,30 @@ const GenerateOrders = () => {
       });
       return;
     }
+    if (orderType && ["MANDATORY_SUBMISSIONS_RESPONSES"].includes(orderType)) {
+      if (!currentFormData?.responseInfo?.responseDeadline && currentFormData?.responseInfo?.isResponseRequired?.code === true) {
+        setFormErrors.current("responseDeadline", { message: t("PROPOSED_DATE_CAN_NOT_BE_BEFORE_SUBMISSION_DEADLINE") });
+        return;
+      }
+      if (
+        (!currentFormData?.responseInfo?.respondingParty || currentFormData?.responseInfo?.respondingParty?.length === 0) &&
+        currentFormData?.responseInfo?.isResponseRequired?.code === true
+      ) {
+        setFormErrors.current("respondingParty", { message: t("CORE_REQUIRED_FIELD_ERROR") });
+        return;
+      }
+    }
+    if (orderType && ["WARRANT"].includes(orderType)) {
+      debugger;
+      if (!currentFormData?.bailInfo?.noOfSureties) {
+        setFormErrors.current("noOfSureties", { message: t("CORE_REQUIRED_FIELD_ERROR") });
+        return;
+      }
+      if (!currentFormData?.bailInfo?.bailableAmount) {
+        setFormErrors.current("bailableAmount", { message: t("CS_VALID_AMOUNT_DECIMAL") });
+        return;
+      }
+    }
     if (referenceId && ![SubmissionWorkflowState.PENDINGAPPROVAL, SubmissionWorkflowState.PENDINGREVIEW].includes(applicationDetails?.status)) {
       setShowErrorToast({
         label:
@@ -1604,7 +1709,6 @@ const GenerateOrders = () => {
     }
     handleSaveDraft({ showReviewModal: true });
   };
-
   const handleClose = async () => {
     if (successModalActionSaveLabel === t("CS_COMMON_CLOSE")) {
       history.push(`/${window.contextPath}/employee/dristi/home/view-case?tab=${"Orders"}&caseId=${caseDetails?.id}&filingNumber=${filingNumber}`, {
@@ -1631,7 +1735,8 @@ const GenerateOrders = () => {
     isApplicationDetailsLoading ||
     !ordersData?.list ||
     isHearingLoading ||
-    pendingTasksLoading
+    pendingTasksLoading ||
+    isCourtIdsLoading
   ) {
     return <Loader />;
   }

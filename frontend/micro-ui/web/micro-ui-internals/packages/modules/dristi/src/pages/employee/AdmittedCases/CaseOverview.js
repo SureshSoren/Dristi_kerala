@@ -12,7 +12,7 @@ import EmptyStates from "../../../../../home/src/components/EmptyStates";
 import { PreviousHearingIcon, RecentOrdersIcon } from "../../../icons/svgIndex";
 import { CaseWorkflowState } from "../../../Utils/caseWorkflow";
 import { getAdvocates } from "../../citizen/FileCase/EfilingValidationUtils";
-
+import JudgementViewCard from "./JudgementViewCard";
 const CaseOverview = ({ caseData, openHearingModule, handleDownload, handleSubmitDocument, handleExtensionRequest }) => {
   const { t } = useTranslation();
   const filingNumber = caseData.filingNumber;
@@ -109,7 +109,9 @@ const CaseOverview = ({ caseData, openHearingModule, handleDownload, handleSubmi
   return (
     <div style={{ display: "flex" }}>
       <div style={{ width: "70%" }}>
-        {hearingRes?.HearingList?.length === 0 && orderList?.length === 0 ? (
+        {caseData?.case?.outcome ? (
+          <JudgementViewCard caseData={caseData} />
+        ) : hearingRes?.HearingList?.length === 0 && orderList?.length === 0 ? (
           <div
             style={{
               marginLeft: "auto",

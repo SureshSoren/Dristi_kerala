@@ -70,7 +70,6 @@ const SelectUserTypeComponent = ({ t, config, onSelect, formData = {}, errors, f
   function getFileStoreData(filesData, input) {
     const numberOfFiles = filesData.length;
     let finalDocumentData = [];
-
     if (numberOfFiles > 0) {
       filesData.forEach((value) => {
         finalDocumentData.push({
@@ -79,30 +78,28 @@ const SelectUserTypeComponent = ({ t, config, onSelect, formData = {}, errors, f
           documentType: value?.[1]?.file?.type,
         });
       });
-
-      onDocumentUpload(filesData[0][1]?.file, filesData[0][0]).then((document) => {
-        const newFileStoreId = document.file?.files?.[0]?.fileStoreId;
-
-        // Update filesData with the new fileStoreId
-        filesData[0][1].fileStoreId = {
-          fileStoreId: newFileStoreId,
-        };
-
-        setFileName(filesData[0][0]);
-        setFileStoreID(newFileStoreId);
-        setShowDoc(true);
-
-        // Set the updated filesData after setting the fileStoreId
-        setValue(filesData, input.name, input);
-      });
-    } else {
-      setShowDoc(false);
-      setValue([], input.name, input);
     }
+    numberOfFiles > 0
+      ? onDocumentUpload(filesData[0][1]?.file, filesData[0][0]).then((document) => {
+          const newFileStoreId = document.file?.files?.[0]?.fileStoreId;
+
+          // Update filesData with the new fileStoreId
+          filesData[0][1].fileStoreId = {
+            fileStoreId: newFileStoreId,
+          };
+          setFileName(filesData[0][0]);
+
+          setFileStoreID(document.file?.files?.[0]?.fileStoreId);
+          setShowDoc(true);
+          // Set the updated filesData after setting the fileStoreId
+          setValue(filesData, input.name, input);
+        })
+      : setShowDoc(false);
+    setValue(numberOfFiles > 0 ? filesData : [], input.name, input);
   }
 
   const checkIfAadharValidationNotSuccessful = (currentValue, input) => {
-    if (!input.checkAadharVerification) {
+    if (!input?.checkAadharVerification) {
       return !currentValue.match(window?.Digit.Utils.getPattern(input.validation.patternType) || input.validation.pattern);
     }
     let isValidated = true;
@@ -166,8 +163,6 @@ const SelectUserTypeComponent = ({ t, config, onSelect, formData = {}, errors, f
             : true;
         return (
           <React.Fragment key={index}>
-            {errors[input.name] && <CardLabelError>{t(input.error)}</CardLabelError>}
-
             {showDependentFields && (
               <LabelFieldPair>
                 {!config?.disableScrutinyHeader && (
@@ -191,8 +186,8 @@ const SelectUserTypeComponent = ({ t, config, onSelect, formData = {}, errors, f
                     <CustomDropdown
                       t={t}
                       label={input?.label}
-                      type={input?.type === "radioButton" && "radio"}
-                      value={formData && formData[config.key] ? formData[config.key][input.name] : undefined}
+                      type={input?.type === "radioButton" ? "radio" : "dropdown"}
+                      value={formData && formData[config.key] ? formData[config.key][input.name] : input?.allowMultiSelect ? [] : undefined}
                       onChange={(e) => {
                         setValue(e, input.name, input);
                       }}
@@ -209,9 +204,11 @@ const SelectUserTypeComponent = ({ t, config, onSelect, formData = {}, errors, f
                       onChange={(e) => {
                         setValue(e.target.value, input.name, input);
                       }}
+                      min={input?.validation?.min}
                       disable={input.isDisabled}
                       style={{ paddingRight: "3px" }}
                       defaultValue={undefined}
+                      errorStyle={errors?.[input.name]}
                       customIcon={input?.customIcon}
                       {...input.validation}
                     />
@@ -247,8 +244,12 @@ const SelectUserTypeComponent = ({ t, config, onSelect, formData = {}, errors, f
                             ? updatedValue
                             : updatedValue?.slice(0, updatedValue?.length - 1);
                         }
+                        if (input.validation && input.validation?.isDecimal && input.validation?.regex) {
+                          updatedValue = input.validation?.regex.test(updatedValue) ? updatedValue : updatedValue?.slice(0, updatedValue?.length - 1);
+                        }
                         setValue(updatedValue, input.name, input);
                       }}
+                      errorStyle={errors?.[input.name]}
                       disable={input.isDisabled}
                       defaultValue={undefined}
                       {...input.validation}
@@ -261,10 +262,16 @@ const SelectUserTypeComponent = ({ t, config, onSelect, formData = {}, errors, f
                     !["documentUpload", "radioButton"].includes(input.type) &&
                     input.validation &&
                     checkIfAadharValidationNotSuccessful(currentValue, input) && (
-                      <CardLabelError style={{ width: "100%", marginTop: "-15px", fontSize: "16px", marginBottom: "12px" }}>
+                      <CardLabelError style={{ width: "100%", fontSize: "12px", marginBottom: "12px" }}>
                         <span style={{ color: "#FF0000" }}> {t(input.validation?.errMsg || "CORE_COMMON_INVALID")}</span>
                       </CardLabelError>
                     )}
+
+                  {errors[input.name] && (
+                    <CardLabelError style={{ width: "70%", marginLeft: "30%", fontSize: "12px" }}>
+                      {errors[input.name]?.message ? errors[input.name]?.message : t(errors[input.name]) || t(input.error)}
+                    </CardLabelError>
+                  )}
                 </div>
               </LabelFieldPair>
             )}

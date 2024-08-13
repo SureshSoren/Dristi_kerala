@@ -6,6 +6,8 @@ export const applicationTypeConfig = [
         key: "orderType",
         type: "dropdown",
         label: "ORDER_TYPE",
+        schemaKeyPath: "orderType",
+        transformer: "mdmsDropdown",
         disable: false,
         populators: {
           name: "orderType",
@@ -97,41 +99,18 @@ export const configs = [
   },
   {
     body: [
-      // {
-      //   type: "component",
-      //   component: "SelectCustomTextArea",
-      //   key: "orderAdditionalNotes",
-      //   populators: {
-      //     inputs: [
-      //       {
-      //         textAreaSubHeader: "CS_ORDER_ADDITIONAL_NOTES",
-      //         type: "TextAreaComponent",
-      //         isOptional: true,
-      //       },
-      //     ],
-      //     validation: {
-      //       customValidationFn: {
-      //         moduleName: "dristiOrders",
-      //         masterName: "alphaNumericValidation",
-      //       },
-      //     },
-      //     mdmsConfig: {
-      //       moduleName: "Order",
-      //       masterName: "", // TO DO: ADD CONFIG IN MDMS
-      //       localePrefix: "",
-      //     },
-      //   },
-      // },
       {
         type: "component",
-        component: "SelectTranscriptTextArea",
+        component: "SelectCustomTextArea",
         key: "orderAdditionalNotes",
         populators: {
-          input: {
-            textAreaSubHeader: "CS_ORDER_ADDITIONAL_NOTES",
-            type: "TranscriptionTextAreaComponent",
-            isOptional: true,
-          },
+          inputs: [
+            {
+              textAreaSubHeader: "CS_ORDER_ADDITIONAL_NOTES",
+              type: "TextAreaComponent",
+              isOptional: true,
+            },
+          ],
           validation: {
             customValidationFn: {
               moduleName: "dristiOrders",
@@ -270,6 +249,7 @@ export const configsOrderSection202CRPC = [
         label: "CNR_NUMBER",
         isMandatory: true,
         key: "cnrNumber",
+        schemaKeyPath: "caseDetails.cnrNumber",
         type: "text",
         populators: { name: "cnrNumber", hideInForm: true },
       },
@@ -284,6 +264,8 @@ export const configsOrderSection202CRPC = [
         label: "APPLICATION_FILLED_BY",
         isMandatory: true,
         key: "applicationFilledBy",
+        schemaKeyPath: "orderDetails.applicationFilledBy",
+        transformer: "customDropdown",
         type: "radio",
         populators: {
           name: "applicationFilledBy",
@@ -311,6 +293,8 @@ export const configsOrderSection202CRPC = [
         label: "DETAILS_SEEKED_OF",
         isMandatory: true,
         key: "detailsSeekedOf",
+        schemaKeyPath: "orderDetails.soughtOfDetails",
+        transformer: "customDropdown",
         type: "radio",
         populators: {
           name: "detailsSeekedOf",
@@ -342,6 +326,7 @@ export const configsOrderSection202CRPC = [
         type: "component",
         component: "SelectCustomTextArea",
         key: "lawSections",
+        schemaKeyPath: "orderDetails.sectionOfLaw",
         isMandatory: true,
         populators: {
           inputs: [
@@ -368,6 +353,8 @@ export const configsOrderSection202CRPC = [
         label: "RESPONSE_REQUIRED_BY",
         isMandatory: true,
         key: "responseRequiredBy",
+        schemaKeyPath: "orderDetails.responseRequiredByDate",
+        transformer: "date",
         type: "date",
         labelChildren: "OutlinedInfoIcon",
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
@@ -498,6 +485,7 @@ export const configsOrderMandatorySubmissions = [
         label: "DOCUMENT_TYPE",
         isMandatory: true,
         key: "documentType",
+        schemaKeyPath: "orderDetails.documentType",
         type: "dropdown",
         populators: {
           name: "documentType",
@@ -516,6 +504,7 @@ export const configsOrderMandatorySubmissions = [
         label: "DOCUMENT_NAME",
         isMandatory: true,
         key: "documentName",
+        schemaKeyPath: "orderDetails.documentName",
         type: "text",
         populators: {
           name: "documentName",
@@ -528,6 +517,7 @@ export const configsOrderMandatorySubmissions = [
         label: "SUBMISSION_PARTY",
         isMandatory: true,
         key: "submissionParty",
+        schemaKeyPath: "partyDetails.partyToMakeSubmission",
         type: "dropdown",
         populators: {
           allowMultiSelect: true,
@@ -557,6 +547,8 @@ export const configsOrderMandatorySubmissions = [
         label: "SUBMISSION_DEADLINE",
         isMandatory: true,
         key: "submissionDeadline",
+        schemaKeyPath: "dates.submissionDeadlineDate",
+        transformer: "date",
         type: "date",
         labelChildren: "OutlinedInfoIcon",
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
@@ -575,29 +567,6 @@ export const configsOrderMandatorySubmissions = [
   },
   {
     body: [
-      // {
-      //   type: "component",
-      //   component: "SelectCustomTextArea",
-      //   key: "additionalComments",
-      //   isMandatory: false,
-      //   populators: {
-      //     inputs: [
-      //       {
-      //         name: "text",
-      //         textAreaSubHeader: "ADDITIONAL_COMMENTS",
-      //         placeholder: "TYPE_HERE_PLACEHOLDER",
-      //         isOptional: true,
-      //         type: "TextAreaComponent",
-      //       },
-      //     ],
-      //     validation: {
-      //       customValidationFn: {
-      //         moduleName: "dristiOrders",
-      //         masterName: "alphaNumericValidation",
-      //       },
-      //     },
-      //   },
-      // },
       {
         type: "component",
         component: "SelectTranscriptTextArea",
@@ -623,73 +592,93 @@ export const configsOrderMandatorySubmissions = [
   {
     body: [
       {
-        label: "IS_RESPONSE_REQUIRED",
-        key: "isResponseRequired",
         isMandatory: true,
-        type: "radio",
+        type: "component",
+        component: "SelectUserTypeComponent",
+        key: "responseInfo",
+        schemaKeyPath: {
+          isResponseRequired: { value: "orderDetails.isResponseRequired" },
+          respondingParty: { value: "partyDetails.partiesToRespond", transformer: "customDropdown" },
+          responseDeadline: { value: "dates.responseDeadlineDate", transformer: "date" },
+        },
+        withoutLabel: true,
         populators: {
-          name: "isResponseRequired",
-          optionsKey: "name",
-          title: "",
-          error: "CORE_REQUIRED_FIELD_ERROR",
-          required: true,
-          isMandatory: true,
-          options: [
+          inputs: [
             {
-              code: "Yes",
-              name: "ES_COMMON_YES",
+              label: "IS_RESPONSE_REQUIRED",
+              type: "radioButton",
+              name: "isResponseRequired",
+              optionsKey: "name",
+              error: "CORE_REQUIRED_FIELD_ERROR",
+              validation: {},
+              styles: {
+                marginBottom: 0,
+              },
+              clearFields: { respondingParty: [], responseDeadline: "" },
+              isMandatory: true,
+              disableFormValidation: false,
+              options: [
+                {
+                  code: true,
+                  name: "ES_COMMON_YES",
+                },
+                {
+                  code: false,
+                  name: "ES_COMMON_NO",
+                },
+              ],
             },
             {
-              code: "No",
-              name: "ES_COMMON_NO",
+              label: "RESPONDING_PARTY",
+              type: "dropdown",
+              name: "respondingParty",
+              optionsKey: "name",
+              error: "CORE_REQUIRED_FIELD_ERROR",
+              allowMultiSelect: true,
+              required: true,
+              isMandatory: true,
+              selectedText: "party(s)",
+              disableFormValidation: false,
+              isDependentOn: "isResponseRequired",
+              dependentKey: {
+                isResponseRequired: ["code"],
+              },
+              styles: {
+                marginBottom: 0,
+              },
+              options: [
+                {
+                  code: "PARTY_1",
+                  name: "PARTY_1",
+                },
+                {
+                  code: "PARTY_2",
+                  name: "PARTY_2",
+                },
+                {
+                  code: "PARTY_3",
+                  name: "PARTY_3",
+                },
+              ],
+            },
+            {
+              label: "RESPONSE_DEADLINE",
+              type: "date",
+              name: "responseDeadline",
+              labelChildren: "OutlinedInfoIcon",
+              tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
+              isDependentOn: "isResponseRequired",
+              dependentKey: {
+                isResponseRequired: ["code"],
+              },
+              error: "CORE_REQUIRED_FIELD_ERROR",
+              validation: {
+                min: new Date().toISOString().split("T")[0],
+              },
+              isMandatory: true,
+              disableFormValidation: false,
             },
           ],
-        },
-      },
-      {
-        label: "RESPONDING_PARTY",
-        key: "respondingParty",
-        type: "dropdown",
-        populators: {
-          name: "respondingParty",
-          allowMultiSelect: true,
-          optionsKey: "name",
-          error: "CORE_REQUIRED_FIELD_ERROR",
-          required: true,
-          isMandatory: true,
-          selectedText: "party(s)",
-          options: [
-            {
-              code: "PARTY_1",
-              name: "PARTY_1",
-            },
-            {
-              code: "PARTY_2",
-              name: "PARTY_2",
-            },
-            {
-              code: "PARTY_3",
-              name: "PARTY_3",
-            },
-          ],
-        },
-      },
-      {
-        label: "RESPONSE_DEADLINE",
-        isMandatory: false,
-        key: "responseDeadline",
-        type: "date",
-        labelChildren: "OutlinedInfoIcon",
-        tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
-        populators: {
-          name: "responseDeadline",
-          error: "CORE_REQUIRED_FIELD_ERROR",
-          validation: {
-            customValidationFn: {
-              moduleName: "dristiOrders",
-              masterName: "minTodayDateValidation",
-            },
-          },
         },
       },
       {
@@ -921,6 +910,8 @@ export const configsOrderTranferToADR = [
         label: "ADR_MODE",
         isMandatory: true,
         key: "ADRMode",
+        schemaKeyPath: "orderDetails.adrMode",
+        transformer: "mdmsDropdown",
         type: "dropdown",
         populators: {
           name: "ADRMode",
@@ -1016,6 +1007,8 @@ export const configsScheduleHearingDate = [
         label: "HEARING_PURPOSE",
         isMandatory: true,
         key: "hearingPurpose",
+        schemaKeyPath: "orderDetails.purposeOfHearing",
+        transformer: "mdmsDropdown",
         type: "dropdown",
         populators: {
           name: "hearingPurpose",
@@ -1067,6 +1060,8 @@ export const configsScheduleHearingDate = [
         label: "NAMES_OF_PARTIES_REQUIRED",
         isMandatory: true,
         key: "namesOfPartiesRequired",
+        schemaKeyPath: "orderDetails.partyName",
+        transformer: "customDropdown",
         type: "dropdown",
         populators: {
           name: "namesOfPartiesRequired",
@@ -1080,6 +1075,26 @@ export const configsScheduleHearingDate = [
             {
               code: "PARTY_1",
               name: "PARTY_1",
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    body: [
+      {
+        type: "component",
+        component: "SelectCustomNote",
+        key: "unjoinedPartiesNote",
+        populators: {
+          inputs: [
+            {
+              infoHeader: "CS_COMMON_NOTE",
+              infoText: "FOLLOWING_PARTIES_HAVE_NOT_JOINED",
+              infoTooltipMessage: "Tooltip",
+              type: "InfoComponent",
+              children: "unjoinedParties",
             },
           ],
         },
@@ -1232,6 +1247,26 @@ export const configsScheduleNextHearingDate = [
     body: [
       {
         type: "component",
+        component: "SelectCustomNote",
+        key: "unjoinedPartiesNote",
+        populators: {
+          inputs: [
+            {
+              infoHeader: "CS_COMMON_NOTE",
+              infoText: "FOLLOWING_PARTIES_HAVE_NOT_JOINED",
+              infoTooltipMessage: "Tooltip",
+              type: "InfoComponent",
+              children: "unjoinedParties",
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    body: [
+      {
+        type: "component",
         component: "SelectCustomTextArea",
         key: "lastHearingTranscript",
         isMandatory: true,
@@ -1342,6 +1377,7 @@ export const configsRescheduleHearingDate = [
         label: "REF_APPLICATION_ID",
         isMandatory: false,
         key: "refApplicationId",
+        schemaKeyPath: "orderDetails.refApplicationId",
         disable: true,
         type: "text",
         populators: { name: "refApplicationId" },
@@ -1403,6 +1439,8 @@ export const configsRescheduleHearingDate = [
         label: "ORIGINAL_HEARING_DATE",
         isMandatory: false,
         key: "originalHearingDate",
+        schemaKeyPath: "orderDetails.originalHearingDate",
+        transformer: "date",
         disable: true,
         type: "date",
         populators: {
@@ -1413,6 +1451,8 @@ export const configsRescheduleHearingDate = [
         label: "NEW_HEARING_DATE",
         isMandatory: true,
         key: "newHearingDate",
+        schemaKeyPath: "orderDetails.hearingDate",
+        transformer: "date",
         type: "date",
         labelChildren: "OutlinedInfoIcon",
         tooltipValue: "ONLY_CURRENT_AND_FUTURE_DATES_ARE_ALLOWED",
@@ -1976,6 +2016,7 @@ export const configsCaseTransfer = [
         label: "REF_APPLICATION_ID",
         isMandatory: false,
         key: "refApplicationId",
+        schemaKeyPath: "orderDetails.refApplicationId",
         disable: true,
         type: "text",
         populators: { name: "refApplicationId" },
@@ -2012,6 +2053,7 @@ export const configsCaseTransfer = [
         label: "COMPLAINANT_NAME",
         isMandatory: true,
         key: "complainantName",
+        schemaKeyPath: "complainantDetails.name",
         type: "textarea",
         populators: { name: "complainantName", hideInForm: true },
       },
@@ -2195,6 +2237,8 @@ export const configsCaseSettlement = [
         label: "SETTLEMENT_AGREEMENT_DATE",
         isMandatory: true,
         key: "settlementAgreementDate",
+        schemaKeyPath: "orderDetails.settlementDate",
+        transformer: "date",
         type: "date",
         populators: {
           name: "settlementAgreementDate",
@@ -2205,6 +2249,8 @@ export const configsCaseSettlement = [
         label: "SETTLEMENT_MECHANISM",
         isMandatory: true,
         key: "settlementMechanism",
+        schemaKeyPath: "orderDetails.settlementMechanism",
+        transformer: "mdmsDropdown",
         type: "dropdown",
         populators: {
           name: "settlementMechanism",
@@ -2224,6 +2270,8 @@ export const configsCaseSettlement = [
         label: "SETTLEMENT_IMPLEMETED",
         isMandatory: true,
         key: "settlementImplemented",
+        schemaKeyPath: "orderDetails.isSettlementImplemented",
+        transformer: "customDropdown",
         type: "radio",
         populators: {
           name: "settlementImplemented",
@@ -2583,6 +2631,7 @@ export const configsCaseWithdrawal = [
         label: "APPLICATION_ON_BEHALF_OF",
         isMandatory: false,
         key: "applicationOnBehalfOf",
+        schemaKeyPath: "orderDetails.appFilledOnBehalfOf",
         disable: true,
         type: "text",
         populators: { name: "applicationOnBehalfOf" },
@@ -2591,6 +2640,7 @@ export const configsCaseWithdrawal = [
         label: "PARTY_TYPE",
         isMandatory: false,
         key: "partyType",
+        schemaKeyPath: "orderDetails.partyType",
         disable: true,
         type: "text",
         populators: { name: "partyType" },
@@ -2607,6 +2657,7 @@ export const configsCaseWithdrawal = [
         label: "APPLICATION_STATUS",
         isMandatory: false,
         key: "applicationStatus",
+        schemaKeyPath: "orderDetails.applicationStatus",
         disable: true,
         type: "text",
         populators: { name: "applicationStatus" },
@@ -3055,13 +3106,16 @@ export const configsCreateOrderWarrant = [
               label: "BAILABLE_AMOUNT",
               type: "text",
               name: "bailableAmount",
+              error: "CORE_REQUIRED_FIELD_ERROR",
               isDependentOn: "isBailable",
               dependentKey: {
                 isBailable: ["code"],
               },
               error: "CORE_REQUIRED_FIELD_ERROR",
               validation: {
-                isNumber: true,
+                isDecimal: true,
+                regex: /^\d+(\.\d{0,2})?$/,
+                errMsg: "CS_VALID_AMOUNT_DECIMAL",
               },
               isMandatory: true,
               disableFormValidation: false,
@@ -3290,14 +3344,17 @@ export const configsJudgement = [
         label: "DATE_OF_JUDGEMENT",
         isMandatory: false,
         key: "dateOfJudgement",
+        schemaKeyPath: "judgementDetails.issueDate",
+        transformer: "date",
         disable: true,
         type: "date",
-        populators: { name: "dateOfJudgement" },
+        populators: { name: "dateOfJudgement", hideInForm: true },
       },
       {
         label: "NAME_OF_JUDGE",
         isMandatory: false,
         key: "nameOfJudge",
+        schemaKeyPath: "caseDetails.judgeName",
         disable: true,
         type: "text",
         populators: { name: "nameOfJudge" },
@@ -3306,6 +3363,7 @@ export const configsJudgement = [
         label: "NAME_OF_COURT",
         isMandatory: false,
         key: "nameOfCourt",
+        schemaKeyPath: "caseDetails.courtName",
         disable: true,
         type: "text",
         populators: { name: "nameOfCourt" },
@@ -3313,7 +3371,9 @@ export const configsJudgement = [
       {
         label: "DESCRIPTION_OF_ACCUSED",
         isMandatory: false,
-        key: "nameofRespondant",
+        disable: true,
+        key: "nameofRespondent",
+        schemaKeyPath: "respondentDetails.name",
         type: "text",
         populators: {
           name: "nameofRespondent",
@@ -3330,6 +3390,7 @@ export const configsJudgement = [
         label: "DESCRIPTION_OF_ACCUSED_RESIDENCE",
         isMandatory: false,
         key: "addressRespondant",
+        schemaKeyPath: "respondentDetails.address",
         disable: true,
         type: "text",
         populators: { name: "addressRespondant" },
@@ -3338,6 +3399,8 @@ export const configsJudgement = [
         label: "DATE_OF_OCCURENCE",
         isMandatory: false,
         key: "dateChequeReturnMemo",
+        schemaKeyPath: "dates.occurenceDate",
+        transformer: "date",
         disable: true,
         type: "date",
         populators: { name: "dateChequeReturnMemo" },
@@ -3346,6 +3409,8 @@ export const configsJudgement = [
         label: "DATE_COMPLAINT",
         isMandatory: false,
         key: "dateFiling",
+        schemaKeyPath: "dates.complaintDate",
+        transformer: "date",
         disable: true,
         type: "date",
         populators: { name: "dateFiling" },
@@ -3354,6 +3419,8 @@ export const configsJudgement = [
         label: "DATE_OF_APPREHENSION",
         isMandatory: false,
         key: "dateApprehension",
+        schemaKeyPath: "dates.apprehensionDate",
+        transformer: "date",
         disable: true,
         type: "date",
         populators: { name: "dateApprehension" },
@@ -3362,6 +3429,8 @@ export const configsJudgement = [
         label: "DATE_OF_RELEASE_ON_BAIL",
         isMandatory: false,
         key: "dateofReleaseOnBail",
+        schemaKeyPath: "dates.bailDate",
+        transformer: "date",
         disable: true,
         type: "date",
         populators: { name: "dateofReleaseOnBail" },
@@ -3370,6 +3439,8 @@ export const configsJudgement = [
         label: "DATE_OF_COMMENCEMENT_TRIAL",
         isMandatory: false,
         key: "dateofCommencementTrial",
+        schemaKeyPath: "dates.trailCommencementDate",
+        transformer: "date",
         disable: true,
         type: "date",
         populators: { name: "dateofCommencementTrial" },
@@ -3378,6 +3449,8 @@ export const configsJudgement = [
         label: "DATE_OF_CLOSE_TRIAL",
         isMandatory: false,
         key: "dateofCloseTrial",
+        schemaKeyPath: "dates.trailClosureDate",
+        transformer: "date",
         disable: true,
         type: "date",
         populators: { name: "dateofCloseTrial" },
@@ -3386,6 +3459,8 @@ export const configsJudgement = [
         label: "DATE_OF_SENTENCE",
         isMandatory: false,
         key: "dateofSentence",
+        schemaKeyPath: "dates.sentenceDate",
+        transformer: "date",
         disable: true,
         type: "date",
         populators: { name: "dateofSentence" },
@@ -3402,6 +3477,7 @@ export const configsJudgement = [
         label: "NAME_COMPLAINANT_ADVOCATE",
         isMandatory: false,
         key: "nameofComplainantAdvocate",
+        schemaKeyPath: "complainantDetails.advocateName",
         disable: true,
         type: "text",
         populators: { name: "nameofComplainantAdvocate" },
@@ -3409,15 +3485,17 @@ export const configsJudgement = [
       {
         label: "NAME_RESPONDANT_ADVOCATE",
         isMandatory: false,
-        key: "nameofRespondantAdvocate",
+        key: "nameofRespondentAdvocate",
+        schemaKeyPath: "respondentDetails.advocateName",
         disable: true,
         type: "text",
-        populators: { name: "nameofRespondantAdvocate" },
+        populators: { name: "nameofRespondentAdvocate" },
       },
       {
         label: "OFFENSE",
         isMandatory: false,
         key: "offense",
+        schemaKeyPath: "caseDetails.offence",
         disable: true,
         type: "text",
         populators: { name: "offense" },
@@ -3425,6 +3503,7 @@ export const configsJudgement = [
       {
         type: "radio",
         key: "plea",
+        schemaKeyPath: "judgementDetails.plea",
         label: "PLEA",
         isMandatory: true,
         populators: {
@@ -3454,6 +3533,8 @@ export const configsJudgement = [
         key: "findings",
         label: "FINDING",
         isMandatory: true,
+        schemaKeyPath: "caseDetails.finding",
+        transformer: "mdmsDropdown",
         populators: {
           label: "PLEA",
           type: "radioButton",
@@ -3473,28 +3554,6 @@ export const configsJudgement = [
   },
   {
     body: [
-      // {
-      //   type: "component",
-      //   component: "SelectCustomTextArea",
-      //   key: "sentence",
-      //   isMandatory: true,
-      //   populators: {
-      //     inputs: [
-      //       {
-      //         name: "text",
-      //         textAreaSubHeader: "SENTENCE",
-      //         placeholder: "TYPE_HERE_PLACEHOLDER",
-      //         type: "TextAreaComponent",
-      //       },
-      //     ],
-      //     validation: {
-      //       customValidationFn: {
-      //         moduleName: "dristiOrders",
-      //         masterName: "alphaNumericValidation",
-      //       },
-      //     },
-      //   },
-      // },
       {
         type: "component",
         component: "SelectTranscriptTextArea",

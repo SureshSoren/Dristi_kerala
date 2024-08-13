@@ -64,11 +64,11 @@ const EvidenceHearingHeader = ({ hearing, caseData, filingNumber, setActiveTab, 
         <div className="case-details-title" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {/* <Header>{t(`HEARING_TYPE_${hearing.hearingType}`)}</Header> */}
           <Header>{hearing.hearingType} Hearing</Header>
-          {/* <div className="sub-details-text">Aparna vs. Subarna</div> */}
+          <div className="sub-details-text">{caseData?.caseTitle || " "}</div>
           <div className="vertical-line"></div>
-          <div className="sub-details-text">NIA 138</div>
+          <div className="sub-details-text">{caseData?.caseType || "NIA 138"}</div>
           <div className="vertical-line"></div>
-          <div className="sub-details-text">Trial</div>
+          <div className="sub-details-text">{caseData?.substage || "Trial"}</div>
         </div>
         <div className="judge-action-block">
           <div className="evidence-header-wrapper">

@@ -467,7 +467,17 @@ const JoinCaseHome = ({ refreshInbox }) => {
     );
     setUserUUID(individualData?.Individual?.[0]?.userUuid);
   };
-
+  const getUserForAdvocateUUID = async (barRegistrationNumber) => {
+    const advocateDetail = await window?.Digit.DRISTIService.searchAdvocateClerk("/advocate/advocate/v1/_search", {
+      criteria: [
+        {
+          barRegistrationNumber: barRegistrationNumber,
+        },
+      ],
+      tenantId,
+    });
+    setUserUUID(advocateDetail?.advocates?.[0]?.responseList?.[0]?.auditDetails?.createdBy);
+  };
   useEffect(() => {
     if (step === 0 && !caseNumber) {
       setErrors({
@@ -497,7 +507,7 @@ const JoinCaseHome = ({ refreshInbox }) => {
     } else if (step === 2) {
       if (userType === "Litigant" && representingYourself !== "Yes") {
         if (advocateDetailForm?.advocateBarRegNumberWithName?.[0]?.barRegistrationNumber && advocateDetailForm?.vakalatnamaFileUpload) {
-          getUserUUID(advocateDetailForm?.data?.individualId);
+          getUserForAdvocateUUID(advocateDetailForm?.advocateBarRegNumberWithName?.[0]?.barRegistrationNumber);
           setIsDisabled(false);
         } else {
           setIsDisabled(true);
