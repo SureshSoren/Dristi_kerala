@@ -1,7 +1,10 @@
 import { FileIcon, PrintIcon } from "@egovernments/digit-ui-react-components";
 import React from "react";
+import { Urls } from "../hooks/services/Urls";
 
 const DocumentPrintComponent = ({ documents }) => {
+  const tenantId = window?.Digit.ULBService.getCurrentTenantId();
+
   return (
     <div className="print-documents-container">
       <div className="print-documents-heading">{`Print Documents (${documents?.length})`}</div>
@@ -13,7 +16,14 @@ const DocumentPrintComponent = ({ documents }) => {
           </div>
           <button className="print-button">
             <PrintIcon />
-            <div style={{ marginLeft: "0.5rem" }}>Print</div>
+            <a
+              href={`${window.location.origin}${Urls.FileFetchById}?tenantId=${tenantId}&fileStoreId=${document?.fileStore}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ marginLeft: "0.5rem", color: "#007E7E" }}
+            >
+              Print
+            </a>
           </button>
         </div>
       ))}

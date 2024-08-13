@@ -103,15 +103,29 @@ const WitnessModal = ({ handleClose, hearingId, setSignedDocumentUploadID, handl
   };
 
   // for Dowloading the Witness Deposition
-  //   const handleDownload = async () => {
-  //     try {
-  //       const res = await hearingService.customApiService(Urls.hearing.downloadWitnesspdf, reqBody, { applicationNumber: "", cnrNumber: "" });
-  //       // complete the download part
-  //       console.log(res, "lllppp");
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
+  const handleDownload = async () => {
+    try {
+      const res = await hearingService.generateWitnessDepostionDownload(reqBody, {
+        applicationNumber: "",
+        cnrNumber: "",
+        responseType: "blob", // Ensure the response is handled as a Blob
+      });
+
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "witness_deposition_pdf.pdf"); // Set the default filename
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // Optionally, you can revoke the object URL after a short delay
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+    }
+  };
 
   return !openUploadSignatureModal ? (
     <Modal
@@ -140,15 +154,15 @@ const WitnessModal = ({ handleClose, hearingId, setSignedDocumentUploadID, handl
             </div>
             <div className="donwload-submission" style={{ display: "flex", alignItems: "center" }}>
               <h2>{t("Download the Witness Deposition")}</h2>
-              <a
+              <button
                 href={uri}
                 arget="_blank"
                 rel="noreferrer"
                 style={{ marginLeft: "10px", color: "#007E7E", cursor: "pointer", textDecoration: "underline", background: "none" }}
-                // onClick={handleDownload}
+                onClick={handleDownload}
               >
                 {t("CLICK_HERE")}
-              </a>
+              </button>
             </div>
           </div>
         ) : (

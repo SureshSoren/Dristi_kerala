@@ -155,7 +155,7 @@ export const SummonsTabsConfig = {
         },
         requestBody: {
           criteria: {
-            completeStatus: "COMPLETED",
+            completeStatus: "DELIVERED",
           },
         },
         masterName: "commonUiConfig",

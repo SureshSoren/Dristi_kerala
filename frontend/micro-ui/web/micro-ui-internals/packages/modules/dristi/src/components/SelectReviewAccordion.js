@@ -290,7 +290,6 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
 
   const updateObject = (formData, update, message) => {
     if (update?.configKey in formData) {
-      debugger;
       handleAddError(update, message, "systemError");
     }
   };

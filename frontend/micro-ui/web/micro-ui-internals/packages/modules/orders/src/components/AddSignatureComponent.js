@@ -6,7 +6,7 @@ import useESign from "../hooks/orders/useESign";
 import { Urls } from "../hooks/services/Urls";
 import useDocumentUpload from "../hooks/orders/useDocumentUpload";
 
-const AddSignatureComponent = ({ t, isSigned, handleSigned, rowData, setSignatureId }) => {
+const AddSignatureComponent = ({ t, isSigned, handleSigned, rowData, setSignatureId, deliveryChannel }) => {
   const { handleEsign, checkSignStatus } = useESign();
   const { uploadDocuments } = useDocumentUpload();
   const [formData, setFormData] = useState({}); // storing the file upload data
@@ -91,6 +91,7 @@ const AddSignatureComponent = ({ t, isSigned, handleSigned, rowData, setSignatur
                   onButtonClick={() => {
                     // setOpenAadharModal(true);
                     localStorage.setItem("ESignSummons", JSON.stringify(rowData));
+                    localStorage.setItem("delieveryChannel", deliveryChannel);
                     handleEsign(name, pageModule, rowData?.documents?.[0]?.fileStore);
                   }}
                   className={"aadhar-sign-in"}
