@@ -68,6 +68,7 @@ const InsideHearingMainPage = () => {
 
   const { data: hearingLink } = useGetHearingLink();
   const hearingVcLink = hearingLink?.[0];
+  const refetchTime = disableTextArea ? 10 * SECOND : "";
 
   const reqBody = {
     hearing: { tenantId },
@@ -80,8 +81,8 @@ const InsideHearingMainPage = () => {
     reqBody,
     { applicationNumber: "", cnrNumber: "", hearingId },
     "dristi",
-    disableTextArea,
-    10 * SECOND
+    true,
+    refetchTime
   );
 
   const { mutateAsync: _updateTranscriptRequest } = Digit.Hooks.useCustomAPIMutationHook({
@@ -375,6 +376,7 @@ const InsideHearingMainPage = () => {
             transcriptText={transcriptText}
             setAdjournHearing={setAdjournHearing}
             disableTextArea={disableTextArea}
+            setTranscriptText={setTranscriptText}
           />
         )}
       </div>
@@ -418,7 +420,7 @@ const InsideHearingMainPage = () => {
                 {`${attendanceCount}`}
               </h2>
             </Button>
-            {userHasRole("EMPLOYEE") && (
+            {/* {userHasRole("EMPLOYEE") && (
               <Button
                 label={t("MARK_ATTENDANCE")}
                 variation={"teritiary"}
@@ -433,7 +435,7 @@ const InsideHearingMainPage = () => {
                   color: "#007E7E",
                 }}
               />
-            )}
+            )} */}
           </div>
           {userHasRole("EMPLOYEE") ? (
             <div
@@ -517,6 +519,7 @@ const InsideHearingMainPage = () => {
           hearing={hearing}
           transcriptText={transcriptText}
           disableTextArea={disableTextArea}
+          setTranscriptText={setTranscriptText}
         />
       )}
     </div>

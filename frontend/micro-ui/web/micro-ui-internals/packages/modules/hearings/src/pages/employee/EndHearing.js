@@ -41,7 +41,7 @@ const CloseBtn = (props) => {
   );
 };
 
-const EndHearing = ({ handleEndHearingModal, hearingId, updateTranscript, hearing, transcriptText, disableTextArea }) => {
+const EndHearing = ({ handleEndHearingModal, hearingId, updateTranscript, hearing, transcriptText, disableTextArea, setTranscriptText }) => {
   const { t } = useTranslation();
   const [stepper, setStepper] = useState(1);
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
@@ -59,10 +59,12 @@ const EndHearing = ({ handleEndHearingModal, hearingId, updateTranscript, hearin
       updatedHearing.transcript[0] = updatedTranscriptText;
       updatedHearing.workflow = updatedHearing.workflow || {};
       updatedHearing.workflow.action = "CLOSE";
-      return await hearingService.updateHearings(
+      const response = await hearingService.updateHearings(
         { tenantId, hearing: updatedHearing, hearingType: "", status: "" },
         { applicationNumber: "", cnrNumber: "" }
       );
+      setTranscriptText(updatedTranscriptText);
+      return response;
     } catch (error) {
       console.error("Error Ending hearing:", error);
     }

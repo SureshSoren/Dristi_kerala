@@ -37,8 +37,6 @@ function PendingTaskAccordion({
     }
   };
 
-  console.log(pendingTasks, "kkkkk");
-
   return (
     <div key={accordionKey} className="accordion-wrapper" style={{ border: "1px solid #E8E8E8", padding: 16, borderRadius: 4 }}>
       <div

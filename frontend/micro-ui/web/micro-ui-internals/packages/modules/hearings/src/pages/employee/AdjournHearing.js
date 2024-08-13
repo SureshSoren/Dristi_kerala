@@ -7,7 +7,7 @@ import Modal from "@egovernments/digit-ui-module-dristi/src/components/Modal";
 import { hearingService } from "../../hooks/services";
 import { useTranslation } from "react-i18next";
 
-const AdjournHearing = ({ hearing, updateTranscript, transcriptText, setAdjournHearing, disableTextArea }) => {
+const AdjournHearing = ({ hearing, updateTranscript, transcriptText, setAdjournHearing, disableTextArea, setTranscriptText }) => {
   const { hearingId } = Digit.Hooks.useQueryParams();
   const [disable, setDisable] = useState(true);
   const [stepper, setStepper] = useState(1);
@@ -109,10 +109,12 @@ const AdjournHearing = ({ hearing, updateTranscript, transcriptText, setAdjournH
           reason: reasonFormData.reason.code,
         },
       };
-      return await hearingService.updateHearings(
+      const response = await hearingService.updateHearings(
         { tenantId: Digit.ULBService.getCurrentTenantId(), hearing: updatedHearing, hearingType: "", status: "" },
         { applicationNumber: "", cnrNumber: "" }
       );
+      setTranscriptText(updatedTranscriptText);
+      return response;
     } catch (error) {
       console.error("Error Ending hearing:", error);
     }
