@@ -117,8 +117,7 @@ public class WitnessDepositionPdfService {
     }
 
     private JsonNode extractAdditionalDetails(Hearing hearing) {
-        LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) hearing.getAdditionalDetails();
-        return mapper.convertValue(map, ObjectNode.class);
+        return mapper.convertValue(hearing.getAdditionalDetails(), ObjectNode.class);
     }
 
     private String getFilingNumber(JsonNode caseDetails) {
