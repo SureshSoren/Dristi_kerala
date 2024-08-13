@@ -223,7 +223,7 @@ const SummaryModal = ({
           onCancel();
         }}
         formId="modal-action"
-        isDisabled={!transcript || disableTextArea}
+        isDisabled={!transcript}
       >
         <div style={{ height: "308px", padding: "5px 24px 16px 24px", width: "100%" }}>
           <div style={{ height: "80px", backgroundColor: "#ECF3FD", borderRadius: "4px" }}>

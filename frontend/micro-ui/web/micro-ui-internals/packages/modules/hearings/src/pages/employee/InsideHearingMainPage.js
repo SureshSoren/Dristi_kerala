@@ -61,7 +61,7 @@ const InsideHearingMainPage = () => {
     return userRoles.some((role) => role.code === userRole);
   };
 
-  const disableTextArea = !!userHasRole("HEARING_VIEWER");
+  const disableTextArea = !userHasRole("HEARING_START");
   // if (!userHasRole("HEARING_VIEWER")) {
   //   history.push(`/${window.contextPath}/${userType}/home/home-pending-task`);
   // }
@@ -420,7 +420,7 @@ const InsideHearingMainPage = () => {
             </Button>
             {userHasRole("EMPLOYEE") && (
               <Button
-                label={"MARK_ATTENDANCE"}
+                label={t("MARK_ATTENDANCE")}
                 variation={"teritiary"}
                 onButtonClick={handleModal}
                 style={{ boxShadow: "none", backgroundColor: "none", borderRadius: "4px", border: "none", padding: "10px" }}
