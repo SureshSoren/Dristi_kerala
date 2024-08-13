@@ -167,4 +167,7 @@ public class Configuration {
 
     @Value("${app.zone.id}")
     private String zoneId;
+
+    @Value("${drishti.judge.pending.due.days}")
+    private Long judgePendingSla;
 }

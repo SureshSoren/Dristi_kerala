@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static digit.config.ServiceConstants.*;
@@ -27,10 +29,13 @@ public class PendingTaskUtil {
 
     private final ServiceRequestRepository serviceRequestRepository;
 
-    public PendingTaskUtil(ObjectMapper objectMapper, Configuration configuration, RestTemplate restTemplate, ServiceRequestRepository serviceRequestRepository) {
+    private final DateUtil dateUtil;
+
+    public PendingTaskUtil(ObjectMapper objectMapper, Configuration configuration, RestTemplate restTemplate, ServiceRequestRepository serviceRequestRepository, DateUtil dateUtil) {
         this.objectMapper = objectMapper;
         this.configuration = configuration;
         this.serviceRequestRepository = serviceRequestRepository;
+        this.dateUtil = dateUtil;
     }
 
     public PendingTask createPendingTask(ReScheduleHearing reScheduleHearing) {
@@ -41,6 +46,11 @@ public class PendingTaskUtil {
         pendingTask.setStatus(PENDING_TASK_STATUS);
         pendingTask.setFilingNumber(reScheduleHearing.getCaseId());
         pendingTask.setAssignedRole(List.of("JUDGE_ROLE"));
+        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime slaDate=currentTime.plusDays(configuration.getJudgePendingSla());
+
+        log.info("sla date {}", slaDate);
+        pendingTask.setStateSla(dateUtil.getEpochFromLocalDateTime(slaDate));
         return pendingTask;
     }
 
@@ -48,7 +58,7 @@ public class PendingTaskUtil {
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         StringBuilder uri = new StringBuilder(configuration.getAnalyticsHost().concat(configuration.getAnalyticsEndpoint()));
         try {
-            serviceRequestRepository.fetchResult(uri,request);
+            serviceRequestRepository.fetchResult(uri, request);
         } catch (HttpClientErrorException e) {
             log.error(EXTERNAL_SERVICE_EXCEPTION, e);
             throw new ServiceCallException(e.getResponseBodyAsString());
