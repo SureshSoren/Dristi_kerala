@@ -16,6 +16,7 @@ async function fetchDocument(fileStoreId) {
             console.log('PDF file detected');
             return response.data;
         } else if (contentType.startsWith('image/')) {
+            const tempFilePath = path.join(__dirname, 'temp_image_file');
             console.log('Image file detected');
             await fs.writeFile(tempFilePath, response.data);
             try {
