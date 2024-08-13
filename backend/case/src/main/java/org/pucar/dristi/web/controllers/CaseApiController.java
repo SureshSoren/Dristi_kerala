@@ -139,11 +139,10 @@ public class CaseApiController {
     public ResponseEntity<?> caseV1GeneratePdf (
             @Parameter(in = ParameterIn.DEFAULT, description = "Search criteria + RequestInfo meta data.", required = true, schema = @Schema()) @Valid @RequestBody CaseSearchRequest body){
 
-        ByteArrayResource pdfFile = casePdfService.generatePdf(body);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"case_pdf.pdf\"")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdfFile);
+        CourtCase courtCase = casePdfService.generatePdf(body);
+        ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(body.getRequestInfo(), true);
+        CaseResponse caseResponse = CaseResponse.builder().cases(Collections.singletonList(courtCase)).responseInfo(responseInfo).build();
+        return new ResponseEntity<>(caseResponse, HttpStatus.OK);
     }
 }
 

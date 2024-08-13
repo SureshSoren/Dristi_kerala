@@ -58,6 +58,13 @@ public class Configuration {
     @Value("${egov.filestore.path}")
     private String fileStorePath;
 
+    @Value("${egov.file.store.save.endpoint}")
+    private String fileStoreSaveEndPoint;
+
+    @Value("${egov.filestore.case.module}")
+    private String fileStoreCaseModule;
+
+
     // Advocate Config
     @Value("${egov.advocate.host}")
     private String advocateHost;
