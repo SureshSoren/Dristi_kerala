@@ -147,18 +147,26 @@ public class WitnessDepositionPdfService {
     private WitnessDeposition buildWitnessWithNoIndividual(JsonNode caseDetails, Hearing hearing,
                                                            String caseYear, String courtCaseNumber, JsonNode witnessDepositionNode) {
 
-        String firstName = getTextOrDefault(witnessDepositionNode, "firstName");
-        String lastName = getTextOrDefault(witnessDepositionNode, "lastName");
-        String mobileNumber = getTextOrDefault(witnessDepositionNode.path("phonenumbers").path("mobileNumber").get(0), "");
-        String deposition = getTextOrDefault(witnessDepositionNode, "deposition");
-        String locality = getTextOrDefault(witnessDepositionNode.path("addressDetails").get(0).path("addressDetails"), "locality");
-        String city = getTextOrDefault(witnessDepositionNode.path("addressDetails").get(0).path("addressDetails"), "city");
+
+        String firstName = safeGetText(witnessDepositionNode, "firstName", "");
+        String lastName = safeGetText(witnessDepositionNode, "lastName", "");
+        String mobileNumber = safeGetText(
+                witnessDepositionNode.path("phonenumbers").has(0) ? witnessDepositionNode.path("phonenumbers").get(0) : null,
+                "mobileNumber", ""
+        );
+        String deposition = safeGetText(witnessDepositionNode, "deposition", "");
+
+        JsonNode addressDetailsNode = witnessDepositionNode.path("addressDetails");
+        String locality = (addressDetailsNode.isArray() && !addressDetailsNode.isEmpty()) ?
+                safeGetText(addressDetailsNode.get(0), "locality", "") : "";
+        String city = (addressDetailsNode.isArray() && !addressDetailsNode.isEmpty()) ?
+                safeGetText(addressDetailsNode.get(0), "city", "") : "";
 
         return WitnessDeposition.builder()
                 .hearingId(hearing.getHearingId())
-                .caseName(caseDetails.get("caseTitle").asText())
-                .courtId(caseDetails.get("courtId").asText())
-                .filingNumber(caseDetails.get("filingNumber").asText())
+                .caseName(safeGetText(caseDetails, "caseTitle", ""))
+                .courtId(safeGetText(caseDetails, "courtId", ""))
+                .filingNumber(safeGetText(caseDetails, "filingNumber", ""))
                 .caseYear(caseYear)
                 .caseNumber(courtCaseNumber)
                 .name(firstName + " " + lastName)
@@ -169,8 +177,9 @@ public class WitnessDepositionPdfService {
                 .village(city)
                 .build();
     }
-    private  String getTextOrDefault(JsonNode node, String path) {
-        return node.path(path).asText("");
+
+    String safeGetText(JsonNode node, String path, String defaultValue) {
+        return (node != null && node.hasNonNull(path)) ? node.path(path).asText(defaultValue) : defaultValue;
     }
 
 
