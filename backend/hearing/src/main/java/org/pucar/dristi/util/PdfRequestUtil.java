@@ -46,6 +46,7 @@ public class PdfRequestUtil {
             headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
             headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
+            log.info("Witness Pdf Request ; {}", objectMapper.writeValueAsString(request));
             HttpEntity<WitnessPdfRequest> requestEntity = new HttpEntity<>(request, headers);
 
             ResponseEntity<ByteArrayResource> responseEntity = restTemplate.postForEntity(requestUrl.toString(),
