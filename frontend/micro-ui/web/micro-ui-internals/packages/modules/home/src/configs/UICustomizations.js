@@ -393,7 +393,7 @@ export const UICustomizations = {
         case "Issued":
           return `${formatDateDifference(value)} days ago`;
         case "Delivery Channel":
-          return caseDetails?.deliveryChannels?.channelName;
+          return caseDetails?.deliveryChannels?.channelName || "N/A";
         default:
           return t("ES_COMMON_NA");
       }

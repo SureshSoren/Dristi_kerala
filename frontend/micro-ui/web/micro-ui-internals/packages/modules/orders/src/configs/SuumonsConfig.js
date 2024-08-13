@@ -126,7 +126,7 @@ export const SummonsTabsConfig = {
               },
               {
                 label: "Delivery Channel",
-                jsonPath: "deliveryChannel",
+                jsonPath: "taskDetails",
                 additionalCustomization: true,
               },
               {
