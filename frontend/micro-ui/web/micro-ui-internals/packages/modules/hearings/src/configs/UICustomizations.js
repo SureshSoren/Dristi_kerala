@@ -232,7 +232,6 @@ export const UICustomizations = {
   },
   summonWarrantConfig: {
     preProcess: (requestCriteria, additionalDetails) => {
-      // We need to change tenantId "processSearchCriteria" here
       const tenantId = window?.Digit.ULBService.getStateId();
 
       return {
@@ -241,19 +240,29 @@ export const UICustomizations = {
           ...requestCriteria?.config,
           select: (data) => {
             const taskData = data?.list
-              ?.filter((data) => data?.filingNumber === additionalDetails?.filingNumber && data?.orderId === additionalDetails?.orderId)
-              ?.map((data) => {
-                const taskDetail = JSON.parse(data?.taskDetails || "{}");
+              ?.filter((item) => item?.filingNumber === additionalDetails?.filingNumber && item?.orderId === additionalDetails?.orderId)
+              ?.map((item) => {
+                const taskDetail = item?.taskDetails || "{}";
+                const address = taskDetail?.respondentDetails?.address || {};
+                // Concatenate address fields with proper spacing
+                const formattedAddress = [address.locality, address.city, address.district, address.state, address.pincode]
+                  .filter(Boolean)
+                  .join(", ");
+
                 const channelDetailsEnum = {
                   SMS: "phone",
                   Email: "email",
                   Post: "address",
                   Police: "address",
                 };
+
                 return {
                   deliveryChannel: taskDetail?.deliveryChannels?.channelName,
-                  channelDetails: taskDetail?.respondentDetails?.[channelDetailsEnum?.[taskDetail?.deliveryChannels?.channelName]],
-                  status: data?.status,
+                  channelDetails:
+                    taskDetail?.deliveryChannels?.channelName === "Post" || taskDetail?.deliveryChannels?.channelName === "Police"
+                      ? formattedAddress
+                      : taskDetail?.respondentDetails?.[channelDetailsEnum?.[taskDetail?.deliveryChannels?.channelName]],
+                  status: item?.status,
                   remarks: taskDetail?.deliveryChannels?.status,
                 };
               });
@@ -265,12 +274,12 @@ export const UICustomizations = {
     },
     additionalValidations: (type, data, keys) => {
       if (type === "date") {
-        return data[keys.start] && data[keys.end] ? () => new Date(data[keys.start]).getTime() <= new Date(data[keys.end]).getTime() : true;
+        return data[keys.start] && data[keys.end] ? new Date(data[keys.start]).getTime() <= new Date(data[keys.end]).getTime() : true;
       }
     },
     MobileDetailsOnClick: (row, tenantId) => {
       let link;
-      Object.keys(row).map((key) => {
+      Object.keys(row).forEach((key) => {
         if (key === "Case ID") link = ``;
       });
       return link;
