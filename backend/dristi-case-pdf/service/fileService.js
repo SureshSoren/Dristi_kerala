@@ -17,11 +17,13 @@ async function fetchDocument(fileStoreId) {
             return response.data;
         } else if (contentType.startsWith('image/')) {
             console.log('Image file detected');
-            const tempFilePath = path.join(__dirname, 'temp_image_file');
-            fs.writeFileSync(tempFilePath, response.data);
-            const imagePdf = await imageToPdf([tempFilePath], { format: 'A4' });
-            fs.unlinkSync(tempFilePath);
-            return imagePdf;
+            await fs.writeFile(tempFilePath, response.data);
+            try {
+                const imagePdf = await imageToPdf([tempFilePath], { format: 'A4' });
+                return imagePdf;
+            } finally {
+                await fs.unlink(tempFilePath);
+            }
         } else {
             throw new Error(`Unsupported content type: ${contentType}`);
         }
