@@ -519,15 +519,34 @@ const CustomReviewCardRow = ({
                   </div>
                 );
               })}
-            {systemErrors?.length > 0 &&
+            {!(FSOErrors?.length > 0) &&
+              systemErrors?.length > 0 &&
               isScrutiny &&
               systemErrors.map((error, ind) => {
                 return (
-                  <div className="scrutiny-error input" key={ind}>
+                  <div
+                    style={{
+                      width: "fit-content",
+                    }}
+                    className="scrutiny-error input"
+                    key={ind}
+                  >
                     {bgclassname === "preverror" ? (
                       <span style={{ color: "#4d83cf", fontWeight: 300 }}>{t("CS_PREVIOUS_ERROR")}</span>
                     ) : (
-                      <FlagIcon isError={true} />
+                      <h4
+                        style={{
+                          margin: "0px",
+                          fontFamily: "Roboto",
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          lineHeight: "20px",
+                          textAlign: "left",
+                          color: "#9E400A",
+                        }}
+                      >
+                        Potential Error:
+                      </h4>
                     )}
                     {`${error.fileName ? t(error.fileName) + " : " : ""}${error.systemError}`}
                   </div>
