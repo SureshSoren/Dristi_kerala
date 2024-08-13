@@ -126,8 +126,8 @@ const ReviewSummonsNoticeAndWarrant = () => {
       return [
         { key: "Issued to", value: caseDetails?.respondentDetails?.name },
         { key: "Issued Date", value: rowData?.createdDate },
-        { key: "Next Hearing Date", value: nextHearingDate?.startTime ? formatDate(nextHearingDate?.startTime) : "N/A" },
-        { key: "Amount Paid", value: `Rs. ${caseDetails?.deliveryChannels?.fees}` },
+        // { key: "Next Hearing Date", value: nextHearingDate?.startTime ? formatDate(nextHearingDate?.startTime) : "N/A" },
+        { key: "Amount Paid", value: `Rs. ${caseDetails?.deliveryChannels?.fees || 100}` },
         { key: "Channel Details", value: caseDetails?.deliveryChannels?.channelName },
       ];
     }
@@ -265,7 +265,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
               onClickRow: (props) => {
                 console.log("props?.original :>> ", props?.original);
                 setRowData(props?.original);
-                setActionModalType("SIGN_PENDING");
+                setActionModalType(props?.original?.documentStatus);
                 setShowActionModal(true);
                 setStep(0);
                 setIsSigned(props?.original?.documentStatus === "SIGN_PENDING" ? false : true);

@@ -8,6 +8,25 @@ import { formatDate } from "../../../cases/src/utils";
 
 const customColumnStyle = { whiteSpace: "nowrap" };
 
+const handleTaskDetails = (taskDetails) => {
+  try {
+    // Try parsing the taskDetails string
+    const parsed = JSON.parse(taskDetails);
+
+    // Check if the result is a string (indicating it's a double-escaped JSON)
+    if (typeof parsed === "string") {
+      // Attempt to parse it again as JSON
+      return JSON.parse(parsed);
+    }
+
+    // Return the parsed object if it's already a valid JSON object
+    return parsed;
+  } catch (error) {
+    console.error("Failed to parse taskDetails:", error);
+    return null;
+  }
+};
+
 const handleNavigate = (path) => {
   console.log("Funvtion called ");
   const contextPath = window?.contextPath || "";
@@ -384,7 +403,7 @@ export const UICustomizations = {
       };
     },
     additionalCustomizations: (row, key, column, value, t, searchResult) => {
-      const caseDetails = JSON.parse(row?.taskDetails);
+      const caseDetails = handleTaskDetails(row?.taskDetails);
       switch (key) {
         case "Case Name & ID":
           return `${row?.caseName}, ${value}`;

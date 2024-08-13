@@ -4,17 +4,15 @@ import { Button } from "@egovernments/digit-ui-react-components";
 import React, { useEffect, useMemo, useState } from "react";
 import useESign from "../hooks/orders/useESign";
 import { Urls } from "../hooks/services/Urls";
-import { getFilestoreId } from "@egovernments/digit-ui-module-dristi/src/Utils/fileStoreUtil";
 import useDocumentUpload from "../hooks/orders/useDocumentUpload";
 
 const AddSignatureComponent = ({ t, isSigned, handleSigned, rowData, setSignatureId }) => {
   const { handleEsign, checkSignStatus } = useESign();
   const { uploadDocuments } = useDocumentUpload();
-  const fileStoreIdESign = getFilestoreId();
   const [formData, setFormData] = useState({}); // storing the file upload data
   const [openUploadSignatureModal, setOpenUploadSignatureModal] = useState(false);
   const UploadSignatureModal = window?.Digit?.ComponentRegistryService?.getComponent("UploadSignatureModal");
-  const [fileStoreId, setFileStoreId] = useState("c162c182-103f-463e-99b6-18654ed7a5b1"); // have to set the uploaded fileStoreID
+  const [fileStoreId, setFileStoreId] = useState(rowData?.documents?.[0]?.fileStore || ""); // have to set the uploaded fileStoreID
   const [pageModule, setPageModule] = useState("en");
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const uri = `${window.location.origin}${Urls.FileFetchById}?tenantId=${tenantId}&fileStoreId=${fileStoreId}`;
@@ -93,7 +91,7 @@ const AddSignatureComponent = ({ t, isSigned, handleSigned, rowData, setSignatur
                   onButtonClick={() => {
                     // setOpenAadharModal(true);
                     localStorage.setItem("ESignSummons", JSON.stringify(rowData));
-                    handleEsign(name, pageModule, fileStoreIdESign);
+                    handleEsign(name, pageModule, rowData?.documents?.[0]?.fileStore);
                   }}
                   className={"aadhar-sign-in"}
                   labelClassName={"aadhar-sign-in"}

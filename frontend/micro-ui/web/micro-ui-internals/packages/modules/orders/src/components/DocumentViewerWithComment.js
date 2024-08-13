@@ -18,14 +18,14 @@ const DocumentViewerWithComment = ({ infos, links, documents, showCommentSection
                 {docs && (
                   <div className="application-view" key={index}>
                     <DocViewerWrapper
-                      key={docs.fileStoreId}
-                      fileStoreId={docs.fileStoreId}
-                      displayFilename={docs.fileName}
+                      key={docs.fileStore}
+                      fileStoreId={docs.fileStore}
+                      // displayFilename={docs.fileName}
                       tenantId={"kl"}
                       docWidth="100%"
                       docHeight="unset"
                       showDownloadOption={false}
-                      documentName={docs.fileName}
+                      // documentName={docs.fileName}
                     />
                   </div>
                 )}

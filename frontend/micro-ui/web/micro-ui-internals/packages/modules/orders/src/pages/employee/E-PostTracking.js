@@ -78,7 +78,7 @@ const EpostTrackingPage = () => {
 
   const printInfos = useMemo(() => {
     return [
-      { key: "E-post fees", value: "Rs.575" },
+      { key: "E-post fees", value: "Rs.100" },
       { key: "Received on", value: "04/07/2024, 12:56" },
     ];
   }, []);
@@ -139,7 +139,7 @@ const EpostTrackingPage = () => {
 
   const infos = useMemo(() => {
     return [
-      { key: "E-post fees", value: "Rs.575" },
+      { key: "E-post fees", value: "Rs.100" },
       { key: "Received on", value: "04/07/2024, 12:56" },
       { key: "Bar Code", value: "1234567890" },
       { key: "Date of Booking", value: "04/07/2024" },
