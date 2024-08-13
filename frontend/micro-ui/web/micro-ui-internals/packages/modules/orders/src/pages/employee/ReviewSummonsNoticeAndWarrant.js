@@ -44,8 +44,9 @@ const ReviewSummonsNoticeAndWarrant = () => {
   const [step, setStep] = useState(0);
   const [signatureId, setSignatureId] = useState("");
   const [deliveryChannel, setDeliveryChannel] = useState("");
-  const [refetch, setRefetch] = useState(false);
+  const [reload, setReload] = useState(false);
   const [taskDetails, setTaskDetails] = useState({});
+  const [tasksData, setTasksData] = useState(null);
 
   const [tabData, setTabData] = useState(
     SummonsTabsConfig?.SummonsTabsConfig?.map((configItem, index) => ({ key: index, label: configItem.label, active: index === 0 ? true : false }))
@@ -55,16 +56,76 @@ const ReviewSummonsNoticeAndWarrant = () => {
     //change status to signed or unsigned
   };
 
+  const { data: fetchedTasksData, refetch } = Digit.Hooks.hearings.useGetTaskList(
+    {
+      criteria: {
+        tenantId: tenantId,
+        taskNumber: rowData?.taskNumber,
+      },
+    },
+    {},
+    true,
+    Boolean(showActionModal || step)
+  );
+
+  useEffect(() => {
+    if (fetchedTasksData && fetchedTasksData !== tasksData) {
+      setTasksData(fetchedTasksData); // Store tasksData only if it's different
+    }
+  }, [fetchedTasksData, tasksData]);
+
   const handleSubmitButtonDisable = (disable) => {
     console.log("disable :>> ", disable);
     setIsDisabled(disable);
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
     localStorage.removeItem("SignedFileStoreID");
-    setShowActionModal(false);
-    setRefetch(!refetch);
+    await refetch();
+    if (tasksData) {
+      try {
+        const reqBody = {
+          task: {
+            ...tasksData?.list?.[0],
+            workflow: {
+              ...tasksData?.list?.[0]?.workflow,
+              action: "SERVE",
+              documents: [{}],
+            },
+          },
+        };
+        const response = await taskService.updateTask(reqBody, { tenantId });
+        setShowActionModal(false);
+        setReload(!reload);
+      } catch (error) {
+        console.error("Error updating task data:", error);
+      }
+    }
   };
+
+  const handleUpdate = async () => {
+    await refetch();
+    if (tasksData) {
+      try {
+        const reqBody = {
+          task: {
+            ...tasksData?.list?.[0],
+            workflow: {
+              ...tasksData?.list?.[0]?.workflow,
+              action: "CLOSE",
+              documents: [{}],
+            },
+          },
+        };
+        const response = await taskService.updateTask(reqBody, { tenantId });
+        setShowActionModal(false);
+        setReload(!reload);
+      } catch (error) {
+        console.error("Error updating task data:", error);
+      }
+    }
+  };
+
   useEffect(() => {
     // Set default values when component mounts
     setDefaultValues(defaultSearchValues);
@@ -253,7 +314,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
 
   const signedModalConfig = useMemo(() => {
     return {
-      handleClose: handleClose,
+      handleClose: () => setShowActionModal(false),
       heading: { label: "Print & Send Documents" },
       actionSaveLabel: "Mark As Sent",
       isStepperModal: false,
@@ -266,12 +327,14 @@ const ReviewSummonsNoticeAndWarrant = () => {
 
   const sentModalConfig = useMemo(() => {
     return {
-      handleClose: handleClose,
+      handleClose: () => setShowActionModal(false),
       heading: { label: "Print & Send Documents" },
-      actionSaveLabel: "Mark As Sent",
+      actionSaveLabel: "Update Status",
       isStepperModal: false,
-      modalBody: <UpdateDeliveryStatusComponent infos={infos} links={links} t={t} handleSubmitButtonDisable={handleSubmitButtonDisable} />,
-      actionSaveOnSubmit: handleClose,
+      modalBody: (
+        <UpdateDeliveryStatusComponent infos={infos} links={links} t={t} handleSubmitButtonDisable={handleSubmitButtonDisable} rowData={rowData} />
+      ),
+      actionSaveOnSubmit: handleUpdate,
       isDisabled: isDisabled,
     };
   }, [infos, isDisabled, links, t]);
@@ -280,6 +343,20 @@ const ReviewSummonsNoticeAndWarrant = () => {
     // if (rowData?.id) getTaskDocuments();
     if (rowData?.filingNumber) getHearingFromCaseId();
   }, [rowData]);
+
+  const handleRowClick = (props) => {
+    if (props?.original?.status === "COMPLETED") {
+      return; // Do nothing if the row's status is 'Completed'
+    }
+
+    setRowData(props?.original);
+    setActionModalType(props?.original?.documentStatus);
+    setShowActionModal(true);
+    setStep(0);
+    setIsSigned(props?.original?.documentStatus === "SIGN_PENDING" ? false : true);
+    setDeliveryChannel(handleTaskDetails(props?.original?.taskDetails)?.deliveryChannels?.channelName);
+    setTaskDetails(handleTaskDetails(props?.original?.taskDetails));
+  };
 
   return (
     <div className="review-summon-warrant">
@@ -290,7 +367,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
       <div className="inbox-search-wrapper pucar-home home-view">
         {/* Pass defaultValues as props to InboxSearchComposer */}
         <InboxSearchComposer
-          key={`inbox-composer-${refetch}`}
+          key={`inbox-composer-${reload}`}
           configs={config}
           defaultValues={defaultValues}
           showTab={true}
@@ -298,15 +375,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
           onTabChange={onTabChange}
           additionalConfig={{
             resultsTable: {
-              onClickRow: (props) => {
-                setRowData(props?.original);
-                setActionModalType(props?.original?.documentStatus);
-                setShowActionModal(true);
-                setStep(0);
-                setIsSigned(props?.original?.documentStatus === "SIGN_PENDING" ? false : true);
-                setDeliveryChannel(handleTaskDetails(props?.original?.taskDetails)?.deliveryChannels?.channelName);
-                setTaskDetails(handleTaskDetails(props?.original?.taskDetails));
-              },
+              onClickRow: handleRowClick, // Use the new row click handler
             },
           }}
         ></InboxSearchComposer>

@@ -43,6 +43,7 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
   const userType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo?.type]);
   const todayDate = new Date().getTime();
   const [formData, setFormData] = useState({});
+  const [showFileIcon, setShowFileIcon] = useState(false);
 
   const setData = (data) => {
     setFormData(data);
@@ -613,6 +614,7 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
   const handleSubmitComment = async (newComment) => {
     if (modalType === "Submissions") {
       await submitCommentApplication(newComment);
+      setShowFileIcon(false);
     } else {
       await submitCommentEvidence(newComment);
     }
@@ -880,8 +882,11 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
                                     comment: [
                                       {
                                         ...newComment.comment[0],
-                                        commentDocumentId: formData?.SelectUserTypeComponent?.doc?.[0]?.[1]?.fileStoreId?.fileStoreId,
-                                        commentDocumentName: documentUploaderConfig?.[0]?.body?.[0]?.populators?.inputs?.[0]?.options?.[0]?.code,
+                                        additionalDetails: {
+                                          ...newComment.comment[0].additionalDetails,
+                                          commentDocumentId: formData?.SelectUserTypeComponent?.doc?.[0]?.[1]?.fileStoreId?.fileStoreId,
+                                          commentDocumentName: documentUploaderConfig?.[0]?.body?.[0]?.populators?.inputs?.[0]?.options?.[0]?.code,
+                                        },
                                       },
                                     ],
                                   };
@@ -904,6 +909,8 @@ const EvidenceModal = ({ caseData, documentSubmission = [], setShow, userRoles, 
                           config={[documentUploaderConfig?.[0]]}
                           setData={setData}
                           documentSubmission={documentSubmission}
+                          showDocument={showFileIcon}
+                          setShowDocument={setShowFileIcon}
                         />
                       </div>
                     </div>

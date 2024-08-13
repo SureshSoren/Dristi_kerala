@@ -21,7 +21,7 @@ export const SummonsTabsConfig = {
         requestBody: {
           apiOperation: "SEARCH",
           criteria: {
-            completeStatus: "ISSUESUMMON", // have to do changes
+            completeStatus: ["ISSUESUMMON"], // have to do changes
           },
         },
         masterName: "commonUiConfig",
@@ -155,7 +155,7 @@ export const SummonsTabsConfig = {
         },
         requestBody: {
           criteria: {
-            completeStatus: "DELIVERED",
+            completeStatus: ["SUMMONSERVED", "COMPLETED"],
           },
         },
         masterName: "commonUiConfig",
@@ -205,7 +205,7 @@ export const SummonsTabsConfig = {
                 },
               },
               {
-                label: "E-Sign Status",
+                label: "Summon Status",
                 isMandatory: false,
                 key: "applicationStatus",
                 type: "dropdown",
@@ -213,7 +213,7 @@ export const SummonsTabsConfig = {
                 populators: {
                   name: "applicationStatus",
                   name: "status",
-                  options: ["SENT", "DELIVERED", "NOT_DELIVERED"],
+                  options: ["DELIVERED", "NOT_DELIVERED"],
                   optionsCustomStyle: {
                     overflowX: "hidden",
                   },
@@ -248,7 +248,7 @@ export const SummonsTabsConfig = {
               },
               {
                 label: "Status",
-                jsonPath: "documentStatus",
+                jsonPath: "status",
               },
               {
                 label: "Case Name & ID",

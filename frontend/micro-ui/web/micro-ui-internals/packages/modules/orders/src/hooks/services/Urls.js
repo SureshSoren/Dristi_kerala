@@ -19,5 +19,6 @@ export const Urls = {
   },
   Task: {
     uploadDoc: "/task/v1/uploadDocument",
+    updateTask: "/task/v1/update",
   },
 };

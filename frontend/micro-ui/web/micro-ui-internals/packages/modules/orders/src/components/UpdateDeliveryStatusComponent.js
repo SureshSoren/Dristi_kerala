@@ -2,26 +2,31 @@ import { CardLabel, Dropdown, LabelFieldPair, TextInput } from "@egovernments/di
 import React, { useEffect, useState } from "react";
 import ApplicationInfoComponent from "./ApplicationInfoComponent";
 
-const UpdateDeliveryStatusComponent = ({ t, infos, links, handleSubmitButtonDisable }) => {
-  const [selectedDelievery, setSelectedDelievery] = useState({});
-  const [date, setDate] = useState("");
+const convertToDateInputFormat = (dateStr) => {
+  const [day, month, year] = dateStr.split("-");
+  return `${year}-${month}-${day}`;
+};
+
+const convertToDisplayFormat = (dateStr) => {
+  const [year, month, day] = dateStr.split("-");
+  return `${day}-${month}-${year}`;
+};
+
+const UpdateDeliveryStatusComponent = ({ t, infos, links, handleSubmitButtonDisable, rowData }) => {
+  const [selectedDelievery, setSelectedDelievery] = useState(
+    rowData?.status === "SUMMONSERVED" || rowData?.status === "COMPLETED"
+      ? {
+          key: "DELIVERED",
+          value: "Delivered",
+        }
+      : {}
+  );
+  const [date, setDate] = useState(rowData?.createdDate ? convertToDateInputFormat(rowData.createdDate) : "");
   const [remarks, setRemarks] = useState("");
   const deliveryOptions = [
     {
-      key: "SENT",
-      value: "Sent",
-    },
-    {
       key: "DELIVERED",
       value: "Delivered",
-    },
-    {
-      key: "NOT_DELIVERED",
-      value: "Not Delivered",
-    },
-    {
-      key: "SIGNED",
-      value: "Signed",
     },
   ];
 
@@ -38,7 +43,7 @@ const UpdateDeliveryStatusComponent = ({ t, infos, links, handleSubmitButtonDisa
       </LabelFieldPair>
       {selectedDelievery && (
         <LabelFieldPair className="case-label-field-pair">
-          <CardLabel className="case-input-label">{`${t("Update Delivery Status")}`}</CardLabel>
+          <CardLabel className="case-input-label">{`${t("Update Delivery Date")}`}</CardLabel>
           <TextInput
             value={date}
             type={"date"}

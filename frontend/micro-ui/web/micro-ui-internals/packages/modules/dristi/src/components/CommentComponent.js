@@ -20,7 +20,7 @@ function CommentComponent({ key, comment }) {
         </h3>
         <p className="comment-text">{comment?.text}</p>
         <p className="comment-text">{comment?.comment}</p>
-        {comment?.commentDocumentId && (
+        {comment?.additionalDetails?.commentDocumentId && (
           <div
             style={{
               border: "1px solid #bbbbbd",
@@ -36,11 +36,15 @@ function CommentComponent({ key, comment }) {
               cursor: "pointer",
             }}
             onClick={() => {
-              window.open(`/filestore/v1/files/id?tenantId=kl&fileStoreId=${comment.commentDocumentId}`, "_blank", "noopener,noreferrer");
+              window.open(
+                `/filestore/v1/files/id?tenantId=kl&fileStoreId=${comment?.additionalDetails?.commentDocumentId}`,
+                "_blank",
+                "noopener,noreferrer"
+              );
             }}
           >
             <FileIcon />
-            <span style={{ fontWeight: "bold" }}>{comment.commentDocumentName || "Attached File"}</span>
+            <span style={{ fontWeight: "bold" }}>{comment?.additionalDetails?.commentDocumentName || "Attached File"}</span>
           </div>
         )}
       </div>

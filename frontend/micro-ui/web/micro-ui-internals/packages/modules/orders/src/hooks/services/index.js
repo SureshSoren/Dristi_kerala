@@ -98,4 +98,13 @@ export const taskService = {
       data,
       params,
     }),
+
+  updateTask: (data, params) =>
+    Request({
+      url: Urls.Task.updateTask,
+      useCache: true,
+      userService: true,
+      data,
+      params,
+    }),
 };

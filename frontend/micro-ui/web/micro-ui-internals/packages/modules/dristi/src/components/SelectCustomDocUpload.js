@@ -16,10 +16,9 @@ const DragDropJSX = ({ t, currentValue, error }) => {
   );
 };
 
-function SelectCustomDocUpload({ t, config, formUploadData = {}, setData, documentSubmission }) {
+function SelectCustomDocUpload({ t, config, formUploadData = {}, setData, documentSubmission, showDocument, setShowDocument }) {
   const [upload, setUpload] = useState(false);
   const [eSignModal, setEsignModal] = useState(false);
-  const [showDocument, setShowDocument] = useState(false);
   const [isSigned, setIsSigned] = useState(false);
 
   const handleOpenUploadModal = () => {

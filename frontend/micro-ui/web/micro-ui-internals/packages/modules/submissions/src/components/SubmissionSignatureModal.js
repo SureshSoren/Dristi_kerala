@@ -99,6 +99,16 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup,
             <h1 style={{ color: "#3d3c3c", fontSize: "24px", fontWeight: "bold" }}>{t("YOUR_SIGNATURE")}</h1>
             <div className="buttons-div">
               <Button
+                label={t("CS_ESIGN_AADHAR")}
+                onClick={() => {
+                  // setOpenAadharModal(true);
+                  // setIsSigned(true);
+                  handleEsign(name, pageModule, fileStoreIdESign);
+                }}
+                className={"aadhar-sign-in"}
+                labelClassName={"submission-aadhar-sign-in"}
+              ></Button>
+              <Button
                 icon={<FileUploadIcon />}
                 label={t("CS_UPLOAD_ESIGNATURE")}
                 onClick={() => {
@@ -108,16 +118,6 @@ function SubmissionSignatureModal({ t, handleProceed, handleCloseSignaturePopup,
                 }}
                 className={"upload-signature"}
                 labelClassName={"submission-upload-signature-label"}
-              ></Button>
-              <Button
-                label={t("CS_ESIGN_AADHAR")}
-                onClick={() => {
-                  // setOpenAadharModal(true);
-                  // setIsSigned(true);
-                  handleEsign(name, pageModule,fileStoreIdESign);
-                }}
-                className={"aadhar-sign-in"}
-                labelClassName={"submission-aadhar-sign-in"}
               ></Button>
             </div>
             <div className="click-for-download">
