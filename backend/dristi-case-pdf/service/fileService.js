@@ -16,15 +16,31 @@ async function fetchDocument(fileStoreId) {
             console.log('PDF file detected');
             return response.data;
         } else if (contentType.startsWith('image/')) {
-            const tempFilePath = path.join(__dirname, 'temp_image_file');
             console.log('Image file detected');
-            await fs.writeFile(tempFilePath, response.data);
-            try {
-                const imagePdf = await imageToPdf([tempFilePath], { format: 'A4' });
-                return imagePdf;
-            } finally {
-                await fs.unlink(tempFilePath);
+
+            const imageBytes = Buffer.from(response.data);
+            const pdfDoc = await PDFDocument.create();
+
+            let image;
+            if (contentType === 'image/jpeg') {
+                image = await pdfDoc.embedJpg(imageBytes);
+            } else if (contentType === 'image/png') {
+                image = await pdfDoc.embedPng(imageBytes);
+            } else {
+                throw new Error(`Unsupported image format: ${contentType}`);
             }
+
+            const page = pdfDoc.addPage();
+            const { width, height } = page.getSize();
+            page.drawImage(image, {
+                x: 0,
+                y: 0,
+                width: width,
+                height: height,
+            });
+
+            const pdfBytes = await pdfDoc.save();
+            return pdfBytes;
         } else {
             throw new Error(`Unsupported content type: ${contentType}`);
         }
