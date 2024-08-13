@@ -33,7 +33,7 @@ public class SummonsDeliveryEnrichment {
         return SummonsDelivery.builder()
                 .summonDeliveryId(id)
                 .taskNumber(task.getTaskNumber())
-                .caseId(taskDetails.getCaseDetails().getCaseId())
+                .caseId(task.getCnrNumber())
                 .tenantId(config.getEgovStateTenantId())
                 .docType(taskDetails.getSummonDetails().getDocType())
                 .docSubType(taskDetails.getSummonDetails().getDocSubType())
