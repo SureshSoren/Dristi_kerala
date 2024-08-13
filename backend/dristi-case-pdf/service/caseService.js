@@ -131,7 +131,7 @@ exports.getWitnessDetails = async (cases) => {
             phoneNumber: data.phonenumbers && data.phonenumbers.mobileNumber[0] || null,
             email: data.emails && data.emails.textfieldValue || null,
             address: addresses,
-            additionalDetails
+            additionalDetails: ''
         };
     });
 };
