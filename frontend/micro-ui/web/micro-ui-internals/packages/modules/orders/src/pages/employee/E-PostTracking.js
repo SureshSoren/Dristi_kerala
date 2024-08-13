@@ -69,6 +69,27 @@ const EpostTrackingPage = () => {
     [tenantId]
   );
 
+  function epochToDateTimeObject(epochTime) {
+    if (!epochTime || typeof epochTime !== "number") {
+      return null;
+    }
+
+    const date = new Date(epochTime);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    const dateTimeObject = {
+      date: `${day}/${month}/${year}  ${hours}:${minutes}`,
+    };
+
+    return dateTimeObject;
+  }
+
+  const recievedOn = epochToDateTimeObject(rowData?.original?.auditDetails?.createdTime);
+
   const onRowClick = (row) => {
     setRowData(row);
     setFileStoreID(row?.original?.fileStoreId);
@@ -79,9 +100,9 @@ const EpostTrackingPage = () => {
   const printInfos = useMemo(() => {
     return [
       { key: "E-post fees", value: "Rs.100" },
-      { key: "Received on", value: "04/07/2024, 12:56" },
+      { key: "Received on", value: recievedOn ? recievedOn?.date : "04/07/2024, 12:56" },
     ];
-  }, []);
+  }, [recievedOn]);
 
   const printLinks = useMemo(() => {
     return [{ text: "View Details", link: "" }];
@@ -140,11 +161,11 @@ const EpostTrackingPage = () => {
   const infos = useMemo(() => {
     return [
       { key: "E-post fees", value: "Rs.100" },
-      { key: "Received on", value: "04/07/2024, 12:56" },
+      { key: "Received on", value: recievedOn ? recievedOn?.date : "04/07/2024, 12:56" },
       { key: "Bar Code", value: "1234567890" },
       { key: "Date of Booking", value: "04/07/2024" },
     ];
-  }, []);
+  }, [recievedOn]);
 
   const links = useMemo(() => {
     return [
