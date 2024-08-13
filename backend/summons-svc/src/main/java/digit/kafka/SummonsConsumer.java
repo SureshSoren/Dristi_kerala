@@ -42,38 +42,25 @@ public class SummonsConsumer {
         try {
             TaskRequest taskRequest = objectMapper.convertValue(record, TaskRequest.class);
             String taskType = taskRequest.getTask().getTaskType();
+            String status = taskRequest.getTask().getStatus();
+
+            // Process for generating summons document
             if (taskType.equalsIgnoreCase(SUMMON) || taskType.equalsIgnoreCase(WARRANT)) {
-                log.info(taskRequest.getTask().toString());
-                summonsService.generateSummonsDocument(taskRequest);
+                try {
+                    log.info("Received message for uploading document {}", taskRequest.getTask());
+                    summonsService.generateSummonsDocument(taskRequest);
+                } catch (Exception e) {
+                    log.error("Error while generating summons document: {}", taskRequest.getTask(), e);
+                }
             }
-        } catch (final Exception e) {
-            log.error("Error while listening to value: {}: ", record, e);
-        }
-    }
-
-    @KafkaListener(topics = {"${kafka.topic.save.task.application}"})
-    @Async
-    public void listenForGenerateSummonsBill(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        try {
-            TaskRequest taskRequest = objectMapper.convertValue(record, TaskRequest.class);
-            String taskType = taskRequest.getTask().getTaskType();
-            if (taskType.equalsIgnoreCase(SUMMON) && taskRequest.getTask().getStatus().equalsIgnoreCase("PAYMENT_PENDING")) {
-                log.info(taskRequest.getTask().toString());
-                demandService.fetchPaymentDetailsAndGenerateDemandAndBill(taskRequest);
-            }
-        } catch (final Exception e) {
-            log.error("Error while listening to value: {}: ", record, e);
-        }
-    }
-
-    @KafkaListener(topics = {"${kafka.topic.insert.summons}"})
-    @Async
-    public void listenForInsertSummons(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        try {
-            SummonsRequest request = objectMapper.convertValue(record, SummonsRequest.class);
-            log.info(request.toString());
-            if (request.getSummonsDelivery().getDeliveryStatus().equals(DeliveryStatus.DELIVERED)) {
-                summonsService.updateTaskStatus(request);
+            // Process for generating summons bill
+            if (taskType.equalsIgnoreCase(SUMMON) && "PAYMENT_PENDING".equalsIgnoreCase(status)) {
+                try {
+                    log.info("Received message for bill creation {}", taskRequest.getTask());
+                    demandService.fetchPaymentDetailsAndGenerateDemandAndBill(taskRequest);
+                } catch (Exception e) {
+                    log.error("Error while creating bill: {}", taskRequest.getTask(), e);
+                }
             }
         } catch (final Exception e) {
             log.error("Error while listening to value: {}: ", record, e);
