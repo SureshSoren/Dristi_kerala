@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.config.Configuration;
-import org.pucar.dristi.repository.ServiceRequestRepository;
 import org.pucar.dristi.web.models.WitnessPdfRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -14,9 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
-import static org.pucar.dristi.config.ServiceConstants.CASE_PDF_UTILITY_EXCEPTION;
 import static org.pucar.dristi.config.ServiceConstants.PDF_UTILITY_EXCEPTION;
 
 

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.egov.common.contract.request.RequestInfo;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class WitnessPdfRequest {
 
 
     @JsonProperty("RequestInfo")
-    private Object requestInfo;
+    private RequestInfo requestInfo;
 
     @JsonProperty("WitnessDepositions")
     private List<WitnessDeposition> witnessDepositions;
