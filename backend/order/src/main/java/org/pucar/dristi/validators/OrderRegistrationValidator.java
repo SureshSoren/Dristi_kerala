@@ -34,9 +34,16 @@ public class OrderRegistrationValidator {
 
         if (ObjectUtils.isEmpty(orderRequest.getOrder().getStatuteSection()))
             throw new CustomException(CREATE_ORDER_ERR, "statute and section is mandatory for creating order");
+        log.info("Hello im here");
+        if (!caseUtil.fetchCaseDetails(requestInfo, orderRequest.getOrder().getCnrNumber(), orderRequest.getOrder().getFilingNumber())){
 
-        if (!caseUtil.fetchCaseDetails(requestInfo, orderRequest.getOrder().getCnrNumber(), orderRequest.getOrder().getFilingNumber()))
+            log.info( orderRequest.getOrder().getCnrNumber(),"  -cnr number");
+            log.info(orderRequest.getOrder().getFilingNumber(),"  -cnr number");
+
+            log.info( " im inside exception");
             throw new CustomException("INVALID_CASE_DETAILS", "Invalid Case");
+
+        }
     }
 
     public boolean validateApplicationExistence(OrderRequest orderRequest) {
