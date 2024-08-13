@@ -21,7 +21,7 @@ public class SummonFactory {
 
             Field field = SummonChannelConstant.class.getField(channelId);
             String clazzName = (String) field.get(null);
-            Class<?> klass = Class.forName(clazzName);
+            Class<?> klass = Class.forName(clazzName.toUpperCase());
 
             ApplicationContext context = ApplicationContextProvider.getApplicationContext();
 
