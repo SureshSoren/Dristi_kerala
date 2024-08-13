@@ -161,15 +161,13 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
       setTranscription((prev) => prev + transcriptData.text + " ");
     }
 
-    setEditableTranscription((prev) => prev + transcriptData.text + " ");
-
     setSendOriginal((prev) => prev + transcriptData.text + " ");
   };
   const startRecording = () => {
     if (isRecording) {
       return;
     }
-    if (formdata?.[config.key]?.[input.name]) setEditableTranscription(formdata?.[config.key]?.[input.name]);
+    if (formdata?.[config.key]?.[input.name]) setTranscription(formdata?.[config.key]?.[input.name] + " ");
     setIsRecording(true);
 
     const inputSource = inputSourceRef.current.value;
@@ -186,10 +184,10 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
     setFormData((prevData) => ({
       ...prevData,
       [config.key]: {
-        ...prevData[config.key],
-        [input.name]: editableTranscription,
+        [input.name]: transcription,
       },
     }));
+    onSelect(config.key, { [input.name]: transcription }, { shouldValidate: true });
 
     setIsRecording(false);
 
@@ -335,7 +333,7 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
       </div>
       <div style={{ position: "relative" }}>
         <textarea
-          value={isRecording ? editableTranscription : formdata?.[config.key]?.[input.name]}
+          value={isRecording ? transcription : formdata?.[config.key]?.[input.name]}
           onChange={(data) => {
             handleChange(data, input);
           }}

@@ -101,14 +101,14 @@ const TranscriptComponent = ({ setTranscriptText, isRecording, setIsRecording, a
           return `<span style="color: ${color}">${wordData.word} </span>`;
         })
         .join("");
-      setTranscription((prev) => prev + newTranscription + " ");
+      setTranscription((prev) => prev + " " + newTranscription);
     } else {
-      setTranscription((prev) => prev + transcriptData.text + " ");
+      setTranscription((prev) => prev + " " + transcriptData.text);
     }
     activeTab === "Witness Deposition"
-      ? setWitnessDepositionText((prev) => prev + transcriptData.text + " ")
-      : setTranscriptText((prev) => prev + transcriptData.text + " ");
-    setSendOriginal((prev) => prev + transcriptData.text + " ");
+      ? setWitnessDepositionText((prev) => prev + " " + transcriptData.text)
+      : setTranscriptText((prev) => prev + " " + transcriptData.text);
+    setSendOriginal((prev) => prev + " " + transcriptData.text);
   };
   const startRecording = () => {
     if (isRecording) {

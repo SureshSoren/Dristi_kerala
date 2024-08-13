@@ -73,18 +73,18 @@ const EvidenceHearingHeader = ({ hearing, caseData, filingNumber, setActiveTab, 
         <div className="judge-action-block">
           <div className="evidence-header-wrapper">
             <div className="evidence-hearing-header" style={{ background: "transparent" }}>
-              <div className="evidence-actions">
+              {/* <div className="evidence-actions">
                 <Button
                   style={{
                     backgroundColor: "#fff",
                   }}
                   textStyles={{
-                    fontFamily: "Roboto",
-                    fontSize: "16px",
-                    fontWeight: 700,
-                    lineHeight: "18.75px",
-                    textAlign: "center",
-                    color: "#007E7E",
+                    // fontFamily: "Roboto",
+                    // fontSize: "16px",
+                    // fontWeight: 700,
+                    // lineHeight: "18.75px",
+                    // textAlign: "center",
+                    // color: "#007E7E",
                   }}
                   variation={"tertiary"}
                   label={"Share"}
@@ -92,7 +92,7 @@ const EvidenceHearingHeader = ({ hearing, caseData, filingNumber, setActiveTab, 
                   iconFill={"#007E7E"}
                   className={"take-action-btn-class"}
                 ></Button>
-              </div>
+              </div> */}
             </div>
           </div>
           {userRoles.includes("EMPLOYEE") ? (

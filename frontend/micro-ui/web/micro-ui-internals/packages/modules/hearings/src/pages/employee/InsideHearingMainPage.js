@@ -69,7 +69,6 @@ const InsideHearingMainPage = () => {
   const { data: hearingLink } = useGetHearingLink();
   const hearingVcLink = hearingLink?.[0];
   const refetchTime = disableTextArea ? 10 * SECOND : "";
-
   const reqBody = {
     hearing: { tenantId },
     criteria: {
@@ -394,7 +393,7 @@ const InsideHearingMainPage = () => {
               gap: "16px",
             }}
           >
-            <Button
+            {/* <Button
               label={"ATTENDANCE_CHIP"}
               style={{ boxShadow: "none", backgroundColor: "#ECF3FD", borderRadius: "4px", border: "none", padding: "10px" }}
               textStyles={{
@@ -419,7 +418,7 @@ const InsideHearingMainPage = () => {
               >
                 {`${attendanceCount}`}
               </h2>
-            </Button>
+            </Button> */}
             {/* {userHasRole("EMPLOYEE") && (
               <Button
                 label={t("MARK_ATTENDANCE")}
