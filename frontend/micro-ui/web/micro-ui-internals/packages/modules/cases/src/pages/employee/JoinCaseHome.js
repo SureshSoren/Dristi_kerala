@@ -1521,10 +1521,12 @@ const JoinCaseHome = ({ refreshInbox }) => {
                   label={
                     roleOfNewAdvocate === t(JoinHomeLocalisation.PRIMARY_ADVOCATE)
                       ? t(JoinHomeLocalisation.VIEW_CASE_DETAILS)
-                      : t(JoinHomeLocalisation.CONFIRM_ATTENDANCE)
+                      : t(JoinHomeLocalisation.VIEW_CASE_DETAILS)
                   }
                   onButtonClick={() => {
                     if (roleOfNewAdvocate === t(JoinHomeLocalisation.PRIMARY_ADVOCATE)) {
+                      history.push(`/${window?.contextPath}/${userInfoType}/dristi/home/view-case?caseId=${caseDetails?.id}`);
+                    } else {
                       history.push(`/${window?.contextPath}/${userInfoType}/dristi/home/view-case?caseId=${caseDetails?.id}`);
                     }
                   }}

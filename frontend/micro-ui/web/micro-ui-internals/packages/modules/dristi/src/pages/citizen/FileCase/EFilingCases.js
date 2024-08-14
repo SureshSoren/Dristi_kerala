@@ -181,7 +181,6 @@ function EFilingCases({ path }) {
 
   useEffect(() => {
     if (casePdf) {
-      console.log(casePdf?.cases?.[0]?.documents?.[0]?.fileStore, "llll");
       localStorage.setItem("fileStoreId", casePdf?.cases?.[0]?.documents?.[0]?.fileStore);
       // Add any additional logic that should occur when casePdf is available
     }
@@ -1475,10 +1474,7 @@ function EFilingCases({ path }) {
     }
 
     if (selected === "reviewCaseFile") {
-      refetch().then((data) => {
-        console.log(data);
-        debugger;
-      });
+      refetch();
     }
     if (selected === "addSignature" && isDraftInProgress) {
       if (courtRooms?.length === 1) {
