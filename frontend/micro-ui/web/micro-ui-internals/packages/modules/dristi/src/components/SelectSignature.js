@@ -64,7 +64,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
           uidToken: "3456565",
           consent: "6564",
           authType: "6546",
-          fileStoreId: EsignFileStoreID ? EsignFileStoreID : filestoreId,
+          fileStoreId: EsignFileStoreID ? EsignFileStoreID : "4824356d-e582-48bc-8929-c53a1bdb2bf1",
           tenantId: "kl",
           pageModule: "ci",
         },

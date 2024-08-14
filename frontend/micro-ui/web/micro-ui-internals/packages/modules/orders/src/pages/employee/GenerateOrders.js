@@ -616,6 +616,23 @@ const GenerateOrders = () => {
     return foundKeys;
   }, [modifiedFormConfig]);
 
+  const generateAddress = ({
+    pincode = "",
+    district = "",
+    city = "",
+    state = "",
+    coordinates = { longitude: "", latitude: "" },
+    locality = "",
+    address = "",
+  }) => {
+    if (address) {
+      return address;
+    }
+    return `${locality ? `${locality},` : ""} ${district ? `${district},` : ""} ${city ? `${city},` : ""} ${state ? `${state},` : ""} ${
+      pincode ? `- ${pincode}` : ""
+    }`.trim();
+  };
+
   const defaultValue = useMemo(() => {
     if (currentOrder?.orderType && !currentOrder?.additionalDetails?.formdata) {
       return {
@@ -1159,22 +1176,6 @@ const GenerateOrders = () => {
       },
       {}
     );
-  };
-  const generateAddress = ({
-    pincode = "",
-    district = "",
-    city = "",
-    state = "",
-    coordinates = { longitude: "", latitude: "" },
-    locality = "",
-    address = "",
-  }) => {
-    if (address) {
-      return address;
-    }
-    return `${locality ? `${locality},` : ""} ${district ? `${district},` : ""} ${city ? `${city},` : ""} ${state ? `${state},` : ""} ${
-      pincode ? `- ${pincode}` : ""
-    }`.trim();
   };
 
   const createTask = async (orderType, caseDetails, orderDetails) => {

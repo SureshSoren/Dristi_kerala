@@ -163,7 +163,29 @@ function EFilingCases({ path }) {
   const [prevSelected, setPrevSelected] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const homepagePath = "/digit-ui/citizen/dristi/home";
-  const [pdfGenerate, setPdfGenerate] = useState(false);
+
+  const { data: casePdf, isPdfLoading, refetch } = useCasePdfGeneration(
+    {
+      criteria: [
+        {
+          caseId: caseId,
+        },
+      ],
+      tenantId,
+    },
+    {},
+    "dristi",
+    caseId,
+    false
+  );
+
+  useEffect(() => {
+    if (casePdf) {
+      console.log(casePdf?.cases?.[0]?.documents?.[0]?.fileStore, "llll");
+      localStorage.setItem("fileStoreId", casePdf?.cases?.[0]?.documents?.[0]?.fileStore);
+      // Add any additional logic that should occur when casePdf is available
+    }
+  }, [casePdf]);
 
   const [{ showSuccessToast, successMsg }, setSuccessToast] = useState({
     showSuccessToast: false,
@@ -1126,31 +1148,7 @@ function EFilingCases({ path }) {
   //   setFormdata(newArray);
   // };
 
-  const { data: casePdf, isPdfLoading } = useCasePdfGeneration(
-    {
-      criteria: [
-        {
-          caseId: caseId,
-        },
-      ],
-      tenantId,
-    },
-    {},
-    "dristi",
-    caseId,
-    Boolean(pdfGenerate === true)
-  );
-
-  useEffect(() => {
-    if (casePdf) {
-      console.log(casePdf?.cases?.[0]?.documents?.[0]?.fileStore, "llll");
-      localStorage.setItem("fileStoreId", casePdf?.cases?.[0]?.documents?.[0]?.fileStore);
-      // Add any additional logic that should occur when casePdf is available
-    }
-  }, [casePdf]);
-
   const handleSkip = () => {
-    setPdfGenerate(true); // At this point, casePdf might still be undefined
     setShowConfirmOptionalModal(false);
   };
 
@@ -1476,6 +1474,12 @@ function EFilingCases({ path }) {
       return setOpenConfirmCorrectionModal(true);
     }
 
+    if (selected === "reviewCaseFile") {
+      refetch().then((data) => {
+        console.log(data);
+        debugger;
+      });
+    }
     if (selected === "addSignature" && isDraftInProgress) {
       if (courtRooms?.length === 1) {
         onSubmitCase({ court: courtRooms[0] });
