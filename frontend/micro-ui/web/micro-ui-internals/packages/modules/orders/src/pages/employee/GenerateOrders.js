@@ -887,11 +887,13 @@ const GenerateOrders = () => {
   const createPendingTask = async ({
     order,
     refId = null,
+    orderEntityType = null,
     isAssignedRole = false,
     createTask = false,
     taskStatus = "CREATE_SUBMISSION",
     taskName = "",
   }) => {
+    console.log(orderEntityType, "PENDING");
     const formdata = order?.additionalDetails?.formdata;
     let create = createTask;
     let name = taskName;
@@ -899,8 +901,11 @@ const GenerateOrders = () => {
     let referenceId = order?.orderNumber;
     let assignedRole = [];
     let additionalDetails = {};
-    let entityType =
-      formdata?.isResponseRequired?.code === "Yes" ? "async-submission-with-response-managelifecycle" : "async-order-submission-managelifecycle";
+    let entityType = orderEntityType
+      ? orderEntityType
+      : formdata?.isResponseRequired?.code === "Yes"
+      ? "async-submission-with-response-managelifecycle"
+      : "async-order-submission-managelifecycle";
     let status = taskStatus;
     let stateSla = stateSlaMap?.[order?.orderType] * dayInMillisecond + todayDate;
     if (order?.orderType === "MANDATORY_SUBMISSIONS_RESPONSES") {
@@ -1506,6 +1511,7 @@ const GenerateOrders = () => {
             createTask: true,
             taskStatus: "DRAFT_IN_PROGRESS",
             taskName: t("DRAFT_IN_PROGRESS_ISSUE_SUMMONS"),
+            orderEntityType: "order-managelifecycle",
           })
         )
       );

@@ -60,6 +60,7 @@ function EFilingPaymentResponse() {
             onButtonClick={() => {
               history.push(`/${window?.contextPath}/employee/dristi/pending-payment-inbox`);
             }}
+            style={{ width: "100%" }}
           />
         </div>
       </div>
