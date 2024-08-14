@@ -329,7 +329,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
             <Button
               variation={"secondary"}
               className={"secondary-button-selector"}
-              label={t("CS_PRINT_RECEIPT")}
+              label={t("CS_PRINT_CASE_FILE")}
               labelClassName={"secondary-label-selector"}
               onButtonClick={() => {
                 localStorage.removeItem("fileStoreId");
