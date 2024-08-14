@@ -1485,10 +1485,12 @@ const GenerateOrders = () => {
       const promiseList = summonsArray?.map((data) =>
         ordersService.createOrder(
           {
-            ...orderbody,
-            additionalDetails: {
-              ...orderbody?.additionalDetails,
-              selectedParty: data,
+            order: {
+              ...orderbody,
+              additionalDetails: {
+                ...orderbody?.additionalDetails,
+                selectedParty: data,
+              },
             },
           },
           { tenantId }

@@ -1085,26 +1085,6 @@ export const configsScheduleHearingDate = [
     body: [
       {
         type: "component",
-        component: "SelectCustomNote",
-        key: "unjoinedPartiesNote",
-        populators: {
-          inputs: [
-            {
-              infoHeader: "CS_COMMON_NOTE",
-              infoText: "FOLLOWING_PARTIES_HAVE_NOT_JOINED",
-              infoTooltipMessage: "Tooltip",
-              type: "InfoComponent",
-              children: "unjoinedParties",
-            },
-          ],
-        },
-      },
-    ],
-  },
-  {
-    body: [
-      {
-        type: "component",
         component: "SelectCustomTextArea",
         key: "comments",
         isMandatory: false,
@@ -1237,26 +1217,6 @@ export const configsScheduleNextHearingDate = [
             {
               code: "PARTY_1",
               name: "PARTY_1",
-            },
-          ],
-        },
-      },
-    ],
-  },
-  {
-    body: [
-      {
-        type: "component",
-        component: "SelectCustomNote",
-        key: "unjoinedPartiesNote",
-        populators: {
-          inputs: [
-            {
-              infoHeader: "CS_COMMON_NOTE",
-              infoText: "FOLLOWING_PARTIES_HAVE_NOT_JOINED",
-              infoTooltipMessage: "Tooltip",
-              type: "InfoComponent",
-              children: "unjoinedParties",
             },
           ],
         },
