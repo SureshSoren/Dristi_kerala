@@ -972,8 +972,10 @@ const GenerateOrders = () => {
       return await Promise.all(promises);
     }
     if (order?.orderType === "SUMMONS") {
-      const assignee = [userInfo?.uuid];
-      const advocateUuid = Object.values(allAdvocates)?.flat();
+      const assignee = [...complainants?.map((data) => data?.uuid[0])];
+      const advocateUuid = Object.keys(allAdvocates)
+        .filter((data) => assignee.includes(allAdvocates?.[data]?.[0]))
+        ?.flat();
       assignees = [...assignee, ...advocateUuid]?.map((uuid) => ({ uuid }));
       if (Array.isArray(order?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels)) {
         entityType = "order-managelifecycle";

@@ -83,7 +83,6 @@ export const DRISTIService = {
       userService: false,
       data,
       params,
-      userDownload: true,
     }),
   updateEvidence: (data, params) =>
     Request({
