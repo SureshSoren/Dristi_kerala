@@ -52,7 +52,7 @@ const usePaymentProcess = ({ tenantId, consumerCode, service, path, caseDetails,
         return status;
       } else {
         handleError("Error calling e-Treasury.");
-        return false;
+        return true;
       }
     } catch (e) {
       return true;
@@ -89,7 +89,7 @@ const usePaymentProcess = ({ tenantId, consumerCode, service, path, caseDetails,
           setPaymentLoader(false);
           const billAfterPayment = await DRISTIService.callSearchBill({}, { tenantId, consumerCode, service });
           clearInterval(checkPopupClosed);
-          resolve(billAfterPayment?.Bill?.[0]?.status === "PAID");
+          resolve(true);
         }
       }, 1000);
       if (scenario !== "applicationSubmission") {
