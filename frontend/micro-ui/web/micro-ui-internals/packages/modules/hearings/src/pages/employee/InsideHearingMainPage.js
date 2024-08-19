@@ -176,6 +176,20 @@ const InsideHearingMainPage = () => {
     }
   };
 
+  const updateAPICall = (newText) => {
+    const newHearingUpdated = structuredClone(hearing);
+    newHearingUpdated.transcript[0] = newText;
+    if (userHasRole("EMPLOYEE") && !disableTextArea) {
+      updateTranscriptRequest({ body: { hearing: newHearingUpdated } });
+    }
+  };
+
+  useEffect(() => {
+    if (transcriptText && !disableTextArea) {
+      updateAPICall(transcriptText);
+    }
+  }, [transcriptText, setTranscriptText]);
+
   const isDepositionSaved = Boolean(
     hearing?.additionalDetails?.witnessDepositions?.find((witness) => witness.uuid === selectedWitness.uuid)?.deposition
   );
