@@ -76,4 +76,6 @@ public class ServiceConstants {
     public static final String ORDER_EXCEPTION = "ORDER_EXCEPTION";
     public static final String COMMENT_ADD_ERR = "COMMENT_ADD_ERR";
 
+    public static final String COMPLETED = "COMPLETED";
+
 }
