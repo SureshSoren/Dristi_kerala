@@ -371,11 +371,11 @@ function SelectReviewAccordion({ t, config, onSelect, formData = {}, errors, for
             form: [
               {
                 image: {
-                  systemError: groupedByDocumentType?.COMPLAINT_MEMO?.[0]?.message,
+                  systemError: groupedByDocumentType?.AFFIDAVIT?.[0]?.message,
                   fileName: "Affidavit documents",
                 },
                 "inquiryAffidavitFileUpload.document": {
-                  systemError: groupedByDocumentType?.COMPLAINT_MEMO?.[0]?.message,
+                  systemError: groupedByDocumentType?.AFFIDAVIT?.[0]?.message,
                   fileName: "Affidavit documents",
                 },
               },
