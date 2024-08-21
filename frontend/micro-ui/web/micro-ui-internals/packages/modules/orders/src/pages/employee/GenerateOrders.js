@@ -503,6 +503,25 @@ const GenerateOrders = () => {
           };
         });
       }
+      if (orderType === "SCHEDULING_NEXT_HEARING") {
+        orderTypeForm = orderTypeForm?.map((section) => {
+          return {
+            ...section,
+            body: section.body.map((field) => {
+              if (field.key === "namesOfPartiesRequired") {
+                return {
+                  ...field,
+                  populators: {
+                    ...field.populators,
+                    options: [...complainants, ...respondents, ...unJoinedLitigant],
+                  },
+                };
+              }
+              return field;
+            }),
+          };
+        });
+      }
       if (orderType === "MANDATORY_SUBMISSIONS_RESPONSES") {
         orderTypeForm = orderTypeForm?.map((section) => {
           return {
