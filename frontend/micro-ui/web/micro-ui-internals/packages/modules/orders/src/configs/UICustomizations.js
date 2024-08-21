@@ -1,13 +1,10 @@
 import get from "lodash/get";
 import set from "lodash/set";
+
 //create functions here based on module name set in mdms(eg->SearchProjectConfig)
 //how to call these -> Digit?.Customizations?.[masterName]?.[moduleName]
 // these functions will act as middlewares
 // var Digit = window.Digit || {};
-const customColumnStyle = { whiteSpace: "nowrap" };
-const businessServiceMap = {};
-
-const inboxModuleNameMap = {};
 
 export const UICustomizations = {
   minTodayDateValidation: () => {
@@ -38,6 +35,7 @@ export const UICustomizations = {
       pattern: /^[a-zA-Z0-9 ]+$/i,
     };
   },
+
   OrderFormSchemaUtils: {
     transformers: {
       mdmsDropdown: {

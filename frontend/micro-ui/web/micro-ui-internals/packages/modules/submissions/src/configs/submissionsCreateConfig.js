@@ -19,7 +19,12 @@ export const submissionTypeConfig = [
               code: "APPLICATION",
               name: "APPLICATION",
             },
+            {
+              code: "DOCUMENT",
+              name: "DOCUMENT",
+            },
           ],
+          customStyle: { display: "flex", flexDirection: "column", alignItems: "flex-start" },
         },
       },
     ],
@@ -49,6 +54,7 @@ export const applicationTypeConfig = [
             select:
               "(data) => {return data['Application'].ApplicationType?.filter((item)=>![`EXTENSION_SUBMISSION_DEADLINE`,`RE_SCHEDULE`,`CHECKOUT_REQUEST`].includes(item.type)).map((item) => {return { ...item, name: 'APPLICATION_TYPE_'+item.type };});}",
           },
+          customStyle: { display: "flex", flexDirection: "column", alignItems: "flex-start" },
         },
       },
     ],
@@ -499,7 +505,7 @@ export const configsExtensionSubmissionDeadline = [
         key: "documentType",
         populators: {
           name: "documentType",
-          optionsKey: "name",
+          optionsKey: "value",
           error: "CORE_REQUIRED_FIELD_ERROR",
           styles: { maxWidth: "100%" },
           required: true,
@@ -607,6 +613,107 @@ export const configsExtensionSubmissionDeadline = [
               masterName: "alphaNumericValidation",
             },
           },
+        },
+      },
+    ],
+  },
+];
+
+export const configsDocumentSubmission = [
+  {
+    body: [
+      {
+        inline: true,
+        label: "DOCUMENT_TYPE",
+        isMandatory: true,
+        type: "dropdown",
+        key: "documentType",
+        populators: {
+          name: "documentType",
+          optionsKey: "value",
+          error: "CORE_REQUIRED_FIELD_ERROR",
+          styles: { maxWidth: "100%" },
+          required: true,
+          isMandatory: true,
+          mdmsConfig: {
+            moduleName: "Submission",
+            masterName: "DocumentType",
+            localePrefix: "",
+          },
+          customStyle: { display: "flex", flexDirection: "column", alignItems: "flex-start" },
+        },
+      },
+
+      {
+        inline: true,
+        label: "SUBMISSION_TITLE",
+        isMandatory: true,
+        key: "submissionTitle",
+        type: "text",
+        populators: {
+          name: "submissionTitle",
+          customStyle: { display: "flex", flexDirection: "column", alignItems: "flex-start" },
+        },
+      },
+    ],
+  },
+  {
+    body: [
+      {
+        inline: true,
+        type: "component",
+        component: "SelectCustomTextArea",
+        key: "extensionBenefit",
+        isMandatory: true,
+        populators: {
+          inputs: [
+            {
+              name: "text",
+              textAreaHeader: "PURPOSE_FOR_DOCUMENT_SUBMISSION",
+              placeholder: "TYPE_HERE_PLACEHOLDER",
+              type: "TextAreaComponent",
+              textAreaStyle: {
+                fontSize: "16px",
+                fontWeight: 400,
+                marginBottom: 0,
+              },
+            },
+          ],
+          validation: {
+            customValidationFn: {
+              moduleName: "dristiSubmissions",
+              masterName: "alphaNumericValidation",
+            },
+          },
+          customStyle: { display: "flex", flexDirection: "column", alignItems: "flex-start" },
+        },
+      },
+    ],
+  },
+  {
+    body: [
+      {
+        type: "component",
+        component: "SelectCustomDragDrop",
+        key: "submissionDocuments",
+        isMandatory: true,
+        populators: {
+          inputs: [
+            {
+              isMandatory: true,
+              name: "documents",
+              documentHeader: "DOCUMENT",
+              documentHeaderStyle: { fontSize: "16px", fontWeight: 400, marginBottom: 0 },
+              type: "DragDropComponent",
+              maxFileSize: 25,
+              maxFileErrorMessage: "CS_FILE_LIMIT_50_MB",
+              fileTypes: ["TXT", "DOC", "PDF", "DOCX"],
+              isMultipleUpload: false,
+              uploadGuidelines: "UPLOAD_PDF_JPEG_50",
+              headerClassName: "dristi-font-bold",
+            },
+          ],
+          customStyle: { display: "flex", flexDirection: "column", alignItems: "flex-start" },
         },
       },
     ],
@@ -1299,7 +1406,7 @@ export const configsSurety = [
               isMandatory: true,
               key: "documentType",
               type: "dropdown",
-              label: "Document Type",
+              label: "DOCUMENT_TYPE",
               name: "documentType",
               disable: false,
               populators: {
@@ -1319,7 +1426,7 @@ export const configsSurety = [
               },
             },
             {
-              label: "Document Title",
+              label: "DOCUMENT_TITLE",
               type: "text",
               name: "documentTitle",
               validation: {
@@ -1330,7 +1437,7 @@ export const configsSurety = [
               isMandatory: true,
             },
             {
-              label: "Attachment",
+              label: "DOCUMENT_ATTACHMENT",
               type: "documentUpload",
               name: "document",
               validation: {
@@ -1412,7 +1519,7 @@ export const configsBailBond = [
               isMandatory: true,
               key: "documentType",
               type: "dropdown",
-              label: "Document Type",
+              label: "DOCUMENT_TYPE",
               name: "documentType",
               disable: false,
               populators: {
@@ -1432,7 +1539,7 @@ export const configsBailBond = [
               },
             },
             {
-              label: "Document Title",
+              label: "DOCUMENT_TITLE",
               type: "text",
               name: "documentTitle",
               validation: {
@@ -1443,7 +1550,7 @@ export const configsBailBond = [
               isMandatory: true,
             },
             {
-              label: "Attachment",
+              label: "DOCUMENT_ATTACHMENT",
               type: "documentUpload",
               name: "document",
               validation: {
@@ -1482,6 +1589,28 @@ export const configsOthers = [
   },
   {
     body: [
+      {
+        type: "component",
+        component: "SelectCustomDragDrop",
+        key: "othersDocument",
+        isMandatory: true,
+        populators: {
+          inputs: [
+            {
+              isMandatory: true,
+              name: "documents",
+              documentHeader: "OTHERS_DOCUMENT",
+              documentHeaderStyle: { fontSize: "19px", fontWeight: 700 },
+              type: "DragDropComponent",
+              maxFileSize: 50,
+              maxFileErrorMessage: "CS_FILE_LIMIT_50_MB",
+              fileTypes: ["PDF", "JPEG"],
+              uploadGuidelines: "UPLOAD_PDF_JPEG_50",
+              headerClassName: "dristi-font-bold",
+            },
+          ],
+        },
+      },
       {
         type: "component",
         component: "SelectCustomTextArea",

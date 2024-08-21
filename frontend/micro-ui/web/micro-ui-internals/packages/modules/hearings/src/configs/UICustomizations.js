@@ -141,7 +141,7 @@ export const UICustomizations = {
           {
             label: "View transcript",
             id: "view_transcript",
-            hide: true,
+            hide: false,
             action: (history) => {
               alert("Not Yet Implemented");
             },
@@ -149,7 +149,7 @@ export const UICustomizations = {
           {
             label: "View witness deposition",
             id: "view_witness",
-            hide: true,
+            hide: false,
             action: (history) => {
               alert("Not Yet Implemented");
             },
@@ -204,7 +204,7 @@ export const UICustomizations = {
           {
             label: "View transcript",
             id: "view_transcript",
-            hide: true,
+            hide: false,
             action: (history) => {
               alert("Not Yet Implemented");
             },
@@ -212,7 +212,7 @@ export const UICustomizations = {
           {
             label: "View witness deposition",
             id: "view_witness",
-            hide: true,
+            hide: false,
             action: (history) => {
               alert("Not Yet Implemented");
             },
@@ -232,6 +232,7 @@ export const UICustomizations = {
   },
   summonWarrantConfig: {
     preProcess: (requestCriteria, additionalDetails) => {
+      // We need to change tenantId "processSearchCriteria" here
       const tenantId = window?.Digit.ULBService.getStateId();
 
       return {
@@ -239,30 +240,35 @@ export const UICustomizations = {
         config: {
           ...requestCriteria?.config,
           select: (data) => {
+            const generateAddress = ({
+              pincode = "",
+              district = "",
+              city = "",
+              state = "",
+              coordinates = { longitude: "", latitude: "" },
+              locality = "",
+              address = "",
+            }) => {
+              if (address) {
+                return address;
+              }
+              return `${locality} ${district} ${city} ${state} ${pincode ? ` - ${pincode}` : ""}`.trim();
+            };
             const taskData = data?.list
-              ?.filter((item) => item?.filingNumber === additionalDetails?.filingNumber && item?.orderId === additionalDetails?.orderId)
-              ?.map((item) => {
-                const taskDetail = item?.taskDetails || "{}";
-                const address = taskDetail?.respondentDetails?.address || {};
-                // Concatenate address fields with proper spacing
-                const formattedAddress = [address.locality, address.city, address.district, address.state, address.pincode]
-                  .filter(Boolean)
-                  .join(", ");
-
+              ?.filter((data) => data?.filingNumber === additionalDetails?.filingNumber && data?.orderId === additionalDetails?.orderId)
+              ?.map((data) => {
+                const taskDetail = JSON.parse(data?.taskDetails || "{}");
                 const channelDetailsEnum = {
                   SMS: "phone",
                   Email: "email",
                   Post: "address",
                   Police: "address",
                 };
-
+                const channelDetails = taskDetail?.respondentDetails?.[channelDetailsEnum?.[taskDetail?.deliveryChannels?.channelName]];
                 return {
                   deliveryChannel: taskDetail?.deliveryChannels?.channelName,
-                  channelDetails:
-                    taskDetail?.deliveryChannels?.channelName === "Post" || taskDetail?.deliveryChannels?.channelName === "Police"
-                      ? formattedAddress
-                      : taskDetail?.respondentDetails?.[channelDetailsEnum?.[taskDetail?.deliveryChannels?.channelName]],
-                  status: item?.status,
+                  channelDetails: typeof channelDetails === "object" ? generateAddress({ ...channelDetails }) : channelDetails,
+                  status: data?.status,
                   remarks: taskDetail?.deliveryChannels?.status,
                 };
               });
@@ -274,12 +280,12 @@ export const UICustomizations = {
     },
     additionalValidations: (type, data, keys) => {
       if (type === "date") {
-        return data[keys.start] && data[keys.end] ? new Date(data[keys.start]).getTime() <= new Date(data[keys.end]).getTime() : true;
+        return data[keys.start] && data[keys.end] ? () => new Date(data[keys.start]).getTime() <= new Date(data[keys.end]).getTime() : true;
       }
     },
     MobileDetailsOnClick: (row, tenantId) => {
       let link;
-      Object.keys(row).forEach((key) => {
+      Object.keys(row).map((key) => {
         if (key === "Case ID") link = ``;
       });
       return link;

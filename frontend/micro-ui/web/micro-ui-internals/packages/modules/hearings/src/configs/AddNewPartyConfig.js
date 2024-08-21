@@ -38,7 +38,7 @@ const createPartyConfig = (index) => ({
       isMandatory: true,
       populators: {
         name: `phoneNumber${index}`,
-        error: "CORE_REQUIRED_FIELD_ERROR",
+        error: "INVALID_PHONE_NUMBER",
         validation: {
           minlength: 10,
           maxlength: 10,
@@ -59,19 +59,6 @@ const createPartyConfig = (index) => ({
       populators: {
         name: `emailId${index}`,
         error: "CS_ENTER_VALID_EMAIL",
-        required: true,
-        isMandatory: true,
-        customStyle: { display: "flex", flexDirection: "column", alignItems: "flex-start" },
-      },
-    },
-    {
-      label: "PARTY_ADDRESS",
-      key: `address${index}`,
-      type: "text",
-      isMandatory: true,
-      populators: {
-        name: `address${index}`,
-        error: "CORE_REQUIRED_FIELD_ERROR",
         required: true,
         isMandatory: true,
         customStyle: { display: "flex", flexDirection: "column", alignItems: "flex-start" },

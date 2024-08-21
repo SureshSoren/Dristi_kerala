@@ -50,5 +50,5 @@ export const CustomisedHooks = {
   ordersService,
   EpostService,
   schedulerService,
-  taskService
+  taskService,
 };

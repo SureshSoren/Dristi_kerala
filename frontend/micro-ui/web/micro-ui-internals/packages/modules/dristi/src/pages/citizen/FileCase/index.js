@@ -35,7 +35,7 @@ function FileCase({ t }) {
             <EFilingPayment t={t} path={path} />
           </Route>
           <Route path={`${path}/e-filing-payment-response`}>
-            <EFilingPaymentResponse t={t} path={path} />
+            <EFilingPaymentResponse t={t} />
           </Route>
         </AppContainer>
       </Switch>

@@ -180,7 +180,7 @@ const ViewPaymentDetails = ({ location, match }) => {
         Payment: {
           paymentDetails: [
             {
-              businessService: "case",
+              businessService: "case-default",
               billId: billFetched.id,
               totalDue: billFetched.totalAmount,
               totalAmountPaid: billFetched.totalAmount,

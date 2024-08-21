@@ -324,7 +324,7 @@ function ScheduleHearing({
   };
 
   const handleClose = () => {
-    history.push(`/${window?.contextPath}/${userInfoType}/home/home-pending-task`, { taskType: { code: "case", name: "Case" } });
+    history.push(`/${window?.contextPath}/${userInfoType}/home/home-pending-task`, { taskType: { code: "case-default", name: "Case" } });
   };
 
   const handleSubmit = async (data) => {
@@ -374,7 +374,7 @@ function ScheduleHearing({
           await HomeService.customApiService(Urls.pendingTask, {
             pendingTask: {
               name: "Schedule Hearing",
-              entityType: "case",
+              entityType: "case-default",
               referenceId: `MANUAL_${caseDetails?.filingNumber}`,
               status: "SCHEDULE_HEARING",
               assignedTo: [],
@@ -556,6 +556,7 @@ function ScheduleHearing({
             <CustomCalendar
               config={customDateConfig}
               t={t}
+              minDate={new Date()}
               onCalendarConfirm={onCalendarConfirm}
               handleSelect={handleSelect}
               selectedCustomDate={selectedCustomDate}

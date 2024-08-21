@@ -48,6 +48,7 @@ export const getAdvocates = (caseDetails) => {
   });
   return litigants;
 };
+
 export const getuuidNameMap = (caseDetails) => {
   return caseDetails?.representatives?.reduce((acc, item) => {
     acc[item.additionalDetails.uuid] = item.additionalDetails.advocateName;

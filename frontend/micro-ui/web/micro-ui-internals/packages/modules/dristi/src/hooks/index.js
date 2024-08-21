@@ -15,7 +15,6 @@ import useCasePdfGeneration from "./dristi/useCasePdfGeneration";
 import usePaymentCalculator from "./dristi/usePaymentCalculator";
 import { useToast } from "../components/Toast/useToast.js";
 import useCreateHearings from "./dristi/useCreateHearings.js";
-import useEvidenceDetails from "./dristi/useEvidenceDetails.js";
 import useBillSearch from "./dristi/useBillSearch";
 import useCreateDemand from "./dristi/useCreateDemand";
 import useApplicationDetails from "./dristi/useApplicationDetails.js";
@@ -23,6 +22,8 @@ import useJudgeAvailabilityDates from "./dristi/useJudgeAvailabilityDates.js";
 import useGetOCRData from "./dristi/useGetOCRData.js";
 import { useGetPendingTask } from "./dristi/useGetPendingTask.js";
 
+import useEvidenceDetails from "./dristi/useEvidenceDetails.js";
+import useGetStatuteSection from "./dristi/useGetStatuteSection.js";
 export const Urls = {
   Authenticate: "/user/oauth/token",
   dristi: {
@@ -87,6 +88,8 @@ const dristi = {
   useApplicationDetails,
   useEvidenceDetails,
   useToast,
+  useGetStatuteSection,
+
   useGetPendingTask,
   useBillSearch,
   useCreateDemand,

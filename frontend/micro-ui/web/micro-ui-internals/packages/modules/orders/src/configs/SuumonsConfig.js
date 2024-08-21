@@ -213,7 +213,7 @@ export const SummonsTabsConfig = {
                 populators: {
                   name: "applicationStatus",
                   name: "status",
-                  options: ["DELIVERED", "NOT_DELIVERED"],
+                  options: ["Signed", "Sign Pending", "Sent", "Delivered", "Not Delivered"],
                   optionsCustomStyle: {
                     overflowX: "hidden",
                   },

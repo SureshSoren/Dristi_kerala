@@ -141,7 +141,7 @@ const TaskComponentCalander = ({ isLitigant, uuid, filingNumber, inCase = false 
     <React.Fragment>
       <div style={{ width: "100%", borderBottom: "1px solid #E8E8E8", padding: "24px" }}>
         <div style={{ fontWeight: 700, fontSize: "24px", color: "#231F20" }}>{todayDate}</div>
-        {/* <button
+        <button
           style={{
             width: "330px",
             height: "60px",
@@ -158,7 +158,7 @@ const TaskComponentCalander = ({ isLitigant, uuid, filingNumber, inCase = false 
         >
           <DownloadIcon />
           <div style={{ fontWeight: 700, fontSize: "16px", marginLeft: "10px" }}>Download Cause List</div>
-        </button> */}
+        </button>
       </div>
       <div style={{ width: "100%", padding: "24px" }}>
         {!searchCaseLoading ? (

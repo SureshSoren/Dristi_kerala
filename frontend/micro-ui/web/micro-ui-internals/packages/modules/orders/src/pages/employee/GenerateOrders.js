@@ -44,7 +44,7 @@ import { HearingWorkflowAction } from "../../utils/hearingWorkflow";
 import _ from "lodash";
 import { useGetPendingTask } from "../../hooks/orders/useGetPendingTask";
 import useSearchOrdersService from "../../hooks/orders/useSearchOrdersService";
-import useGetStatuteSection from "../../hooks/orders/useGetStatuteSection";
+
 const configKeys = {
   SECTION_202_CRPC: configsOrderSection202CRPC,
   MANDATORY_SUBMISSIONS_RESPONSES: configsOrderMandatorySubmissions,
@@ -254,7 +254,16 @@ const GenerateOrders = () => {
         }) || []
     );
   }, [caseDetails]);
-
+  const witnesses = useMemo(() => {
+    return (
+      caseDetails?.additionalDetails?.witnessDetails?.formdata?.map((data) => {
+        const fullName = `${data?.data?.firstName || ""}${data?.data?.middleName ? " " + data?.data?.middleName + " " : " "}${
+          data?.data?.lastName || ""
+        }`.trim();
+        return { code: fullName, name: fullName, uuid: data?.data?.uuid, partyType: "witness" };
+      }) || []
+    );
+  }, [caseDetails]);
   const { data: ordersData, refetch: refetchOrdersData, isLoading: isOrdersLoading, isFetching: isOrdersFetching } = useSearchOrdersService(
     {
       tenantId,
@@ -443,6 +452,7 @@ const GenerateOrders = () => {
   );
   const hearingDetails = useMemo(() => hearingsData?.HearingList?.[0], [hearingsData]);
   const hearingsList = useMemo(() => hearingsData?.HearingList?.sort((a, b) => b.startTime - a.startTime), [hearingsData]);
+
   const isHearingAlreadyScheduled = useMemo(() => {
     const isPresent = hearingsData?.HearingList.some((hearing) => {
       return !(hearing?.status === "COMPLETED" || hearing?.status === "ABATED");
@@ -484,7 +494,7 @@ const GenerateOrders = () => {
           };
         });
       }
-      if (orderType === "SCHEDULE_OF_HEARING_DATE") {
+      if (["SCHEDULE_OF_HEARING_DATE", "SCHEDULING_NEXT_HEARING"].includes(orderType)) {
         orderTypeForm = orderTypeForm?.map((section) => {
           return {
             ...section,
@@ -494,26 +504,32 @@ const GenerateOrders = () => {
                   ...field,
                   populators: {
                     ...field.populators,
-                    options: [...complainants, ...respondents, ...unJoinedLitigant],
+                    options: [...complainants, ...respondents, ...unJoinedLitigant, ...witnesses],
                   },
                 };
               }
-              return field;
-            }),
-          };
-        });
-      }
-      if (orderType === "SCHEDULING_NEXT_HEARING") {
-        orderTypeForm = orderTypeForm?.map((section) => {
-          return {
-            ...section,
-            body: section.body.map((field) => {
-              if (field.key === "namesOfPartiesRequired") {
+              if (field.key === "unjoinedPartiesNote") {
+                const parties = [...unJoinedLitigant, ...witnesses];
                 return {
                   ...field,
                   populators: {
                     ...field.populators,
-                    options: [...complainants, ...respondents, ...unJoinedLitigant],
+                    inputs: [
+                      {
+                        ...field.populators.inputs[0],
+                        children: (
+                          <React.Fragment>
+                            {parties.map((party, index) => (
+                              <div className="list-div" key={index}>
+                                <p style={{ margin: "0px", fontSize: "14px" }}>
+                                  {index + 1}. {party?.name}
+                                </p>
+                              </div>
+                            ))}
+                          </React.Fragment>
+                        ),
+                      },
+                    ],
                   },
                 };
               }
@@ -621,8 +637,7 @@ const GenerateOrders = () => {
       };
     });
     return updatedConfig;
-  }, [complainants, currentOrder, orderType, respondents, t, unJoinedLitigant]);
-
+  }, [complainants, currentOrder, orderType, respondents, t, unJoinedLitigant, witnesses]);
   const multiSelectDropdownKeys = useMemo(() => {
     const foundKeys = [];
     modifiedFormConfig.forEach((config) => {
@@ -877,6 +892,8 @@ const GenerateOrders = () => {
   };
 
   const updateOrder = async (order, action) => {
+    // const orderSchema = Digit.Customizations.dristiOrders.OrderFormSchemaUtils.formToSchema(order.additionalDetails.formdata, modifiedFormConfig);
+    const orderSchema = {};
     try {
       const localStorageID = localStorage.getItem("fileStoreId");
       const documents = Array.isArray(order?.documents) ? order.documents : [];
@@ -909,7 +926,19 @@ const GenerateOrders = () => {
 
   const createOrder = async (order) => {
     try {
-      return await ordersService.createOrder({ order }, { tenantId });
+      // const orderSchema = Digit.Customizations.dristiOrders.OrderFormSchemaUtils.formToSchema(order.additionalDetails.formdata, modifiedFormConfig);
+      const orderSchema = {};
+      // const formOrder = await Digit.Customizations.dristiOrders.OrderFormSchemaUtils.schemaToForm(orderDetails, modifiedFormConfig);
+
+      return await ordersService.createOrder(
+        {
+          order: {
+            ...order,
+            ...orderSchema,
+          },
+        },
+        { tenantId }
+      );
     } catch (error) {}
   };
 
@@ -986,7 +1015,7 @@ const GenerateOrders = () => {
         ?.flat()
         ?.map((uuid) => ({ uuid }));
       name = t("CHOOSE_DATES_FOR_RESCHEDULE_OF_HEARING_DATE");
-      entityType = "hearing";
+      entityType = "hearing-default";
       const promises = assignees.map(async (assignee) => {
         return ordersService.customApiService(Urls.orders.pendingTask, {
           pendingTask: {
@@ -1079,7 +1108,7 @@ const GenerateOrders = () => {
       await ordersService.customApiService(Urls.orders.pendingTask, {
         pendingTask: {
           name: "Completed",
-          entityType: "order-managelifecycle",
+          entityType: "order-default",
           referenceId: `MANUAL_${refId}`,
           status: "DRAFT_IN_PROGRESS",
           assignedTo: [],
@@ -1545,7 +1574,6 @@ const GenerateOrders = () => {
       setLoader(true);
       let newhearingId = "";
       setPrevOrder(currentOrder);
-      console.log("currentOrder", currentOrder);
       if (["SCHEDULE_OF_HEARING_DATE", "SCHEDULING_NEXT_HEARING"].includes(orderType)) {
         const advocateData = advocateDetails.advocates.map((advocate) => {
           return {

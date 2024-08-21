@@ -105,7 +105,7 @@ const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript,
   const closeSetDate = () => {
     handleNavigate(`/employee/hearings/inside-hearing?hearingId=${hearingId}`);
   };
-  const [error,setError] = useState(null);
+  const [error, setError] = useState(null);
   const onGenerateOrder = () => {
     const requestBody = {
       order: {
@@ -280,39 +280,39 @@ const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript,
           // actionSaveLabel={t("CS_COMMON_CONFIRM")}
           hideSubmit={true}
           popmoduleClassName={"custom-date-selector-modal"}
-        ><div>
-          <CustomCalendar
-            config={{
-              headModal: "CS_SELECT_CUSTOM_DATE",
-              label: "CS_HEARINGS_SCHEDULED",
-              showBottomBar: true,
-              buttonText: "CS_COMMON_CONFIRM",
-            }}
-            t={t}
-            onCalendarConfirm={(date) => {
-              // setScheduleHearingParam({ ...scheduleHearingParams, date: formatDateInMonth(date) });
-              // setSelectedCustomDate(date);
-              setSelectedDate(selectedCustomDate);
-              setIsCustomDateSelected(true);
-              setIsCalendarModalOpen(false);
-            }}
-            handleSelect={(date) => {
-              // setScheduleHearingParam({ ...scheduleHearingParams, date: formatDateInMonth(date) });
-              if(date<= new Date()){
-                setError("The date chosen must be a future date");
-              }else{
-                setError(null)
-                setSelectedCustomDate(date);
-              }
-            }}
-            selectedCustomDate={selectedCustomDate}
-            tenantId={tenantId}
-          />
-          {error && <span style={{color:"red"}}>{error}</span>}
+        >
+          <div>
+            <CustomCalendar
+              config={{
+                headModal: "CS_SELECT_CUSTOM_DATE",
+                label: "CS_HEARINGS_SCHEDULED",
+                showBottomBar: true,
+                buttonText: "CS_COMMON_CONFIRM",
+              }}
+              t={t}
+              onCalendarConfirm={(date) => {
+                // setScheduleHearingParam({ ...scheduleHearingParams, date: formatDateInMonth(date) });
+                // setSelectedCustomDate(date);
+                setSelectedDate(selectedCustomDate);
+                setIsCustomDateSelected(true);
+                setIsCalendarModalOpen(false);
+              }}
+              handleSelect={(date) => {
+                // setScheduleHearingParam({ ...scheduleHearingParams, date: formatDateInMonth(date) });
+                if (date <= new Date()) {
+                  setError("The date chosen must be a future date");
+                } else {
+                  setError(null);
+                  setSelectedCustomDate(date);
+                }
+              }}
+              selectedCustomDate={selectedCustomDate}
+              tenantId={tenantId}
+            />
+            {error && <span style={{ color: "red" }}>{error}</span>}
           </div>
         </Modal>
       )}
-    
     </div>
   );
 };

@@ -7,6 +7,7 @@ import {
   configsCaseTransfer,
   configsCaseWithdrawal,
   configsCheckoutRequest,
+  configsDocumentSubmission,
   configsExtensionSubmissionDeadline,
   configsOthers,
   configsProductionOfDocuments,
@@ -29,7 +30,7 @@ import { Urls } from "../../hooks/services/Urls";
 import { getAdvocates } from "@egovernments/digit-ui-module-dristi/src/pages/citizen/FileCase/EfilingValidationUtils";
 import usePaymentProcess from "../../../../home/src/hooks/usePaymentProcess";
 
-const fieldStyle = { marginRight: 0 };
+const fieldStyle = { marginRight: 0, width: "100%" };
 
 const stateSla = {
   RE_SCHEDULE: 2 * 24 * 3600 * 1000,
@@ -50,12 +51,32 @@ const SubmissionsCreate = ({ path }) => {
   const [makePaymentLabel, setMakePaymentLabel] = useState(false);
   const [loader, setLoader] = useState(false);
   const userInfo = Digit.UserService.getUser()?.info;
-  const userType = useMemo(() => (userInfo.type === "CITIZEN" ? "citizen" : "employee"), [userInfo.type]);
-  const individualId = localStorage.getItem("individualId");
-  const [signedDoucumentUploadedID, setSignedDocumentUploadID] = useState("");
+  const applicationTypeParam = useMemo(() => applicationTypeUrl, [applicationTypeUrl]);
+  const userType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo?.type]);
+  const isCitizen = useMemo(() => userInfo?.type === "CITIZEN", [userInfo]);
+  const hasSubmissionRole = useMemo(
+    () =>
+      ["SUBMISSION_CREATOR", "SUBMISSION_RESPONDER"].reduce((result, current) => {
+        if (!result) return result;
+        result = userInfo?.roles?.includes(current);
+        return result;
+      }, false),
+    [userInfo]
+  );
   const todayDate = new Date().getTime();
-  const [paymentStatus, setPaymentStatus] = useState();
-  const scenario = "applicationSubmission";
+  const { data: individualData } = window?.Digit.Hooks.dristi.useGetIndividualUser(
+    {
+      Individual: {
+        userUuid: [userInfo?.uuid],
+      },
+    },
+    { tenantId, limit: 1000, offset: 0 },
+    "Home",
+    "",
+    userInfo?.uuid
+  );
+  const individualId = useMemo(() => individualData?.Individual?.[0]?.individualId, [individualData]);
+
   const submissionType = useMemo(() => {
     return formdata?.submissionType?.code;
   }, [formdata?.submissionType?.code]);
@@ -65,7 +86,7 @@ const SubmissionsCreate = ({ path }) => {
       APPLICATION: applicationTypeConfig,
     };
     if (Array.isArray(submissionConfigKeys[submissionType])) {
-      if (orderNumber || hearingId) {
+      if (orderNumber || hearingId || !isCitizen) {
         return submissionConfigKeys[submissionType]?.map((item) => {
           return {
             ...item,
@@ -79,7 +100,7 @@ const SubmissionsCreate = ({ path }) => {
       }
     }
     return [];
-  }, [hearingId, orderNumber, submissionType]);
+  }, [hearingId, orderNumber, submissionType, isCitizen]);
 
   const applicationType = useMemo(() => {
     return formdata?.applicationType?.type || applicationTypeUrl;
@@ -98,7 +119,10 @@ const SubmissionsCreate = ({ path }) => {
       CHECKOUT_REQUEST: configsCheckoutRequest,
       OTHERS: configsOthers,
     };
-    let newConfig = applicationConfigKeys?.[applicationType] || [];
+    const applicationConfigKeysForEmployee = {
+      DOCUMENT: configsDocumentSubmission,
+    };
+    let newConfig = isCitizen ? applicationConfigKeys?.[applicationType] || [] : applicationConfigKeysForEmployee?.[applicationType] || [];
 
     if (newConfig.length > 0) {
       const updatedConfig = newConfig.map((config) => {
@@ -128,7 +152,7 @@ const SubmissionsCreate = ({ path }) => {
     } else {
       return [];
     }
-  }, [applicationType]);
+  }, [applicationType, isCitizen]);
 
   const formatDate = (date, format) => {
     const day = String(date.getDate()).padStart(2, "0");
@@ -213,9 +237,10 @@ const SubmissionsCreate = ({ path }) => {
     caseDetails,
     onBehalfOfuuid,
   ]);
-  const sourceType = useMemo(() => (onBehalfOfLitigent?.partyType?.toLowerCase()?.includes("complainant") ? "COMPLAINANT" : "ACCUSED"), [
-    onBehalfOfLitigent,
-  ]);
+  const sourceType = useMemo(
+    () => (onBehalfOfLitigent?.partyType?.toLowerCase()?.includes("complainant") ? "COMPLAINANT" : !isCitizen ? "COURT" : "ACCUSED"),
+    [onBehalfOfLitigent, isCitizen]
+  );
 
   const { data: orderData, isloading: isOrdersLoading } = Digit.Hooks.orders.useSearchOrdersService(
     { tenantId, criteria: { filingNumber, applicationNumber: "", cnrNumber: caseDetails?.cnrNumber, orderNumber: orderNumber } },
@@ -228,6 +253,19 @@ const SubmissionsCreate = ({ path }) => {
   const defaultFormValue = useMemo(() => {
     if (applicationDetails?.additionalDetails?.formdata) {
       return applicationDetails?.additionalDetails?.formdata;
+    } else if (!isCitizen && applicationTypeParam) {
+      return {
+        submissionType: {
+          code: "APPLICATION",
+          name: "APPLICATION",
+        },
+        ...(applicationTypeParam && {
+          applicationType: {
+            type: applicationTypeParam,
+            name: `APPLICATION_TYPE_${applicationTypeParam}`,
+          },
+        }),
+      };
     } else if (hearingId && hearingsData?.HearingList?.[0]?.startTime) {
       return {
         submissionType: {
@@ -318,18 +356,10 @@ const SubmissionsCreate = ({ path }) => {
         applicationDate: formatDate(new Date()),
       };
     }
-  }, [
-    applicationDetails?.additionalDetails?.formdata,
-    hearingId,
-    hearingsData?.HearingList,
-    orderNumber,
-    applicationType,
-    orderDetails,
-    isExtension,
-  ]);
+  }, [applicationDetails, isCitizen, hearingId, hearingsData, orderNumber, applicationType, applicationTypeParam, orderDetails, isExtension]);
 
   const onFormValueChange = (setValue, formData, formState, reset, setError, clearErrors, trigger, getValues) => {
-    if (applicationType && !["OTHERS", "BAIL_BOND"].includes(applicationType) && !formData?.applicationDate) {
+    if (applicationType && !["OTHERS", "DOCUMENT"].includes(applicationType) && !formData?.applicationDate) {
       setValue("applicationDate", formatDate(new Date()));
     }
     if (applicationType && applicationType === "TRANSFER" && !formData?.requestedCourt) {
@@ -371,12 +401,12 @@ const SubmissionsCreate = ({ path }) => {
     isAssignedRole = false,
     assignedRole = [],
   }) => {
-    let entityType = "async-voluntary-submission-managelifecycle";
+    let entityType = "application-voluntary-submission";
     if (orderNumber) {
       entityType =
-        orderDetails?.additionalDetails?.formdata?.isResponseRequired?.code === "Yes"
-          ? "async-submission-with-response-managelifecycle"
-          : "async-order-submission-managelifecycle";
+        orderDetails?.additionalDetails?.formdata?.responseInfo?.isResponseRequired?.code === true
+          ? "application-order-submission-feedback"
+          : "application-order-submission-default";
     }
     const assignes = !isAssignedRole ? [userInfo?.uuid] || [] : [];
     await submissionService.customApiService(Urls.application.pendingTask, {
@@ -406,6 +436,9 @@ const SubmissionsCreate = ({ path }) => {
       if (formdata?.reasonForDocumentsSubmission?.documents?.length > 0) {
         documentsList = [...documentsList, ...formdata?.reasonForDocumentsSubmission?.documents];
       }
+      if (formdata?.submissionDocuments?.documents?.length > 0) {
+        documentsList = [...documentsList, ...formdata?.submissionDocuments?.documents];
+      }
       const bailDocuments =
         formdata?.additionalDetails?.submissionDocuments?.submissionDocuments?.map((item) => ({
           fileType: item?.document?.documentType,
@@ -433,6 +466,10 @@ const SubmissionsCreate = ({ path }) => {
             comments: [],
             file,
             sourceType,
+            sourceID: individualId,
+            additionalDetails: {
+              uuid: userInfo?.uuid,
+            },
           },
         };
         DRISTIService.createEvidence(evidenceReqBody);
@@ -446,7 +483,7 @@ const SubmissionsCreate = ({ path }) => {
           cnrNumber: caseDetails?.cnrNumber,
           caseId: caseDetails?.id,
           referenceId: isExtension ? null : orderDetails?.id || null,
-          createdDate: formatDate(new Date(), "DD-MM-YYYY"),
+          createdDate: new Date().getTime(),
           applicationType,
           status: caseDetails?.status,
           isActive: true,
@@ -458,14 +495,15 @@ const SubmissionsCreate = ({ path }) => {
             onBehalOfName: onBehalfOfLitigent?.additionalDetails?.fullName,
             partyType: "complainant.primary",
             ...(orderDetails &&
-              orderDetails?.additionalDetails?.formdata?.isResponseRequired?.code === "Yes" && {
-                respondingParty: orderDetails?.additionalDetails?.formdata?.respondingParty,
+              orderDetails?.additionalDetails?.formdata?.responseInfo?.isResponseRequired?.code === true && {
+                respondingParty: orderDetails?.additionalDetails?.formdata?.responseInfo?.respondingParty,
               }),
-            isResponseRequired: orderDetails && !isExtension ? orderDetails?.additionalDetails?.formdata?.isResponseRequired?.code === "Yes" : true,
+            isResponseRequired:
+              orderDetails && !isExtension ? orderDetails?.additionalDetails?.formdata?.responseInfo?.isResponseRequired?.code === true : true,
             ...(hearingId && { hearingId }),
           },
           documents,
-          onBehalfOf: [onBehalfOfuuid],
+          onBehalfOf: [isCitizen ? onBehalfOfuuid : userInfo?.uuid],
           comment: [],
           workflow: {
             id: "workflow123",
@@ -509,12 +547,29 @@ const SubmissionsCreate = ({ path }) => {
       };
 
       await submissionService.updateApplication(reqBody, { tenantId });
-      await createPendingTask({ name: t("ESIGN_THE_SUBMISSION"), status: "ESIGN_THE_SUBMISSION", isCompleted: true });
-      await createPendingTask({
-        name: t("MAKE_PAYMENT_SUBMISSION"),
-        status: "MAKE_PAYMENT_SUBMISSION",
-        stateSla: todayDate + stateSla.MAKE_PAYMENT_SUBMISSION,
-      });
+      if (isCitizen) {
+        await createPendingTask({ name: t("ESIGN_THE_SUBMISSION"), status: "ESIGN_THE_SUBMISSION", isCompleted: true });
+        await createPendingTask({
+          name: t("MAKE_PAYMENT_SUBMISSION"),
+          status: "MAKE_PAYMENT_SUBMISSION",
+          stateSla: todayDate + stateSla.MAKE_PAYMENT_SUBMISSION,
+        });
+      } else if (hasSubmissionRole) {
+        await createPendingTask({
+          name: t("ESIGN_THE_SUBMISSION"),
+          status: "ESIGN_THE_SUBMISSION",
+          isCompleted: true,
+          isAssignedRole: true,
+          assignedRole: ["SUBMISSION_CREATOR", "SUBMISSION_RESPONDER"],
+        });
+        await createPendingTask({
+          name: t("MAKE_PAYMENT_SUBMISSION"),
+          status: "MAKE_PAYMENT_SUBMISSION",
+          isAssignedRole: true,
+          assignedRole: ["SUBMISSION_CREATOR", "SUBMISSION_RESPONDER"],
+          stateSla: todayDate + stateSla.MAKE_PAYMENT_SUBMISSION,
+        });
+      }
       applicationRefetch();
       setShowPaymentModal(true);
     } catch (error) {
@@ -528,20 +583,24 @@ const SubmissionsCreate = ({ path }) => {
     setLoader(true);
     const res = await createSubmission();
     const newapplicationNumber = res?.application?.applicationNumber;
-    !isExtension &&
-      orderNumber &&
-      (await createPendingTask({
-        refId: orderNumber,
-        isCompleted: true,
-        status: "Completed",
-      }));
-    await createPendingTask({
-      name: t("ESIGN_THE_SUBMISSION"),
-      status: "ESIGN_THE_SUBMISSION",
-      refId: newapplicationNumber,
-      stateSla: todayDate + stateSla.ESIGN_THE_SUBMISSION,
-    });
     if (newapplicationNumber) {
+      if (isCitizen) {
+        await createPendingTask({
+          name: t("ESIGN_THE_SUBMISSION"),
+          status: "ESIGN_THE_SUBMISSION",
+          refId: newapplicationNumber,
+          stateSla: todayDate + stateSla.ESIGN_THE_SUBMISSION,
+        });
+      } else if (hasSubmissionRole) {
+        await createPendingTask({
+          name: t("ESIGN_THE_SUBMISSION"),
+          status: "ESIGN_THE_SUBMISSION",
+          refId: newapplicationNumber,
+          stateSla: todayDate + stateSla.ESIGN_THE_SUBMISSION,
+          isAssignedRole: true,
+          assignedRole: ["SUBMISSION_CREATOR", "SUBMISSION_RESPONDER"],
+        });
+      }
       history.push(
         orderNumber
           ? `?filingNumber=${filingNumber}&applicationNumber=${newapplicationNumber}&orderNumber=${orderNumber}`
@@ -567,6 +626,10 @@ const SubmissionsCreate = ({ path }) => {
   };
 
   const handleSkipPayment = () => {
+    setMakePaymentLabel(true);
+    setShowPaymentModal(false);
+    setShowSuccessModal(true);
+
     if (!paymentLoader) {
       setMakePaymentLabel(true);
       setShowPaymentModal(false);
@@ -673,7 +736,7 @@ const SubmissionsCreate = ({ path }) => {
     return <Loader />;
   }
   return (
-    <div className="create-submission">
+    <div className="citizen create-submission" style={{ width: "50%", ...(!isCitizen && { padding: "0 8px 24px 16px" }) }}>
       <Header> {t("CREATE_SUBMISSION")}</Header>
       <FormComposerV2
         label={t("REVIEW_SUBMISSION")}
