@@ -4,7 +4,7 @@ import { FileIcon, PrintIcon } from "@egovernments/digit-ui-react-components";
 import React from "react";
 import { Urls } from "../hooks/services/Urls";
 
-const CustomStepperSuccess = ({ closeButtonAction, t, submissionData, documents, deliveryChannel }) => {
+const CustomStepperSuccess = ({ closeButtonAction, submitButtonAction, t, submissionData, documents, deliveryChannel }) => {
   const tenantId = window?.Digit.ULBService.getCurrentTenantId();
   const fileStore = localStorage.getItem("SignedFileStoreID");
   return (
@@ -25,7 +25,7 @@ const CustomStepperSuccess = ({ closeButtonAction, t, submissionData, documents,
         tableDataClassName={"e-filing-table-data-style"}
         tableValueClassName={"e-filing-table-value-style"}
       />
-      <div className="print-documents-box">
+      <div className="print-documents-box-div">
         <div className="print-documents-box-text">
           <FileIcon />
           <div style={{ marginLeft: "0.5rem" }}>Summons Document</div>
@@ -54,14 +54,16 @@ const CustomStepperSuccess = ({ closeButtonAction, t, submissionData, documents,
           onButtonClick={() => {
             // closeModal();
             // refreshInbox();
-            if (documents) closeButtonAction();
+            // if (documents) closeButtonAction();
+            closeButtonAction();
           }}
         />
         <Button
           className={"selector-button-primary"}
           label={t(documents ? "Mark as sent" : "Close")}
           onButtonClick={() => {
-            if (!documents) closeButtonAction();
+            // if (!documents) closeButtonAction();
+            submitButtonAction();
           }}
         >
           {/* <RightArrow /> */}

@@ -79,7 +79,13 @@ const ReviewSummonsNoticeAndWarrant = () => {
     setIsDisabled(disable);
   };
 
-  const handleClose = async () => {
+  const handleClose = () => {
+    localStorage.removeItem("SignedFileStoreID");
+    setShowActionModal(false);
+    setReload(!reload);
+  };
+
+  const handleSubmit = async () => {
     localStorage.removeItem("SignedFileStoreID");
     await refetch();
     if (tasksData) {
@@ -103,7 +109,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
     }
   };
 
-  const handleUpdate = async () => {
+  const handleUpdateStatus = async () => {
     await refetch();
     if (tasksData) {
       try {
@@ -301,6 +307,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
           modalBody: (
             <CustomStepperSuccess
               closeButtonAction={handleClose}
+              submitButtonAction={handleSubmit}
               t={t}
               submissionData={submissionData}
               documents={documents}
@@ -321,7 +328,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
       modalBody: (
         <PrintAndSendDocumentComponent infos={infos} documents={documents?.filter((docs) => docs.documentType === "SIGNED")} links={links} t={t} />
       ),
-      actionSaveOnSubmit: handleClose,
+      actionSaveOnSubmit: handleSubmit,
     };
   }, [documents, infos, links, t]);
 
@@ -334,7 +341,7 @@ const ReviewSummonsNoticeAndWarrant = () => {
       modalBody: (
         <UpdateDeliveryStatusComponent infos={infos} links={links} t={t} handleSubmitButtonDisable={handleSubmitButtonDisable} rowData={rowData} />
       ),
-      actionSaveOnSubmit: handleUpdate,
+      actionSaveOnSubmit: handleUpdateStatus,
       isDisabled: isDisabled,
     };
   }, [infos, isDisabled, links, t]);
