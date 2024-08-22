@@ -39,7 +39,7 @@ public class OrderRegistrationValidator {
             throw new CustomException(CREATE_ORDER_ERR, "statute and section is mandatory for creating order");
 
         if(!ADMINISTRATIVE.equalsIgnoreCase(orderRequest.getOrder().getOrderCategory()) && !caseUtil.fetchCaseDetails(requestInfo, orderRequest.getOrder().getCnrNumber(), orderRequest.getOrder().getFilingNumber())){
-            throw new CustomException("INVALID_CASE_DETAILS", "Invalid Case");
+                throw new CustomException("INVALID_CASE_DETAILS", "Invalid Case");
         }
 
         //validate documents

@@ -14,14 +14,14 @@ import org.pucar.dristi.util.CaseUtil;
 import org.pucar.dristi.util.FileStoreUtil;
 import org.pucar.dristi.web.models.*;
 
-        import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-        import static org.mockito.ArgumentMatchers.*;
-        import static org.mockito.Mockito.*;
-        import static org.pucar.dristi.config.ServiceConstants.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.pucar.dristi.config.ServiceConstants.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderRegistrationValidatorTest {

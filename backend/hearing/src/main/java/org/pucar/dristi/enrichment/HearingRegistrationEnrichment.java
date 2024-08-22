@@ -67,13 +67,11 @@ public class HearingRegistrationEnrichment {
             Hearing hearing = hearingRequest.getHearing();
             hearing.getAuditDetails().setLastModifiedTime(System.currentTimeMillis());
             hearing.getAuditDetails().setLastModifiedBy(hearingRequest.getRequestInfo().getUserInfo().getUuid());
-            if (hearing.getDocuments() != null) {
-                hearing.getDocuments().removeIf(document -> document.getId() != null);
+
+            if(hearing.getDocuments()!=null){
                 hearing.getDocuments().forEach(document -> {
-                    if (document.getId() == null) {
-                        document.setId(UUID.randomUUID().toString());
-                        document.setDocumentUid(document.getId());
-                    }
+                    if(document.getId()==null)
+                     document.setId(String.valueOf(UUID.randomUUID()));
                 });
             }
         } catch (Exception e) {
