@@ -54,6 +54,9 @@ const SubmissionsCreate = ({ path }) => {
   const applicationTypeParam = useMemo(() => applicationTypeUrl, [applicationTypeUrl]);
   const userType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo?.type]);
   const isCitizen = useMemo(() => userInfo?.type === "CITIZEN", [userInfo]);
+  const [signedDoucumentUploadedID, setSignedDocumentUploadID] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState();
+  const scenario = "applicationSubmission";
   const hasSubmissionRole = useMemo(
     () =>
       ["SUBMISSION_CREATOR", "SUBMISSION_RESPONDER"].reduce((result, current) => {
