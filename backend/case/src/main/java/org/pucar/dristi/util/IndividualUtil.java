@@ -2,6 +2,7 @@ package org.pucar.dristi.util;
 
 import static org.pucar.dristi.config.ServiceConstants.INDIVIDUAL_UTILITY_EXCEPTION;
 
+import org.egov.common.models.individual.IndividualBulkResponse;
 import org.egov.tracer.model.CustomException;
 import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.repository.ServiceRequestRepository;
@@ -46,6 +47,24 @@ public class IndividualUtil {
             throw e;
         } catch (Exception e){
             throw new CustomException(INDIVIDUAL_UTILITY_EXCEPTION,"Exception in individual utility service: "+e.getMessage());
+        }
+    }
+
+    public IndividualBulkResponse getIndividualByIndividualId(IndividualSearchRequest individualRequest, StringBuilder uri) {
+        try {
+            Object responseMap = serviceRequestRepository.fetchResult(uri, individualRequest);
+            if (responseMap != null) {
+                Gson gson = new Gson();
+                String jsonString = gson.toJson(responseMap);
+                log.info("Response :: {}", jsonString);
+                return gson.fromJson(jsonString, IndividualBulkResponse.class);
+            }
+            return null;
+        } catch (CustomException e) {
+            log.error("Custom Exception occurred in Individual Utility :: {}", e.toString());
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException(INDIVIDUAL_UTILITY_EXCEPTION, "Error in individual utility service: " + e.getMessage());
         }
     }
 }

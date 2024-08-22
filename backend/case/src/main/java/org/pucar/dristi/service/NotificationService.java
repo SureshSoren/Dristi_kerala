@@ -6,6 +6,7 @@ import digit.models.coremodels.RequestInfoWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.models.individual.Individual;
 import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.repository.ServiceRequestRepository;
@@ -14,10 +15,7 @@ import org.pucar.dristi.web.models.SMSRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.pucar.dristi.config.ServiceConstants.*;
 
@@ -31,11 +29,14 @@ public class NotificationService {
 
     private final ServiceRequestRepository repository;
 
+    private final IndividualService individualService;
+
     @Autowired
-    public NotificationService(Configuration config, Producer producer, ServiceRequestRepository repository) {
+    public NotificationService(Configuration config, Producer producer, ServiceRequestRepository repository, IndividualService individualService) {
         this.config = config;
         this.producer = producer;
         this.repository = repository;
+        this.individualService = individualService;
     }
 
     public void sendNotification(CaseRequest request, String statusBefore) {
@@ -72,14 +73,14 @@ public class NotificationService {
 
     private Map<String, String> getDetailsForSMS(CaseRequest request) {
         Map<String, String> smsDetails = new HashMap<>();
-
+        List<Individual> individuals = individualService.getIndividuals(request.getRequestInfo(), Collections.singletonList(request.getCases().getAuditdetails().getCreatedBy()));;
         smsDetails.put("caseId", request.getCases().getCaseNumber());
         smsDetails.put("efilingNumber", request.getCases().getFilingNumber());
         smsDetails.put("cnr", request.getCases().getCnrNumber());
         smsDetails.put("date", "");
         smsDetails.put("link", "");
         smsDetails.put("tenantId", request.getCases().getTenantId().split("\\.")[0]);
-        smsDetails.put("mobileNumber", request.getRequestInfo().getUserInfo().getMobileNumber());
+        smsDetails.put("mobileNumber", individuals.get(0).getMobileNumber());
         return smsDetails;
     }
 
