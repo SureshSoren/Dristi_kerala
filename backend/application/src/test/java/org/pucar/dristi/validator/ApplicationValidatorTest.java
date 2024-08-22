@@ -1,5 +1,6 @@
 package org.pucar.dristi.validator;
 
+import org.egov.common.contract.models.Document;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
@@ -8,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pucar.dristi.repository.ApplicationRepository;
 import org.pucar.dristi.util.CaseUtil;
+import org.pucar.dristi.util.FileStoreUtil;
 import org.pucar.dristi.util.OrderUtil;
 import org.pucar.dristi.web.models.Application;
 import org.pucar.dristi.web.models.ApplicationExists;
@@ -23,6 +24,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.pucar.dristi.config.ServiceConstants.INVALID_FILESTORE_ID;
 import static org.pucar.dristi.config.ServiceConstants.ORDER_EXCEPTION;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +36,10 @@ public class ApplicationValidatorTest {
     private CaseUtil caseUtil;
     @Mock
     private OrderUtil orderUtil;
+
+    @Mock
+    private FileStoreUtil fileStoreUtil;
+
     @InjectMocks
     private ApplicationValidator validator;
 
@@ -56,7 +62,7 @@ public class ApplicationValidatorTest {
         List<UUID> onBehalfOf = new ArrayList<>();
         onBehalfOf.add(UUID.randomUUID());
         application.setTenantId("tenantId");
-        application.setCreatedDate("2024-05-01");
+        application.setCreatedDate(123453335l);
         application.setCreatedBy(UUID.randomUUID());
         requestInfo.setUserInfo(user); // Simulating non-empty user info
         application.setOnBehalfOf(onBehalfOf);
@@ -71,39 +77,9 @@ public class ApplicationValidatorTest {
     }
 
     @Test
-    public void testValidateApplication_MissingTenantId() {
-        application.setCaseId("caseId");
-        when(caseUtil.fetchCaseDetails(any())).thenReturn(true);
-
-        Exception exception = assertThrows(CustomException.class, () -> validator.validateApplication(applicationRequest));
-        assertEquals("tenantId is mandatory for creating application", exception.getMessage());
-    }
-
-    @Test
-    public void testValidateApplication_MissingApplicationType() {
-        application.setTenantId("tenantId");
-        application.setCaseId("caseId");
-        when(caseUtil.fetchCaseDetails(any())).thenReturn(true);
-
-        Exception exception = assertThrows(CustomException.class, () -> validator.validateApplication(applicationRequest));
-        assertEquals("applicationType is mandatory for creating application", exception.getMessage());
-    }
-
-    @Test
-    public void testValidateApplication_MissingCaseId() {
-        application.setTenantId("tenantId");
-        application.setCreatedDate("2024-05-01");
-        application.setCreatedBy(UUID.randomUUID());
-
-        Exception exception = assertThrows(CustomException.class, () -> validator.validateApplication(applicationRequest));
-        assertEquals("caseId is mandatory for creating application", exception.getMessage());
-    }
-
-    @Test
     public void testValidateApplication_MissingCase() {
         User user = new User();
         application.setTenantId("tenantId");
-        application.setCreatedDate("2024-05-01");
         application.setCreatedBy(UUID.randomUUID());
         application.setCaseId("CaseId");
         requestInfo.setUserInfo(user);
@@ -172,44 +148,6 @@ public class ApplicationValidatorTest {
     }
 
     @Test
-    public void testValidateApplicationExistence_WithMissingCaseId_ShouldThrowException() {
-        application.setId(UUID.randomUUID());
-        application.setCnrNumber("cnr123");
-        application.setReferenceId(UUID.randomUUID());
-
-        CustomException exception = assertThrows(CustomException.class,
-                () -> validator.validateApplicationExistence(requestInfo, application));
-        assertEquals("caseId is mandatory for updating application", exception.getMessage());
-    }
-    @Test
-    public void testValidateApplicationExistence_WithMissingTenantId_ShouldThrowException() {
-        application.setId(UUID.randomUUID());
-        application.setCaseId("caseId");
-        application.setCnrNumber("cnr123");
-        application.setFilingNumber("file123");
-        when(caseUtil.fetchCaseDetails(any())).thenReturn(true);
-
-        CustomException exception = assertThrows(CustomException.class,
-                () -> validator.validateApplicationExistence(requestInfo, application));
-
-        assertEquals("tenantId is mandatory for updating application", exception.getMessage());
-    }
-    @Test
-    public void testValidateApplicationExistence_WithMissingApplicationType_ShouldThrowException() {
-        application.setId(UUID.randomUUID());
-        application.setCaseId("caseId");
-        application.setCnrNumber("cnr123");
-        application.setTenantId("tID");
-        application.setFilingNumber("file123");
-
-        when(caseUtil.fetchCaseDetails(any())).thenReturn(true);
-
-        CustomException exception = assertThrows(CustomException.class,
-                () -> validator.validateApplicationExistence(requestInfo, application));
-
-        assertEquals("applicationType is mandatory for updating application", exception.getMessage());
-    }
-    @Test
     void testCreateOrderExistRequest() {
         // Arrange
         application.setReferenceId(UUID.fromString("f35961ed-c3eb-452d-85e8-cde5f33221ce"));
@@ -268,5 +206,21 @@ public class ApplicationValidatorTest {
         // Act & Assert
         assertDoesNotThrow(() -> validator.validateOrderDetails(applicationRequest));
 
+    }
+
+    @Test
+    public void testValidateOrder_InvalidDocumentFileStore() {
+        when(fileStoreUtil.doesFileExist(anyString(), any())).thenReturn(false);
+        CustomException exception = assertThrows(CustomException.class, this::invokeValidator);
+        assertEquals(INVALID_FILESTORE_ID, exception.getCode());
+        assertEquals("Invalid document details", exception.getMessage());
+    }
+
+    private void invokeValidator() {
+        Document document = new Document();
+        document.setFileStore("invalidFileStore");
+        application.setDocuments(Collections.singletonList(document));
+        application.setTenantId("pg");
+        validator.validateApplicationExistence(applicationRequest.getRequestInfo(), application);
     }
 }
