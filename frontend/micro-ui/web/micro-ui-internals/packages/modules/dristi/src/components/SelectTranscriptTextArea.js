@@ -33,6 +33,13 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
     initWebSocket();
   }, []);
 
+  useEffect(() => {
+    if (webSocketStatus === "Connected") {
+      createRoom();
+      setIsConnected(true);
+    }
+  }, [webSocketStatus]);
+
   const input = useMemo(
     () =>
       config?.populators?.input || {
@@ -348,7 +355,7 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
 
           {!isConnected && (
             <div style={{ textAlign: "right" }}>
-              <button
+              {/* <button
                 onClick={() => {
                   createRoom();
                   setIsConnected(true);
@@ -370,7 +377,21 @@ function SelectTranscriptTextArea({ t, config, formData = {}, onSelect, errors }
                     </clipPath>
                   </defs>
                 </svg>
-              </button>
+              </button> */}
+
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <title>Loading...</title>
+                <circle cx="50" cy="50" fill="none" stroke="#1d3f72" strokeWidth="10" r="35" strokeDasharray="164.93361431346415 56.97787143782138">
+                  <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    repeatCount="indefinite"
+                    dur="1s"
+                    values="0 50 50;360 50 50"
+                    keyTimes="0;1"
+                  />
+                </circle>
+              </svg>
             </div>
           )}
           {isConnected && webSocketStatus === "Connected" && !isRecording && (

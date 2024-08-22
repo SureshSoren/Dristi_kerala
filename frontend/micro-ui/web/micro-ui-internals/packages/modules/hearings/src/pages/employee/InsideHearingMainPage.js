@@ -185,8 +185,11 @@ const InsideHearingMainPage = () => {
   };
 
   useEffect(() => {
-    if (transcriptText && !disableTextArea) {
-      updateAPICall(transcriptText);
+    if (hearingsData) {
+      const hearingData = hearingsData?.HearingList?.[0];
+      if (hearingData && transcriptText !== hearingData?.transcript[0] && !disableTextArea) {
+        updateAPICall(transcriptText);
+      }
     }
   }, [transcriptText, setTranscriptText]);
 

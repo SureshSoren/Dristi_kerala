@@ -56,7 +56,7 @@ const EpostTrackingPage = () => {
       const updatedTabData = await Promise.all(
         tabConfig?.map(async (configItem, index) => {
           const response = await Digit.HomeService.customApiService(configItem?.apiDetails?.serviceName, configItem?.apiDetails?.requestBody);
-          const totalCount = response?.EPostTracker?.length;
+          const totalCount = response?.pagination?.totalCount;
           return {
             key: index,
             label: totalCount ? `${configItem.label} (${totalCount})` : `${configItem.label} (0)`,
