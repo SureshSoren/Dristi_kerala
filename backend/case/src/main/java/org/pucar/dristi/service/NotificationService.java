@@ -11,6 +11,7 @@ import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.repository.ServiceRequestRepository;
 import org.pucar.dristi.web.models.CaseRequest;
+import org.pucar.dristi.web.models.CourtCase;
 import org.pucar.dristi.web.models.SMSRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,22 +40,21 @@ public class NotificationService {
         this.individualService = individualService;
     }
 
-    public void sendNotification(CaseRequest request, String statusBefore) {
-        String action = request.getCases().getWorkflow().getAction();
-        String message = getMessageBasedOnAction(request, action, statusBefore);
+    public void sendNotification(RequestInfo requestInfo, CourtCase courtCase, String status) {
+        String message = getMessage(requestInfo,courtCase, status);
         if (StringUtils.isEmpty(message)) {
             log.info("SMS content has not been configured for this case");
             return;
 
         }
-        pushNotification(request, message);
+        pushNotification(requestInfo,courtCase, message);
     }
 
-    private void pushNotification(CaseRequest request, String message) {
+    private void pushNotification(RequestInfo requestInfo, CourtCase courtCase, String message) {
 
         //get individual name, id, mobileNumber
         log.info("get case e filing number, id, cnr");
-        Map<String, String> smsDetails = getDetailsForSMS(request);
+        Map<String, String> smsDetails = getDetailsForSMS(requestInfo,courtCase);
 
         log.info("build Message");
         message = buildMessage(smsDetails, message);
@@ -71,53 +71,31 @@ public class NotificationService {
         producer.push(config.getSmsNotificationTopic(), smsRequest);
     }
 
-    private Map<String, String> getDetailsForSMS(CaseRequest request) {
+    private Map<String, String> getDetailsForSMS(RequestInfo requestInfo, CourtCase courtCase) {
         Map<String, String> smsDetails = new HashMap<>();
-        List<Individual> individuals = individualService.getIndividuals(request.getRequestInfo(), Collections.singletonList(request.getCases().getAuditdetails().getCreatedBy()));;
-        smsDetails.put("caseId", request.getCases().getCaseNumber());
-        smsDetails.put("efilingNumber", request.getCases().getFilingNumber());
-        smsDetails.put("cnr", request.getCases().getCnrNumber());
+        List<Individual> individuals = individualService.getIndividuals(requestInfo, Collections.singletonList(courtCase.getAuditdetails().getCreatedBy()));;
+        smsDetails.put("caseId", courtCase.getCaseNumber());
+        smsDetails.put("efilingNumber", courtCase.getFilingNumber());
+        smsDetails.put("cnr", courtCase.getCnrNumber());
         smsDetails.put("date", "");
         smsDetails.put("link", "");
-        smsDetails.put("tenantId", request.getCases().getTenantId().split("\\.")[0]);
+        smsDetails.put("tenantId", courtCase.getTenantId().split("\\.")[0]);
         smsDetails.put("mobileNumber", individuals.get(0).getMobileNumber());
         return smsDetails;
     }
 
-    private String getMessageBasedOnAction(CaseRequest request, String action, String statusBefore) {
-        return switch (action.toUpperCase()) {
-            case "SUBMIT_CASE" -> getMessage(request, CASE_SUBMISSION);
-            case "MAKE_PAYMENT" -> getMessage(request, CASE_FILED);
-            case "VALIDATE" -> getMessage(request, SCRUTINY_COMPLETE_CASE_REGISTERED);
-            case "SEND_BACK" -> {
-                if (statusBefore == null) {
-                    yield null;
-                } else {
-                    yield switch (statusBefore) {
-                        case "UNDER_SCRUTINY" -> getMessage(request, EFILING_ERRORS);
-                        case "PENDING_ADMISSION" -> getMessage(request, ERRORS_IDENTIFIED_CASE_FILE);
-                        default -> null;
-                    };
-                }
-            }
-            case "SCHEDULE_ADMISSION_HEARING" -> getMessage(request, ADMISSION_HEARING_SCHEDULED);
-            case "ADMIT" -> getMessage(request, CASE_ADMITTED);
-            case "REJECT" -> getMessage(request, HEARING_REJECTED);
-            default -> null;
-        };
-    }
 
     /**
      * Gets the message from localization
      *
-     * @param request
+     * @param requestInfo
+     * @param courtCase
      * @param msgCode
      * @return
      */
 
-    public String getMessage(CaseRequest request, String msgCode) {
-        String rootTenantId = request.getCases().getTenantId().split("\\.")[0];
-        RequestInfo requestInfo = request.getRequestInfo();
+    public String getMessage(RequestInfo requestInfo, CourtCase courtCase, String msgCode) {
+        String rootTenantId = courtCase.getTenantId().split("\\.")[0];
         Map<String, Map<String, String>> localizedMessageMap = getLocalisedMessages(requestInfo, rootTenantId,
                 NOTIFICATION_ENG_LOCALE_CODE, NOTIFICATION_MODULE_CODE);
         return localizedMessageMap.get(NOTIFICATION_ENG_LOCALE_CODE + "|" + rootTenantId).get(HIGH_COURT_LOCALIZATION_CODE)
