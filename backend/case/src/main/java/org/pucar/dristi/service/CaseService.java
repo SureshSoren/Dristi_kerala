@@ -45,11 +45,9 @@ public class CaseService {
 
     private BillingUtil billingUtil;
 
-    private NotificationService notificationService;
-
 
     @Autowired
-    public CaseService(CaseRegistrationValidator validator, CaseRegistrationEnrichment enrichmentUtil, CaseRepository caseRepository, WorkflowService workflowService, Configuration config, Producer producer, BillingUtil billingUtil, NotificationService notificationService) {
+    public CaseService(CaseRegistrationValidator validator, CaseRegistrationEnrichment enrichmentUtil, CaseRepository caseRepository, WorkflowService workflowService, Configuration config, Producer producer, BillingUtil billingUtil) {
         this.validator = validator;
         this.enrichmentUtil = enrichmentUtil;
         this.caseRepository = caseRepository;
@@ -57,7 +55,6 @@ public class CaseService {
         this.config = config;
         this.producer = producer;
         this.billingUtil = billingUtil;
-        this.notificationService = notificationService;
     }
 
     @Autowired
@@ -72,10 +69,6 @@ public class CaseService {
             enrichmentUtil.enrichCaseRegistrationOnCreate(body);
 
             workflowService.updateWorkflowStatus(body);
-
-            if(config.getIsSMSEnabled()) {
-                notificationService.sendNotification(body, null);
-            }
 
             producer.push(config.getCaseCreateTopic(), body);
             return body.getCases();
@@ -114,20 +107,16 @@ public class CaseService {
 
             // Enrich application upon update
             enrichmentUtil.enrichCaseApplicationUponUpdate(caseRequest);
-            String statusBefore = caseRequest.getCases().getStatus();
+
             workflowService.updateWorkflowStatus(caseRequest);
 
-//            if (CREATE_DEMAND_STATUS.equals(caseRequest.getCases().getStatus())) {
-//                billingUtil.createDemand(caseRequest);
-//            }
+            if (CREATE_DEMAND_STATUS.equals(caseRequest.getCases().getStatus())) {
+                billingUtil.createDemand(caseRequest);
+            }
             if (CASE_ADMIT_STATUS.equals(caseRequest.getCases().getStatus())) {
                 enrichmentUtil.enrichAccessCode(caseRequest);
                 enrichmentUtil.enrichCaseNumberAndCNRNumber(caseRequest);
                 enrichmentUtil.enrichRegistrationDate(caseRequest);
-            }
-
-            if(config.getIsSMSEnabled()) {
-                notificationService.sendNotification(caseRequest, statusBefore);
             }
 
             producer.push(config.getCaseUpdateTopic(), caseRequest);

@@ -58,13 +58,6 @@ public class Configuration {
     @Value("${egov.filestore.path}")
     private String fileStorePath;
 
-    @Value("${egov.file.store.save.endpoint}")
-    private String fileStoreSaveEndPoint;
-
-    @Value("${egov.filestore.case.module}")
-    private String fileStoreCaseModule;
-
-
     // Advocate Config
     @Value("${egov.advocate.host}")
     private String advocateHost;
@@ -168,6 +161,27 @@ public class Configuration {
     @Value("${egov.additional.join.case.kafka.topic}")
     private String additionalJoinCaseTopic;
 
+    //Mdms
+
+    @Value("${mdms.case.module.name}")
+    private String caseModule;
+
+    @Value("${egov.localization.statelevel}")
+    private Boolean isLocalizationStateLevel;
+
+    //Dristi Case Pdf Service
+    @Value("${egov.dristi.case.pdf.host}")
+    private String dristiCasePdfHost;
+
+    @Value("${egov.dristi.case.pdf.path}")
+    private String dristiCasePdfPath;
+
+    @Value("${egov.file.store.save.endpoint}")
+    private String fileStoreSaveEndPoint;
+
+    @Value("${egov.filestore.case.module}")
+    private String fileStoreCaseModule;
+
 
     @Value("${egov.sms.notification.template.id}")
     private String smsNotificationTemplateId;
@@ -185,13 +199,5 @@ public class Configuration {
     @Value("${egov.localization.search.endpoint}")
     private String localizationSearchEndpoint;
 
-    @Value("${egov.localization.statelevel}")
-    private Boolean isLocalizationStateLevel;
 
-    //Dristi Case Pdf Service
-    @Value("${egov.dristi.case.pdf.host}")
-    private String dristiCasePdfHost;
-
-    @Value("${egov.dristi.case.pdf.path}")
-    private String dristiCasePdfPath;
 }

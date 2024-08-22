@@ -5,14 +5,11 @@ import java.util.List;
 
 import org.egov.common.contract.response.ResponseInfo;
 import org.pucar.dristi.service.CaseService;
-import org.pucar.dristi.service.CasePdfService;
 import org.pucar.dristi.service.WitnessService;
 import org.pucar.dristi.util.ResponseInfoFactory;
 import org.pucar.dristi.web.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +20,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import org.springframework.core.io.ByteArrayResource;
 
 @jakarta.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2024-04-15T11:31:40.281899+05:30[Asia/Kolkata]")
 @Controller
@@ -36,15 +32,12 @@ public class CaseApiController {
 
     private ResponseInfoFactory responseInfoFactory;
 
-    private CasePdfService casePdfService;
-
 
     @Autowired
-    public CaseApiController(CaseService caseService, WitnessService witnessService, ResponseInfoFactory responseInfoFactory, CasePdfService casePdfService) {
+    public CaseApiController(CaseService caseService, WitnessService witnessService, ResponseInfoFactory responseInfoFactory) {
         this.caseService = caseService;
         this.witnessService = witnessService;
         this.responseInfoFactory = responseInfoFactory;
-        this.casePdfService = casePdfService;
     }
 
     @PostMapping(value = "/v1/_create")
@@ -135,15 +128,6 @@ public class CaseApiController {
         return new ResponseEntity<>(witnessResponse, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/v1/_generatePdf")
-    public ResponseEntity<?> caseV1GeneratePdf (
-            @Parameter(in = ParameterIn.DEFAULT, description = "Search criteria + RequestInfo meta data.", required = true, schema = @Schema()) @Valid @RequestBody CaseSearchRequest body){
-
-        CourtCase courtCase = casePdfService.generatePdf(body);
-        ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(body.getRequestInfo(), true);
-        CaseResponse caseResponse = CaseResponse.builder().cases(Collections.singletonList(courtCase)).responseInfo(responseInfo).build();
-        return new ResponseEntity<>(caseResponse, HttpStatus.OK);
     }
-}
 
 
