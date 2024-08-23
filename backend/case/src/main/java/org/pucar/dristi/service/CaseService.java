@@ -124,8 +124,8 @@ public class CaseService {
             }
 
             if(config.getIsSMSEnabled()) {
-                String status = getNotificationStatus(caseRequest.getCases().getWorkflow().getAction(),statusBefore);
-                notificationService.sendNotification(caseRequest.getRequestInfo(),caseRequest.getCases(), status);
+                String notificationStatus = getNotificationStatus(caseRequest.getCases().getWorkflow().getAction(),statusBefore);
+                notificationService.sendNotification(caseRequest.getRequestInfo(),caseRequest.getCases(), notificationStatus);
             }
 
             producer.push(config.getCaseUpdateTopic(), caseRequest);

@@ -10,7 +10,6 @@ import org.egov.common.models.individual.Individual;
 import org.pucar.dristi.config.Configuration;
 import org.pucar.dristi.kafka.Producer;
 import org.pucar.dristi.repository.ServiceRequestRepository;
-import org.pucar.dristi.web.models.CaseRequest;
 import org.pucar.dristi.web.models.CourtCase;
 import org.pucar.dristi.web.models.SMSRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +39,8 @@ public class NotificationService {
         this.individualService = individualService;
     }
 
-    public void sendNotification(RequestInfo requestInfo, CourtCase courtCase, String status) {
-        String message = getMessage(requestInfo,courtCase, status);
+    public void sendNotification(RequestInfo requestInfo, CourtCase courtCase, String notificationStatus) {
+        String message = getMessage(requestInfo,courtCase, notificationStatus);
         if (StringUtils.isEmpty(message)) {
             log.info("SMS content has not been configured for this case");
             return;
@@ -98,8 +97,7 @@ public class NotificationService {
         String rootTenantId = courtCase.getTenantId().split("\\.")[0];
         Map<String, Map<String, String>> localizedMessageMap = getLocalisedMessages(requestInfo, rootTenantId,
                 NOTIFICATION_ENG_LOCALE_CODE, NOTIFICATION_MODULE_CODE);
-        return localizedMessageMap.get(NOTIFICATION_ENG_LOCALE_CODE + "|" + rootTenantId).get(HIGH_COURT_LOCALIZATION_CODE)
-                + localizedMessageMap.get(NOTIFICATION_ENG_LOCALE_CODE + "|" + rootTenantId).get(msgCode);
+        return localizedMessageMap.get(NOTIFICATION_ENG_LOCALE_CODE + "|" + rootTenantId).get(msgCode);
     }
 
     /**
