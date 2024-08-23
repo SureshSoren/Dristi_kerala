@@ -40,47 +40,58 @@ public class NotificationService {
     }
 
     public void sendNotification(RequestInfo requestInfo, CourtCase courtCase, String notificationStatus) {
-        String message = getMessage(requestInfo,courtCase, notificationStatus);
-        if (StringUtils.isEmpty(message)) {
-            log.info("SMS content has not been configured for this case");
-            return;
+        try {
+            List<Individual> individuals = individualService.getIndividuals(requestInfo, Collections.singletonList(courtCase.getAuditdetails().getCreatedBy()));
+            if (individuals == null) {
+                log.info("No individual found with UUID: {}", courtCase.getAuditdetails().getCreatedBy());
+                return;
+            }
+            String message = getMessage(requestInfo,courtCase, notificationStatus);
+            if (StringUtils.isEmpty(message)) {
+                log.info("SMS content has not been configured for this case");
+                return;
+            }
 
+            pushNotification(courtCase, message, individuals);
+        } catch (Exception e){
+            log.error("Error in Sending Message To Notification Service: " , e);
         }
-        pushNotification(requestInfo,courtCase, message);
+
     }
 
-    private void pushNotification(RequestInfo requestInfo, CourtCase courtCase, String message) {
+    private void pushNotification(CourtCase courtCase, String message, List<Individual> individuals) {
 
-        //get individual name, id, mobileNumber
-        log.info("get case e filing number, id, cnr");
-        Map<String, String> smsDetails = getDetailsForSMS(requestInfo,courtCase);
+           //get individual name, id, mobileNumber
+            log.info("get case e filing number, id, cnr");
+            Map<String, String> smsDetails = getDetailsForSMS(courtCase, individuals);
 
-        log.info("build Message");
-        message = buildMessage(smsDetails, message);
-        SMSRequest smsRequest = SMSRequest.builder()
-                .mobileNumber(smsDetails.get("mobileNumber"))
-                .tenantId(smsDetails.get("tenantId"))
-                .templateId(config.getSmsNotificationTemplateId())
-                .contentType("TEXT")
-                .category("NOTIFICATION")
-                .locale(NOTIFICATION_ENG_LOCALE_CODE)
-                .expiryTime(System.currentTimeMillis() + 60 * 60 * 1000)
-                .message(message).build();
-        log.info("push message");
-        producer.push(config.getSmsNotificationTopic(), smsRequest);
+            log.info("build Message");
+            message = buildMessage(smsDetails, message);
+            SMSRequest smsRequest = SMSRequest.builder()
+                    .mobileNumber(smsDetails.get("mobileNumber"))
+                    .tenantId(smsDetails.get("tenantId"))
+                    .templateId(config.getSmsNotificationTemplateId())
+                    .contentType("TEXT")
+                    .category("NOTIFICATION")
+                    .locale(NOTIFICATION_ENG_LOCALE_CODE)
+                    .expiryTime(System.currentTimeMillis() + 60 * 60 * 1000)
+                    .message(message).build();
+            log.info("push message");
+            producer.push(config.getSmsNotificationTopic(), smsRequest);
+
     }
 
-    private Map<String, String> getDetailsForSMS(RequestInfo requestInfo, CourtCase courtCase) {
+    private Map<String, String> getDetailsForSMS(CourtCase courtCase, List<Individual> individuals) {
         Map<String, String> smsDetails = new HashMap<>();
-        List<Individual> individuals = individualService.getIndividuals(requestInfo, Collections.singletonList(courtCase.getAuditdetails().getCreatedBy()));;
-        smsDetails.put("caseId", courtCase.getCaseNumber());
-        smsDetails.put("efilingNumber", courtCase.getFilingNumber());
-        smsDetails.put("cnr", courtCase.getCnrNumber());
-        smsDetails.put("date", "");
-        smsDetails.put("link", "");
-        smsDetails.put("tenantId", courtCase.getTenantId().split("\\.")[0]);
-        smsDetails.put("mobileNumber", individuals.get(0).getMobileNumber());
-        return smsDetails;
+            smsDetails.put("caseId", courtCase.getCaseNumber());
+            smsDetails.put("efilingNumber", courtCase.getFilingNumber());
+            smsDetails.put("cnr", courtCase.getCnrNumber());
+            smsDetails.put("date", "");
+            smsDetails.put("link", "");
+            smsDetails.put("tenantId", courtCase.getTenantId().split("\\.")[0]);
+            smsDetails.put("mobileNumber", individuals.get(0).getMobileNumber());
+            return smsDetails;
+
     }
 
 

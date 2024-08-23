@@ -64,15 +64,15 @@ public class IndividualService {
             uri.append("?limit=").append(uuids.size()).append("&offset=0")
                     .append("&tenantId=").append(requestInfo.getUserInfo().getTenantId())
                     .append("&includeDeleted=true");
-            IndividualBulkResponse response = individualUtils.getIndividualByIndividualId(individualSearchRequest, uri);
-            if (response != null && response.getIndividual() != null) {
-                return response.getIndividual();
+            List<Individual> individual = individualUtils.getIndividualByIndividualId(individualSearchRequest, uri);
+            if (individual != null ) {
+                return individual;
             } else {
                 log.error("No individuals found");
                 return Collections.emptyList();
             }
         } catch (Exception e) {
-            log.error("Error in search individual service :: {}", e.toString());
+            log.error("Error in search individual service: ", e);
             log.error("Individuals not found");
             return Collections.emptyList();
         }
