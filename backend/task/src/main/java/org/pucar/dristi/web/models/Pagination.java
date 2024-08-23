@@ -14,33 +14,26 @@ import org.springframework.validation.annotation.Validated;
  */
 @Schema(description = "Pagination details")
 @Validated
-@jakarta.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2024-04-04T05:55:27.937918+05:30[Asia/Kolkata]")
+@jakarta.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2024-05-16T15:17:16.225735+05:30[Asia/Kolkata]")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Pagination {
+	@JsonProperty("limit")
+	@DecimalMax("100")
+	private Double limit = 10d;
 
+	@JsonProperty("offSet")
+	private Double offSet = 0d;
 
-    @JsonProperty("limit")
+	@JsonProperty("totalCount")
+	private Double totalCount = null;
 
-    @DecimalMax("100")
-    private Double limit = 10d;
+	@JsonProperty("sortBy")
+	private String sortBy = null;
 
-    @JsonProperty("offSet")
-
-    private Double offSet = 0d;
-
-    @JsonProperty("totalCount")
-
-    private Double totalCount = null;
-
-    @JsonProperty("sortBy")
-
-    private String sortBy = null;
-
-    @JsonProperty("order")
-
-    private Order order = null;
+	@JsonProperty("order")
+	private Order order = null;
 
 }

@@ -110,24 +110,24 @@ public class TaskServiceTest {
 
     @Test
     void testSearchTaskSuccess() {
-        when(taskRepository.getApplications(any())).thenReturn(Collections.singletonList(task));
+        when(taskRepository.getApplications(any(),any())).thenReturn(Collections.singletonList(task));
 
         List<Task> result = taskService.searchTask(new TaskSearchRequest());
 
         assertEquals(1, result.size());
-        verify(taskRepository, times(1)).getApplications(any());
+        verify(taskRepository, times(1)).getApplications(any(),any());
     }
 
     @Test
     void testSearchTaskThrowsException() {
-        doThrow(new RuntimeException("Unexpected error")).when(taskRepository).getApplications(any(TaskCriteria.class));
+        doThrow(new RuntimeException("Unexpected error")).when(taskRepository).getApplications(any(TaskCriteria.class),any());
         assertThrows(CustomException.class, this::invokeSearchTask);
     }
 
 
     @Test
     void testSearchTaskThrows_CustomException() {
-        when(taskRepository.getApplications(any())).thenThrow(new CustomException(SEARCH_TASK_ERR, "Error"));
+        when(taskRepository.getApplications(any(),any())).thenThrow(new CustomException(SEARCH_TASK_ERR, "Error"));
 
         CustomException exception = assertThrows(CustomException.class, this::invokeSearchTask);
 
@@ -234,7 +234,7 @@ public class TaskServiceTest {
 
     @Test
     void testWorkflowUpdate_SummonTask() {
-        task.setTaskType("SUMMONS"); // Task type in lowercase
+        task.setTaskType("summon"); // Task type in lowercase
         task.setTenantId("tenant2");
         task.setTaskNumber("T456");
 
@@ -250,7 +250,7 @@ public class TaskServiceTest {
 
     @Test
     void testWorkflowUpdate_WarrantTask() {
-        task.setTaskType("WARRANT"); // Task type in lowercase
+        task.setTaskType("warrant"); // Task type in lowercase
         task.setTenantId("tenant3");
         task.setTaskNumber("T789");
 

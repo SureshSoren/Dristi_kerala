@@ -1,6 +1,5 @@
 package org.pucar.dristi.service;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.models.Workflow;
 import org.egov.common.contract.request.RequestInfo;
@@ -77,7 +76,7 @@ public class TaskService {
 
         try {
             // Fetch tasks from database according to the given search criteria
-            return taskRepository.getApplications(request.getCriteria());
+            return taskRepository.getApplications(request.getCriteria(), request.getPagination());
         } catch (CustomException e) {
             log.error("Custom Exception occurred while searching task :: {}", e.toString());
             throw e;
@@ -150,32 +149,5 @@ public class TaskService {
         };
 
         task.setStatus(status);
-    }
-
-    public List<TaskCase> searchCaseTask(TaskCaseSearchRequest request) {
-        return taskRepository.getTaskWithCaseDetails(request);
-
-    }
-
-    public Task uploadDocument(@Valid TaskRequest body) {
-        try {
-            // Validate whether the application that is being requested for update indeed exists
-            if (!validator.validateApplicationExistence(body.getTask(), body.getRequestInfo()))
-                throw new CustomException(VALIDATION_ERR, "Task Application does not exist");
-
-            // Enrich application upon update
-            enrichmentUtil.enrichCaseApplicationUponUpdate(body);
-
-            producer.push(config.getTaskUpdateTopic(), body);
-
-            return body.getTask();
-
-        } catch (CustomException e) {
-            log.error("Custom Exception occurred while uploading document into task :: {}", e.toString());
-            throw e;
-        } catch (Exception e) {
-            log.error("Error occurred while uploading document into task :: {}", e.toString());
-            throw new CustomException(DOCUMENT_UPLOAD_QUERY_EXCEPTION, "Error occurred while uploading document into task: " + e.getMessage());
-        }
     }
 }

@@ -74,7 +74,7 @@ public class PaymentUpdateService {
                     .taskNumber(bill.getConsumerCode())
                     .build();
 
-            List<Task> tasks = repository.getApplications(criteria);
+            List<Task> tasks = repository.getApplications(criteria ,null);
 
             if (CollectionUtils.isEmpty(tasks)) {
                 throw new CustomException("INVALID_RECEIPT", "No Tasks found for the consumerCode " + criteria.getTaskNumber());
