@@ -114,9 +114,6 @@ public class CaseService {
             String statusBefore = caseRequest.getCases().getStatus();
             workflowService.updateWorkflowStatus(caseRequest);
 
-            if (CREATE_DEMAND_STATUS.equals(caseRequest.getCases().getStatus())) {
-                billingUtil.createDemand(caseRequest);
-            }
             if (CASE_ADMIT_STATUS.equals(caseRequest.getCases().getStatus())) {
                 enrichmentUtil.enrichAccessCode(caseRequest);
                 enrichmentUtil.enrichCaseNumberAndCNRNumber(caseRequest);
