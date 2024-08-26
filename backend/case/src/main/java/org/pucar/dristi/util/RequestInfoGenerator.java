@@ -69,9 +69,8 @@ public class RequestInfoGenerator {
             // Set up the request entity
             HttpEntity<String> requestEntity = new HttpEntity<>(formBody.toString(), headers);
 
-            String url = configs.getUserHost() + configs.getUserSearchEndpoint();
             ResponseEntity<String> responseEntity = restTemplate.exchange(
-                    url,
+                    configs.getUserOauthUrl(),
                     HttpMethod.POST,
                     requestEntity,
                     String.class
