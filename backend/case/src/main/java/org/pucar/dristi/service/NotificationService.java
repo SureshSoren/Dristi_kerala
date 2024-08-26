@@ -39,9 +39,9 @@ public class NotificationService {
         this.individualService = individualService;
     }
 
-    public void sendNotification(RequestInfo requestInfo, CourtCase courtCase, String notificationStatus) {
+    public void sendNotification(RequestInfo requestInfo, CourtCase courtCase, String notificationStatus, String uuid) {
         try {
-            List<Individual> individuals = individualService.getIndividuals(requestInfo, Collections.singletonList(courtCase.getAuditdetails().getCreatedBy()));
+            List<Individual> individuals = individualService.getIndividuals(requestInfo, Collections.singletonList(uuid));
             if (individuals == null) {
                 log.info("No individual found with UUID: {}", courtCase.getAuditdetails().getCreatedBy());
                 return;

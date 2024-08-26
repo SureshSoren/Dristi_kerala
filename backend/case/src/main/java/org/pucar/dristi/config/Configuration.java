@@ -199,5 +199,16 @@ public class Configuration {
     @Value("${egov.localization.search.endpoint}")
     private String localizationSearchEndpoint;
 
+    // Default User
+    @Value("${egov.default.user.username}")
+    private String defaultUserUserName;
+
+    @Value("${egov.default.user.password}")
+    private String defaultUserPassword;
+
+    @Value("${egov.user.notification.period}")
+    private String userNotificationPeriod;
+
+
 
 }

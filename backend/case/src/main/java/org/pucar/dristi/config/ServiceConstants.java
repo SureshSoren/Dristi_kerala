@@ -128,4 +128,10 @@ public class ServiceConstants {
 
 	public static final String NOTIFICATION_LOCALIZATION_MSGS_JSONPATH = "$.messages.*.message";
 	public static final BigDecimal TAX_AMOUNT = BigDecimal.valueOf(4.00);
+
+	public static final String ESIGN_PENDING= "ESIGN_PENDING";
+
+	public static final String ADVOCATE_ESIGN_PENDING= "ADVOCATE_ESIGN_PENDING";
+
+	public static final String PAYMENT_PENDING= "PAYMENT_PENDING";
 }
