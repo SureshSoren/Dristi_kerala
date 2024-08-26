@@ -186,6 +186,15 @@ public class Configuration {
     @Value("${egov.sms.notification.template.id}")
     private String smsNotificationTemplateId;
 
+    @Value("${egov.sms.notification.payment.pending.template.id}")
+    private String smsNotificationPaymentPendingTemplateId;
+
+    @Value("${egov.sms.notification.esign.pending.template.id}")
+    private String smsNotificationEsignPendingTemplateId;
+
+    @Value("${egov.sms.notification.advocate.esign.pending.template.id}")
+    private String smsNotificationAdvocateEsignPendingTemplateId;
+
     @Value("${notification.sms.enabled}")
     private Boolean isSMSEnabled;
 

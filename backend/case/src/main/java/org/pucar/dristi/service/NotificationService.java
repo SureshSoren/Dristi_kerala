@@ -51,15 +51,26 @@ public class NotificationService {
                 log.info("SMS content has not been configured for this case");
                 return;
             }
+            if(notificationStatus.equalsIgnoreCase(PAYMENT_PENDING)){
+                pushNotification(courtCase, message, individuals,config.getSmsNotificationPaymentPendingTemplateId());
+            }
+            else if(notificationStatus.equalsIgnoreCase(ESIGN_PENDING)){
+                pushNotification(courtCase, message, individuals,config.getSmsNotificationEsignPendingTemplateId());
+            }
+            else if(notificationStatus.equalsIgnoreCase(ADVOCATE_ESIGN_PENDING)){
+                pushNotification(courtCase, message, individuals,config.getSmsNotificationAdvocateEsignPendingTemplateId());
+            }
+            else {
+                pushNotification(courtCase, message, individuals,config.getSmsNotificationTemplateId());
+            }
 
-            pushNotification(courtCase, message, individuals);
         } catch (Exception e){
             log.error("Error in Sending Message To Notification Service: " , e);
         }
 
     }
 
-    private void pushNotification(CourtCase courtCase, String message, List<Individual> individuals) {
+    private void pushNotification(CourtCase courtCase, String message, List<Individual> individuals, String templateId) {
 
            //get individual name, id, mobileNumber
             log.info("get case e filing number, id, cnr");
@@ -70,7 +81,7 @@ public class NotificationService {
             SMSRequest smsRequest = SMSRequest.builder()
                     .mobileNumber(smsDetails.get("mobileNumber"))
                     .tenantId(smsDetails.get("tenantId"))
-                    .templateId(config.getSmsNotificationTemplateId())
+                    .templateId(templateId)
                     .contentType("TEXT")
                     .category("NOTIFICATION")
                     .locale(NOTIFICATION_ENG_LOCALE_CODE)
