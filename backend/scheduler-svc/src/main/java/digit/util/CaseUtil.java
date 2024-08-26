@@ -127,7 +127,7 @@ public class CaseUtil {
         Set<String> response = new HashSet<>();
         if (nodeArray != null && nodeArray.isArray()) {
             for (JsonNode node : nodeArray) {
-                JsonNode id = node.get("id");
+                JsonNode id = node.get("advocateId");
                 if (id != null) {
                     response.add(String.valueOf(id.asText()));
                 }

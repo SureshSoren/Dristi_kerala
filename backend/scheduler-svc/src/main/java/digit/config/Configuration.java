@@ -170,4 +170,10 @@ public class Configuration {
 
     @Value("${drishti.judge.pending.due.days}")
     private Long judgePendingSla;
+
+    @Value("${egov.advocate.host}")
+    private String advocateHost;
+
+    @Value("${egov.advocate.path}")
+    private String advocatePath;
 }
