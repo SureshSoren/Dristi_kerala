@@ -242,7 +242,7 @@ const PaymentForSummonModal = ({ path }) => {
             ordersService.customApiService(Urls.orders.pendingTask, {
               pendingTask: {
                 name: "Show Summon-Warrant Status",
-                entityType: "order-managelifecycle",
+                entityType: "order-default",
                 referenceId: hearingsData?.HearingList?.[0]?.hearingId,
                 status: `SUMMON_WARRANT_STATUS`,
                 assignedTo: [],

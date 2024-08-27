@@ -375,7 +375,7 @@ function ScheduleHearing({
           await HomeService.customApiService(Urls.dristi.pendingTask, {
             pendingTask: {
               name: "Schedule Hearing",
-              entityType: "case",
+              entityType: "case-default",
               referenceId: `MANUAL_${caseDetails?.filingNumber}`,
               status: "SCHEDULE_HEARING",
               assignedTo: [],
