@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import SignatureCard from "./SignatureCard";
 import { DRISTIService } from "../services";
 import isEqual from "lodash/isEqual";
-import { getFilestoreId } from "../Utils/fileStoreUtil";
+import useSearchCaseService from "../hooks/dristi/useSearchCaseService";
 
 function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
   const inputs = useMemo(
@@ -25,6 +25,24 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
   const storedData = localStorage.getItem("formData");
   const parsedObj = JSON.parse(storedData);
   let allKeys = Object.keys(parsedESignObj);
+  const urlParams = new URLSearchParams(window.location.search);
+  const tenantId = window?.Digit.ULBService.getCurrentTenantId();
+  const caseId = urlParams.get("caseId");
+
+  const { data: caseData } = useSearchCaseService(
+    {
+      criteria: [
+        {
+          caseId: caseId,
+        },
+      ],
+      tenantId,
+    },
+    {},
+    "dristi",
+    true,
+    true
+  );
 
   function setValue(configkey, value, input) {
     if (Array.isArray(input)) {
@@ -53,8 +71,9 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
       localStorage.removeItem("formdata");
     }
   }, [isSignSuccess, formData]);
-  const filestoreId = getFilestoreId();
-  const EsignFileStoreID = localStorage.getItem("fileStoreId");
+
+  const caseDetails = useMemo(() => caseData?.criteria[0]?.responseList[0], [caseData]);
+  const EsignFileStoreID = caseDetails?.additionalDetails?.signedCaseDocument;
   const handleAadharClick = async (data, name) => {
     try {
       localStorage.setItem("signStatus", JSON.stringify({ [config.key]: { [name]: [true] } }));
@@ -64,7 +83,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
           uidToken: "3456565",
           consent: "6564",
           authType: "6546",
-          fileStoreId: EsignFileStoreID ? EsignFileStoreID : "4824356d-e582-48bc-8929-c53a1bdb2bf1",
+          fileStoreId: EsignFileStoreID,
           tenantId: "kl",
           pageModule: "ci",
         },
@@ -104,6 +123,7 @@ function SelectSignature({ t, config, onSelect, formData = {}, errors }) {
       console.error("API call failed:", error);
     }
   };
+
   return (
     <div className="select-signature-main">
       {inputs.map((input, inputIndex) => (
