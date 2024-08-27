@@ -1477,7 +1477,9 @@ function EFilingCases({ path }) {
       let res;
       if (selected === "reviewCaseFile") {
         res = await refetchCasePDfGeneration();
-        localStorage.setItem("fileStoreId", res?.data?.cases?.[0]?.documents?.[0]?.fileStore);
+        if (res?.data?.cases?.[0]?.documents?.[0]?.fileStore) {
+          localStorage.setItem("fileStoreId", res?.data?.cases?.[0]?.documents?.[0]?.fileStore);
+        }
       }
       updateCaseDetails({
         isCompleted: true,

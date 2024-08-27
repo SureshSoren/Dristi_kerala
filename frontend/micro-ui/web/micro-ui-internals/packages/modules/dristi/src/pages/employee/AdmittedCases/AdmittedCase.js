@@ -19,6 +19,7 @@ import ViewAllOrderDrafts from "./ViewAllOrderDrafts";
 import PublishedOrderModal from "./PublishedOrderModal";
 import ViewAllSubmissions from "./ViewAllSubmissions";
 import { getAdvocates } from "../../citizen/FileCase/EfilingValidationUtils";
+import useDownloadCasePdf from "../../../hooks/dristi/useDownloadCasePdf";
 
 const defaultSearchValues = {};
 
@@ -50,6 +51,7 @@ const AdmittedCases = () => {
   const OrderReviewModal = Digit.ComponentRegistryService.getComponent("OrderReviewModal") || {};
   const userInfo = Digit.UserService.getUser()?.info;
   const userType = useMemo(() => (userInfo?.type === "CITIZEN" ? "citizen" : "employee"), [userInfo?.type]);
+  const { downloadPdf } = useDownloadCasePdf();
   const { data: caseData, isLoading } = useSearchCaseService(
     {
       criteria: [
@@ -740,7 +742,13 @@ const AdmittedCases = () => {
             <div className="sub-details-text">Code: {caseData?.criteria[0].responseList[0]?.accessCode}</div>
           </div>
           <div className="make-submission-action" style={{ display: "flex", gap: 20, justifyContent: "space-between", alignItems: "center" }}>
-            {isCitizen && <Button variation={"outlined"} label={t("DOWNLOAD_CASE_FILE")} />}
+            {isCitizen && (
+              <Button
+                variation={"outlined"}
+                label={t("DOWNLOAD_CASE_FILE")}
+                onButtonClick={() => downloadPdf(tenantId, caseDetails?.additionalDetails?.signedCaseDocument)}
+              />
+            )}
             {showMakeSubmission && <Button label={t("MAKE_SUBMISSION")} onButtonClick={handleMakeSubmission} />}
           </div>
           {showTakeAction && (
