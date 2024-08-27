@@ -67,7 +67,7 @@ public class CronJobScheduler {
                 CaseCriteria criteria = CaseCriteria.builder()
                         .status(Collections.singletonList("DRAFT_IN_PROGRESS"))
                         .filingToDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-                        .filingFromDate(LocalDate.now().minusDays(Integer.getInteger(config.getUserNotificationPeriod())).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+                        .filingFromDate(LocalDate.now().minusDays(Integer.parseInt(config.getUserNotificationPeriod())).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
                         .pagination(pagination)
                         .build();
 
