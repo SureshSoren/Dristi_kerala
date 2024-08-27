@@ -70,8 +70,11 @@ public class OtpSMSRepository {
 
     private String getMessage(String otpNumber, OtpRequest otpRequest) {
         final String messageFormat = getMessageFormat(otpRequest);
-        String message = messageFormat.replace("{{otp}}", Optional.ofNullable(otpNumber).orElse(""));
-        return format(message, otpNumber);
+        if(messageFormat != null) {
+            String message = messageFormat.replace("{{otp}}", Optional.ofNullable(otpNumber).orElse(""));
+            return format(message, otpNumber);
+        }
+        return null;
     }
 
     private String getMessageFormat(OtpRequest otpRequest) {
@@ -92,6 +95,7 @@ public class OtpSMSRepository {
         else
             message = localisedMsgs.get(LOCALIZATION_KEY_PWD_RESET_SMS);
 
+        log.info("message from localization service: {}", message);
         return message;
     }
 
