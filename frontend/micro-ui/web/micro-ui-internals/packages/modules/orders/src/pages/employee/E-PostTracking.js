@@ -6,8 +6,9 @@ import { useTranslation } from "react-i18next";
 import DocumentModal from "../../components/DocumentModal";
 import EpostPrintAndSendDocument from "./EpostPrintAndSendDocument";
 import EpostUpdateStatus from "./EpostUpdateStatus";
-import { EpostService } from "../../hooks/services";
+import { EpostService, ordersService } from "../../hooks/services";
 import DocumentViewerWithComment from "../../components/DocumentViewerWithComment";
+import { Urls } from "../../hooks/services/Urls";
 
 const EpostTrackingPage = () => {
   const { t } = useTranslation();
@@ -35,6 +36,8 @@ const EpostTrackingPage = () => {
   );
   const [updatedData, setUpdatedData] = useState(rowData?.original);
   const [toast, setToast] = useState(null);
+  const dayInMillisecond = 24 * 3600 * 1000;
+  const todayDate = new Date().getTime();
 
   const showToast = (type, message, duration = 5000) => {
     setToast({ key: type, action: message });
@@ -130,6 +133,25 @@ const EpostTrackingPage = () => {
     setUpdatedData(data);
   };
 
+  const { data: taskData } = Digit.Hooks.hearings.useGetTaskList(
+    {
+      criteria: {
+        tenantId: tenantId,
+        taskNumber: rowData?.original?.taskNumber,
+      },
+    },
+    {},
+    rowData?.original?.taskNumber,
+    Boolean(rowData)
+  );
+
+  const { data: orderData } = Digit.Hooks.orders.useSearchOrdersService(
+    { tenantId, criteria: { id: taskData?.list[0]?.orderId } },
+    { tenantId },
+    taskData?.list[0]?.orderId,
+    Boolean(taskData)
+  );
+
   const onUpdateClick = async () => {
     updateFunction();
     const requestBody = {
@@ -140,6 +162,24 @@ const EpostTrackingPage = () => {
     };
     try {
       const data = await EpostService.EpostUpdate(requestBody, {});
+      if (rowData?.original?.deliveryStatus === "NOT_DELIVERED") {
+        ordersService.customApiService(Urls.orders.pendingTask, {
+          pendingTask: {
+            name: "Re-issue Summon",
+            entityType: "order-default",
+            referenceId: `MANUAL_${orderData?.list[0]?.hearingNumber}`,
+            status: "RE-ISSUE_SUMMON",
+            assignedTo: [],
+            assignedRole: ["JUDGE_ROLE"],
+            cnrNumber: taskData?.list[0]?.cnrNumber,
+            filingNumber: taskData?.list[0]?.filingNumber,
+            isCompleted: false,
+            stateSla: 3 * dayInMillisecond + todayDate,
+            additionalDetails: {},
+            tenantId,
+          },
+        });
+      }
       showToast("success", t("CORE_COMMON_PROFILE_UPDATE_SUCCESS_WITH_PASSWORD"), 50000);
       setShow(false);
     } catch (error) {

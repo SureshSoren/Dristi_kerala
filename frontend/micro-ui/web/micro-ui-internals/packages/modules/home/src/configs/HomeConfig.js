@@ -381,6 +381,17 @@ export const pendingTaskOrderActions = {
       url: "/home/home-pending-task/e-filing-payment-breakdown",
     },
   },
+  "RE-ISSUE_SUMMON": {
+    actorName: ["JUDGE"],
+    redirectDetails: {
+      url: "/home/home-pending-task/reissue-summons-modal",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "cnrNumber", value: "cnrNumber" },
+        { key: "hearingId", value: "referenceId" },
+      ],
+    },
+  },
 };
 
 export const pendingTaskOrderOfJudgementActions = {};

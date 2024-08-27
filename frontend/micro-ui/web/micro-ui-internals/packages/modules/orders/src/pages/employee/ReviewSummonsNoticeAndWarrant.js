@@ -9,7 +9,8 @@ import AddSignatureComponent from "../../components/AddSignatureComponent";
 import CustomStepperSuccess from "../../components/CustomStepperSuccess";
 import UpdateDeliveryStatusComponent from "../../components/UpdateDeliveryStatusComponent";
 import { formatDate } from "../../utils";
-import { taskService } from "../../hooks/services";
+import { ordersService, taskService } from "../../hooks/services";
+import { Urls } from "../../hooks/services/Urls";
 
 const defaultSearchValues = {
   eprocess: "",
@@ -47,6 +48,10 @@ const ReviewSummonsNoticeAndWarrant = () => {
   const [reload, setReload] = useState(false);
   const [taskDetails, setTaskDetails] = useState({});
   const [tasksData, setTasksData] = useState(null);
+  const [selectedDelievery, setSelectedDelievery] = useState({});
+
+  const dayInMillisecond = 24 * 3600 * 1000;
+  const todayDate = new Date().getTime();
 
   const [tabData, setTabData] = useState(
     SummonsTabsConfig?.SummonsTabsConfig?.map((configItem, index) => ({ key: index, label: configItem.label, active: index === 0 ? true : false }))
@@ -73,6 +78,13 @@ const ReviewSummonsNoticeAndWarrant = () => {
       setTasksData(fetchedTasksData); // Store tasksData only if it's different
     }
   }, [fetchedTasksData, tasksData]);
+
+  const { data: orderData } = Digit.Hooks.orders.useSearchOrdersService(
+    { tenantId, criteria: { id: tasksData?.list[0]?.orderId } },
+    { tenantId },
+    tasksData?.list[0]?.orderId,
+    Boolean(tasksData)
+  );
 
   const handleSubmitButtonDisable = (disable) => {
     console.log("disable :>> ", disable);
@@ -124,6 +136,24 @@ const ReviewSummonsNoticeAndWarrant = () => {
           },
         };
         const response = await taskService.updateTask(reqBody, { tenantId });
+        if (selectedDelievery?.key === "NOT_DELIVERED") {
+          ordersService.customApiService(Urls.orders.pendingTask, {
+            pendingTask: {
+              name: "Re-issue Summon",
+              entityType: "order-default",
+              referenceId: `MANUAL_${orderData?.list[0]?.hearingNumber}`,
+              status: "RE-ISSUE_SUMMON",
+              assignedTo: [],
+              assignedRole: ["JUDGE_ROLE"],
+              cnrNumber: tasksData?.list[0]?.cnrNumber,
+              filingNumber: tasksData?.list[0]?.filingNumber,
+              isCompleted: false,
+              stateSla: 3 * dayInMillisecond + todayDate,
+              additionalDetails: {},
+              tenantId,
+            },
+          });
+        }
         setShowActionModal(false);
         setReload(!reload);
       } catch (error) {
@@ -339,7 +369,15 @@ const ReviewSummonsNoticeAndWarrant = () => {
       actionSaveLabel: "Update Status",
       isStepperModal: false,
       modalBody: (
-        <UpdateDeliveryStatusComponent infos={infos} links={links} t={t} handleSubmitButtonDisable={handleSubmitButtonDisable} rowData={rowData} />
+        <UpdateDeliveryStatusComponent
+          infos={infos}
+          links={links}
+          t={t}
+          handleSubmitButtonDisable={handleSubmitButtonDisable}
+          rowData={rowData}
+          selectedDelievery={selectedDelievery}
+          setSelectedDelievery={setSelectedDelievery}
+        />
       ),
       actionSaveOnSubmit: handleUpdateStatus,
       isDisabled: isDisabled,
@@ -349,6 +387,14 @@ const ReviewSummonsNoticeAndWarrant = () => {
   useEffect(() => {
     // if (rowData?.id) getTaskDocuments();
     if (rowData?.filingNumber) getHearingFromCaseId();
+    setSelectedDelievery(
+      rowData?.status === "SUMMONSERVED" || rowData?.status === "COMPLETED"
+        ? {
+            key: "DELIVERED",
+            value: "Delivered",
+          }
+        : {}
+    );
   }, [rowData]);
 
   const handleRowClick = (props) => {

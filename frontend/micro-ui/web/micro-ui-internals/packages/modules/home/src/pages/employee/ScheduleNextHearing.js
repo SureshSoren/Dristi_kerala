@@ -336,15 +336,16 @@ function ScheduleNextHearing({
         .then(async (res) => {
           await HomeService.customApiService(Urls.pendingTask, {
             pendingTask: {
-              name: "Schedule Hearing",
-              entityType: "case",
-              referenceId: `MANUAL_${caseDetails?.filingNumber}`,
-              status: "SCHEDULE_HEARING",
+              name: "Create Order for rescheduling the hearing",
+              entityType: "order-managelifecycle",
+              referenceId: hearingId,
+              status: "RESCHEDULE_HEARING",
               assignedTo: [],
-              assignedRole: ["JUDGE_ROLE"],
-              cnrNumber: null,
-              filingNumber: caseDetails?.filingNumber,
+              assignedRole: [],
+              cnrNumber: cnrNumber,
+              filingNumber: filingNumber,
               isCompleted: true,
+              stateSla: null,
               additionalDetails: {},
               tenantId,
             },

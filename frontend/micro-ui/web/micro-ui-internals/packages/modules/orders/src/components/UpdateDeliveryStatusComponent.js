@@ -12,21 +12,21 @@ const convertToDisplayFormat = (dateStr) => {
   return `${day}-${month}-${year}`;
 };
 
-const UpdateDeliveryStatusComponent = ({ t, infos, links, handleSubmitButtonDisable, rowData }) => {
-  const [selectedDelievery, setSelectedDelievery] = useState(
-    rowData?.status === "SUMMONSERVED" || rowData?.status === "COMPLETED"
-      ? {
-          key: "DELIVERED",
-          value: "Delivered",
-        }
-      : {}
-  );
+const UpdateDeliveryStatusComponent = ({ t, infos, links, handleSubmitButtonDisable, rowData, selectedDelievery, setSelectedDelievery }) => {
   const [date, setDate] = useState(rowData?.createdDate ? convertToDateInputFormat(rowData.createdDate) : "");
   const [remarks, setRemarks] = useState("");
   const deliveryOptions = [
     {
+      key: "SENT",
+      value: "Sent",
+    },
+    {
       key: "DELIVERED",
       value: "Delivered",
+    },
+    {
+      key: "NOT_DELIVERED",
+      value: "Not Delivered",
     },
   ];
 
