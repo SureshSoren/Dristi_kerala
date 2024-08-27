@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -28,7 +29,7 @@ public class OtpSMSRepository {
     @Value("${expiry.time.for.otp: 4000}")
     private long maxExecutionTime=2000L;
 
-    @Value("${egov.sms.template.id}")
+    @Value("${egov.login.sms.template.id}")
     private String templateId;
 
     @Value("${egov.localisation.tenantid.strip.suffix.count}")
@@ -69,16 +70,17 @@ public class OtpSMSRepository {
 
     private String getMessage(String otpNumber, OtpRequest otpRequest) {
         final String messageFormat = getMessageFormat(otpRequest);
-        return format(messageFormat, otpNumber);
+        String message = messageFormat.replace("{{otp}}", Optional.ofNullable(otpNumber).orElse(""));
+        return format(message, otpNumber);
     }
 
     private String getMessageFormat(OtpRequest otpRequest) {
         String tenantId = getRequiredTenantId(otpRequest.getTenantId());
-        Map<String, String> localisedMsgs = localizationService.getLocalisedMessages(tenantId, "en_IN", "egov-user");
+        Map<String, String> localisedMsgs = localizationService.getLocalisedMessages(tenantId, "en_IN", "notification");
         if (localisedMsgs.isEmpty()) {
             log.info("Localization Service didn't return any msgs so using default...");
             localisedMsgs.put(LOCALIZATION_KEY_REGISTER_SMS, "High Court of Kerala, Your OTP for mobile number verification is %s. Do not share this code with anyone.");
-            localisedMsgs.put(LOCALIZATION_KEY_LOGIN_SMS, "Dear Citizen, Your Login OTP is %s.");
+            localisedMsgs.put(LOCALIZATION_KEY_LOGIN_SMS, "Hello,\nYour OTP for mobile number verification is {{otp}}. Do not share this code with anyone.\nON Court.HCK");
             localisedMsgs.put(LOCALIZATION_KEY_PWD_RESET_SMS, "Dear Citizen, Your OTP for recovering password is %s.");
         }
         String message = null;
