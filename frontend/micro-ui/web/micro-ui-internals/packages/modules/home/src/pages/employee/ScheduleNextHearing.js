@@ -337,7 +337,7 @@ function ScheduleNextHearing({
           await HomeService.customApiService(Urls.pendingTask, {
             pendingTask: {
               name: "Create Order for rescheduling the hearing",
-              entityType: "order-managelifecycle",
+              entityType: "order-default",
               referenceId: hearingId,
               status: "RESCHEDULE_HEARING",
               assignedTo: [],

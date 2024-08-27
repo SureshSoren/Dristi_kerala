@@ -93,7 +93,7 @@ function ReIssueSummonsModal() {
     await ordersService.customApiService(Urls.orders.pendingTask, {
       pendingTask: {
         name: "Completed",
-        entityType: "order-managelifecycle",
+        entityType: "order-default",
         referenceId: `MANUAL_${hearingId}`,
         status: "DRAFT_IN_PROGRESS",
         assignedTo: [],
