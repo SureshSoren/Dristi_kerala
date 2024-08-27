@@ -150,7 +150,7 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
   const { fetchBill, openPaymentPortal, paymentLoader, showPaymentModal, setShowPaymentModal } = usePaymentProcess({
     tenantId,
     consumerCode: caseDetails?.filingNumber,
-    service: "case",
+    service: "case-default",
     path,
     caseDetails,
     totalAmount: chequeDetails?.totalAmount,

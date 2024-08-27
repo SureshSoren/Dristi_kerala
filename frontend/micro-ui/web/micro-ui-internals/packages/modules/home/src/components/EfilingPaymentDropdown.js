@@ -143,7 +143,7 @@ function EfilingPaymentBreakdown({ setShowModal, header, subHeader, submitModalI
   const { fetchBill, openPaymentPortal, paymentLoader, showPaymentModal, setShowPaymentModal } = usePaymentProcess({
     tenantId,
     consumerCode: caseDetails?.filingNumber,
-    service: "case",
+    service: "case-default",
     path,
     caseDetails,
     totalAmount: chequeDetails?.totalAmount,
@@ -158,8 +158,8 @@ function EfilingPaymentBreakdown({ setShowModal, header, subHeader, submitModalI
             {
               tenantId,
               consumerCode: caseDetails?.filingNumber,
-              consumerType: "case",
-              businessService: "case",
+              consumerType: "case-default",
+              businessService: "case-default",
               taxPeriodFrom: Date.now().toString(),
               taxPeriodTo: Date.now().toString(),
               demandDetails: [

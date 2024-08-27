@@ -639,13 +639,13 @@ const SubmissionsCreate = ({ path }) => {
       setShowSuccessModal(true);
     }
   };
-  let entityType = "async-voluntary-submission-managelifecycle";
+  let entityType = "application-voluntary-submission";
   let taxHeadMasterCode = "ASYNC_VOLUNTARY_SUNMISSION_ADVANCE_CARRYFORWARD";
   if (orderNumber) {
     entityType =
       orderDetails?.additionalDetails?.formdata?.isResponseRequired?.code === "Yes"
-        ? "async-submission-with-response-managelifecycle"
-        : "async-order-submission-managelifecycle";
+        ? "application-order-submission-feedback"
+        : "application-order-submission-default";
 
     taxHeadMasterCode =
       orderDetails?.additionalDetails?.formdata?.isResponseRequired?.code === "Yes"

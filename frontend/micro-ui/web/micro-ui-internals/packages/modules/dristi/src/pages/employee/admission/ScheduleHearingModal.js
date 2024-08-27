@@ -416,7 +416,7 @@ function ScheduleHearing({
           await HomeService.customApiService(Urls.pendingTask, {
             pendingTask: {
               name: "Completed",
-              entityType: "order-managelifecycle",
+              entityType: "order-default",
               referenceId: `MANUAL_${individualId?.userUuid}_${applicationData?.applicationList[0]?.additionalDetails?.hearingId}`,
               status: "DRAFT_IN_PROGRESS",
               assignedTo: [],

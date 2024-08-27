@@ -970,8 +970,8 @@ const GenerateOrders = () => {
     let entityType = orderEntityType
       ? orderEntityType
       : formdata?.isResponseRequired?.code === "Yes"
-      ? "async-submission-with-response-managelifecycle"
-      : "async-order-submission-managelifecycle";
+      ? "application-order-submission-feedback"
+      : "application-order-submission-default";
     let status = taskStatus;
     let stateSla = stateSlaMap?.[order?.orderType] * dayInMillisecond + todayDate;
     if (order?.orderType === "MANDATORY_SUBMISSIONS_RESPONSES") {
@@ -1044,14 +1044,14 @@ const GenerateOrders = () => {
         ?.flat();
       assignees = [...assignee, ...advocateUuid]?.map((uuid) => ({ uuid }));
       if (Array.isArray(order?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels)) {
-        entityType = "order-managelifecycle";
+        entityType = "order-default";
         const promises = order?.additionalDetails?.formdata?.SummonsOrder?.selectedChannels?.map(async (channel) => {
-          if (channel?.type === "Post") {
+          if (channel?.type === "Post" || channel.type === "SMS" || channel.type === "E-mail") {
             return ordersService.customApiService(Urls.orders.pendingTask, {
               pendingTask: {
                 name: t(`MAKE_PAYMENT_FOR_SUMMONS_${channelTypeEnum?.[channel?.type]?.code}`),
                 entityType,
-                referenceId: `MANUAL_${currentOrder?.orderNumber}`,
+                referenceId: `MANUAL_${currentOrder?.orderNumber}_${channel.type}`,
                 status: `PAYMENT_PENDING_${channelTypeEnum?.[channel?.type]?.code}`,
                 assignedTo: assignees,
                 assignedRole,
@@ -1065,7 +1065,7 @@ const GenerateOrders = () => {
             });
           }
 
-          return [];
+          return null;
         });
         return await Promise.all(promises);
       }
@@ -1079,7 +1079,7 @@ const GenerateOrders = () => {
         create = true;
         status = "CREATE_SUMMONS_ORDER";
         name = t("CREATE_ORDERS_FOR_SUMMONS");
-        entityType = "order-managelifecycle";
+        entityType = "order-default";
         additionalDetails = { ...additionalDetails, orderType: "SUMMONS", hearingID: order?.hearingNumber };
       }
     }
@@ -1563,7 +1563,7 @@ const GenerateOrders = () => {
             createTask: true,
             taskStatus: "DRAFT_IN_PROGRESS",
             taskName: t("DRAFT_IN_PROGRESS_ISSUE_SUMMONS"),
-            orderEntityType: "order-managelifecycle",
+            orderEntityType: "order-default",
           })
         )
       );

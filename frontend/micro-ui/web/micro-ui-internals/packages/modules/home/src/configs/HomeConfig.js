@@ -363,6 +363,28 @@ export const pendingTaskOrderActions = {
       ],
     },
   },
+  PAYMENT_PENDING_SMS: {
+    actorName: ["JUDGE"],
+    actionName: "Show Summon-Warrant Status",
+    redirectDetails: {
+      url: "/home/home-pending-task/sms-payment-modal",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "orderNumber", value: "referenceId" },
+      ],
+    },
+  },
+  PAYMENT_PENDING_EMAIL: {
+    actorName: ["JUDGE"],
+    actionName: "Show Summon-Warrant Status",
+    redirectDetails: {
+      url: "/home/home-pending-task/email-payment-modal",
+      params: [
+        { key: "filingNumber", value: "filingNumber" },
+        { key: "orderNumber", value: "referenceId" },
+      ],
+    },
+  },
   RESCHEDULE_HEARING: {
     actorName: ["JUDGE"],
     actionName: "Schedule admission hearing",
