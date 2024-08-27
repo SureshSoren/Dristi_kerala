@@ -52,127 +52,134 @@ public class CronJobScheduler {
     @Async
     @Scheduled(cron = "${config.case.esign.pending}", zone = "Asia/Kolkata")
     public void sendNotificationToESignPending() {
-        log.info("Starting Cron Job For Sending Notification To ESign Pending");
-        RequestInfo requestInfo = requestInfoGenerator.generateSystemRequestInfo();
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        List<Future<Boolean>> futures = new ArrayList<>();
+        if(config.getIsSMSEnabled()) {
+            log.info("Starting Cron Job For Sending Notification To ESign Pending");
+            RequestInfo requestInfo = requestInfoGenerator.generateSystemRequestInfo();
+            ExecutorService executorService = Executors.newCachedThreadPool();
+            List<Future<Boolean>> futures = new ArrayList<>();
 
-        try {
-            int offset = 0;
-            int limit = 100;
-            List<CourtCase> courtCases;
+            try {
+                int offset = 0;
+                int limit = 100;
+                List<CourtCase> courtCases;
 
-            do {
-                Pagination pagination = Pagination.builder().limit((double) limit).offSet((double) offset).build();
-                CaseCriteria criteria = CaseCriteria.builder()
-                        .status(Collections.singletonList("DRAFT_IN_PROGRESS"))
-                        .filingToDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-                        .filingFromDate(LocalDate.now().minusDays(Integer.parseInt(config.getUserNotificationPeriod())).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-                        .pagination(pagination)
-                        .build();
+                do {
+                    Pagination pagination = Pagination.builder().limit((double) limit).offSet((double) offset).build();
+                    CaseCriteria criteria = CaseCriteria.builder()
+                            .status(Collections.singletonList("DRAFT_IN_PROGRESS"))
+                            .filingToDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+                            .filingFromDate(LocalDate.now().minusDays(Integer.parseInt(config.getUserNotificationPeriod())).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+                            .pagination(pagination)
+                            .build();
 
-                List<CaseCriteria> criteriaList = caseRepository.getApplications(Collections.singletonList(criteria), requestInfo);
-                courtCases = criteriaList.get(0).getResponseList();
-                log.info("Fetched {} cases for processing with offset {}", courtCases.size(), offset);
+                    List<CaseCriteria> criteriaList = caseRepository.getApplications(Collections.singletonList(criteria), requestInfo);
+                    courtCases = criteriaList.get(0).getResponseList();
+                    log.info("Fetched {} cases for processing with offset {}", courtCases.size(), offset);
 
-                for (CourtCase courtCase : courtCases) {
-                    Future<Boolean> future = executorService.submit(() -> {
-                        try {
-                            notificationService.sendNotification(requestInfo, courtCase, ServiceConstants.ESIGN_PENDING, courtCase.getAuditdetails().getCreatedBy());
-                            if (!CollectionUtils.isEmpty(courtCase.getRepresentatives())) {
-                                for (AdvocateMapping mapping : courtCase.getRepresentatives()) {
-                                    notificationService.sendNotification(requestInfo, courtCase, ServiceConstants.ADVOCATE_ESIGN_PENDING,mapping.getAuditDetails().getCreatedBy());
+                    for (CourtCase courtCase : courtCases) {
+                        Future<Boolean> future = executorService.submit(() -> {
+                            try {
+                                    notificationService.sendNotification(requestInfo, courtCase, ServiceConstants.ESIGN_PENDING, courtCase.getAuditdetails().getCreatedBy());
+                                if (!CollectionUtils.isEmpty(courtCase.getRepresentatives())) {
+                                    for (AdvocateMapping mapping : courtCase.getRepresentatives()) {
+                                        notificationService.sendNotification(requestInfo, courtCase, ServiceConstants.ADVOCATE_ESIGN_PENDING, mapping.getAuditDetails().getCreatedBy());
+
+                                    }
                                 }
+                                return true;
+                            } catch (Exception e) {
+                                log.error("Error processing case: {}", courtCase.getId(), e);
+                                return false;
                             }
-                            return true;
-                        } catch (Exception e) {
-                            log.error("Error processing case: {}", courtCase.getId(), e);
-                            return false;
-                        }
-                    });
-                    futures.add(future);
-                }
-                // Increase the offset for the next batch
-                offset += limit;
-
-            } while (courtCases.size() == limit);
-
-            for (Future<Boolean> future : futures) {
-                try {
-                    if (!future.get()) {
-                        log.warn("Failed to Send notifications in some cases");
+                        });
+                        futures.add(future);
                     }
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error("Error waiting for task completion", e);
-                }
-            }
+                    // Increase the offset for the next batch
+                    offset += limit;
 
-            log.info("Completed Cron Job For Sending Notification To ESign Pending");
-        } catch (Exception e) {
-            log.error("Error occurred during Cron Job For Sending Notification To ESign Pending", e);
-        } finally {
-            executorService.shutdown();
+                } while (courtCases.size() == limit);
+
+                for (Future<Boolean> future : futures) {
+                    try {
+                        if (!future.get()) {
+                            log.warn("Failed to Send notifications in some cases");
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error("Error waiting for task completion", e);
+                    }
+                }
+
+                log.info("Completed Cron Job For Sending Notification To ESign Pending");
+            } catch (Exception e) {
+                log.error("Error occurred during Cron Job For Sending Notification To ESign Pending", e);
+            } finally {
+                executorService.shutdown();
+            }
         }
     }
 
     @Async
     @Scheduled(cron = "${config.application.payment.pending}", zone = "Asia/Kolkata")
     public void sendNotificationToPaymentPending() {
-        log.info("Starting Cron Job For Sending Notification To Payment Pending");
-        RequestInfo requestInfo = requestInfoGenerator.generateSystemRequestInfo();
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        List<Future<Boolean>> futures = new ArrayList<>();
+        if(config.getIsSMSEnabled()) {
+            log.info("Starting Cron Job For Sending Notification To Payment Pending");
+            RequestInfo requestInfo = requestInfoGenerator.generateSystemRequestInfo();
+            ExecutorService executorService = Executors.newCachedThreadPool();
+            List<Future<Boolean>> futures = new ArrayList<>();
 
-        try {
-            int offset = 0;
-            int limit = 100;
-            List<CourtCase> courtCases;
+            try {
+                int offset = 0;
+                int limit = 100;
+                List<CourtCase> courtCases;
 
-            do {
-                Pagination pagination = Pagination.builder().limit((double) limit).offSet((double) offset).build();
-                CaseCriteria criteria = CaseCriteria.builder()
-                        .status(Collections.singletonList("PAYMENT_PENDING"))
-                        .filingToDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-                        .filingFromDate(LocalDate.now().minusDays(Integer.parseInt(config.getUserNotificationPeriod())).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-                        .pagination(pagination)
-                        .build();
+                do {
+                    Pagination pagination = Pagination.builder().limit((double) limit).offSet((double) offset).build();
+                    CaseCriteria criteria = CaseCriteria.builder()
+                            .status(Collections.singletonList("PAYMENT_PENDING"))
+                            .filingToDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+                            .filingFromDate(LocalDate.now().minusDays(Integer.parseInt(config.getUserNotificationPeriod())).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+                            .pagination(pagination)
+                            .build();
 
-                List<CaseCriteria> criteriaList = caseRepository.getApplications(Collections.singletonList(criteria), requestInfo);
-                courtCases = criteriaList.get(0).getResponseList();
-                log.info("Fetched {} cases for processing with offset {}", courtCases.size(), offset);
+                    List<CaseCriteria> criteriaList = caseRepository.getApplications(Collections.singletonList(criteria), requestInfo);
+                    courtCases = criteriaList.get(0).getResponseList();
+                    log.info("Fetched {} cases for processing with offset {}", courtCases.size(), offset);
 
-                for (CourtCase courtCase : courtCases) {
-                    Future<Boolean> future = executorService.submit(() -> {
-                        try {
-                            notificationService.sendNotification(requestInfo, courtCase, ServiceConstants.PAYMENT_PENDING,courtCase.getAuditdetails().getCreatedBy());
-                            return true;
-                        } catch (Exception e) {
-                            log.error("Error processing case: {}", courtCase.getId(), e);
-                            return false;
-                        }
-                    });
-                    futures.add(future);
-                }
-                // Increase the offset for the next batch
-                offset += limit;
+                    for (CourtCase courtCase : courtCases) {
+                        Future<Boolean> future = executorService.submit(() -> {
+                            try {
 
-            } while (courtCases.size() == limit);
+                                notificationService.sendNotification(requestInfo, courtCase, ServiceConstants.PAYMENT_PENDING, courtCase.getAuditdetails().getCreatedBy());
 
-            for (Future<Boolean> future : futures) {
-                try {
-                    if (!future.get()) {
-                        log.warn("Failed to Send notifications in some cases");
+                                return true;
+                            } catch (Exception e) {
+                                log.error("Error processing case: {}", courtCase.getId(), e);
+                                return false;
+                            }
+                        });
+                        futures.add(future);
                     }
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error("Error waiting for task completion", e);
-                }
-            }
+                    // Increase the offset for the next batch
+                    offset += limit;
 
-            log.info("Completed Cron Job For Sending Notification To Payment Pending");
-        } catch (Exception e) {
-            log.error("Error occurred during Cron Job For Sending Notification To Payment Pending", e);
-        } finally {
-            executorService.shutdown();
-        }
+                } while (courtCases.size() == limit);
+
+                for (Future<Boolean> future : futures) {
+                    try {
+                        if (!future.get()) {
+                            log.warn("Failed to Send notifications in some cases");
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error("Error waiting for task completion", e);
+                    }
+                }
+
+                log.info("Completed Cron Job For Sending Notification To Payment Pending");
+            } catch (Exception e) {
+                log.error("Error occurred during Cron Job For Sending Notification To Payment Pending", e);
+            } finally {
+                executorService.shutdown();
+            }
+    }
     }
 }
