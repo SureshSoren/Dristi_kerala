@@ -164,7 +164,7 @@ function EFilingCases({ path }) {
   const [errorMsg, setErrorMsg] = useState("");
   const homepagePath = "/digit-ui/citizen/dristi/home";
 
-  const { data: casePdf, isPdfLoading, refetch } = useCasePdfGeneration(
+  const { data: casePdf, isPdfLoading, refetch: refetchCasePDfGeneration } = useCasePdfGeneration(
     {
       criteria: [
         {
@@ -178,13 +178,6 @@ function EFilingCases({ path }) {
     caseId,
     false
   );
-
-  useEffect(() => {
-    if (casePdf) {
-      localStorage.setItem("fileStoreId", casePdf?.cases?.[0]?.documents?.[0]?.fileStore);
-      // Add any additional logic that should occur when casePdf is available
-    }
-  }, [casePdf]);
 
   const [{ showSuccessToast, successMsg }, setSuccessToast] = useState({
     showSuccessToast: false,
@@ -1473,9 +1466,6 @@ function EFilingCases({ path }) {
       return setOpenConfirmCorrectionModal(true);
     }
 
-    if (selected === "reviewCaseFile") {
-      refetch();
-    }
     if (selected === "addSignature" && isDraftInProgress) {
       if (courtRooms?.length === 1) {
         onSubmitCase({ court: courtRooms[0] });
@@ -1484,6 +1474,11 @@ function EFilingCases({ path }) {
         setOpenConfirmCourtModal(true);
       }
     } else {
+      let res;
+      if (selected === "reviewCaseFile") {
+        res = await refetchCasePDfGeneration();
+        localStorage.setItem("fileStoreId", res?.data?.cases?.[0]?.documents?.[0]?.fileStore);
+      }
       updateCaseDetails({
         isCompleted: true,
         caseDetails: isCaseReAssigned && errorCaseDetails ? errorCaseDetails : caseDetails,
@@ -1496,6 +1491,7 @@ function EFilingCases({ path }) {
         setFormDataValue: setFormDataValue.current,
         action,
         setErrorCaseDetails,
+        ...(res && { fileStoreId: res?.data?.cases?.[0]?.documents?.[0]?.fileStore }),
       })
         .then(() => {
           if (resetFormData.current) {
@@ -1620,10 +1616,17 @@ function EFilingCases({ path }) {
   const onSubmitCase = async (data) => {
     setOpenConfirmCourtModal(false);
     const assignees = getAllAssignees(caseDetails);
+    const fileStoreId = localStorage.getItem("fileStoreId");
     await DRISTIService.caseUpdateService(
       {
         cases: {
           ...caseDetails,
+          ...(fileStoreId && {
+            additionalDetails: {
+              ...caseDetails?.additionalDetails,
+              signedCaseDocument: fileStoreId,
+            },
+          }),
           caseTitle:
             (caseDetails?.additionalDetails?.complainantDetails?.formdata?.[0]?.data?.firstName &&
               `${caseDetails?.additionalDetails?.complainantDetails?.formdata?.[0]?.data?.firstName} ${

@@ -1103,6 +1103,7 @@ export const updateCaseDetails = async ({
   pageConfig,
   setFormDataValue,
   action = "SAVE_DRAFT",
+  fileStoreId,
   setErrorCaseDetails = () => {},
 }) => {
   const data = {};
@@ -2006,6 +2007,7 @@ export const updateCaseDetails = async ({
         formdata: formdata,
         isCompleted: isCompleted === "PAGE_CHANGE" ? caseDetails.caseDetails?.[selected]?.isCompleted : isCompleted,
       },
+      ...(fileStoreId && { signedCaseDocument: fileStoreId }),
     };
   }
   const caseTitle =
