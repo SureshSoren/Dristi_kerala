@@ -177,7 +177,7 @@ const PaymentForSummonModalSMSAndEmail = ({ path }) => {
 
     const tasksWithRequiredChannel = tasksWithMatchingOrderId.filter((task) => {
       try {
-        const taskDetails = task?.taskDetails;
+        const taskDetails = task?.taskDetails ? JSON.parse(task.taskDetails) : null;
         return taskDetails?.deliveryChannels?.channelName === requiredChannel;
       } catch (error) {
         console.error("Error parsing taskDetails JSON:", error);
@@ -374,13 +374,14 @@ const PaymentForSummonModalSMSAndEmail = ({ path }) => {
     const name = `${orderData?.list?.[0]?.additionalDetails?.formdata?.SummonsOrder?.party?.data?.firstName} ${orderData?.list?.[0]?.additionalDetails?.formdata?.SummonsOrder?.party?.data?.lastName}`;
 
     const task = filteredTasks?.[0];
-    const deliveryChannel = task?.taskDetails?.deliveryChannels?.channelName || "";
+    const taskDetails = task?.taskDetails ? JSON.parse(task.taskDetails) : null;
+    const deliveryChannel = taskDetails?.deliveryChannels?.channelName || "";
 
     let contactDetail = "";
     if (deliveryChannel === "Email") {
-      contactDetail = task?.taskDetails?.respondentDetails?.email || "Not provided";
+      contactDetail = taskDetails?.respondentDetails?.email || "Not provided";
     } else if (deliveryChannel === "SMS") {
-      contactDetail = task?.taskDetails?.respondentDetails?.phone || "Not provided";
+      contactDetail = taskDetails?.respondentDetails?.phone || "Not provided";
     }
 
     return [
