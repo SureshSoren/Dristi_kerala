@@ -46,7 +46,6 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
   const toast = useToast();
   const scenario = "EfillingCase";
   const fileStoreId = localStorage.getItem("fileStoreId");
-  const uri = `${window.location.origin}${Urls.FileFetchById}?tenantId=${tenantId}&fileStoreId=${fileStoreId}`;
 
   const { data: caseData, isLoading } = useSearchCaseService(
     {
@@ -281,6 +280,10 @@ function EFilingPayment({ t, setShowModal, header, subHeader, submitModalInfo = 
   if (isLoading || isPaymentLoading || paymentLoader || isBillLoading) {
     return <Loader />;
   }
+
+  const fileStoreIdToUse = caseDetails?.caseDetails?.[0]?.additionalDetails?.signedCaseDocument || fileStoreId;
+
+  const uri = fileStoreIdToUse ? `${window.location.origin}${Urls.FileFetchById}?tenantId=${tenantId}&fileStoreId=${fileStoreIdToUse}` : null;
   return (
     <div className=" user-registration">
       <div className="e-filing-payment">
