@@ -65,6 +65,19 @@ const createPartyConfig = (index) => ({
       },
     },
     {
+      label: "PARTY_ADDRESS",
+      key: `address${index}`,
+      type: "text",
+      isMandatory: true,
+      populators: {
+        name: `address${index}`,
+        error: "CORE_REQUIRED_FIELD_ERROR",
+        required: true,
+        isMandatory: true,
+        customStyle: { display: "flex", flexDirection: "column", alignItems: "flex-start" },
+      },
+    },
+    {
       key: `additionalDetails${index}`,
       type: "component",
       inline: true,
