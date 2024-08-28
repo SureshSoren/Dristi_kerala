@@ -221,7 +221,7 @@ const NextHearingModal = ({ hearingId, hearing, stepper, setStepper, transcript,
           <div className="case-card">
             <div className="case-details">
               Case Number:
-              <div> {caseDetails?.caseNumber} </div>
+              <div> {caseDetails?.filingNumber} </div>
             </div>
             <div className="case-details">
               Court Name:

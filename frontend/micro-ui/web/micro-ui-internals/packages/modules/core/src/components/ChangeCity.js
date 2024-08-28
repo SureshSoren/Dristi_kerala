@@ -25,7 +25,7 @@ const ChangeCity = (prop) => {
       loggedInData.info.roles = filteredRoles;
       loggedInData.info.tenantId = city?.value;
     }
-    Digit.SessionStorage.set("Employee.tenantId", city?.value);
+    localStorage.setItem("Employee.tenantId", city?.value);
     Digit.UserService.setUser(loggedInData);
     setDropDownData(city);
     if (window.location.href.includes(`/${window?.contextPath}/employee/`)) {

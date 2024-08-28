@@ -34,7 +34,7 @@ const Login = ({ config: propsConfig, t, isDisabled }) => {
     if (!user) {
       return;
     }
-    Digit.SessionStorage.set("citizen.userRequestObject", user);
+    localStorage.setItem("citizen.userRequestObject", user);
     const filteredRoles = user?.info?.roles?.filter((role) => role.tenantId === Digit.SessionStorage.get("Employee.tenantId"));
     if (user?.info?.roles?.length > 0) user.info.roles = filteredRoles;
     Digit.UserService.setUser(user);
@@ -80,7 +80,7 @@ const Login = ({ config: propsConfig, t, isDisabled }) => {
     delete requestData.city;
     try {
       const { UserRequest: info, ...tokens } = await Digit.UserService.authenticate(requestData);
-      Digit.SessionStorage.set("Employee.tenantId", info?.tenantId);
+      localStorage.setItem("Employee.tenantId", info?.tenantId);
       setUser({ info, ...tokens });
     } catch (err) {
       setShowToast(

@@ -29,21 +29,21 @@ const initTokens = (stateCode) => {
   const employeeTenantId = window.localStorage.getItem("Employee.tenant-id");
 
   const userTypeInfo = userType === "CITIZEN" || userType === "QACT" ? "citizen" : "employee";
-  window.Digit.SessionStorage.set("user_type", userTypeInfo);
-  window.Digit.SessionStorage.set("userType", userTypeInfo);
+  localStorage.setItem("user_type", userTypeInfo);
+  localStorage.setItem("userType", userTypeInfo);
 
   if (userType !== "CITIZEN") {
-    window.Digit.SessionStorage.set("User", {
+    localStorage.setItem("User", {
       access_token: token,
       info: userType !== "CITIZEN" ? JSON.parse(employeeInfo) : citizenInfo,
     });
   } else {
-    // if (!window.Digit.SessionStorage.get("User")?.extraRoleInfo) window.Digit.SessionStorage.set("User", { access_token: token, info: citizenInfo });
+    // if (!window.Digit.SessionStorage.get("User")?.extraRoleInfo) localStorage.setItem("User", { access_token: token, info: citizenInfo });
   }
 
-  window.Digit.SessionStorage.set("Citizen.tenantId", citizenTenantId);
+  localStorage.setItem("Citizen.tenantId", citizenTenantId);
 
-  if (employeeTenantId && employeeTenantId.length) window.Digit.SessionStorage.set("Employee.tenantId", employeeTenantId);
+  if (employeeTenantId && employeeTenantId.length) localStorage.setItem("Employee.tenantId", employeeTenantId);
 };
 
 const initDigitUI = () => {

@@ -268,7 +268,7 @@ const InsideHearingMainPage = () => {
   const [isRecording, setIsRecording] = useState(false);
 
   return (
-    <div className="admitted-case" style={{ display: "flex", height: "100vh" }}>
+    <div className="admitted-case" style={{ display: "flex" }}>
       <div className="left-side" style={{ padding: "24px 40px" }}>
         <React.Fragment>
           <EvidenceHearingHeader

@@ -273,7 +273,7 @@ const GenerateOrders = () => {
     },
     { tenantId },
     filingNumber,
-    Boolean(filingNumber && cnrNumber)
+    Boolean(filingNumber)
   );
   const { data: publishedOrdersData, isLoading: isPublishedOrdersLoading } = useSearchOrdersService(
     {
@@ -1588,7 +1588,7 @@ const GenerateOrders = () => {
             hearing: {
               tenantId: tenantId,
               filingNumber: [filingNumber],
-              cnrNumbers: [cnrNumber],
+              cnrNumbers: cnrNumber ? [cnrNumber] : [],
               hearingType: currentOrder?.additionalDetails?.formdata?.hearingPurpose?.type,
               status: true,
               attendees: [

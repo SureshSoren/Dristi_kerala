@@ -1,5 +1,5 @@
 import { Loader } from "@egovernments/digit-ui-react-components";
-import React from "react";
+import React, { useMemo } from "react";
 import { useRouteMatch } from "react-router-dom";
 import AddressComponent from "./components/AddressComponent";
 import SelectComponents from "./components/SelectComponents";
@@ -57,19 +57,29 @@ import { RightArrow } from "./icons/svgIndex";
 import useBillSearch from "./hooks/dristi/useBillSearch";
 import SelectTranscriptTextArea from "./components/SelectTranscriptTextArea";
 
-
 export const DRISTIModule = ({ stateCode, userType, tenants }) => {
+  const Digit = useMemo(() => window?.Digit || {}, []);
   const { path } = useRouteMatch();
   const history = useHistory();
   const moduleCode = ["DRISTI", "CASE", "ORDERS", "SUBMISSIONS"];
   const tenantID = tenants?.[0]?.code?.split(".")?.[0];
   const language = Digit.StoreData.getCurrentLanguage();
   const { isLoading } = Digit.Services.useStore({ stateCode, moduleCode, language });
-  const userInfo = JSON.parse(window.localStorage.getItem("user-info"));
+  const userInfo = useMemo(() => Digit?.UserService?.getUser()?.info, [Digit]);
+  const hasCitizenRoute = useMemo(() => path?.includes(`/${window?.contextPath}/citizen`), [path]);
+  const isCitizen = useMemo(() => Boolean(Digit?.UserService?.getUser()?.info?.type === "CITIZEN"), [Digit]);
+
   if (isLoading) {
     return <Loader />;
   }
-  Digit.SessionStorage.set("DRISTI_TENANTS", tenants);
+
+  if (isCitizen && !hasCitizenRoute && Boolean(userInfo)) {
+    history.push(`/${window?.contextPath}/citizen/home/home-pending-task`);
+  } else if (!isCitizen && hasCitizenRoute && Boolean(userInfo)) {
+    history.push(`/${window?.contextPath}/employee/home/home-pending-task`);
+  }
+
+  localStorage.setItem("DRISTI_TENANTS", tenants);
   const urlParams = new URLSearchParams(window.location.search);
   const result = urlParams.get("result");
   const fileStoreId = urlParams.get("filestoreId");
@@ -148,7 +158,7 @@ const componentsToRegister = {
   CustomCalendar,
   RightArrow,
   useBillSearch,
-  SelectTranscriptTextArea
+  SelectTranscriptTextArea,
 };
 
 const overrideHooks = () => {
