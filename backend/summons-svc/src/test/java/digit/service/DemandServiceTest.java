@@ -1,5 +1,7 @@
 package digit.service;
 
+import digit.util.MdmsUtil;
+import net.minidev.json.JSONArray;
 import org.egov.common.contract.request.RequestInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +16,7 @@ import digit.repository.ServiceRequestRepository;
 import digit.web.models.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
 class DemandServiceTest {
@@ -65,12 +66,23 @@ class DemandServiceTest {
     @Mock
     private Address address;
 
+    @Mock
+    private MdmsUtil mdmsUtil;
+
     @Test
     public void fetchPaymentDetailsAndGenerateDemandAndBillTest() {
         // Arrange
         List<Calculation> calculations = Collections.singletonList(mock(Calculation.class));
         BillResponse billResponse = mock(BillResponse.class);
 
+        Map<String, Map<String, JSONArray>> mdmsRes = new HashMap<>();
+        mdmsRes.put("payment", new HashMap<>());
+
+        List<String> masterList = new ArrayList<>();
+        masterList.add("PaymentMasterCode");
+
+
+        lenient().when(mdmsUtil.fetchMdmsData(requestInfo, "kl", "payment", masterList)).thenReturn(mdmsRes);
         when(taskRequest.getTask()).thenReturn(task);
         when(task.getTaskDetails()).thenReturn(taskDetails);
         when(taskDetails.getDeliveryChannel()).thenReturn(deliveryChannel);
@@ -141,7 +153,6 @@ class DemandServiceTest {
 
         when(calculation.getTenantId()).thenReturn("tenant1");
 
-        when(config.getTaskTaxHeadMasterCode()).thenReturn("TH001");
         when(config.getTaxConsumerType()).thenReturn("CT001");
         when(config.getTaskModuleCode()).thenReturn("TM001");
         when(config.getTaxPeriodFrom()).thenReturn(1234567890L);
